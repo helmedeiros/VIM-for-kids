@@ -34,9 +34,15 @@ This project was built incrementally with proper testing for each stage:
 - Educational foundation for VIM editor learning
 - Case-insensitive key handling
 
+### Stage 5: Collectible Keys and Game Logic ✓
+
+- Collectible VIM keys placed on the game map
+- Key collection system with educational feedback
+- UI display for collected keys progress
+- Interactive learning through gameplay mechanics
+
 ### Future Stages (Coming Soon)
 
-- Stage 5: Collectible Keys and Game Logic
 - Stage 6: UI Enhancements and Instructions
 
 ## Running Tests

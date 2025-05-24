@@ -20,6 +20,7 @@ class TestRunner {
         this.testStage2();
         this.testStage3();
         this.testStage4();
+        this.testStage5();
         this.displayResults();
     }
 
@@ -223,6 +224,63 @@ class TestRunner {
 
         } catch (error) {
             this.assert(false, '✗ Arrow key compatibility test failed: ' + error.message);
+                }
+    }
+
+    testStage5() {
+        const stage5Section = this.createSection('Stage 5: Collectible Keys and Game Logic Tests');
+
+        // Test 1: Key initialization
+        try {
+            const game = new VimForKidsGame();
+            this.assert(Array.isArray(game.keys), '✓ Keys array is created');
+            this.assert(game.keys.length === 4, '✓ Four VIM keys are defined');
+            this.assert(game.collectedKeys instanceof Set, '✓ Collected keys set is created');
+            this.assert(game.collectedKeys.size === 0, '✓ No keys collected initially');
+        } catch (error) {
+            this.assert(false, '✗ Key initialization test failed: ' + error.message);
+        }
+
+        // Test 2: Key rendering
+        try {
+            const game = new VimForKidsGame();
+            const keyTiles = game.gameBoard.querySelectorAll('.tile.key');
+            this.assert(keyTiles.length === 4, '✓ Four key tiles are rendered');
+
+            // Check that keys have correct content
+            const keyTexts = Array.from(keyTiles).map(tile => tile.textContent);
+            this.assert(keyTexts.includes('h'), '✓ h key is rendered');
+            this.assert(keyTexts.includes('j'), '✓ j key is rendered');
+            this.assert(keyTexts.includes('k'), '✓ k key is rendered');
+            this.assert(keyTexts.includes('l'), '✓ l key is rendered');
+        } catch (error) {
+            this.assert(false, '✗ Key rendering test failed: ' + error.message);
+        }
+
+        // Test 3: Key collection
+        try {
+            const game = new VimForKidsGame();
+            const originalSize = game.collectedKeys.size;
+
+            // Move player to a key position
+            game.player.x = 2;
+            game.player.y = 3;
+            game.checkKeyCollection();
+
+            this.assert(game.collectedKeys.size === originalSize + 1, '✓ Key is collected when player moves to key position');
+            this.assert(game.collectedKeys.has('h'), '✓ Correct key (h) is collected');
+        } catch (error) {
+            this.assert(false, '✗ Key collection test failed: ' + error.message);
+        }
+
+        // Test 4: UI elements
+        try {
+            const game = new VimForKidsGame();
+            this.assert(game.collectedKeysDisplay !== null, '✓ Collected keys display element exists');
+            this.assert(document.querySelector('.instructions') !== null, '✓ Instructions element exists');
+            this.assert(document.querySelector('.collected-keys') !== null, '✓ Collected keys container exists');
+        } catch (error) {
+            this.assert(false, '✗ UI elements test failed: ' + error.message);
         }
     }
 
