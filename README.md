@@ -27,9 +27,15 @@ This project was built incrementally with proper testing for each stage:
 - Collision detection with boundaries and obstacles
 - Event handling and game board focus management
 
+### Stage 4: VIM-style Navigation (hjkl keys) ✓
+
+- VIM movement keys: h (left), j (down), k (up), l (right)
+- Backward compatibility with arrow keys
+- Educational foundation for VIM editor learning
+- Case-insensitive key handling
+
 ### Future Stages (Coming Soon)
 
-- Stage 4: VIM-style Navigation (hjkl keys)
 - Stage 5: Collectible Keys and Game Logic
 - Stage 6: UI Enhancements and Instructions
 

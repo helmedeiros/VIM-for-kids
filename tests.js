@@ -19,6 +19,7 @@ class TestRunner {
         this.testStage1();
         this.testStage2();
         this.testStage3();
+        this.testStage4();
         this.displayResults();
     }
 
@@ -166,6 +167,62 @@ class TestRunner {
             this.assert(game.gameBoard.getAttribute('tabindex') === '0', '✓ Game board is focusable');
         } catch (error) {
             this.assert(false, '✗ Event listeners test failed: ' + error.message);
+                }
+    }
+
+    testStage4() {
+        const stage4Section = this.createSection('Stage 4: VIM-style Navigation Tests');
+
+        // Test 1: VIM key movement
+        try {
+            const game = new VimForKidsGame();
+            const originalX = game.player.x;
+            const originalY = game.player.y;
+
+            // Test h key (left)
+            game.movePlayer(originalX - 1, originalY);
+            this.assert(game.player.x === originalX - 1, '✓ h key moves player left');
+
+            // Reset position
+            game.player.x = originalX;
+            game.player.y = originalY;
+
+            // Test l key (right)
+            game.movePlayer(originalX + 1, originalY);
+            this.assert(game.player.x === originalX + 1, '✓ l key moves player right');
+
+            // Reset position
+            game.player.x = originalX;
+            game.player.y = originalY;
+
+            // Test j key (down)
+            game.movePlayer(originalX, originalY + 1);
+            this.assert(game.player.y === originalY + 1, '✓ j key moves player down');
+
+            // Reset position
+            game.player.x = originalX;
+            game.player.y = originalY;
+
+            // Test k key (up)
+            game.movePlayer(originalX, originalY - 1);
+            this.assert(game.player.y === originalY - 1, '✓ k key moves player up');
+
+        } catch (error) {
+            this.assert(false, '✗ VIM key movement test failed: ' + error.message);
+        }
+
+        // Test 2: Arrow keys still work
+        try {
+            const game = new VimForKidsGame();
+            const originalX = game.player.x;
+            const originalY = game.player.y;
+
+            // Test that arrow keys still function (backward compatibility)
+            game.movePlayer(originalX + 1, originalY);
+            this.assert(game.player.x === originalX + 1, '✓ Arrow keys still work alongside VIM keys');
+
+        } catch (error) {
+            this.assert(false, '✗ Arrow key compatibility test failed: ' + error.message);
         }
     }
 

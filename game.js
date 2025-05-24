@@ -87,20 +87,24 @@ class VimForKidsGame {
             let newY = this.player.y;
             let moved = false;
 
-            switch (e.key) {
-                case 'ArrowUp':
+            switch (e.key.toLowerCase()) {
+                case 'arrowup':
+                case 'k':
                     newY--;
                     moved = true;
                     break;
-                case 'ArrowDown':
+                case 'arrowdown':
+                case 'j':
                     newY++;
                     moved = true;
                     break;
-                case 'ArrowLeft':
+                case 'arrowleft':
+                case 'h':
                     newX--;
                     moved = true;
                     break;
-                case 'ArrowRight':
+                case 'arrowright':
+                case 'l':
                     newX++;
                     moved = true;
                     break;
