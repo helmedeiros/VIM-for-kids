@@ -15,12 +15,13 @@
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
     "format": "prettier --write src/**/*.js",
+    "format:check": "prettier --check src/**/*.js",
     "clean": "rm -rf dist coverage",
     "serve": "python3 -m http.server 8000",
     "build:analyze": "vite build --mode analyze",
     "prepare": "husky install",
     "pre-commit": "lint-staged",
-    "validate": "npm run lint && npm run test && npm run build"
+    "validate": "npm run lint && npm run format:check && npm run test && npm run build"
   },
   "keywords": [
     "vim",

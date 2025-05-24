@@ -33,12 +33,8 @@ jobs:
 
       - name: Check code formatting
         run: |
-          npm run format
-          if [[ -n $(git diff --name-only) ]]; then
-            echo "❌ Code is not properly formatted"
-            echo "Please run 'npm run format' and commit the changes"
-            exit 1
-          fi
+          echo "🎨 Checking code formatting with Prettier..."
+          npm run format:check
           echo "✅ Code formatting is correct"
 
       - name: Lint check
