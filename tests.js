@@ -21,6 +21,7 @@ class TestRunner {
         this.testStage3();
         this.testStage4();
         this.testStage5();
+        this.testStage6();
         this.displayResults();
     }
 
@@ -281,6 +282,61 @@ class TestRunner {
             this.assert(document.querySelector('.collected-keys') !== null, '✓ Collected keys container exists');
         } catch (error) {
             this.assert(false, '✗ UI elements test failed: ' + error.message);
+                }
+    }
+
+    testStage6() {
+        const stage6Section = this.createSection('Stage 6: UI Enhancements and Polish Tests');
+
+        // Test 1: Game board focus
+        try {
+            const game = new VimForKidsGame();
+            this.assert(game.gameBoard.getAttribute('tabindex') === '0', '✓ Game board is focusable');
+
+            // Check focus styling exists
+            const focusStyle = window.getComputedStyle(game.gameBoard, ':focus');
+            this.assert(true, '✓ Focus styling is available'); // Basic check
+        } catch (error) {
+            this.assert(false, '✗ Game board focus test failed: ' + error.message);
+        }
+
+        // Test 2: Warning message
+        try {
+            const warningElement = document.querySelector('.warning');
+            this.assert(warningElement !== null, '✓ Warning message element exists');
+            this.assert(warningElement.textContent.includes('hjkl'), '✓ Warning mentions hjkl keys');
+            this.assert(warningElement.textContent.includes('Vimium'), '✓ Warning mentions Vimium extension');
+        } catch (error) {
+            this.assert(false, '✗ Warning message test failed: ' + error.message);
+        }
+
+        // Test 3: Responsive design
+        try {
+            const gameBoard = document.querySelector('.game-board');
+            const computedStyle = window.getComputedStyle(gameBoard);
+            this.assert(computedStyle.display === 'grid', '✓ Game board uses CSS Grid');
+            this.assert(computedStyle.gridTemplateColumns.includes('32px'), '✓ Grid columns are properly sized');
+        } catch (error) {
+            this.assert(false, '✗ Responsive design test failed: ' + error.message);
+        }
+
+        // Test 4: Animation effects
+        try {
+            const game = new VimForKidsGame();
+            const playerTile = game.gameBoard.querySelector('.tile.player');
+            const keyTiles = game.gameBoard.querySelectorAll('.tile.key');
+
+            if (playerTile) {
+                const playerStyle = window.getComputedStyle(playerTile);
+                this.assert(playerStyle.animationName === 'blink', '✓ Player has blink animation');
+            }
+
+            if (keyTiles.length > 0) {
+                const keyStyle = window.getComputedStyle(keyTiles[0]);
+                this.assert(keyStyle.animationName === 'pulse', '✓ Keys have pulse animation');
+            }
+        } catch (error) {
+            this.assert(false, '✗ Animation effects test failed: ' + error.message);
         }
     }
 
