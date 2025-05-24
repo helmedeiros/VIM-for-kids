@@ -1,0 +1,190 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.game-container {
+    text-align: center;
+    background-color: #34495e;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+h1 {
+    margin-bottom: 20px;
+    color: #e74c3c;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(12, 32px);
+    grid-template-rows: repeat(12, 32px);
+    gap: 1px;
+    margin: 20px auto;
+    border: 3px solid #2c3e50;
+    background-color: #2c3e50;
+    padding: 5px;
+    outline: none;
+    cursor: pointer;
+}
+
+.game-board:focus {
+    border-color: #e74c3c;
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+}
+
+.tile {
+    width: 32px;
+    height: 32px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+/* Tile Types */
+.tile.water {
+    background-color: #3498db;
+    background-image:
+        radial-gradient(circle at 25% 25%, #2980b9 2px, transparent 2px),
+        radial-gradient(circle at 75% 75%, #5dade2 1px, transparent 1px);
+}
+
+.tile.grass {
+    background-color: #27ae60;
+    background-image:
+        linear-gradient(45deg, #2ecc71 25%, transparent 25%),
+        linear-gradient(-45deg, #2ecc71 25%, transparent 25%);
+    background-size: 8px 8px;
+}
+
+.tile.dirt {
+    background-color: #8b4513;
+    background-image:
+        radial-gradient(circle at 20% 30%, #a0522d 1px, transparent 1px),
+        radial-gradient(circle at 70% 80%, #cd853f 1px, transparent 1px),
+        radial-gradient(circle at 40% 70%, #deb887 0.5px, transparent 0.5px);
+    background-size: 16px 16px, 12px 12px, 8px 8px;
+}
+
+.tile.tree {
+    background-color: #228b22;
+    background-image:
+        radial-gradient(circle at center, #006400 40%, #228b22 41%);
+    border: 1px solid #8b4513;
+}
+
+/* Player */
+.tile.player {
+    background-color: #f39c12;
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: bold;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; }
+}
+
+/* Collectible Keys */
+.tile.key {
+    color: #e74c3c;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Text tiles for "Hello world!" */
+.tile.text {
+    color: #f1c40f;
+    font-size: 10px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* UI Elements */
+.instructions {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #2c3e50;
+    border-radius: 5px;
+    border-left: 4px solid #e74c3c;
+}
+
+.instructions p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.collected-keys {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #2c3e50;
+    border-radius: 5px;
+    border-left: 4px solid #27ae60;
+}
+
+.collected-keys h3 {
+    margin-bottom: 10px;
+    color: #27ae60;
+}
+
+.key-display {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.collected-key {
+    background-color: #27ae60;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .game-board {
+        grid-template-columns: repeat(12, 28px);
+        grid-template-rows: repeat(12, 28px);
+    }
+
+    .tile {
+        width: 28px;
+        height: 28px;
+        font-size: 10px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+}
