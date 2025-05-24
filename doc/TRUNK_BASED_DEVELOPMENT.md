@@ -55,7 +55,7 @@ Trunk-based development is a version control management practice where developer
 4. **Test locally before pushing:**
 
    ```bash
-   npm run validate  # Lint, test, and build
+   npm run validate  # Lint, format check, test, and build
    ```
 
 5. **Push and create a Pull Request:**
@@ -303,6 +303,12 @@ A: Check the flag name spelling and ensure it's properly loaded. Use browser dev
 
 **Q: CI is taking too long**
 A: Consider parallelizing tests or optimizing the build process. Fast feedback is crucial for trunk-based development.
+
+**Q: GitHub Actions failing on formatting but code looks fine locally**
+A: Always run `npm run validate` before pushing. This includes `npm run format:check` which catches formatting issues without modifying files. Use `npm run format` to fix any issues found.
+
+**Q: Pre-commit hooks not catching all issues**
+A: Pre-commit hooks only run on staged files. Use `npm run validate` to check your entire codebase before pushing.
 
 ## 📚 Additional Resources
 
