@@ -2,11 +2,19 @@ class VimForKidsGame {
     constructor() {
         this.gridSize = 12;
         this.gameBoard = document.getElementById('gameBoard');
+        this.collectedKeysDisplay = document.querySelector('.key-display');
         this.gameGrid = [];
         this.player = {
             x: 5,
             y: 2
         };
+        this.collectedKeys = new Set();
+        this.keys = [
+            { x: 2, y: 3, key: 'h', description: 'Move left' },
+            { x: 3, y: 3, key: 'j', description: 'Move down' },
+            { x: 4, y: 3, key: 'k', description: 'Move up' },
+            { x: 5, y: 3, key: 'l', description: 'Move right' }
+        ];
         this.initializeGame();
     }
 
@@ -66,15 +74,24 @@ class VimForKidsGame {
                                 // Set base tile type
                 tile.classList.add(this.gameGrid[y][x]);
 
-                // Add player
+                                // Add player
                 if (x === this.player.x && y === this.player.y) {
                     tile.classList.add('player');
                     tile.textContent = '●';
                 }
 
+                // Add collectible keys
+                const key = this.keys.find(k => k.x === x && k.y === y && !this.collectedKeys.has(k.key));
+                if (key) {
+                    tile.classList.add('key');
+                    tile.textContent = key.key;
+                }
+
                 this.gameBoard.appendChild(tile);
             }
         }
+
+        this.updateCollectedKeysDisplay();
     }
 
     setupEventListeners() {
@@ -137,12 +154,51 @@ class VimForKidsGame {
             return;
         }
 
-        // Update player position
+                // Update player position
         this.player.x = newX;
         this.player.y = newY;
 
+        // Check for key collection
+        this.checkKeyCollection();
+
         // Re-render the game
         this.renderGame();
+    }
+
+    checkKeyCollection() {
+        const key = this.keys.find(k =>
+            k.x === this.player.x &&
+            k.y === this.player.y &&
+            !this.collectedKeys.has(k.key)
+        );
+
+        if (key) {
+            this.collectedKeys.add(key.key);
+            this.showKeyInfo(key);
+        }
+    }
+
+        showKeyInfo(key) {
+        alert(`Collected: ${key.key}\nDescription: ${key.description}\n\nGreat job learning VIM movements!`);
+    }
+
+    updateCollectedKeysDisplay() {
+        this.collectedKeysDisplay.innerHTML = '';
+
+        this.collectedKeys.forEach(keyName => {
+            const keyElement = document.createElement('div');
+            keyElement.className = 'collected-key';
+            keyElement.textContent = keyName;
+            this.collectedKeysDisplay.appendChild(keyElement);
+        });
+
+        if (this.collectedKeys.size === 0) {
+            const emptyMessage = document.createElement('div');
+            emptyMessage.textContent = 'No keys collected yet!';
+            emptyMessage.style.color = '#95a5a6';
+            emptyMessage.style.fontStyle = 'italic';
+            this.collectedKeysDisplay.appendChild(emptyMessage);
+        }
     }
 
     isValidPosition(x, y) {
