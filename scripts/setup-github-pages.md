@@ -70,24 +70,27 @@ git push origin main
 
 ## Troubleshooting
 
+### Issue: "Missing environment" error in GitHub Actions
+
+**Solution**: The GitHub Pages actions require an explicit environment configuration:
+
+1. Ensure your workflow includes:
+   ```yaml
+   environment:
+     name: github-pages
+     url: ${{ steps.deployment.outputs.page_url }}
+   ```
+2. This is already configured in our workflow, but may be needed if you modify it
+
 ### Issue: Workflow fails with permissions error
 
-**Solution**: Make sure your repository has the correct permissions:
+**Solution**:
 
 1. Go to **Settings** > **Actions** > **General**
 2. Under **Workflow permissions**, select:
    - **Read and write permissions**
    - Check **Allow GitHub Actions to create and approve pull requests**
 3. Under **Pages** > **Source**, select: **GitHub Actions** (not "Deploy from a branch")
-
-### Issue: GitHub Pages not deploying
-
-**Solution**:
-
-1. Check if your repository is public (GitHub Pages requires public repo for free accounts)
-2. Verify that Pages source is set to **GitHub Actions**
-3. Check that workflow permissions are set correctly
-4. Look for any errors in the Actions tab
 
 ### Issue: 404 on deployed site
 
