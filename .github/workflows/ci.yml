@@ -49,6 +49,11 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/main'
 
+    # Add required environment for GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     # Configure permissions for GitHub Pages
     permissions:
       contents: read
