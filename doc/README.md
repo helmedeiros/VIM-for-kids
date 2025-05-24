@@ -6,18 +6,14 @@ This folder contains comprehensive technical documentation for developers, contr
 
 ## 📚 Documentation Index
 
-### 🚀 Getting Started
-
-- **[Development Guide](DEVELOPMENT.md)** - Complete setup, workflow, testing, and best practices for developers
-
-### 🏗️ Architecture & Design
-
-- **[Architecture Overview](ARCHITECTURE.md)** - Hexagonal architecture implementation, benefits, and patterns
-- **[Refactoring Summary](REFACTORING_SUMMARY.md)** - Evolution from monolithic to hexagonal architecture
-
-### 🔧 Build System & Tooling
-
-- **[Build System Summary](BUILD_SYSTEM_SUMMARY.md)** - Implementation details, metrics, and technical achievements
+| Document                                                     | Purpose                             | Audience    |
+| ------------------------------------------------------------ | ----------------------------------- | ----------- |
+| **[📖 Documentation Index](README.md)**                      | Complete navigation guide           | All         |
+| **[🚀 Development Guide](DEVELOPMENT.md)**                   | Setup, workflow, and best practices | Developers  |
+| **[🏗️ Architecture Guide](ARCHITECTURE.md)**                 | Hexagonal architecture explanation  | Developers  |
+| **[🌳 Trunk-Based Development](TRUNK_BASED_DEVELOPMENT.md)** | Modern development workflow guide   | Developers  |
+| **[🔧 Build System](BUILD_SYSTEM_SUMMARY.md)**               | Technical implementation details    | Developers  |
+| **[📈 Refactoring History](REFACTORING_SUMMARY.md)**         | Project evolution story             | Maintainers |
 
 ## 📋 Quick Navigation
 
