@@ -13,9 +13,15 @@ This project was built incrementally with proper testing for each stage:
 - JavaScript class structure with basic grid rendering
 - Test suite implementation
 
+### Stage 2: Tile Types and Map Creation ✓
+
+- Different tile types (water, grass, dirt, tree)
+- Map generation with water borders
+- Dirt path creation for player movement
+- Enhanced CSS styling for visual tile differentiation
+
 ### Future Stages (Coming Soon)
 
-- Stage 2: Tile Types and Map Creation
 - Stage 3: Player Character and Basic Movement
 - Stage 4: VIM-style Navigation (hjkl keys)
 - Stage 5: Collectible Keys and Game Logic
