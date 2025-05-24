@@ -48,17 +48,35 @@ This project was built incrementally with proper testing for each stage:
 - Responsive design for mobile devices
 - Animated player and key elements for visual appeal
 
-## Running Tests
+## Quick Start
 
-Open `test.html` in a browser to run the test suite and verify functionality.
+```bash
+# Install dependencies
+npm install
 
-## Playing the Game
+# Start development server
+npm run dev
 
-Open `index.html` in a browser to play the current version of the game.
+# Run tests
+npm test
+
+# Build for production
+npm run build
+```
+
+## Documentation
+
+Comprehensive documentation is available in the `doc/` folder:
+
+- **[Development Guide](doc/DEVELOPMENT.md)** - Complete setup, workflow, and best practices
+- **[Architecture Overview](doc/ARCHITECTURE.md)** - Hexagonal architecture explanation
+- **[Build System Summary](doc/BUILD_SYSTEM_SUMMARY.md)** - Implementation details and metrics
+- **[Refactoring Summary](doc/REFACTORING_SUMMARY.md)** - Evolution from monolithic to hexagonal architecture
 
 ## Technologies Used
 
-- Pure HTML5, CSS3, and JavaScript (ES6+)
-- No external dependencies
-- Responsive design
-- Test-driven development approach
+- **Build System**: Vite with Hot Module Replacement
+- **Testing**: Jest with 92%+ coverage, JSDOM environment
+- **Code Quality**: ESLint, Prettier, Babel
+- **Architecture**: Hexagonal (Ports & Adapters) pattern
+- **Modules**: ES6+ with clean separation of concerns
