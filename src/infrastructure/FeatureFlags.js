@@ -29,7 +29,7 @@ class FeatureFlags {
 
       // Load flags from environment or remote config
       ...this.loadFromEnvironment(),
-      ...this.loadFromRemoteConfig()
+      ...this.loadFromRemoteConfig(),
     };
   }
 
@@ -105,8 +105,8 @@ class FeatureFlags {
     return (
       typeof window !== 'undefined' &&
       (window.location.hostname === 'localhost' ||
-       window.location.hostname === '127.0.0.1' ||
-       window.location.hostname.startsWith('192.168.'))
+        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname.startsWith('192.168.'))
     );
   }
 
@@ -140,7 +140,7 @@ class FeatureFlags {
 
     // Simple hash function for consistent user assignment
     const hash = this.simpleHash(userId + flagName);
-    return (hash % 100) < percentage;
+    return hash % 100 < percentage;
   }
 
   /**
@@ -150,7 +150,7 @@ class FeatureFlags {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);
