@@ -15,8 +15,9 @@ class TestRunner {
     }
 
     runTests() {
-        console.log('Running Stage 1 Tests...');
+        console.log('Running Tests...');
         this.testStage1();
+        this.testStage2();
         this.displayResults();
     }
 
@@ -55,6 +56,59 @@ class TestRunner {
             this.assert(document.querySelector('.game-container') !== null, '✓ Game container exists');
         } catch (error) {
             this.assert(false, '✗ HTML structure test failed: ' + error.message);
+                }
+    }
+
+    testStage2() {
+        const stage2Section = this.createSection('Stage 2: Tile Types and Map Creation Tests');
+
+        // Test 1: Map creation
+        try {
+            const game = new VimForKidsGame();
+            this.assert(Array.isArray(game.gameGrid), '✓ Game grid is created as array');
+            this.assert(game.gameGrid.length === 12, '✓ Game grid has correct height');
+            this.assert(game.gameGrid[0].length === 12, '✓ Game grid has correct width');
+        } catch (error) {
+            this.assert(false, '✗ Map creation test failed: ' + error.message);
+        }
+
+        // Test 2: Tile types
+        try {
+            const game = new VimForKidsGame();
+            const tiles = game.gameBoard.querySelectorAll('.tile');
+
+            // Check for different tile types
+            const waterTiles = game.gameBoard.querySelectorAll('.tile.water');
+            const grassTiles = game.gameBoard.querySelectorAll('.tile.grass');
+            const dirtTiles = game.gameBoard.querySelectorAll('.tile.dirt');
+            const treeTiles = game.gameBoard.querySelectorAll('.tile.tree');
+
+            this.assert(waterTiles.length > 0, '✓ Water tiles are present');
+            this.assert(grassTiles.length > 0, '✓ Grass tiles are present');
+            this.assert(dirtTiles.length > 0, '✓ Dirt tiles are present');
+            this.assert(treeTiles.length > 0, '✓ Tree tiles are present');
+
+            // Check water border
+            this.assert(game.gameGrid[0][0] === 'water', '✓ Top-left corner is water');
+            this.assert(game.gameGrid[0][11] === 'water', '✓ Top-right corner is water');
+            this.assert(game.gameGrid[11][0] === 'water', '✓ Bottom-left corner is water');
+            this.assert(game.gameGrid[11][11] === 'water', '✓ Bottom-right corner is water');
+        } catch (error) {
+            this.assert(false, '✗ Tile types test failed: ' + error.message);
+        }
+
+        // Test 3: Map layout
+        try {
+            const game = new VimForKidsGame();
+
+            // Check for dirt path
+            this.assert(game.gameGrid[2][2] === 'dirt', '✓ Dirt path starts correctly');
+            this.assert(game.gameGrid[2][9] === 'tree', '✓ Tree is placed correctly');
+
+            // Check that center area has grass
+            this.assert(game.gameGrid[5][5] === 'dirt', '✓ Center path is dirt');
+        } catch (error) {
+            this.assert(false, '✗ Map layout test failed: ' + error.message);
         }
     }
 
