@@ -64,13 +64,14 @@ VIM for Kids is built with modern web technologies and clean architecture:
 
 Detailed documentation is available for developers and contributors:
 
-| Document                                                 | Purpose                             | Audience    |
-| -------------------------------------------------------- | ----------------------------------- | ----------- |
-| **[📖 Documentation Index](doc/README.md)**              | Complete navigation guide           | All         |
-| **[🚀 Development Guide](doc/DEVELOPMENT.md)**           | Setup, workflow, and best practices | Developers  |
-| **[🏗️ Architecture Guide](doc/ARCHITECTURE.md)**         | Hexagonal architecture explanation  | Developers  |
-| **[🔧 Build System](doc/BUILD_SYSTEM_SUMMARY.md)**       | Technical implementation details    | Developers  |
-| **[📈 Refactoring History](doc/REFACTORING_SUMMARY.md)** | Project evolution story             | Maintainers |
+| Document                                                         | Purpose                             | Audience    |
+| ---------------------------------------------------------------- | ----------------------------------- | ----------- |
+| **[📖 Documentation Index](doc/README.md)**                      | Complete navigation guide           | All         |
+| **[🚀 Development Guide](doc/DEVELOPMENT.md)**                   | Setup, workflow, and best practices | Developers  |
+| **[🏗️ Architecture Guide](doc/ARCHITECTURE.md)**                 | Hexagonal architecture explanation  | Developers  |
+| **[🌳 Trunk-Based Development](doc/TRUNK_BASED_DEVELOPMENT.md)** | Modern development workflow guide   | Developers  |
+| **[🔧 Build System](doc/BUILD_SYSTEM_SUMMARY.md)**               | Technical implementation details    | Developers  |
+| **[📈 Refactoring History](doc/REFACTORING_SUMMARY.md)**         | Project evolution story             | Maintainers |
 
 ## 🤝 Contributing
 
