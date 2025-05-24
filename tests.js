@@ -18,6 +18,7 @@ class TestRunner {
         console.log('Running Tests...');
         this.testStage1();
         this.testStage2();
+        this.testStage3();
         this.displayResults();
     }
 
@@ -109,6 +110,62 @@ class TestRunner {
             this.assert(game.gameGrid[5][5] === 'dirt', '✓ Center path is dirt');
         } catch (error) {
             this.assert(false, '✗ Map layout test failed: ' + error.message);
+                }
+    }
+
+    testStage3() {
+        const stage3Section = this.createSection('Stage 3: Player Character and Movement Tests');
+
+        // Test 1: Player initialization
+        try {
+            const game = new VimForKidsGame();
+            this.assert(typeof game.player === 'object', '✓ Player object is created');
+            this.assert(typeof game.player.x === 'number', '✓ Player has x coordinate');
+            this.assert(typeof game.player.y === 'number', '✓ Player has y coordinate');
+            this.assert(game.player.x === 5 && game.player.y === 2, '✓ Player starts at correct position');
+        } catch (error) {
+            this.assert(false, '✗ Player initialization test failed: ' + error.message);
+        }
+
+        // Test 2: Player rendering
+        try {
+            const game = new VimForKidsGame();
+            const playerTiles = game.gameBoard.querySelectorAll('.tile.player');
+            this.assert(playerTiles.length === 1, '✓ Exactly one player tile is rendered');
+
+            const playerTile = playerTiles[0];
+            this.assert(playerTile.textContent === '●', '✓ Player tile shows correct character');
+        } catch (error) {
+            this.assert(false, '✗ Player rendering test failed: ' + error.message);
+        }
+
+        // Test 3: Movement system
+        try {
+            const game = new VimForKidsGame();
+            const originalX = game.player.x;
+            const originalY = game.player.y;
+
+            // Test valid movement
+            game.movePlayer(originalX + 1, originalY);
+            this.assert(game.player.x === originalX + 1, '✓ Player can move horizontally');
+
+            // Test boundary collision
+            game.movePlayer(-1, originalY);
+            this.assert(game.player.x !== -1, '✓ Player cannot move outside boundaries');
+
+            // Test obstacle collision (water)
+            game.movePlayer(0, 0); // Water tile
+            this.assert(!(game.player.x === 0 && game.player.y === 0), '✓ Player cannot move into water');
+        } catch (error) {
+            this.assert(false, '✗ Movement system test failed: ' + error.message);
+        }
+
+        // Test 4: Event listeners
+        try {
+            const game = new VimForKidsGame();
+            this.assert(game.gameBoard.getAttribute('tabindex') === '0', '✓ Game board is focusable');
+        } catch (error) {
+            this.assert(false, '✗ Event listeners test failed: ' + error.message);
         }
     }
 

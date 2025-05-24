@@ -3,12 +3,17 @@ class VimForKidsGame {
         this.gridSize = 12;
         this.gameBoard = document.getElementById('gameBoard');
         this.gameGrid = [];
+        this.player = {
+            x: 5,
+            y: 2
+        };
         this.initializeGame();
     }
 
     initializeGame() {
         this.createMap();
         this.renderGame();
+        this.setupEventListeners();
     }
 
     createMap() {
@@ -58,12 +63,82 @@ class VimForKidsGame {
                 const tile = document.createElement('div');
                 tile.className = 'tile';
 
-                // Set base tile type
+                                // Set base tile type
                 tile.classList.add(this.gameGrid[y][x]);
+
+                // Add player
+                if (x === this.player.x && y === this.player.y) {
+                    tile.classList.add('player');
+                    tile.textContent = '●';
+                }
 
                 this.gameBoard.appendChild(tile);
             }
         }
+    }
+
+    setupEventListeners() {
+        // Make the game board focusable and focus it
+        this.gameBoard.setAttribute('tabindex', '0');
+        this.gameBoard.focus();
+
+        const handleMovement = (e) => {
+            let newX = this.player.x;
+            let newY = this.player.y;
+            let moved = false;
+
+            switch (e.key) {
+                case 'ArrowUp':
+                    newY--;
+                    moved = true;
+                    break;
+                case 'ArrowDown':
+                    newY++;
+                    moved = true;
+                    break;
+                case 'ArrowLeft':
+                    newX--;
+                    moved = true;
+                    break;
+                case 'ArrowRight':
+                    newX++;
+                    moved = true;
+                    break;
+            }
+
+            if (moved) {
+                e.preventDefault();
+                this.movePlayer(newX, newY);
+            }
+        };
+
+        this.gameBoard.addEventListener('keydown', handleMovement);
+
+        // Ensure the game board stays focused when clicked
+        this.gameBoard.addEventListener('click', () => {
+            this.gameBoard.focus();
+        });
+    }
+
+    movePlayer(newX, newY) {
+        // Check boundaries
+        if (!this.isValidPosition(newX, newY)) {
+            return;
+        }
+
+        const targetTile = this.gameGrid[newY][newX];
+
+        // Check for impassable tiles
+        if (targetTile === 'water' || targetTile === 'tree') {
+            return;
+        }
+
+        // Update player position
+        this.player.x = newX;
+        this.player.y = newY;
+
+        // Re-render the game
+        this.renderGame();
     }
 
     isValidPosition(x, y) {
