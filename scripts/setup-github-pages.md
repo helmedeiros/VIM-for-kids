@@ -27,12 +27,17 @@ git push origin main
 
 1. Go to your GitHub repository
 2. Click on **Settings** tab
-3. Scroll down to **Pages** section (in the left sidebar)
-4. Under **Source**, select:
-   - **Deploy from a branch**
-   - Branch: **gh-pages**
-   - Folder: **/ (root)**
-5. Click **Save**
+3. **First, configure Actions permissions**:
+   - Go to **Actions** → **General**
+   - Under **Workflow permissions**, select: **Read and write permissions**
+   - Check: **Allow GitHub Actions to create and approve pull requests**
+   - Click **Save**
+4. **Then configure Pages**:
+   - Go to **Pages** section (in the left sidebar)
+   - Under **Source**, select: **GitHub Actions**
+   - Click **Save**
+
+> **Note**: We now use GitHub's native Pages deployment instead of branch-based deployment for better security and reliability.
 
 ## Step 3: Trigger First Deployment
 
@@ -73,14 +78,16 @@ git push origin main
 2. Under **Workflow permissions**, select:
    - **Read and write permissions**
    - Check **Allow GitHub Actions to create and approve pull requests**
+3. Under **Pages** > **Source**, select: **GitHub Actions** (not "Deploy from a branch")
 
 ### Issue: GitHub Pages not deploying
 
 **Solution**:
 
 1. Check if your repository is public (GitHub Pages requires public repo for free accounts)
-2. Verify the `gh-pages` branch exists after workflow runs
-3. Check **Settings** > **Pages** shows the correct source
+2. Verify that Pages source is set to **GitHub Actions**
+3. Check that workflow permissions are set correctly
+4. Look for any errors in the Actions tab
 
 ### Issue: 404 on deployed site
 
