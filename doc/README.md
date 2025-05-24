@@ -1,6 +1,8 @@
-# VIM for Kids - Documentation
+# VIM for Kids - Technical Documentation
 
-This folder contains comprehensive documentation for the VIM for Kids educational game project.
+This folder contains comprehensive technical documentation for developers, contributors, and maintainers of the VIM for Kids project.
+
+> **For Users**: Looking to play the game? Check out the main [README.md](../README.md) > **For Developers**: You're in the right place! This documentation will guide you through the codebase.
 
 ## 📚 Documentation Index
 
