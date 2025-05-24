@@ -70,6 +70,7 @@ Detailed documentation is available for developers and contributors:
 | **[🚀 Development Guide](doc/DEVELOPMENT.md)**                   | Setup, workflow, and best practices | Developers  |
 | **[🏗️ Architecture Guide](doc/ARCHITECTURE.md)**                 | Hexagonal architecture explanation  | Developers  |
 | **[🌳 Trunk-Based Development](doc/TRUNK_BASED_DEVELOPMENT.md)** | Modern development workflow guide   | Developers  |
+| **[📝 Conventional Commits](doc/CONVENTIONAL_COMMITS.md)**       | Commit message standards and tools  | All         |
 | **[🔧 Build System](doc/BUILD_SYSTEM_SUMMARY.md)**               | Technical implementation details    | Developers  |
 | **[📈 Refactoring History](doc/REFACTORING_SUMMARY.md)**         | Project evolution story             | Maintainers |
 
