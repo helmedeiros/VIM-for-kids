@@ -25,6 +25,12 @@ describe('TileType', () => {
       expect(TileType.TREE.name).toBe('tree');
       expect(TileType.TREE.walkable).toBe(false);
     });
+
+    it('should have STONE tile type', () => {
+      expect(TileType.STONE).toBeInstanceOf(TileType);
+      expect(TileType.STONE.name).toBe('stone');
+      expect(TileType.STONE.walkable).toBe(false);
+    });
   });
 
   describe('properties', () => {
@@ -65,6 +71,7 @@ describe('TileType', () => {
       expect(TileType.WATER.toString()).toBe('water');
       expect(TileType.DIRT.toString()).toBe('dirt');
       expect(TileType.TREE.toString()).toBe('tree');
+      expect(TileType.STONE.toString()).toBe('stone');
     });
   });
 
@@ -77,6 +84,7 @@ describe('TileType', () => {
     it('should correctly identify non-walkable tiles', () => {
       expect(TileType.WATER.walkable).toBe(false);
       expect(TileType.TREE.walkable).toBe(false);
+      expect(TileType.STONE.walkable).toBe(false);
     });
   });
 
