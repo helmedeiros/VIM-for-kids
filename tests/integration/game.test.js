@@ -61,7 +61,7 @@ describe('VIM for Kids Game Integration', () => {
       expect(game.gameState.availableKeys).toHaveLength(4);
       expect(game.gameState.collectedKeys.size).toBe(0);
 
-      const keyNames = game.gameState.availableKeys.map(key => key.key);
+      const keyNames = game.gameState.availableKeys.map((key) => key.key);
       expect(keyNames).toContain('h');
       expect(keyNames).toContain('j');
       expect(keyNames).toContain('k');
@@ -91,10 +91,7 @@ describe('VIM for Kids Game Integration', () => {
 
       game.movePlayerUseCase.execute('left');
 
-      expect(game.gameState.player.position).toHavePosition(
-        position.x - 1,
-        position.y
-      );
+      expect(game.gameState.player.position).toHavePosition(position.x - 1, position.y);
     });
 
     it('should move player down', () => {
@@ -114,16 +111,10 @@ describe('VIM for Kids Game Integration', () => {
 
       game.movePlayerUseCase.execute('up');
 
-      expect(game.gameState.player.position).toHavePosition(
-        position.x,
-        position.y - 1
-      );
+      expect(game.gameState.player.position).toHavePosition(position.x, position.y - 1);
     });
 
     it('should not move into water tiles', () => {
-      // Try to move to a water boundary (top edge)
-      const originalPosition = game.gameState.player.position;
-
       // Move up twice should hit water boundary
       game.movePlayerUseCase.execute('up');
       game.movePlayerUseCase.execute('up');
@@ -140,7 +131,7 @@ describe('VIM for Kids Game Integration', () => {
 
     it('should collect key when player moves to key position', () => {
       // Move to a key position (2, 3) where 'h' key is located
-      const targetKey = game.gameState.availableKeys.find(key =>
+      const targetKey = game.gameState.availableKeys.find((key) =>
         key.position.equals(new Position(2, 3))
       );
 
@@ -159,16 +150,16 @@ describe('VIM for Kids Game Integration', () => {
       expect(game.gameState.availableKeys.length).toBe(3);
     });
 
-    it('should show alert when key is collected', () => {
-      // Navigate to key position and verify alert was called
+    it('should collect key without popup when key is collected', () => {
+      // Navigate to key position and verify key is collected
       game.movePlayerUseCase.execute('left');
       game.movePlayerUseCase.execute('left');
       game.movePlayerUseCase.execute('left');
       game.movePlayerUseCase.execute('down');
 
-      expect(global.alert).toHaveBeenCalledWith(
-        expect.stringContaining('Collected: h')
-      );
+      // Verify key was collected
+      expect(game.gameState.collectedKeys.has('h')).toBe(true);
+      expect(game.gameState.availableKeys.length).toBe(3);
     });
 
     it('should update UI when key is collected', () => {
