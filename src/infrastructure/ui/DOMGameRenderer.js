@@ -15,6 +15,13 @@ export class DOMGameRenderer extends GameRenderer {
   render(gameState) {
     this.gameBoard.innerHTML = '';
 
+    // Set appropriate CSS class for different levels
+    if (gameState.textLabels || gameState.gate) {
+      this.gameBoard.className = 'game-board welcome-meadow';
+    } else {
+      this.gameBoard.className = 'game-board';
+    }
+
     for (let y = 0; y < gameState.map.size; y++) {
       for (let x = 0; x < gameState.map.size; x++) {
         const position = new Position(x, y);
@@ -36,6 +43,30 @@ export class DOMGameRenderer extends GameRenderer {
         if (key) {
           tile.classList.add('key');
           tile.textContent = key.key;
+        }
+
+        // Add text labels for Welcome Meadow
+        if (gameState.textLabels) {
+          const textLabel = gameState.textLabels.find((label) => label.position.equals(position));
+          if (textLabel) {
+            tile.classList.add('text-label');
+            const labelSpan = document.createElement('span');
+            labelSpan.textContent = textLabel.text;
+            labelSpan.style.color = textLabel.color;
+            labelSpan.style.fontSize = textLabel.fontSize;
+            labelSpan.style.position = 'absolute';
+            labelSpan.style.bottom = '2px';
+            labelSpan.style.left = '50%';
+            labelSpan.style.transform = 'translateX(-50%)';
+            tile.appendChild(labelSpan);
+          }
+        }
+
+        // Add gate for Welcome Meadow
+        if (gameState.gate && gameState.gate.position.equals(position)) {
+          tile.classList.add('gate');
+          tile.classList.add(gameState.gate.isOpen ? 'open' : 'closed');
+          tile.textContent = gameState.gate.isOpen ? '🚪' : '🚧';
         }
 
         this.gameBoard.appendChild(tile);
