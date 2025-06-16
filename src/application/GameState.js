@@ -31,8 +31,8 @@ export class GameState {
     return [
       new VimKey(new Position(2, 3), 'h', 'Move left'),
       new VimKey(new Position(3, 3), 'j', 'Move down'),
-      new VimKey(new Position(4, 3), 'k', 'Move up'),
-      new VimKey(new Position(5, 3), 'l', 'Move right'),
+      new VimKey(new Position(9, 5), 'k', 'Move up'), // In labyrinth
+      new VimKey(new Position(10, 8), 'l', 'Move right'), // In labyrinth
     ];
   }
 }

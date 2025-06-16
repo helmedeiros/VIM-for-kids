@@ -176,6 +176,130 @@ describe('VIM for Kids Game Integration', () => {
       expect(collectedKeyElements.length).toBe(1);
       expect(collectedKeyElements[0].textContent).toBe('h');
     });
+
+    it('should collect keys placed in labyrinth', () => {
+      // Test collecting the 'k' key at position (9, 5) in the labyrinth
+      const targetKey = game.gameState.availableKeys.find((key) =>
+        key.position.equals(new Position(9, 5))
+      );
+
+      expect(targetKey).toBeDefined();
+      expect(targetKey.key).toBe('k');
+
+      // Navigate to labyrinth key: right to (6,2), then through labyrinth
+      game.movePlayerUseCase.execute('right'); // (6,2)
+      game.movePlayerUseCase.execute('right'); // (7,2)
+      game.movePlayerUseCase.execute('right'); // (8,2)
+      game.movePlayerUseCase.execute('down'); // (8,3)
+      game.movePlayerUseCase.execute('right'); // (9,3)
+      game.movePlayerUseCase.execute('down'); // (9,4)
+      game.movePlayerUseCase.execute('down'); // (9,5)
+
+      expect(game.gameState.player.position).toHavePosition(9, 5);
+      expect(game.gameState.collectedKeys.has('k')).toBe(true);
+      expect(game.gameState.availableKeys.length).toBe(3);
+    });
+
+    it('should collect the deepest labyrinth key', () => {
+      // Test collecting the 'l' key at position (10, 8) in the labyrinth
+      const targetKey = game.gameState.availableKeys.find((key) =>
+        key.position.equals(new Position(10, 8))
+      );
+
+      expect(targetKey).toBeDefined();
+      expect(targetKey.key).toBe('l');
+
+      // Navigate to deep labyrinth key
+      game.movePlayerUseCase.execute('right'); // (6,2)
+      game.movePlayerUseCase.execute('right'); // (7,2)
+      game.movePlayerUseCase.execute('right'); // (8,2)
+      game.movePlayerUseCase.execute('down'); // (8,3)
+      game.movePlayerUseCase.execute('right'); // (9,3)
+      game.movePlayerUseCase.execute('right'); // (10,3)
+      game.movePlayerUseCase.execute('down'); // (10,4)
+      game.movePlayerUseCase.execute('down'); // (10,5)
+      game.movePlayerUseCase.execute('down'); // (10,6) - This should fail if blocked by stone
+
+      // Alternative path if direct route is blocked
+      if (!game.gameState.player.position.equals(new Position(10, 6))) {
+        // Try alternative route through (9,6) then (10,6)
+        game.movePlayerUseCase.execute('left'); // (9,5)
+        game.movePlayerUseCase.execute('down'); // (9,6)
+        game.movePlayerUseCase.execute('right'); // (10,6)
+      }
+
+      game.movePlayerUseCase.execute('down'); // (10,7)
+      game.movePlayerUseCase.execute('down'); // (10,8)
+
+      expect(game.gameState.player.position).toHavePosition(10, 8);
+      expect(game.gameState.collectedKeys.has('l')).toBe(true);
+      expect(game.gameState.availableKeys.length).toBe(3);
+    });
+  });
+
+  describe('Labyrinth Navigation', () => {
+    beforeEach(() => {
+      game = new VimForKidsGame();
+    });
+
+    it('should block movement into stone walls', () => {
+      // Navigate to labyrinth entry
+      game.movePlayerUseCase.execute('right'); // (6,2)
+      game.movePlayerUseCase.execute('right'); // (7,2)
+
+      // Try to move up into stone wall at (7,1)
+      const positionBeforeMove = game.gameState.player.position;
+      game.movePlayerUseCase.execute('up');
+
+      // Player should not have moved
+      expect(game.gameState.player.position).toEqual(positionBeforeMove);
+    });
+
+    it('should allow movement through labyrinth paths', () => {
+      // Navigate through the labyrinth entry path
+      game.movePlayerUseCase.execute('right'); // (6,2)
+      expect(game.gameState.player.position).toHavePosition(6, 2);
+
+      game.movePlayerUseCase.execute('right'); // (7,2)
+      expect(game.gameState.player.position).toHavePosition(7, 2);
+
+      game.movePlayerUseCase.execute('right'); // (8,2)
+      expect(game.gameState.player.position).toHavePosition(8, 2);
+
+      game.movePlayerUseCase.execute('down'); // (8,3)
+      expect(game.gameState.player.position).toHavePosition(8, 3);
+    });
+
+    it('should prevent movement into stone walls within labyrinth', () => {
+      // Navigate to a position in the labyrinth
+      game.movePlayerUseCase.execute('right'); // (6,2)
+      game.movePlayerUseCase.execute('right'); // (7,2)
+      game.movePlayerUseCase.execute('right'); // (8,2)
+      game.movePlayerUseCase.execute('down'); // (8,3)
+
+      // Try to move left into stone wall at (7,3) - should be allowed as it's a path
+      // Instead, try to move up to (8,2) then left to (7,2) then up to (7,1) which is stone
+      game.movePlayerUseCase.execute('up'); // (8,2)
+      game.movePlayerUseCase.execute('left'); // (7,2)
+
+      // Try to move up into stone wall at (7,1) - should be blocked
+      const positionBeforeMove = game.gameState.player.position;
+      game.movePlayerUseCase.execute('up');
+
+      // Player should not have moved
+      expect(game.gameState.player.position).toEqual(positionBeforeMove);
+    });
+
+    it('should connect starting area to labyrinth seamlessly', () => {
+      // Test that player can move from starting area into labyrinth
+      expect(game.gameState.player.position).toHavePosition(5, 2); // Starting position
+
+      game.movePlayerUseCase.execute('right'); // (6,2) - transition point
+      expect(game.gameState.player.position).toHavePosition(6, 2);
+
+      game.movePlayerUseCase.execute('right'); // (7,2) - now in labyrinth
+      expect(game.gameState.player.position).toHavePosition(7, 2);
+    });
   });
 
   describe('Game Rendering', () => {
