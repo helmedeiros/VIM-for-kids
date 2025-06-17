@@ -24,7 +24,7 @@ describe('VIM for Kids Game Integration', () => {
 
   describe('Game Initialization', () => {
     it('should initialize all components successfully', () => {
-      game = new VimForKidsGame();
+      game = new VimForKidsGame({ level: 'default' });
 
       expect(game.gameState).toBeDefined();
       expect(game.gameRenderer).toBeDefined();
@@ -33,7 +33,7 @@ describe('VIM for Kids Game Integration', () => {
     });
 
     it('should render initial game state', () => {
-      game = new VimForKidsGame();
+      game = new VimForKidsGame({ level: 'default' });
 
       const gameBoard = document.getElementById('gameBoard');
       const tiles = gameBoard.querySelectorAll('.tile');
@@ -50,13 +50,13 @@ describe('VIM for Kids Game Integration', () => {
     });
 
     it('should have player at correct starting position', () => {
-      game = new VimForKidsGame();
+      game = new VimForKidsGame({ level: 'default' });
 
       expect(game.gameState.player.position).toHavePosition(5, 2);
     });
 
     it('should have all VIM keys available initially', () => {
-      game = new VimForKidsGame();
+      game = new VimForKidsGame({ level: 'default' });
 
       expect(game.gameState.availableKeys).toHaveLength(4);
       expect(game.gameState.collectedKeys.size).toBe(0);
@@ -71,7 +71,7 @@ describe('VIM for Kids Game Integration', () => {
 
   describe('Player Movement', () => {
     beforeEach(() => {
-      game = new VimForKidsGame();
+      game = new VimForKidsGame({ level: 'default' });
     });
 
     it('should move player right', () => {
@@ -126,7 +126,7 @@ describe('VIM for Kids Game Integration', () => {
 
   describe('Key Collection', () => {
     beforeEach(() => {
-      game = new VimForKidsGame();
+      game = new VimForKidsGame({ level: 'default' });
     });
 
     it('should collect key when player moves to key position', () => {
@@ -239,7 +239,7 @@ describe('VIM for Kids Game Integration', () => {
 
   describe('Labyrinth Navigation', () => {
     beforeEach(() => {
-      game = new VimForKidsGame();
+      game = new VimForKidsGame({ level: 'default' });
     });
 
     it('should block movement into stone walls', () => {
@@ -304,7 +304,7 @@ describe('VIM for Kids Game Integration', () => {
 
   describe('Game Rendering', () => {
     beforeEach(() => {
-      game = new VimForKidsGame();
+      game = new VimForKidsGame({ level: 'default' });
     });
 
     it('should update rendering after movement', () => {
@@ -345,7 +345,7 @@ describe('VIM for Kids Game Integration', () => {
 
   describe('Error Handling', () => {
     beforeEach(() => {
-      game = new VimForKidsGame();
+      game = new VimForKidsGame({ level: 'default' });
     });
 
     it('should handle invalid movement direction gracefully', () => {
@@ -364,7 +364,7 @@ describe('VIM for Kids Game Integration', () => {
       document.getElementById('gameBoard').remove();
 
       expect(() => {
-        new VimForKidsGame();
+        new VimForKidsGame({ level: 'default' });
       }).toThrow();
     });
   });
