@@ -22,8 +22,12 @@ export class DOMGameRenderer extends GameRenderer {
       this.gameBoard.className = 'game-board';
     }
 
-    for (let y = 0; y < gameState.map.size; y++) {
-      for (let x = 0; x < gameState.map.size; x++) {
+    // Handle both square and rectangular grids
+    const mapWidth = gameState.map.width || gameState.map.size;
+    const mapHeight = gameState.map.height || gameState.map.size;
+
+    for (let y = 0; y < mapHeight; y++) {
+      for (let x = 0; x < mapWidth; x++) {
         const position = new Position(x, y);
         const tile = document.createElement('div');
         tile.className = 'tile';

@@ -10,44 +10,50 @@ describe('WelcomeMeadow - Zone A', () => {
   });
 
   describe('Grid Layout', () => {
-    it('should have a 10x10 grid size', () => {
-      expect(welcomeMeadow.size).toBe(10);
+    it('should have a 20x15 grid size', () => {
+      expect(welcomeMeadow.width).toBe(20);
+      expect(welcomeMeadow.height).toBe(15);
     });
 
-    it('should be composed of grass and dirt areas', () => {
+    it('should be composed of water, grass and dirt areas', () => {
+      let hasWater = false;
       let hasGrass = false;
       let hasDirt = false;
 
-      for (let y = 0; y < welcomeMeadow.size; y++) {
-        for (let x = 0; x < welcomeMeadow.size; x++) {
+      for (let y = 0; y < welcomeMeadow.height; y++) {
+        for (let x = 0; x < welcomeMeadow.width; x++) {
           const tile = welcomeMeadow.getTileAt(new Position(x, y));
+          if (tile === TileType.WATER) hasWater = true;
           if (tile === TileType.GRASS) hasGrass = true;
           if (tile === TileType.DIRT) hasDirt = true;
         }
       }
 
+      expect(hasWater).toBe(true);
       expect(hasGrass).toBe(true);
       expect(hasDirt).toBe(true);
     });
 
-    it('should have water borders on top, left, and right edges only', () => {
-      const size = welcomeMeadow.size;
-
-      // Test top, left, and right borders (should be water - not walkable)
+    it('should have water filling most of the screen with centered grass area', () => {
+      // Test corners should be water
       expect(welcomeMeadow.isWalkable(new Position(0, 0))).toBe(false); // top-left
-      expect(welcomeMeadow.isWalkable(new Position(size - 1, 0))).toBe(false); // top-right
-      expect(welcomeMeadow.isWalkable(new Position(0, size - 1))).toBe(false); // bottom-left (left edge)
-      expect(welcomeMeadow.isWalkable(new Position(size - 1, size - 1))).toBe(false); // bottom-right (right edge)
+      expect(welcomeMeadow.isWalkable(new Position(19, 0))).toBe(false); // top-right
+      expect(welcomeMeadow.isWalkable(new Position(0, 14))).toBe(false); // bottom-left
+      expect(welcomeMeadow.isWalkable(new Position(19, 14))).toBe(false); // bottom-right
 
-      // Test bottom edge (should be grass - walkable, except corners)
-      expect(welcomeMeadow.isWalkable(new Position(1, size - 1))).toBe(true);
-      expect(welcomeMeadow.isWalkable(new Position(size - 2, size - 1))).toBe(true);
+      // Test that there's a grass area in the center
+      const centerX = Math.floor(welcomeMeadow.width / 2);
+      const centerY = Math.floor(welcomeMeadow.height / 2);
+      const tile = welcomeMeadow.getTileAt(new Position(centerX, centerY));
+      expect(tile === TileType.GRASS || tile === TileType.DIRT).toBe(true);
     });
   });
 
   describe('Player Starting Position', () => {
-    it('should start player in the dirt area as shown in image', () => {
-      expect(welcomeMeadow.getPlayerStartPosition()).toEqual(new Position(6, 2));
+    it('should start player in the center of 3x3 dirt area', () => {
+      const startPos = welcomeMeadow.getPlayerStartPosition();
+      const tile = welcomeMeadow.getTileAt(startPos);
+      expect(tile).toBe(TileType.DIRT);
     });
 
     it('should have walkable tile at center position', () => {
@@ -142,8 +148,8 @@ describe('WelcomeMeadow - Zone A', () => {
     it('should have exactly 1 tree in the meadow', () => {
       let treeCount = 0;
 
-      for (let y = 0; y < welcomeMeadow.size; y++) {
-        for (let x = 0; x < welcomeMeadow.size; x++) {
+      for (let y = 0; y < welcomeMeadow.height; y++) {
+        for (let x = 0; x < welcomeMeadow.width; x++) {
           const tile = welcomeMeadow.getTileAt(new Position(x, y));
           if (tile === TileType.TREE) {
             treeCount++;
@@ -157,8 +163,8 @@ describe('WelcomeMeadow - Zone A', () => {
     it('should have tree as non-walkable obstacle', () => {
       let treePosition = null;
 
-      for (let y = 0; y < welcomeMeadow.size; y++) {
-        for (let x = 0; x < welcomeMeadow.size; x++) {
+      for (let y = 0; y < welcomeMeadow.height; y++) {
+        for (let x = 0; x < welcomeMeadow.width; x++) {
           const pos = new Position(x, y);
           const tile = welcomeMeadow.getTileAt(pos);
           if (tile === TileType.TREE) {

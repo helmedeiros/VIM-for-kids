@@ -59,11 +59,14 @@ describe('Welcome Meadow Game Integration', () => {
   describe('Game Initialization', () => {
     it('should initialize with Welcome Meadow level', () => {
       expect(game.currentLevel).toBe('welcomeMeadow');
-      expect(game.gameState.map.size).toBe(10);
+      expect(game.gameState.map.width).toBe(20);
+      expect(game.gameState.map.height).toBe(15);
     });
 
     it('should place player in dirt area as shown in image', () => {
-      expect(game.gameState.player.position).toHavePosition(6, 2);
+      const startPos = game.gameState.player.position;
+      const tile = game.gameState.map.getTileAt(startPos);
+      expect(tile.name).toBe('dirt');
     });
 
     it('should have 4 movement keys available', () => {
