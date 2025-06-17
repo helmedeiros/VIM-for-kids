@@ -39,5 +39,10 @@ export class VimForKidsGame {
 
   cleanup() {
     this.inputHandler.cleanup();
+
+    // Clean up map-specific resources
+    if (this.gameState.map && typeof this.gameState.map.cleanup === 'function') {
+      this.gameState.map.cleanup();
+    }
   }
 }
