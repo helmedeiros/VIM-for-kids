@@ -103,8 +103,8 @@ h1 {
 
 /* Welcome Meadow specific grid */
 .game-board.welcome-meadow {
-  --grid-cols: 10;
-  --grid-rows: 10;
+  --grid-cols: 20;
+  --grid-rows: 15;
 }
 
 .game-board:focus {

@@ -6,68 +6,122 @@ import { TextLabel } from './TextLabel.js';
 
 export class WelcomeMeadow {
   constructor() {
-    this._size = 10;
+    this._width = 20; // Wider to accommodate full-screen water
+    this._height = 15; // Taller to accommodate full-screen water
     this._collectedKeys = new Set();
     this._initializeMap();
     this._initializeElements();
   }
 
   get size() {
-    return this._size;
+    return this._width; // For backwards compatibility, return width
+  }
+
+  get width() {
+    return this._width;
+  }
+
+  get height() {
+    return this._height;
   }
 
   _initializeMap() {
-    // Create 10x10 grid with water only on top, left, and right edges
+    // Create large grid with water filling entire screen
     this._tiles = [];
-    for (let y = 0; y < this._size; y++) {
+
+    // Initialize entire grid with water
+    for (let y = 0; y < this._height; y++) {
       this._tiles[y] = [];
-      for (let x = 0; x < this._size; x++) {
-        if (x === 0 || y === 0 || x === this._size - 1) {
-          // Water borders only on top, left, and right edges
-          this._tiles[y][x] = TileType.WATER;
-        } else if (y >= 1 && y <= 3 && x >= 1 && x <= 8) {
-          // Upper dirt area where keys and player are located
-          this._tiles[y][x] = TileType.DIRT;
-        } else {
-          // Lower area is grass where "Hello world!" text is displayed
-          this._tiles[y][x] = TileType.GRASS;
+      for (let x = 0; x < this._width; x++) {
+        this._tiles[y][x] = TileType.WATER;
+      }
+    }
+
+    // Calculate center position for 12x8 grass area
+    const grassWidth = 12;
+    const grassHeight = 8;
+    const grassStartX = Math.floor((this._width - grassWidth) / 2);
+    const grassStartY = Math.floor((this._height - grassHeight) / 2);
+
+    // Create centered 12x8 grass area
+    for (let y = grassStartY; y < grassStartY + grassHeight; y++) {
+      for (let x = grassStartX; x < grassStartX + grassWidth; x++) {
+        this._tiles[y][x] = TileType.GRASS;
+      }
+    }
+
+    // Create 3x3 dirt starting area at the left side of grass area
+    const dirtStartX = grassStartX;
+    const dirtStartY = grassStartY + 1; // Offset from top of grass area
+
+    for (let y = dirtStartY; y < dirtStartY + 3; y++) {
+      for (let x = dirtStartX; x < dirtStartX + 3; x++) {
+        this._tiles[y][x] = TileType.DIRT;
+      }
+    }
+
+    // Create dirt path from starting area to stone area
+    // Horizontal path across the grass area
+    const pathY = dirtStartY + 1; // Middle of the 3x3 dirt area
+    for (let x = dirtStartX + 3; x < grassStartX + grassWidth - 2; x++) {
+      this._tiles[pathY][x] = TileType.DIRT;
+    }
+
+    // Stone area on the right side
+    const stoneStartX = grassStartX + grassWidth;
+    const stoneStartY = grassStartY + 2;
+
+    for (let y = stoneStartY; y < stoneStartY + 4; y++) {
+      for (let x = stoneStartX; x < stoneStartX + 2; x++) {
+        if (x < this._width && y < this._height) {
+          this._tiles[y][x] = TileType.STONE;
         }
       }
     }
 
-    // Place tree in grass area on the left side (matching image)
-    this._tiles[4][1] = TileType.TREE;
+    // Place tree in grass area on the left side
+    this._tiles[grassStartY + 5][grassStartX + 1] = TileType.TREE;
   }
 
   _initializeElements() {
-    // Initialize movement keys in dirt area (upper portion) matching image positions
+    // Calculate positions based on the centered layout
+    const grassWidth = 12;
+    const grassHeight = 8;
+    const grassStartX = Math.floor((this._width - grassWidth) / 2);
+    const grassStartY = Math.floor((this._height - grassHeight) / 2);
+    const dirtStartX = grassStartX;
+    const dirtStartY = grassStartY + 1;
+
+    // Initialize movement keys in dirt area
     this._movementKeys = [
-      new VimKey(new Position(1, 2), 'h', 'Move left'),
-      new VimKey(new Position(2, 3), 'j', 'Move down'),
-      new VimKey(new Position(3, 1), 'k', 'Move up'),
-      new VimKey(new Position(8, 2), 'l', 'Move right'),
+      new VimKey(new Position(dirtStartX, dirtStartY + 1), 'h', 'Move left'),
+      new VimKey(new Position(dirtStartX + 1, dirtStartY + 2), 'j', 'Move down'),
+      new VimKey(new Position(dirtStartX + 1, dirtStartY), 'k', 'Move up'),
+      new VimKey(new Position(grassStartX + grassWidth - 3, dirtStartY + 1), 'l', 'Move right'),
     ];
 
-    // Initialize "Hello world!" text labels in grass area (lower portion) as shown in image
+    // Initialize "Hello world!" text labels in grass area
     const message = 'Hello world!';
     this._textLabels = [];
 
-    // Position text in two rows in grass area as shown in image
+    // Position text in two rows in grass area (ensuring they're not on tree position)
+    const textStartX = grassStartX + 3; // Move away from tree position
+    const textStartY = grassStartY + 4; // Position in middle of grass area
     const textPositions = [
       // First row: "Hello "
-      [2, 4],
-      [3, 4],
-      [4, 4],
-      [5, 4],
-      [6, 4],
-      [7, 4],
+      [textStartX, textStartY],
+      [textStartX + 1, textStartY],
+      [textStartX + 2, textStartY],
+      [textStartX + 3, textStartY],
+      [textStartX + 4, textStartY],
+      [textStartX + 5, textStartY],
       // Second row: "world!"
-      [2, 5],
-      [3, 5],
-      [4, 5],
-      [5, 5],
-      [6, 5],
-      [7, 5],
+      [textStartX, textStartY + 1],
+      [textStartX + 1, textStartY + 1],
+      [textStartX + 2, textStartY + 1],
+      [textStartX + 3, textStartY + 1],
+      [textStartX + 4, textStartY + 1],
+      [textStartX + 5, textStartY + 1],
     ];
 
     for (let i = 0; i < message.length && i < textPositions.length; i++) {
@@ -75,8 +129,10 @@ export class WelcomeMeadow {
       this._textLabels.push(new TextLabel(new Position(x, y), message[i]));
     }
 
-    // Initialize gate on the right side as shown in image (inside playable area)
-    this._gate = new Gate(new Position(8, 4));
+    // Initialize gate in the stone area
+    const stoneStartX = grassStartX + grassWidth;
+    const stoneStartY = grassStartY + 2;
+    this._gate = new Gate(new Position(stoneStartX, stoneStartY + 1));
   }
 
   getTileAt(position) {
@@ -87,7 +143,9 @@ export class WelcomeMeadow {
   }
 
   isValidPosition(position) {
-    return position.x >= 0 && position.x < this._size && position.y >= 0 && position.y < this._size;
+    return (
+      position.x >= 0 && position.x < this._width && position.y >= 0 && position.y < this._height
+    );
   }
 
   isWalkable(position) {
@@ -105,8 +163,15 @@ export class WelcomeMeadow {
   }
 
   getPlayerStartPosition() {
-    // Player starts in the dirt area as shown in image (center-right of dirt area)
-    return new Position(6, 2);
+    // Player starts in the center of the 3x3 dirt area
+    const grassWidth = 12;
+    const grassHeight = 8;
+    const grassStartX = Math.floor((this._width - grassWidth) / 2);
+    const grassStartY = Math.floor((this._height - grassHeight) / 2);
+    const dirtStartX = grassStartX;
+    const dirtStartY = grassStartY + 1;
+
+    return new Position(dirtStartX + 1, dirtStartY + 1);
   }
 
   getMovementKeys() {
