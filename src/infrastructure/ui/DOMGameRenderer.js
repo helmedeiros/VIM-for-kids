@@ -18,8 +18,17 @@ export class DOMGameRenderer extends GameRenderer {
     // Set appropriate CSS class for different levels
     if (gameState.textLabels || gameState.gate) {
       this.gameBoard.className = 'game-board welcome-meadow';
+
+      // Dynamically set grid dimensions for Welcome Meadow
+      const mapWidth = gameState.map.width || gameState.map.size;
+      const mapHeight = gameState.map.height || gameState.map.size;
+      this.gameBoard.style.setProperty('--grid-cols', mapWidth);
+      this.gameBoard.style.setProperty('--grid-rows', mapHeight);
     } else {
       this.gameBoard.className = 'game-board';
+      // Reset to default for regular levels
+      this.gameBoard.style.removeProperty('--grid-cols');
+      this.gameBoard.style.removeProperty('--grid-rows');
     }
 
     // Handle both square and rectangular grids

@@ -6,11 +6,81 @@ import { TextLabel } from './TextLabel.js';
 
 export class WelcomeMeadow {
   constructor() {
-    this._width = 20; // Wider to accommodate full-screen water
-    this._height = 15; // Taller to accommodate full-screen water
+    // Calculate grid dimensions dynamically based on screen size
+    this._calculateDynamicGridSize();
     this._collectedKeys = new Set();
     this._initializeMap();
     this._initializeElements();
+
+    // Listen for window resize to recalculate grid if needed
+    if (typeof window !== 'undefined') {
+      this._resizeHandler = () => this._handleResize();
+      window.addEventListener('resize', this._resizeHandler);
+    }
+  }
+
+  _calculateDynamicGridSize(testDimensions = null) {
+    // Get actual screen dimensions (or use test dimensions)
+    let screenWidth, screenHeight;
+
+    if (testDimensions) {
+      screenWidth = testDimensions.width;
+      screenHeight = testDimensions.height;
+    } else if (typeof window !== 'undefined') {
+      screenWidth = window.innerWidth;
+      screenHeight = window.innerHeight;
+    } else {
+      // Default dimensions for server-side rendering or testing
+      screenWidth = 1920;
+      screenHeight = 1080;
+    }
+
+    // Calculate how many 32px tiles fit on screen
+    const tileSize = 32;
+    const minCols = Math.ceil(screenWidth / tileSize);
+    const minRows = Math.ceil(screenHeight / tileSize);
+
+    // Add padding tiles to ensure full coverage and smooth scrolling
+    const paddingTiles = 2;
+    this._width = minCols + paddingTiles;
+    this._height = minRows + paddingTiles;
+
+    // Ensure minimum size for gameplay (grass area needs space)
+    this._width = Math.max(this._width, 24); // Minimum for 12-wide grass + padding
+    this._height = Math.max(this._height, 16); // Minimum for 8-tall grass + padding
+  }
+
+  // Method for testing - allows setting specific screen dimensions
+  _setTestDimensions(width, height) {
+    this._calculateDynamicGridSize({ width, height });
+    this._initializeMap();
+    this._initializeElements();
+  }
+
+  _handleResize() {
+    // Recalculate grid size on window resize
+    const oldWidth = this._width;
+    const oldHeight = this._height;
+
+    this._calculateDynamicGridSize();
+
+    // Only reinitialize if dimensions actually changed
+    if (oldWidth !== this._width || oldHeight !== this._height) {
+      this._initializeMap();
+      this._initializeElements();
+
+      // Trigger re-render if there's a game instance
+      if (typeof window !== 'undefined' && window.game && window.game.gameRenderer) {
+        window.game.gameRenderer.render(window.game.gameState.getCurrentState());
+      }
+    }
+  }
+
+  cleanup() {
+    // Remove resize listener to prevent memory leaks
+    if (typeof window !== 'undefined' && this._resizeHandler) {
+      window.removeEventListener('resize', this._resizeHandler);
+    }
   }
 
   get size() {
