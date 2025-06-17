@@ -103,8 +103,9 @@ h1 {
 
 /* Welcome Meadow specific grid */
 .game-board.welcome-meadow {
-  --grid-cols: 20;
-  --grid-rows: 15;
+  justify-content: start;
+  align-content: start;
+  /* Grid dimensions are set dynamically by DOMGameRenderer */
 }
 
 .game-board:focus {
