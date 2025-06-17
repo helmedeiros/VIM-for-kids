@@ -6,7 +6,7 @@ import { KeyboardInputHandler } from './infrastructure/input/KeyboardInputHandle
 
 export class VimForKidsGame {
   constructor(options = {}) {
-    this.currentLevel = options.level || 'default';
+    this.currentLevel = options.level || 'level1';
     this.gameState = this._createGameState();
     this.gameRenderer = new DOMGameRenderer();
     this.inputHandler = new KeyboardInputHandler(this.gameRenderer.gameBoard);
@@ -17,10 +17,13 @@ export class VimForKidsGame {
 
   _createGameState() {
     switch (this.currentLevel) {
-      case 'welcomeMeadow':
+      case 'level1':
+      case 'welcomeMeadow': // Keep backwards compatibility
         return new WelcomeMeadowGameState();
-      default:
+      case 'default':
         return new GameState();
+      default:
+        return new WelcomeMeadowGameState(); // Default to Level 1 (Welcome Meadow)
     }
   }
 

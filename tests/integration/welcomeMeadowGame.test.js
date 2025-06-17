@@ -52,13 +52,13 @@ describe('Welcome Meadow Game Integration', () => {
     // eslint-disable-next-line no-undef
     global.alert = jest.fn();
 
-    // Create game with Welcome Meadow
-    game = new VimForKidsGame({ level: 'welcomeMeadow' });
+    // Create game with Level 1 (Welcome Meadow)
+    game = new VimForKidsGame({ level: 'level1' });
   });
 
   describe('Game Initialization', () => {
-    it('should initialize with Welcome Meadow level', () => {
-      expect(game.currentLevel).toBe('welcomeMeadow');
+    it('should initialize with Level 1', () => {
+      expect(game.currentLevel).toBe('level1');
       // Grid should be dynamic based on screen size (defaults to 1024x768 in test environment)
       expect(game.gameState.map.width).toBe(34); // ceil(1024/32) + 2 = 34
       expect(game.gameState.map.height).toBe(26); // ceil(768/32) + 2 = 26
