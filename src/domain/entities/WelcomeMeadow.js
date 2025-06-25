@@ -232,8 +232,8 @@ export class WelcomeMeadow {
     return tile.walkable;
   }
 
-  getPlayerStartPosition() {
-    // Player starts in the center of the 3x3 dirt area
+  getCursorStartPosition() {
+    // Cursor starts in the center of the 3x3 dirt area
     const grassWidth = 12;
     const grassHeight = 8;
     const grassStartX = Math.floor((this._width - grassWidth) / 2);

@@ -45,9 +45,9 @@ export class DOMGameRenderer extends GameRenderer {
         const tileType = gameState.map.getTileAt(position);
         tile.classList.add(tileType.name);
 
-        // Add player
-        if (gameState.player.position.equals(position)) {
-          tile.classList.add('player');
+        // Add cursor
+        if (gameState.cursor.position.equals(position)) {
+          tile.classList.add('cursor');
           tile.textContent = '●';
         }
 

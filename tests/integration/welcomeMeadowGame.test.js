@@ -64,8 +64,8 @@ describe('Welcome Meadow Game Integration', () => {
       expect(game.gameState.map.height).toBe(26); // ceil(768/32) + 2 = 26
     });
 
-    it('should place player in dirt area as shown in image', () => {
-      const startPos = game.gameState.player.position;
+    it('should place cursor in dirt area as shown in image', () => {
+      const startPos = game.gameState.cursor.position;
       const tile = game.gameState.map.getTileAt(startPos);
       expect(tile.name).toBe('dirt');
     });
@@ -100,27 +100,27 @@ describe('Welcome Meadow Game Integration', () => {
 
   describe('Movement Mechanics', () => {
     it('should allow movement with h,j,k,l keys', () => {
-      const startPosition = game.gameState.player.position;
+      const startPosition = game.gameState.cursor.position;
 
       // Test h (left)
       game.movePlayerUseCase.execute('left');
-      expect(game.gameState.player.position).toHavePosition(startPosition.x - 1, startPosition.y);
+      expect(game.gameState.cursor.position).toHavePosition(startPosition.x - 1, startPosition.y);
 
       // Test l (right) - move back and then right
       game.movePlayerUseCase.execute('right');
       game.movePlayerUseCase.execute('right');
-      expect(game.gameState.player.position).toHavePosition(startPosition.x + 1, startPosition.y);
+      expect(game.gameState.cursor.position).toHavePosition(startPosition.x + 1, startPosition.y);
 
       // Test j (down)
       game.movePlayerUseCase.execute('down');
-      expect(game.gameState.player.position).toHavePosition(
+      expect(game.gameState.cursor.position).toHavePosition(
         startPosition.x + 1,
         startPosition.y + 1
       );
 
       // Test k (up)
       game.movePlayerUseCase.execute('up');
-      expect(game.gameState.player.position).toHavePosition(startPosition.x + 1, startPosition.y);
+      expect(game.gameState.cursor.position).toHavePosition(startPosition.x + 1, startPosition.y);
     });
 
     it('should prevent movement into tree obstacle', () => {
@@ -146,19 +146,19 @@ describe('Welcome Meadow Game Integration', () => {
 
     it('should prevent movement outside grid boundaries', () => {
       // Move to top-left corner area and try to go out of bounds
-      const player = game.gameState.player;
+      const cursor = game.gameState.cursor;
 
       // Try to move beyond left border
       for (let i = 0; i < 10; i++) {
         game.movePlayerUseCase.execute('left');
       }
-      expect(player.position.x).toBeGreaterThanOrEqual(0);
+      expect(cursor.position.x).toBeGreaterThanOrEqual(0);
 
       // Try to move beyond top border
       for (let i = 0; i < 10; i++) {
         game.movePlayerUseCase.execute('up');
       }
-      expect(player.position.y).toBeGreaterThanOrEqual(0);
+      expect(cursor.position.y).toBeGreaterThanOrEqual(0);
     });
   });
 
@@ -169,11 +169,11 @@ describe('Welcome Meadow Game Integration', () => {
 
       // Navigate to h key
       const targetPos = hKey.position;
-      const playerPos = game.gameState.player.position;
+      const cursorPos = game.gameState.cursor.position;
 
       // Move to key position (simplified navigation)
-      const deltaX = targetPos.x - playerPos.x;
-      const deltaY = targetPos.y - playerPos.y;
+      const deltaX = targetPos.x - cursorPos.x;
+      const deltaY = targetPos.y - cursorPos.y;
 
       // Move horizontally first
       for (let i = 0; i < Math.abs(deltaX); i++) {
@@ -229,7 +229,7 @@ describe('Welcome Meadow Game Integration', () => {
       expect(game.gameState.map.isWalkable(gate.position)).toBe(true);
     });
 
-    it('should allow player to pass through open gate', () => {
+    it('should allow cursor to pass through open gate', () => {
       const gate = game.gameState.getGate();
       const keys = game.gameState.availableKeys;
 
@@ -242,9 +242,9 @@ describe('Welcome Meadow Game Integration', () => {
       const gatePos = gate.position;
 
       // Move player to gate (simplified)
-      game.gameState.player = game.gameState.player.moveTo(gatePos);
+      game.gameState.cursor = game.gameState.cursor.moveTo(gatePos);
 
-      expect(game.gameState.player.position).toEqual(gatePos);
+      expect(game.gameState.cursor.position).toEqual(gatePos);
       expect(game.gameState.map.isWalkable(gatePos)).toBe(true);
     });
   });

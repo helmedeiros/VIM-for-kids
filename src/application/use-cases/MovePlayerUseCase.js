@@ -1,55 +1,55 @@
-import { Position } from '../../domain/value-objects/Position.js';
+import { Position } from '../../domain/value-objects/Position.js'; // eslint-disable-line no-unused-vars
 
 export class MovePlayerUseCase {
-    constructor(gameState, gameRenderer) {
-        this._gameState = gameState;
-        this._gameRenderer = gameRenderer;
+  constructor(gameState, gameRenderer) {
+    this._gameState = gameState;
+    this._gameRenderer = gameRenderer;
+  }
+
+  execute(direction) {
+    const currentPosition = this._gameState.cursor.position;
+    const newPosition = this._calculateNewPosition(currentPosition, direction);
+
+    // Check if move is valid
+    if (!this._gameState.map.isWalkable(newPosition)) {
+      return; // Invalid move, do nothing
     }
 
-    execute(direction) {
-        const currentPosition = this._gameState.player.position;
-        const newPosition = this._calculateNewPosition(currentPosition, direction);
+    // Update cursor position
+    this._gameState.cursor = this._gameState.cursor.moveTo(newPosition);
 
-        // Check if move is valid
-        if (!this._gameState.map.isWalkable(newPosition)) {
-            return; // Invalid move, do nothing
-        }
+    // Check for key collection
+    this._checkKeyCollection();
 
-        // Update player position
-        this._gameState.player = this._gameState.player.moveTo(newPosition);
+    // Re-render the game
+    this._gameRenderer.render(this._gameState.getCurrentState());
+  }
 
-        // Check for key collection
-        this._checkKeyCollection();
+  _calculateNewPosition(currentPosition, direction) {
+    const movements = {
+      up: { x: 0, y: -1 },
+      down: { x: 0, y: 1 },
+      left: { x: -1, y: 0 },
+      right: { x: 1, y: 0 },
+    };
 
-        // Re-render the game
-        this._gameRenderer.render(this._gameState.getCurrentState());
+    const movement = movements[direction];
+    if (!movement) {
+      throw new Error(`Invalid direction: ${direction}`);
     }
 
-    _calculateNewPosition(currentPosition, direction) {
-        const movements = {
-            'up': { x: 0, y: -1 },
-            'down': { x: 0, y: 1 },
-            'left': { x: -1, y: 0 },
-            'right': { x: 1, y: 0 }
-        };
+    return currentPosition.move(movement.x, movement.y);
+  }
 
-        const movement = movements[direction];
-        if (!movement) {
-            throw new Error(`Invalid direction: ${direction}`);
-        }
+  _checkKeyCollection() {
+    const cursorPosition = this._gameState.cursor.position;
+    const keyAtPosition = this._gameState.availableKeys.find((key) =>
+      key.position.equals(cursorPosition)
+    );
 
-        return currentPosition.move(movement.x, movement.y);
+    if (keyAtPosition) {
+      this._gameState.collectKey(keyAtPosition);
+      this._gameRenderer.showKeyInfo(keyAtPosition);
     }
-
-    _checkKeyCollection() {
-        const playerPosition = this._gameState.player.position;
-        const keyAtPosition = this._gameState.availableKeys.find(key =>
-            key.position.equals(playerPosition)
-        );
-
-        if (keyAtPosition) {
-            this._gameState.collectKey(keyAtPosition);
-            this._gameRenderer.showKeyInfo(keyAtPosition);
-        }
-    }
+  }
 }

@@ -148,15 +148,15 @@ describe('WelcomeMeadow - Zone A', () => {
     });
   });
 
-  describe('Player Starting Position', () => {
-    it('should start player in the center of 3x3 dirt area', () => {
-      const startPos = welcomeMeadow.getPlayerStartPosition();
+  describe('Cursor Starting Position', () => {
+    it('should start cursor in the center of 3x3 dirt area', () => {
+      const startPos = welcomeMeadow.getCursorStartPosition();
       const tile = welcomeMeadow.getTileAt(startPos);
       expect(tile).toBe(TileType.DIRT);
     });
 
     it('should have walkable tile at center position', () => {
-      const startPos = welcomeMeadow.getPlayerStartPosition();
+      const startPos = welcomeMeadow.getCursorStartPosition();
       expect(welcomeMeadow.isWalkable(startPos)).toBe(true);
     });
   });
@@ -402,7 +402,7 @@ describe('WelcomeMeadow - Zone A', () => {
       const keys = welcomeMeadow.getMovementKeys();
       const textLabels = welcomeMeadow.getTextLabels();
       const gate = welcomeMeadow.getGate();
-      const playerStart = welcomeMeadow.getPlayerStartPosition();
+      const cursorStart = welcomeMeadow.getCursorStartPosition();
 
       const positions = [];
 
@@ -410,7 +410,7 @@ describe('WelcomeMeadow - Zone A', () => {
       keys.forEach((key) => positions.push(`${key.position.x},${key.position.y}`));
       textLabels.forEach((label) => positions.push(`${label.position.x},${label.position.y}`));
       positions.push(`${gate.position.x},${gate.position.y}`);
-      positions.push(`${playerStart.x},${playerStart.y}`);
+      positions.push(`${cursorStart.x},${cursorStart.y}`);
 
       // Check for duplicates
       const uniquePositions = new Set(positions);

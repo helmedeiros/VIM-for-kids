@@ -1,4 +1,4 @@
-import { Player } from '../domain/entities/Player.js';
+import { Cursor } from '../domain/entities/Cursor.js';
 import { VimKey } from '../domain/entities/VimKey.js';
 import { GameMap } from '../domain/entities/GameMap.js';
 import { Position } from '../domain/value-objects/Position.js';
@@ -6,7 +6,7 @@ import { Position } from '../domain/value-objects/Position.js';
 export class GameState {
   constructor() {
     this.map = new GameMap();
-    this.player = new Player();
+    this.cursor = new Cursor();
     this.availableKeys = this._createInitialKeys();
     this.collectedKeys = new Set();
   }
@@ -21,7 +21,7 @@ export class GameState {
   getCurrentState() {
     return {
       map: this.map,
-      player: this.player,
+      cursor: this.cursor,
       availableKeys: this.availableKeys,
       collectedKeys: this.collectedKeys,
     };

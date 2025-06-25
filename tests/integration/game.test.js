@@ -68,19 +68,19 @@ describe('VIM for Kids Game Integration', () => {
 
       expect(tiles.length).toBe(144); // 12x12 grid
 
-      // Should have player tile
-      const playerTiles = gameBoard.querySelectorAll('.tile.player');
-      expect(playerTiles.length).toBe(1);
+      // Should have cursor tile
+      const cursorTiles = gameBoard.querySelectorAll('.tile.cursor');
+      expect(cursorTiles.length).toBe(1);
 
       // Should have VIM key tiles
       const keyTiles = gameBoard.querySelectorAll('.tile.key');
       expect(keyTiles.length).toBe(4); // h, j, k, l keys
     });
 
-    it('should have player at correct starting position', () => {
+    it('should have cursor at correct starting position', () => {
       game = new VimForKidsGame({ level: 'default' });
 
-      expect(game.gameState.player.position).toHavePosition(5, 2);
+      expect(game.gameState.cursor.position).toHavePosition(5, 2);
     });
 
     it('should have all VIM keys available initially', () => {
@@ -131,49 +131,49 @@ describe('VIM for Kids Game Integration', () => {
     });
   });
 
-  describe('Player Movement', () => {
+  describe('Cursor Movement', () => {
     beforeEach(() => {
       game = new VimForKidsGame({ level: 'default' });
     });
 
-    it('should move player right', () => {
-      const originalPosition = game.gameState.player.position;
+    it('should move cursor right', () => {
+      const originalPosition = game.gameState.cursor.position;
       game.movePlayerUseCase.execute('right');
 
-      expect(game.gameState.player.position).toHavePosition(
+      expect(game.gameState.cursor.position).toHavePosition(
         originalPosition.x + 1,
         originalPosition.y
       );
     });
 
-    it('should move player left', () => {
+    it('should move cursor left', () => {
       // First move right to ensure we can move left
       game.movePlayerUseCase.execute('right');
-      const position = game.gameState.player.position;
+      const position = game.gameState.cursor.position;
 
       game.movePlayerUseCase.execute('left');
 
-      expect(game.gameState.player.position).toHavePosition(position.x - 1, position.y);
+      expect(game.gameState.cursor.position).toHavePosition(position.x - 1, position.y);
     });
 
-    it('should move player down', () => {
-      const originalPosition = game.gameState.player.position;
+    it('should move cursor down', () => {
+      const originalPosition = game.gameState.cursor.position;
       game.movePlayerUseCase.execute('down');
 
-      expect(game.gameState.player.position).toHavePosition(
+      expect(game.gameState.cursor.position).toHavePosition(
         originalPosition.x,
         originalPosition.y + 1
       );
     });
 
-    it('should move player up', () => {
+    it('should move cursor up', () => {
       // First move down to ensure we can move up
       game.movePlayerUseCase.execute('down');
-      const position = game.gameState.player.position;
+      const position = game.gameState.cursor.position;
 
       game.movePlayerUseCase.execute('up');
 
-      expect(game.gameState.player.position).toHavePosition(position.x, position.y - 1);
+      expect(game.gameState.cursor.position).toHavePosition(position.x, position.y - 1);
     });
 
     it('should not move into water tiles', () => {
@@ -182,7 +182,7 @@ describe('VIM for Kids Game Integration', () => {
       game.movePlayerUseCase.execute('up');
 
       // Should not be at (5, 0) which is water
-      expect(game.gameState.player.position.y).toBeGreaterThan(0);
+      expect(game.gameState.cursor.position.y).toBeGreaterThan(0);
     });
   });
 
@@ -191,7 +191,7 @@ describe('VIM for Kids Game Integration', () => {
       game = new VimForKidsGame({ level: 'default' });
     });
 
-    it('should collect key when player moves to key position', () => {
+    it('should collect key when cursor moves to key position', () => {
       // Move to a key position (2, 3) where 'h' key is located
       const targetKey = game.gameState.availableKeys.find((key) =>
         key.position.equals(new Position(2, 3))
@@ -207,7 +207,7 @@ describe('VIM for Kids Game Integration', () => {
       game.movePlayerUseCase.execute('left');
       game.movePlayerUseCase.execute('down');
 
-      expect(game.gameState.player.position).toHavePosition(2, 3);
+      expect(game.gameState.cursor.position).toHavePosition(2, 3);
       expect(game.gameState.collectedKeys.has('h')).toBe(true);
       expect(game.gameState.availableKeys.length).toBe(3);
     });
@@ -257,7 +257,7 @@ describe('VIM for Kids Game Integration', () => {
       game.movePlayerUseCase.execute('down'); // (9,4)
       game.movePlayerUseCase.execute('down'); // (9,5)
 
-      expect(game.gameState.player.position).toHavePosition(9, 5);
+      expect(game.gameState.cursor.position).toHavePosition(9, 5);
       expect(game.gameState.collectedKeys.has('k')).toBe(true);
       expect(game.gameState.availableKeys.length).toBe(3);
     });
@@ -283,7 +283,7 @@ describe('VIM for Kids Game Integration', () => {
       game.movePlayerUseCase.execute('down'); // (10,6) - This should fail if blocked by stone
 
       // Alternative path if direct route is blocked
-      if (!game.gameState.player.position.equals(new Position(10, 6))) {
+      if (!game.gameState.cursor.position.equals(new Position(10, 6))) {
         // Try alternative route through (9,6) then (10,6)
         game.movePlayerUseCase.execute('left'); // (9,5)
         game.movePlayerUseCase.execute('down'); // (9,6)
@@ -293,7 +293,7 @@ describe('VIM for Kids Game Integration', () => {
       game.movePlayerUseCase.execute('down'); // (10,7)
       game.movePlayerUseCase.execute('down'); // (10,8)
 
-      expect(game.gameState.player.position).toHavePosition(10, 8);
+      expect(game.gameState.cursor.position).toHavePosition(10, 8);
       expect(game.gameState.collectedKeys.has('l')).toBe(true);
       expect(game.gameState.availableKeys.length).toBe(3);
     });
@@ -310,26 +310,26 @@ describe('VIM for Kids Game Integration', () => {
       game.movePlayerUseCase.execute('right'); // (7,2)
 
       // Try to move up into stone wall at (7,1)
-      const positionBeforeMove = game.gameState.player.position;
+      const positionBeforeMove = game.gameState.cursor.position;
       game.movePlayerUseCase.execute('up');
 
       // Player should not have moved
-      expect(game.gameState.player.position).toEqual(positionBeforeMove);
+      expect(game.gameState.cursor.position).toEqual(positionBeforeMove);
     });
 
     it('should allow movement through labyrinth paths', () => {
       // Navigate through the labyrinth entry path
       game.movePlayerUseCase.execute('right'); // (6,2)
-      expect(game.gameState.player.position).toHavePosition(6, 2);
+      expect(game.gameState.cursor.position).toHavePosition(6, 2);
 
       game.movePlayerUseCase.execute('right'); // (7,2)
-      expect(game.gameState.player.position).toHavePosition(7, 2);
+      expect(game.gameState.cursor.position).toHavePosition(7, 2);
 
       game.movePlayerUseCase.execute('right'); // (8,2)
-      expect(game.gameState.player.position).toHavePosition(8, 2);
+      expect(game.gameState.cursor.position).toHavePosition(8, 2);
 
       game.movePlayerUseCase.execute('down'); // (8,3)
-      expect(game.gameState.player.position).toHavePosition(8, 3);
+      expect(game.gameState.cursor.position).toHavePosition(8, 3);
     });
 
     it('should prevent movement into stone walls within labyrinth', () => {
@@ -345,22 +345,22 @@ describe('VIM for Kids Game Integration', () => {
       game.movePlayerUseCase.execute('left'); // (7,2)
 
       // Try to move up into stone wall at (7,1) - should be blocked
-      const positionBeforeMove = game.gameState.player.position;
+      const positionBeforeMove = game.gameState.cursor.position;
       game.movePlayerUseCase.execute('up');
 
       // Player should not have moved
-      expect(game.gameState.player.position).toEqual(positionBeforeMove);
+      expect(game.gameState.cursor.position).toEqual(positionBeforeMove);
     });
 
     it('should connect starting area to labyrinth seamlessly', () => {
       // Test that player can move from starting area into labyrinth
-      expect(game.gameState.player.position).toHavePosition(5, 2); // Starting position
+      expect(game.gameState.cursor.position).toHavePosition(5, 2); // Starting position
 
       game.movePlayerUseCase.execute('right'); // (6,2) - transition point
-      expect(game.gameState.player.position).toHavePosition(6, 2);
+      expect(game.gameState.cursor.position).toHavePosition(6, 2);
 
       game.movePlayerUseCase.execute('right'); // (7,2) - now in labyrinth
-      expect(game.gameState.player.position).toHavePosition(7, 2);
+      expect(game.gameState.cursor.position).toHavePosition(7, 2);
     });
   });
 
@@ -372,16 +372,16 @@ describe('VIM for Kids Game Integration', () => {
     it('should update rendering after movement', () => {
       const gameBoard = document.getElementById('gameBoard');
 
-      // Get initial player tile position
-      let playerTile = gameBoard.querySelector('.tile.player');
-      const initialTileIndex = Array.from(gameBoard.children).indexOf(playerTile);
+      // Get initial cursor tile position
+      let cursorTile = gameBoard.querySelector('.tile.cursor');
+      const initialTileIndex = Array.from(gameBoard.children).indexOf(cursorTile);
 
-      // Move player right
+      // Move cursor right
       game.movePlayerUseCase.execute('right');
 
-      // Check that player tile has moved
-      playerTile = gameBoard.querySelector('.tile.player');
-      const newTileIndex = Array.from(gameBoard.children).indexOf(playerTile);
+      // Check that cursor tile has moved
+      cursorTile = gameBoard.querySelector('.tile.cursor');
+      const newTileIndex = Array.from(gameBoard.children).indexOf(cursorTile);
 
       expect(newTileIndex).toBe(initialTileIndex + 1); // Moved one tile right
     });
@@ -411,14 +411,14 @@ describe('VIM for Kids Game Integration', () => {
     });
 
     it('should handle invalid movement direction gracefully', () => {
-      const originalPosition = game.gameState.player.position;
+      const originalPosition = game.gameState.cursor.position;
 
       expect(() => {
         game.movePlayerUseCase.execute('invalid');
       }).toThrow('Invalid direction: invalid');
 
       // Player position should not change
-      expect(game.gameState.player.position).toEqual(originalPosition);
+      expect(game.gameState.cursor.position).toEqual(originalPosition);
     });
 
     it('should handle missing DOM elements gracefully', () => {
