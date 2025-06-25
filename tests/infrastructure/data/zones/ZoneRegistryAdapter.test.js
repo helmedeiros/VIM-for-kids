@@ -60,7 +60,7 @@ describe('ZoneRegistryAdapter', () => {
       const zoneIds = adapter.getAvailableZoneIds();
 
       expect(zoneIds).toContain('zone_1');
-      expect(zoneIds).toHaveLength(1);
+      expect(zoneIds).toHaveLength(10);
     });
 
     test('should check zone existence through adapter', () => {
@@ -71,13 +71,20 @@ describe('ZoneRegistryAdapter', () => {
     test('should get all zone information through adapter', () => {
       const zoneInfo = adapter.getAllZoneInfo();
 
-      expect(zoneInfo).toHaveLength(1);
+      expect(zoneInfo).toHaveLength(10);
       expect(zoneInfo[0]).toEqual({
         zoneId: 'zone_1',
         name: '1. Blinking Grove',
         biome: 'Forest clearing (bottom left)',
         skillFocus: ['h', 'j', 'k', 'l'],
         puzzleTheme: 'Basic movement, bump-to-talk',
+      });
+      expect(zoneInfo[9]).toEqual({
+        zoneId: 'zone_10',
+        name: '10. The Syntax Temple',
+        biome: 'Coastal ruins, golden gates',
+        skillFocus: ['all_vim_skills'],
+        puzzleTheme: 'Apply all skills to save Textland',
       });
     });
   });

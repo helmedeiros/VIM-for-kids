@@ -1,4 +1,13 @@
 import { BlinkingGroveZone } from './BlinkingGroveZone.js';
+import { MazeOfModesZone } from './MazeOfModesZone.js';
+import { SwampOfWordsZone } from './SwampOfWordsZone.js';
+import { DeleteCanyonZone } from './DeleteCanyonZone.js';
+import { FieldOfInsertionZone } from './FieldOfInsertionZone.js';
+import { CopyCircleZone } from './CopyCircleZone.js';
+import { SearchSpringsZone } from './SearchSpringsZone.js';
+import { CommandCavernZone } from './CommandCavernZone.js';
+import { PlaygroundOfPracticeZone } from './PlaygroundOfPracticeZone.js';
+import { SyntaxTempleZone } from './SyntaxTempleZone.js';
 
 /**
  * Central registry for all zone factories
@@ -8,16 +17,15 @@ export class ZoneRegistry {
   static getZones() {
     return new Map([
       ['zone_1', BlinkingGroveZone],
-      // TODO: Add other zones as they are created
-      // ['zone_2', MazeOfModesZone],
-      // ['zone_3', SwampOfWordsZone],
-      // ['zone_4', DeleteCanyonZone],
-      // ['zone_5', FieldOfInsertionZone],
-      // ['zone_6', CopyCircleZone],
-      // ['zone_7', SearchSpringsZone],
-      // ['zone_8', CommandCavernZone],
-      // ['zone_9', PlaygroundOfPracticeZone],
-      // ['zone_10', SyntaxTempleZone],
+      ['zone_2', MazeOfModesZone],
+      ['zone_3', SwampOfWordsZone],
+      ['zone_4', DeleteCanyonZone],
+      ['zone_5', FieldOfInsertionZone],
+      ['zone_6', CopyCircleZone],
+      ['zone_7', SearchSpringsZone],
+      ['zone_8', CommandCavernZone],
+      ['zone_9', PlaygroundOfPracticeZone],
+      ['zone_10', SyntaxTempleZone],
     ]);
   }
 

@@ -37,7 +37,7 @@ describe('ZoneRegistry', () => {
       const zoneIds = ZoneRegistry.getAvailableZoneIds();
 
       expect(zoneIds).toContain('zone_1');
-      expect(zoneIds).toHaveLength(1); // Only zone_1 for now
+      expect(zoneIds).toHaveLength(10); // All 10 zones implemented
     });
 
     test('should check if zone exists', () => {
@@ -48,13 +48,20 @@ describe('ZoneRegistry', () => {
     test('should get all zone information', () => {
       const zoneInfo = ZoneRegistry.getAllZoneInfo();
 
-      expect(zoneInfo).toHaveLength(1);
+      expect(zoneInfo).toHaveLength(10);
       expect(zoneInfo[0]).toEqual({
         zoneId: 'zone_1',
         name: '1. Blinking Grove',
         biome: 'Forest clearing (bottom left)',
         skillFocus: ['h', 'j', 'k', 'l'],
         puzzleTheme: 'Basic movement, bump-to-talk',
+      });
+      expect(zoneInfo[9]).toEqual({
+        zoneId: 'zone_10',
+        name: '10. The Syntax Temple',
+        biome: 'Coastal ruins, golden gates',
+        skillFocus: ['all_vim_skills'],
+        puzzleTheme: 'Apply all skills to save Textland',
       });
     });
   });
@@ -111,8 +118,9 @@ describe('ZoneRegistry', () => {
       const zones = ZoneRegistry.getZones();
 
       expect(zones).toBeInstanceOf(Map);
-      expect(zones.size).toBe(1);
+      expect(zones.size).toBe(10);
       expect(zones.has('zone_1')).toBe(true);
+      expect(zones.has('zone_10')).toBe(true);
     });
 
     test('should get fresh zone map each time', () => {
