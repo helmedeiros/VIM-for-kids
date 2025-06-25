@@ -2,13 +2,15 @@ import { BlinkingGroveGameState } from '../../src/application/BlinkingGroveGameS
 import { Cursor } from '../../src/domain/entities/Cursor.js';
 import { VimKey } from '../../src/domain/entities/VimKey.js';
 import { Position } from '../../src/domain/value-objects/Position.js';
-import { ZoneRegistry } from '../../src/infrastructure/data/zones/ZoneRegistry.js';
+import { ZoneRegistryAdapter } from '../../src/infrastructure/data/zones/ZoneRegistryAdapter.js';
 
 describe('BlinkingGroveGameState', () => {
   let gameState;
+  let zoneProvider;
 
   beforeEach(() => {
-    gameState = new BlinkingGroveGameState();
+    zoneProvider = new ZoneRegistryAdapter();
+    gameState = new BlinkingGroveGameState(zoneProvider);
   });
 
   afterEach(() => {
@@ -19,6 +21,12 @@ describe('BlinkingGroveGameState', () => {
   });
 
   describe('Constructor', () => {
+    test('should require ZoneProvider dependency', () => {
+      expect(() => {
+        new BlinkingGroveGameState();
+      }).toThrow('BlinkingGroveGameState requires a ZoneProvider');
+    });
+
     test('should initialize with zone, map, cursor, and keys', () => {
       expect(gameState.zone).toBeDefined();
       expect(gameState.map).toBeDefined();
@@ -250,10 +258,8 @@ describe('BlinkingGroveGameState', () => {
   });
 
   describe('ZoneRegistry Integration', () => {
-    test('should use ZoneRegistry to create zone instead of direct factory call', () => {
-      const gameState = new BlinkingGroveGameState();
-
-      // Verify that the zone was created correctly using ZoneRegistry
+    test('should use ZoneProvider to create zone instead of direct factory call', () => {
+      // Verify that the zone was created correctly using ZoneProvider
       expect(gameState.zone.zoneId).toBe('zone_1');
       expect(gameState.zone.name).toBe('1. Blinking Grove');
 
@@ -262,32 +268,28 @@ describe('BlinkingGroveGameState', () => {
       expect(gameState.zone.skillFocus).toEqual(['h', 'j', 'k', 'l']);
     });
 
-    test('should work with ZoneRegistry.createZone method', () => {
-      // This test will verify that we can create the same zone using ZoneRegistry
-      const gameState = new BlinkingGroveGameState();
-
-      // The zone should be equivalent to what ZoneRegistry.createZone('zone_1') would create
+    test('should work with ZoneProvider.createZone method', () => {
+      // The zone should be equivalent to what ZoneProvider.createZone('zone_1') would create
       expect(gameState.zone.zoneId).toBe('zone_1');
       expect(gameState.zone.biome).toBe('Forest clearing (bottom left)');
       expect(gameState.zone.puzzleTheme).toBe('Basic movement, bump-to-talk');
     });
 
-    test('should not import BlinkingGroveZone directly', () => {
-      // This test will pass once we remove the direct import
-      const gameState = new BlinkingGroveGameState();
-
-      // The zone should still work properly
+    test('should not import infrastructure directly', () => {
+      // The zone should work properly through the port interface
       expect(gameState.zone).toBeDefined();
       expect(gameState.zone.zoneId).toBe('zone_1');
+
+      // Verify that the ZoneProvider is properly injected
+      expect(gameState._zoneProvider).toBeDefined();
     });
 
     test('should create zone with same properties as direct factory method', () => {
       // Create zone through registry
-      const gameState = new BlinkingGroveGameState();
       const registryZone = gameState.zone;
 
       // Create zone directly through registry for comparison
-      const directRegistryZone = ZoneRegistry.createZone('zone_1');
+      const directRegistryZone = zoneProvider.createZone('zone_1');
 
       // Both should have identical properties
       expect(registryZone.zoneId).toBe(directRegistryZone.zoneId);
@@ -298,10 +300,8 @@ describe('BlinkingGroveGameState', () => {
     });
 
     test('should handle zone creation through registry API consistently', () => {
-      const gameState = new BlinkingGroveGameState();
-
       // The zone should match registry configuration
-      const config = ZoneRegistry.getZoneConfig('zone_1');
+      const config = zoneProvider.getZoneConfig('zone_1');
       expect(gameState.zone.zoneId).toBe(config.zoneId);
       expect(gameState.zone.name).toBe(config.name);
       expect(gameState.zone.biome).toBe(config.biome);
@@ -312,17 +312,16 @@ describe('BlinkingGroveGameState', () => {
       // This test demonstrates how we could make BlinkingGroveGameState
       // more flexible in the future to accept different zone IDs
       // For now, it's hardcoded to zone_1
-      const gameState = new BlinkingGroveGameState();
 
       // Current behavior - always creates zone_1
       expect(gameState.zone.zoneId).toBe('zone_1');
 
       // Future enhancement: constructor could accept zoneId parameter
-      // const gameState2 = new BlinkingGroveGameState('zone_2');
+      // const gameState2 = new BlinkingGroveGameState(zoneProvider, 'zone_2');
       // expect(gameState2.zone.zoneId).toBe('zone_2');
 
       // For now, verify that registry has the zone available
-      expect(ZoneRegistry.hasZone('zone_1')).toBe(true);
+      expect(zoneProvider.hasZone('zone_1')).toBe(true);
     });
   });
 });

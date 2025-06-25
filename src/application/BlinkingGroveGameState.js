@@ -1,9 +1,13 @@
 import { Cursor } from '../domain/entities/Cursor.js';
-import { ZoneRegistry } from '../infrastructure/data/zones/ZoneRegistry.js';
 
 export class BlinkingGroveGameState {
-  constructor() {
-    this.zone = ZoneRegistry.createZone('zone_1');
+  constructor(zoneProvider) {
+    if (!zoneProvider) {
+      throw new Error('BlinkingGroveGameState requires a ZoneProvider');
+    }
+
+    this._zoneProvider = zoneProvider;
+    this.zone = this._zoneProvider.createZone('zone_1');
     this.map = this.zone.gameMap; // Map interface
     this.cursor = new Cursor(this.zone.getCursorStartPosition());
     this.availableKeys = this.zone.vimKeys;
