@@ -170,8 +170,8 @@ h1 {
   box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* Player */
-.tile.player {
+/* Cursor */
+.tile.cursor {
   background-color: #f39c12;
   color: #2c3e50;
   font-size: 16px;

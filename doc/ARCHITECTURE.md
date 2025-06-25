@@ -12,8 +12,11 @@ Contains the core business logic and rules of the game, with no dependencies on 
 
 #### Entities (`src/domain/entities/`)
 
-- **`Player.js`** - Represents the player character with position and movement logic
+- **`Cursor.js`** - The blinking protagonist entity, genderless and full of curiosity
 - **`VimKey.js`** - Represents collectible VIM keys with their commands
+- **`CaretSpirit.js`** - Guardians of VIM knowledge scattered across the land
+- **`BugKing.js`** - The final enemy who corrupts logic and overwrites order
+- **`SyntaxWisp.js`** - Optional lore spirits that explain advanced concepts
 - **`GameMap.js`** - Represents the game world with tiles and navigation rules
 
 #### Value Objects (`src/domain/value-objects/`)
@@ -101,14 +104,14 @@ Infrastructure → Application → Domain
 class VimForKidsGame {
   // Mixed concerns:
   constructor() {
-    this.gameBoard = document.getElementById("gameBoard"); // UI
+    this.gameBoard = document.getElementById('gameBoard'); // UI
     this.player = { x: 5, y: 2 }; // Domain
     this.setupEventListeners(); // Input
   }
 
   movePlayer(newX, newY) {
     // Business logic mixed with UI
-    if (targetTile === "water") return; // Domain rule
+    if (targetTile === 'water') return; // Domain rule
     this.renderGame(); // UI concern
   }
 }
@@ -145,7 +148,7 @@ class DOMGameRenderer extends GameRenderer {
 src/
 ├── domain/                          # Core business logic
 │   ├── entities/
-│   │   ├── Player.js               # Player entity
+│   │   ├── Cursor.js               # Cursor entity (main character)
 │   │   ├── VimKey.js               # Collectible key entity
 │   │   └── GameMap.js              # Game world entity
 │   └── value-objects/
@@ -182,18 +185,44 @@ const game = new VimForKidsGame();
 // 4. DOMGameRenderer updates the UI
 ```
 
+### Character Usage Examples
+
+```javascript
+// Create character entities
+import { Cursor, CaretSpirit, BugKing, SyntaxWisp } from './domain/entities/';
+import { Position } from './domain/value-objects/Position.js';
+
+// The protagonist cursor
+const cursor = new Cursor(new Position(5, 2));
+console.log(cursor.description); // "The blinking protagonist, genderless and full of curiosity"
+
+// Create VIM knowledge guardians
+const movementGuardian = CaretSpirit.createVimMovementGuardian(new Position(3, 4));
+const discoveredGuardian = movementGuardian.discover();
+const knowledge = discoveredGuardian.shareKnowledge();
+
+// The final boss
+const finalBoss = BugKing.createFinalBoss(new Position(10, 10));
+const corruptedAreas = finalBoss.spreadCorruption();
+
+// Advanced concept spirits
+const regexWisp = SyntaxWisp.createRegexWisp(new Position(7, 8));
+const activatedWisp = regexWisp.activate();
+const lore = activatedWisp.shareLore();
+```
+
 ## Testing Strategy
 
 ```javascript
 // Test domain logic in isolation
-const player = new Player(new Position(5, 2));
-const newPlayer = player.moveTo(new Position(6, 2));
-assert(newPlayer.position.equals(new Position(6, 2)));
+const cursor = new Cursor(new Position(5, 2));
+const newCursor = cursor.moveTo(new Position(6, 2));
+assert(newCursor.position.equals(new Position(6, 2)));
 
 // Test use cases with mock dependencies
 const mockRenderer = new MockGameRenderer();
 const useCase = new MovePlayerUseCase(gameState, mockRenderer);
-useCase.execute("right");
+useCase.execute('right');
 assert(mockRenderer.renderCalled);
 ```
 

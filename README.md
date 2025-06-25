@@ -50,6 +50,18 @@ npm run dev
 3. **Rules**: Avoid water tiles (blue), stick to walkable paths (grass/dirt)
 4. **Learning**: Each key collected shows its VIM command and description
 
+## 🎭 Key Characters
+
+Meet the inhabitants of this digital realm:
+
+- **🖱️ Cursor** – The blinking protagonist, genderless and full of curiosity. This is your character, constantly eager to explore and learn new VIM commands.
+
+- **👻 Caret Spirits** – Guardians of VIM knowledge scattered across the land. These wise entities hold the secrets of text editing mastery and will share their wisdom when discovered.
+
+- **👑 The Bug King** – The final enemy who corrupts logic and overwrites order. This malevolent force spreads chaos through the digital realm, turning clean code into tangled messes.
+
+- **✨ Syntax Wisps** – Optional lore spirits that explain advanced concepts. These ethereal beings offer deeper VIM knowledge for those ready to venture beyond the basics.
+
 ## 🏗️ Architecture & Technology
 
 VIM for Kids is built with modern web technologies and clean architecture:

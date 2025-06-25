@@ -1,3 +1,4 @@
+/* eslint-env node */
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
@@ -22,7 +23,7 @@ export default defineConfig({
         manualChunks: {
           // Split domain logic into separate chunk
           domain: [
-            './src/domain/entities/Player.js',
+            './src/domain/entities/Cursor.js',
             './src/domain/entities/VimKey.js',
             './src/domain/entities/GameMap.js',
             './src/domain/value-objects/Position.js',
