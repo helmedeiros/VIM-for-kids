@@ -1,0 +1,156 @@
+import { Cursor } from '../domain/entities/Cursor.js';
+
+export class LevelGameState {
+  constructor(zoneProvider, levelConfig) {
+    if (!zoneProvider || !levelConfig) {
+      throw new Error('LevelGameState requires zoneProvider and levelConfig');
+    }
+
+    if (!levelConfig.zones || levelConfig.zones.length === 0) {
+      throw new Error('Level must contain at least one zone');
+    }
+
+    this._zoneProvider = zoneProvider;
+    this._levelConfig = levelConfig;
+    this._currentZoneIndex = 0;
+    this._completedZones = new Set();
+
+    // Initialize first zone
+    this._loadZone(this._getCurrentZoneId());
+  }
+
+  _loadZone(zoneId) {
+    try {
+      this.zone = this._zoneProvider.createZone(zoneId);
+      this.map = this.zone.gameMap;
+      this.cursor = new Cursor(this.zone.getCursorStartPosition());
+      this.availableKeys = this.zone.vimKeys;
+      this.collectedKeys = new Set();
+    } catch (error) {
+      throw new Error(`Zone '${zoneId}' not found in registry`);
+    }
+  }
+
+  _getCurrentZoneId() {
+    return this._levelConfig.zones[this._currentZoneIndex];
+  }
+
+  // Zone Navigation
+  getCurrentZoneId() {
+    return this._getCurrentZoneId();
+  }
+
+  getCurrentZoneIndex() {
+    return this._currentZoneIndex;
+  }
+
+  getCurrentZone() {
+    return this.zone;
+  }
+
+  hasNextZone() {
+    return this._currentZoneIndex < this._levelConfig.zones.length - 1;
+  }
+
+  // Zone Progression
+  progressToNextZone() {
+    if (!this.isCurrentZoneComplete()) {
+      throw new Error('Cannot progress: current zone not complete');
+    }
+
+    if (!this.hasNextZone()) {
+      throw new Error('Cannot progress: already at last zone');
+    }
+
+    // Mark current zone as completed
+    this._completedZones.add(this._getCurrentZoneId());
+
+    // Move to next zone
+    this._currentZoneIndex++;
+    this._loadZone(this._getCurrentZoneId());
+  }
+
+  isCurrentZoneComplete() {
+    return this.zone.isComplete();
+  }
+
+  // Level Management
+  isLevelComplete() {
+    // Level is complete when all zones are completed AND we're at the last zone and it's complete
+    const allZonesCompleted = this._completedZones.size === this._levelConfig.zones.length - 1;
+    const lastZoneComplete =
+      this.isCurrentZoneComplete() && this._currentZoneIndex === this._levelConfig.zones.length - 1;
+
+    return allZonesCompleted && lastZoneComplete;
+  }
+
+  getCompletedZones() {
+    return Array.from(this._completedZones);
+  }
+
+  getTotalZones() {
+    return this._levelConfig.zones.length;
+  }
+
+  getRemainingZones() {
+    return this._levelConfig.zones.length - this._completedZones.size;
+  }
+
+  getCompletionMessage() {
+    if (this.isLevelComplete()) {
+      return `${this._levelConfig.name} completed! ${this._levelConfig.description}`;
+    }
+    return '';
+  }
+
+  // Zone Operations (delegated to current zone)
+  collectKey(vimKey) {
+    if (this.availableKeys.includes(vimKey)) {
+      this.collectedKeys.add(vimKey.key);
+      this.availableKeys = this.availableKeys.filter((key) => key !== vimKey);
+
+      // Notify zone about key collection
+      this.zone.collectKey(vimKey);
+    }
+  }
+
+  getCurrentState() {
+    return {
+      currentZone: this.zone,
+      map: this.map,
+      cursor: this.cursor,
+      availableKeys: this.availableKeys,
+      collectedKeys: this.collectedKeys,
+      textLabels: this.zone.textLabels,
+      gate: this.zone.gate,
+      npcs: this.zone.getActiveNPCs(),
+      levelProgress: {
+        levelId: this._levelConfig.id,
+        levelName: this._levelConfig.name,
+        currentZoneIndex: this._currentZoneIndex,
+        totalZones: this.getTotalZones(),
+        completedZones: this.getCompletedZones(),
+        isLevelComplete: this.isLevelComplete(),
+      },
+    };
+  }
+
+  getTextLabels() {
+    return this.zone.textLabels;
+  }
+
+  getGate() {
+    return this.zone.gate;
+  }
+
+  getNPCs() {
+    return this.zone.getActiveNPCs();
+  }
+
+  cleanup() {
+    // Clean up zone resources
+    if (this.zone && typeof this.zone.cleanup === 'function') {
+      this.zone.cleanup();
+    }
+  }
+}

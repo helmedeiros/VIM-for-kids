@@ -1,5 +1,6 @@
 import { GameState } from './application/GameState.js';
-import { BlinkingGroveGameState } from './application/BlinkingGroveGameState.js';
+import { LevelGameState } from './application/LevelGameState.js';
+import { getLevelConfiguration } from './application/LevelConfigurations.js';
 import { MovePlayerUseCase } from './application/use-cases/MovePlayerUseCase.js';
 import { DOMGameRenderer } from './infrastructure/ui/DOMGameRenderer.js';
 import { KeyboardInputHandler } from './infrastructure/input/KeyboardInputHandler.js';
@@ -23,12 +24,17 @@ export class VimForKidsGame {
 
   _createGameState() {
     switch (this.currentLevel) {
-      case 'level1':
-        return new BlinkingGroveGameState(this.zoneProvider); // Inject ZoneProvider
+      case 'level1': {
+        const level1Config = getLevelConfiguration('level_1');
+        return new LevelGameState(this.zoneProvider, level1Config);
+      }
       case 'default':
         return new GameState();
-      default:
-        return new BlinkingGroveGameState(this.zoneProvider); // Inject ZoneProvider
+      default: {
+        // Default to level 1 for now (only level with actual zones)
+        const defaultConfig = getLevelConfiguration('level_1');
+        return new LevelGameState(this.zoneProvider, defaultConfig);
+      }
     }
   }
 
