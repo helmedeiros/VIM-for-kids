@@ -1,5 +1,5 @@
 import { Zone } from '../../../src/domain/entities/Zone.js';
-import { BlinkingGroveZone } from '../../../src/infrastructure/data/zones/BlinkingGroveZone.js';
+import { ZoneRegistry } from '../../../src/infrastructure/data/zones/ZoneRegistry.js';
 import { Gate } from '../../../src/domain/entities/Gate.js';
 import { DynamicZoneMap } from '../../../src/domain/entities/DynamicZoneMap.js';
 
@@ -14,7 +14,7 @@ describe('Zone', () => {
   };
 
   beforeEach(() => {
-    blinkingGrove = BlinkingGroveZone.create();
+    blinkingGrove = ZoneRegistry.createZone('zone_1');
   });
 
   describe('Zone Creation', () => {
@@ -230,21 +230,30 @@ describe('Zone', () => {
   });
 
   describe('Zone Factory Pattern', () => {
-    test('should create zone using BlinkingGroveZone factory', () => {
-      const zoneFromFactory = BlinkingGroveZone.create();
+    test('should create zone using ZoneRegistry', () => {
+      const zoneFromRegistry = ZoneRegistry.createZone('zone_1');
 
-      expect(zoneFromFactory).toBeInstanceOf(Zone);
-      expect(zoneFromFactory.zoneId).toBe('zone_1');
-      expect(zoneFromFactory.name).toBe('1. Blinking Grove');
+      expect(zoneFromRegistry).toBeInstanceOf(Zone);
+      expect(zoneFromRegistry.zoneId).toBe('zone_1');
+      expect(zoneFromRegistry.name).toBe('1. Blinking Grove');
     });
 
     test('should get zone configuration without creating instance', () => {
-      const config = BlinkingGroveZone.getConfig();
+      const config = ZoneRegistry.getZoneConfig('zone_1');
 
       expect(config.zoneId).toBe('zone_1');
       expect(config.name).toBe('1. Blinking Grove');
       expect(config.skillFocus).toEqual(['h', 'j', 'k', 'l']);
       expect(config.tiles.specialTiles).toHaveLength(4);
+    });
+
+    test('should create equivalent zones through registry and direct factory', () => {
+      const zoneFromRegistry = ZoneRegistry.createZone('zone_1');
+      const configFromRegistry = ZoneRegistry.getZoneConfig('zone_1');
+
+      expect(zoneFromRegistry.zoneId).toBe(configFromRegistry.zoneId);
+      expect(zoneFromRegistry.name).toBe(configFromRegistry.name);
+      expect(zoneFromRegistry.skillFocus).toEqual(configFromRegistry.skillFocus);
     });
   });
 

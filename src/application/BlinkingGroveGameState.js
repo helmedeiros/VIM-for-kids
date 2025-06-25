@@ -1,9 +1,9 @@
 import { Cursor } from '../domain/entities/Cursor.js';
-import { BlinkingGroveZone } from '../infrastructure/data/zones/BlinkingGroveZone.js';
+import { ZoneRegistry } from '../infrastructure/data/zones/ZoneRegistry.js';
 
 export class BlinkingGroveGameState {
   constructor() {
-    this.zone = BlinkingGroveZone.create();
+    this.zone = ZoneRegistry.createZone('zone_1');
     this.map = this.zone.gameMap; // Map interface
     this.cursor = new Cursor(this.zone.getCursorStartPosition());
     this.availableKeys = this.zone.vimKeys;
