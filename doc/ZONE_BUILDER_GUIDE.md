@@ -45,7 +45,9 @@ The VIM for Kids game uses hexagonal architecture with clean separation:
 - **Dynamic Zone Map**: `src/domain/entities/DynamicZoneMap.js` - Full-screen water with centered zones
 - **Infrastructure Factory**: `src/infrastructure/data/zones/[ZoneName]Zone.js` - Zone-specific factory
 - **Registry**: `src/infrastructure/data/zones/ZoneRegistry.js` - Central zone management
-- **Tests**: Complete unit test coverage for all scenarios
+- **Level System**: `src/application/LevelGameState.js` - Multi-zone level management (2-3 zones per level)
+- **Level Configurations**: `src/application/LevelConfigurations.js` - Level definitions with zone sequences
+- **Tests**: Complete unit test coverage for all scenarios including multi-zone integration
 
 ### 🌊 Dynamic Zone Centering System
 
@@ -58,6 +60,26 @@ The VIM for Kids game uses hexagonal architecture with clean separation:
 
 > 📖 **For technical details**, see `doc/ZONE_CENTERING_SYSTEM.md`
 
+### 🎮 Multi-Zone Level System
+
+**Your zone will be part of a level with 2-3 zones:**
+
+- **Level Progression**: Players move through zones sequentially within a level
+- **Zone Transitions**: When a zone is completed, players progress to the next zone
+- **Custom Cursor Positions**: Each zone can have a different cursor start position
+- **Level Completion**: Level completes when all zones are finished
+
+**Zone Context in Levels:**
+
+```javascript
+// Example: Your zone in a level
+level_2: {
+  zones: ['zone_2', 'zone_3'], // Your zone + another zone
+  name: 'Text Manipulation',
+  description: 'Master VIM modes and word navigation'
+}
+```
+
 ## Implementation Steps
 
 ### Step 1: Create the Zone Factory
@@ -66,37 +88,48 @@ Create `src/infrastructure/data/zones/[ZoneName]Zone.js`:
 
 ```javascript
 import { Zone } from '../../../domain/entities/Zone.js';
+import { Position } from '../../../domain/value-objects/Position.js';
 
 export class [ZoneName]Zone {
   static create() {
     const config = {
       // Map your JSON input to Zone configuration
-      id: '[zone_id_from_json]',
+      zoneId: '[zone_id_from_json]',
       name: '[name_from_json]',
-      description: '[description_from_json]',
+      biome: '[biome_from_json]',
+      skillFocus: ['skill1', 'skill2'], // VIM skills taught in this zone
+      puzzleTheme: '[puzzle_theme_from_json]',
+      narration: ['story_line_1', 'story_line_2'],
 
-      // Convert tiles
-      tiles: [
-        // Map layout rows to tile objects
-      ],
+      // Optional: Custom cursor start position for zone transitions
+      // If not provided, defaults to center of dirt area (2, 2)
+      cursorStartPosition: new Position(x, y), // Use if zone needs different start position
+
+      tiles: {
+        tileType: 'forest_ground', // or other tile type
+        specialTiles: [
+          // Map VIM keys and special tiles from JSON
+        ],
+        textLabels: [
+          // Map text labels from JSON
+        ],
+        gate: {
+          position: [x, y],
+          unlocksWhen: {
+            collectedVimKeys: ['h', 'j', 'k', 'l'] // Keys needed to unlock
+          }
+        }
+      },
 
       // Convert NPCs
       npcs: [
-        // Map NPC objects
-      ],
-
-      // Convert VIM keys from tile legend
-      vimKeys: [
-        // Extract VIM keys from legend
+        // Map NPC objects from JSON
       ],
 
       // Convert events
       events: [
-        // Map event objects
-      ],
-
-      // Zone transition
-      gateTo: '[gateTo_from_json]' || null
+        // Map event objects from JSON
+      ]
     };
 
     return new Zone(config);
@@ -206,11 +239,36 @@ Update `src/infrastructure/data/zones/ZoneRegistry.js`:
 // Add import
 import { [ZoneName]Zone } from './[ZoneName]Zone.js';
 
-// Add to registry map
-[zone_id]: () => [ZoneName]Zone.create(),
+// Add to registry map in getZones()
+['zone_X', [ZoneName]Zone],
 ```
 
-### Step 5: Testing Requirements
+### Step 5: Add Zone to Level Configuration
+
+Update `src/application/LevelConfigurations.js` to include your new zone in a level:
+
+```javascript
+export const LEVEL_CONFIGURATIONS = {
+  // Add your zone to an appropriate level (2-3 zones per level)
+  level_2: {
+    id: 'level_2',
+    name: 'Text Manipulation',
+    zones: ['zone_2', 'zone_3'], // Include your new zone here
+    description: 'Master VIM modes and word navigation',
+  },
+  // ... other levels
+};
+```
+
+**Zone Assignment Guidelines:**
+
+- **Level 1**: `zone_1` (Blinking Grove) - VIM basics (h,j,k,l)
+- **Level 2**: `zone_2`, `zone_3` - Text manipulation (i, ESC, modes, w, b, e)
+- **Level 3**: `zone_4`, `zone_5`, `zone_6` - Advanced movement (f, t, /, ?, n, N)
+- **Level 4**: `zone_7`, `zone_8` - Text operations (d, y, p, c, x)
+- **Level 5**: `zone_9`, `zone_10` - Search & command (:, /, commands)
+
+### Step 6: Testing Requirements
 
 #### Test Categories (Aim for 25-35 tests total):
 
@@ -234,6 +292,7 @@ import { [ZoneName]Zone } from './[ZoneName]Zone.js';
    - NPC conditional visibility
    - Event triggering and actions
    - Zone completion detection
+   - Custom cursor start position (if applicable)
 
 4. **Error Handling Tests** (3-5 tests)
    - Invalid configurations
@@ -247,6 +306,27 @@ import { [ZoneName]Zone } from './[ZoneName]Zone.js';
 // Verify immutability with expect(zone.getConfig()).not.toBe(originalConfig)
 // Test state changes with before/after comparisons
 // Use descriptive test names that explain the scenario
+// Test custom cursor start position if implemented
+// Ensure zone works with LevelGameState (can create via ZoneProvider)
+```
+
+#### Multi-Zone Integration Testing:
+
+Your zone should work seamlessly with the LevelGameState system:
+
+```javascript
+// Example integration test
+test('should work with LevelGameState multi-zone system', () => {
+  const zoneProvider = new ZoneRegistryAdapter();
+  const levelConfig = {
+    id: 'test_level',
+    zones: ['zone_1', 'your_zone_id'],
+    name: 'Test Level',
+  };
+
+  const levelState = new LevelGameState(zoneProvider, levelConfig);
+  // Test zone progression, cursor reset, etc.
+});
 ```
 
 ## Implementation Checklist
@@ -263,13 +343,15 @@ import { [ZoneName]Zone } from './[ZoneName]Zone.js';
 - [ ] Create zone factory with proper JSON mapping
 - [ ] Implement comprehensive test suite
 - [ ] Register zone in ZoneRegistry
+- [ ] Add zone to appropriate level configuration
 - [ ] Follow established code patterns and naming conventions
 
 ### After Implementation:
 
-- [ ] Run all tests to ensure they pass
+- [ ] Run all tests to ensure they pass (including LevelGameState tests)
 - [ ] Verify zone can be created via registry
-- [ ] Test zone integration with existing game systems
+- [ ] Test zone integration with LevelGameState multi-zone system
+- [ ] Verify zone works correctly in level progression
 - [ ] Ensure no breaking changes to existing functionality
 
 ## Code Quality Standards
@@ -288,6 +370,8 @@ import { [ZoneName]Zone } from './[ZoneName]Zone.js';
 - Zone is properly registered and accessible
 - **Zone appears centered with water all around on any screen size**
 - All coordinates are zone-relative and automatically converted
+- Zone is added to appropriate level configuration (2-3 zones per level)
+- Zone works correctly with LevelGameState multi-zone progression
 - Game mechanics work as intended
 - Code follows project standards and patterns
 - No breaking changes to existing functionality
@@ -310,3 +394,9 @@ Your completed zone will look like this on any device:
 ```
 
 The next developer/LLM should be able to take your implementation and immediately use the new zone in the game without any additional setup or configuration.
+
+## 📚 Additional Documentation
+
+- **Multi-Zone Architecture**: `doc/MULTI_ZONE_ARCHITECTURE.md` - Comprehensive guide to the level system
+- **Zone Centering System**: `doc/ZONE_CENTERING_SYSTEM.md` - Technical details on zone positioning
+- **Zone Schema**: `doc/zone.schema.json` - JSON schema for zone configurations
