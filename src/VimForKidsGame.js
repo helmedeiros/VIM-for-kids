@@ -3,10 +3,16 @@ import { BlinkingGroveGameState } from './application/BlinkingGroveGameState.js'
 import { MovePlayerUseCase } from './application/use-cases/MovePlayerUseCase.js';
 import { DOMGameRenderer } from './infrastructure/ui/DOMGameRenderer.js';
 import { KeyboardInputHandler } from './infrastructure/input/KeyboardInputHandler.js';
+import { ZoneRegistryAdapter } from './infrastructure/data/zones/ZoneRegistryAdapter.js';
 
 export class VimForKidsGame {
   constructor(options = {}) {
     this.currentLevel = options.level || 'level1';
+
+    // Create infrastructure adapters
+    this.zoneProvider = new ZoneRegistryAdapter();
+
+    // Create application state with injected dependencies
     this.gameState = this._createGameState();
     this.gameRenderer = new DOMGameRenderer();
     this.inputHandler = new KeyboardInputHandler(this.gameRenderer.gameBoard);
@@ -18,11 +24,11 @@ export class VimForKidsGame {
   _createGameState() {
     switch (this.currentLevel) {
       case 'level1':
-        return new BlinkingGroveGameState(); // Use new zone-based level
+        return new BlinkingGroveGameState(this.zoneProvider); // Inject ZoneProvider
       case 'default':
         return new GameState();
       default:
-        return new BlinkingGroveGameState(); // Default to Blinking Grove
+        return new BlinkingGroveGameState(this.zoneProvider); // Inject ZoneProvider
     }
   }
 
