@@ -1,5 +1,5 @@
 import { GameState } from './application/GameState.js';
-import { WelcomeMeadowGameState } from './application/WelcomeMeadowGameState.js';
+import { BlinkingGroveGameState } from './application/BlinkingGroveGameState.js';
 import { MovePlayerUseCase } from './application/use-cases/MovePlayerUseCase.js';
 import { DOMGameRenderer } from './infrastructure/ui/DOMGameRenderer.js';
 import { KeyboardInputHandler } from './infrastructure/input/KeyboardInputHandler.js';
@@ -18,12 +18,11 @@ export class VimForKidsGame {
   _createGameState() {
     switch (this.currentLevel) {
       case 'level1':
-      case 'welcomeMeadow': // Keep backwards compatibility
-        return new WelcomeMeadowGameState();
+        return new BlinkingGroveGameState(); // Use new zone-based level
       case 'default':
         return new GameState();
       default:
-        return new WelcomeMeadowGameState(); // Default to Level 1 (Welcome Meadow)
+        return new BlinkingGroveGameState(); // Default to Blinking Grove
     }
   }
 

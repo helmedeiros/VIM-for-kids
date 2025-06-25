@@ -82,6 +82,21 @@ export class DOMGameRenderer extends GameRenderer {
           tile.textContent = gameState.gate.isOpen ? '🚪' : '🚧';
         }
 
+        // Add NPCs
+        if (gameState.npcs) {
+          const npc = gameState.npcs.find((n) => {
+            if (n.position && Array.isArray(n.position)) {
+              return n.position[0] === x && n.position[1] === y;
+            }
+            return false;
+          });
+          if (npc) {
+            tile.classList.add('npc');
+            tile.textContent = '🧙‍♂️'; // Wizard emoji for NPCs
+            tile.title = npc.name;
+          }
+        }
+
         this.gameBoard.appendChild(tile);
       }
     }
