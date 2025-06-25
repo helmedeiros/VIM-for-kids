@@ -15,6 +15,9 @@ export class Zone {
     this._narration = zoneConfig.narration;
     this._collectedKeys = new Set();
 
+    // Store custom cursor start position if provided
+    this._customCursorStartPosition = zoneConfig.cursorStartPosition || null;
+
     // Build the zone from configuration
     this._buildZone(zoneConfig);
   }
@@ -218,6 +221,10 @@ export class Zone {
   }
 
   getCursorStartPosition() {
+    // Use custom cursor start position if provided, otherwise default to center of dirt area
+    if (this._customCursorStartPosition) {
+      return this._customCursorStartPosition;
+    }
     // Start position in the center of the dirt area
     return this._gameMap.zoneToAbsolute(2, 2);
   }
