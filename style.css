@@ -366,3 +366,23 @@ h1 {
     transform: scale(1);
   }
 }
+
+/* NPCs */
+.tile.npc {
+  color: #9b59b6;
+  font-size: 16px;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  animation: npcGlow 3s infinite;
+  cursor: pointer;
+}
+
+@keyframes npcGlow {
+  0%,
+  100% {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  }
+  50% {
+    text-shadow: 1px 1px 8px rgba(155, 89, 182, 0.8);
+  }
+}

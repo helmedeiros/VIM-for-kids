@@ -1,0 +1,145 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Zone",
+  "type": "object",
+  "required": ["id", "name", "description", "tiles", "events", "npcs"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique zone identifier (e.g., 'zone1')"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-friendly name of the zone"
+    },
+    "description": {
+      "type": "string",
+      "description": "Narrative description or intro text"
+    },
+    "tiles": {
+      "type": "object",
+      "required": ["layout", "legend"],
+      "properties": {
+        "layout": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Grid of tile symbols"
+        },
+        "legend": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Mapping from layout symbols to tile types"
+        }
+      }
+    },
+    "npcs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "position", "dialogue"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "position": {
+            "type": "object",
+            "required": ["x", "y"],
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              }
+            }
+          },
+          "dialogue": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "trigger", "actions"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "trigger": {
+            "type": "object",
+            "required": ["type", "position"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["step_on_tile", "collect_key", "interact_npc"]
+              },
+              "position": {
+                "type": "object",
+                "required": ["x", "y"],
+                "properties": {
+                  "x": {
+                    "type": "integer"
+                  },
+                  "y": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          },
+          "conditions": {
+            "type": "object",
+            "description": "Optional requirements to trigger the event",
+            "properties": {
+              "required_keys": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "show_dialogue",
+                    "unlock_gate",
+                    "spawn_npc",
+                    "play_sound",
+                    "transition_zone"
+                  ]
+                },
+                "payload": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "gateTo": {
+      "type": "string",
+      "description": "Zone ID that this zone unlocks or transitions to"
+    }
+  }
+}

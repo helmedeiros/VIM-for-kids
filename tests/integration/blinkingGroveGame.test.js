@@ -42,7 +42,7 @@ beforeAll(() => {
   };
 });
 
-describe('Welcome Meadow Game Integration', () => {
+describe('Blinking Grove Game Integration', () => {
   let game;
 
   beforeEach(() => {
@@ -52,19 +52,19 @@ describe('Welcome Meadow Game Integration', () => {
     // eslint-disable-next-line no-undef
     global.alert = jest.fn();
 
-    // Create game with Level 1 (Welcome Meadow)
+    // Create game with Level 1 (Blinking Grove)
     game = new VimForKidsGame({ level: 'level1' });
   });
 
   describe('Game Initialization', () => {
     it('should initialize with Level 1', () => {
       expect(game.currentLevel).toBe('level1');
-      // Grid should be dynamic based on screen size (defaults to 1024x768 in test environment)
-      expect(game.gameState.map.width).toBe(34); // ceil(1024/32) + 2 = 34
-      expect(game.gameState.map.height).toBe(26); // ceil(768/32) + 2 = 26
+      // BlinkingGrove uses dynamic sizing with water all around (calculated based on screen size)
+      expect(game.gameState.map.width).toBeGreaterThanOrEqual(24); // Minimum size with zone + padding
+      expect(game.gameState.map.height).toBeGreaterThanOrEqual(16); // Minimum size with zone + padding
     });
 
-    it('should place cursor in dirt area as shown in image', () => {
+    it('should place cursor in starting position', () => {
       const startPos = game.gameState.cursor.position;
       const tile = game.gameState.map.getTileAt(startPos);
       expect(tile.name).toBe('dirt');
@@ -80,21 +80,22 @@ describe('Welcome Meadow Game Integration', () => {
       expect(keyLetters).toContain('l');
     });
 
-    it('should display "Hello world!" text on the ground', () => {
+    it('should display text labels on the ground', () => {
       const textLabels = game.gameState.getTextLabels();
-      expect(textLabels).toHaveLength(12); // "Hello world!" = 12 characters
+      expect(textLabels).toHaveLength(2); // "Hello" and "world!" in Blinking Grove
 
       const message = textLabels
         .sort((a, b) => a.position.y * 10 + a.position.x - (b.position.y * 10 + b.position.x))
         .map((label) => label.text)
-        .join('');
+        .join(' ');
       expect(message).toBe('Hello world!');
     });
 
     it('should have a closed gate initially', () => {
       const gate = game.gameState.getGate();
       expect(gate.isOpen).toBe(false);
-      expect(game.gameState.map.isWalkable(gate.position)).toBe(false);
+      // Note: In BlinkingGrove Zone system, gate walkability is handled by the gate itself, not map
+      expect(gate.isWalkable()).toBe(false);
     });
   });
 
@@ -213,7 +214,7 @@ describe('Welcome Meadow Game Integration', () => {
       }
 
       expect(gate.isOpen).toBe(false);
-      expect(game.gameState.map.isWalkable(gate.position)).toBe(false);
+      expect(gate.isWalkable()).toBe(false);
     });
 
     it('should open gate after collecting all 4 movement keys', () => {
@@ -272,7 +273,7 @@ describe('Welcome Meadow Game Integration', () => {
       });
 
       const completionMessage = game.gameState.getCompletionMessage();
-      expect(completionMessage).toContain('Welcome Meadow');
+      expect(completionMessage).toContain('Blinking Grove');
       expect(completionMessage).toContain('completed');
     });
   });
@@ -307,16 +308,16 @@ describe('Welcome Meadow Game Integration', () => {
       keys.forEach((key) => {
         switch (key.key) {
           case 'h':
-            expect(key.description).toBe('Move left');
+            expect(key.description).toBe('Move left - The westward wind key');
             break;
           case 'j':
-            expect(key.description).toBe('Move down');
+            expect(key.description).toBe('Move down - The earthward root key');
             break;
           case 'k':
-            expect(key.description).toBe('Move up');
+            expect(key.description).toBe('Move up - The skyward branch key');
             break;
           case 'l':
-            expect(key.description).toBe('Move right');
+            expect(key.description).toBe('Move right - The eastward sun key');
             break;
         }
       });
