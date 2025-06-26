@@ -68,17 +68,17 @@ describe('BlinkingGroveZone', () => {
 
       const positions = config.tiles.specialTiles.map((tile) => tile.position);
       expect(positions).toContainEqual([3, 3]); // h key
-      expect(positions).toContainEqual([3, 4]); // j key
-      expect(positions).toContainEqual([4, 3]); // k key
-      expect(positions).toContainEqual([4, 4]); // l key
+      expect(positions).toContainEqual([4, 3]); // j key
+      expect(positions).toContainEqual([5, 3]); // k key
+      expect(positions).toContainEqual([6, 3]); // l key
     });
 
     test('should have correct text labels configuration', () => {
       const config = BlinkingGroveZone.getConfig();
 
       expect(config.tiles.textLabels).toHaveLength(2);
-      expect(config.tiles.textLabels[0]).toEqual({ text: 'Hello', position: [6, 5] });
-      expect(config.tiles.textLabels[1]).toEqual({ text: 'world!', position: [6, 6] });
+      expect(config.tiles.textLabels[0]).toEqual({ text: 'Hello', position: [3, 5] });
+      expect(config.tiles.textLabels[1]).toEqual({ text: 'world!', position: [4, 5] });
     });
 
     test('should have correct gate configuration', () => {
@@ -86,7 +86,7 @@ describe('BlinkingGroveZone', () => {
 
       expect(config.tiles.gate).toBeDefined();
       expect(config.tiles.gate.locked).toBe(true);
-      expect(config.tiles.gate.position).toEqual([8, 5]);
+      expect(config.tiles.gate.position).toEqual([7, 5]);
       expect(config.tiles.gate.leadsTo).toBe('zone_2');
       expect(config.tiles.gate.unlocksWhen.collectedVimKeys).toEqual(['h', 'j', 'k', 'l']);
     });

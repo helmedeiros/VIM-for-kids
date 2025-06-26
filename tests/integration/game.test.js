@@ -53,11 +53,11 @@ describe('VIM for Kids Game Integration', () => {
       expect(game.currentLevel).toBe('unknownLevel');
     });
 
-    it('should default to level1 when no options provided', () => {
+    it('should default to level_1 when no options provided', () => {
       game = new VimForKidsGame();
 
       expect(game.gameState).toBeDefined();
-      expect(game.currentLevel).toBe('level1');
+      expect(game.currentLevel).toBe('level_1');
     });
 
     it('should render initial game state', () => {

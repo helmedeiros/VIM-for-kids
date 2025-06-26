@@ -56,9 +56,9 @@ describe('Zone', () => {
       const lKey = blinkingGrove.vimKeys.find((k) => k.key === 'l');
 
       expect(hKey.position).toEqual(getAbsolutePosition(3, 3));
-      expect(jKey.position).toEqual(getAbsolutePosition(3, 4));
-      expect(kKey.position).toEqual(getAbsolutePosition(4, 3));
-      expect(lKey.position).toEqual(getAbsolutePosition(4, 4));
+      expect(jKey.position).toEqual(getAbsolutePosition(4, 3));
+      expect(kKey.position).toEqual(getAbsolutePosition(5, 3));
+      expect(lKey.position).toEqual(getAbsolutePosition(6, 3));
     });
 
     test('should have descriptive key descriptions', () => {
@@ -93,15 +93,15 @@ describe('Zone', () => {
       const helloLabel = blinkingGrove.textLabels.find((l) => l.text === 'Hello');
       const worldLabel = blinkingGrove.textLabels.find((l) => l.text === 'world!');
 
-      expect(helloLabel.position).toEqual(getAbsolutePosition(6, 5));
-      expect(worldLabel.position).toEqual(getAbsolutePosition(6, 6));
+      expect(helloLabel.position).toEqual(getAbsolutePosition(3, 5));
+      expect(worldLabel.position).toEqual(getAbsolutePosition(4, 5));
     });
   });
 
   describe('Gate', () => {
     test('should create a gate at correct position', () => {
       expect(blinkingGrove.gate).toBeInstanceOf(Gate);
-      expect(blinkingGrove.gate.position).toEqual(getAbsolutePosition(8, 5));
+      expect(blinkingGrove.gate.position).toEqual(getAbsolutePosition(7, 5));
     });
 
     test('should start with gate closed', () => {

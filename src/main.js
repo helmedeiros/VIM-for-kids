@@ -3,7 +3,7 @@ import { VimForKidsGame } from './VimForKidsGame.js';
 let currentGame = null;
 
 // Initialize game with level selection
-function initializeGame(level = 'level1') {
+function initializeGame(level = 'level_1') {
   // Cleanup previous game
   if (currentGame) {
     currentGame.cleanup();
@@ -17,17 +17,22 @@ function initializeGame(level = 'level1') {
 
 // Setup level selection buttons
 function setupLevelSelection() {
-  const level1Btn = document.getElementById('level1');
-  const defaultBtn = document.getElementById('defaultLevel');
+  const levelButtons = [
+    { id: 'level_1', level: 'level_1' },
+    { id: 'level_2', level: 'level_2' },
+    { id: 'level_3', level: 'level_3' },
+    { id: 'level_4', level: 'level_4' },
+    { id: 'level_5', level: 'level_5' },
+  ];
 
-  level1Btn.addEventListener('click', () => {
-    setActiveButton(level1Btn);
-    initializeGame('level1');
-  });
-
-  defaultBtn.addEventListener('click', () => {
-    setActiveButton(defaultBtn);
-    initializeGame('default');
+  levelButtons.forEach(({ id, level }) => {
+    const button = document.getElementById(id);
+    if (button) {
+      button.addEventListener('click', () => {
+        setActiveButton(button);
+        initializeGame(level);
+      });
+    }
   });
 }
 
@@ -41,5 +46,5 @@ function setActiveButton(activeBtn) {
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   setupLevelSelection();
-  initializeGame('level1'); // Start with Level 1 (Welcome Meadow)
+  initializeGame('level_1'); // Start with Level 1 (Blinking Grove)
 });
