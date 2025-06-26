@@ -81,8 +81,28 @@ export class VimForKidsGame {
       this.movePlayerUseCase.execute(direction);
     });
 
+    // Update level selection visibility based on current game
+    this._updateLevelSelectionForCurrentGame();
+
     // Focus the game board
     this.gameRenderer.focus();
+  }
+
+  /**
+   * Update level selection visibility based on current game
+   * @private
+   */
+  _updateLevelSelectionForCurrentGame() {
+    const levelSelection = document.querySelector('.level-selection');
+    if (levelSelection) {
+      if (this.currentGameId === 'cursor-before-clickers') {
+        // Show level selection for level-based games
+        levelSelection.style.display = 'flex';
+      } else {
+        // Hide level selection for free exploration games
+        levelSelection.style.display = 'none';
+      }
+    }
   }
 
   /**
@@ -161,6 +181,11 @@ export class VimForKidsGame {
     // Re-initialize the game with new configuration
     this._initializeGameSync();
     await this._initializeGameAsync();
+
+    // Update UI to reflect the new game
+    if (this.currentGameDescriptor) {
+      this.gameSelectorUI.updateCurrentGame(this.currentGameDescriptor);
+    }
   }
 
   transitionToLevel(newLevelId) {

@@ -42,6 +42,26 @@ export class GameSelectorUI {
     if (titleElement) {
       titleElement.textContent = gameDescriptor.name;
     }
+
+    // Show/hide level selection based on game type
+    this._updateLevelSelectionVisibility(gameDescriptor.gameType);
+  }
+
+  /**
+   * Update level selection visibility based on game type
+   * @private
+   */
+  _updateLevelSelectionVisibility(gameType) {
+    const levelSelection = document.querySelector('.level-selection');
+    if (levelSelection) {
+      if (gameType.isLevelBased()) {
+        // Show level selection for level-based games
+        levelSelection.style.display = 'flex';
+      } else {
+        // Hide level selection for free exploration games
+        levelSelection.style.display = 'none';
+      }
+    }
   }
 
   /**
