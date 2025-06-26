@@ -1,3 +1,5 @@
+import { getFirstLevelId } from '../LevelConfigurations.js';
+
 /**
  * Service responsible for game initialization logic
  * Follows Single Responsibility Principle
@@ -60,7 +62,7 @@ export class GameInitializationService {
     // Set defaults
     return {
       game: options.game || 'cursor-before-clickers',
-      level: options.level || 'level_1',
+      level: options.level || getFirstLevelId(),
       ...options,
     };
   }

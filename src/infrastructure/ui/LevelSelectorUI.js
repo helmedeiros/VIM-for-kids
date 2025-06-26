@@ -1,3 +1,5 @@
+import { getAllLevelConfigurations } from '../../application/LevelConfigurations.js';
+
 /**
  * UI component responsible for level selection
  * Follows Single Responsibility Principle
@@ -20,6 +22,7 @@ export class LevelSelectorUI {
    * Initialize level selection UI
    */
   initialize() {
+    this._createLevelButtons();
     this._setupLevelButtons();
   }
 
@@ -52,6 +55,47 @@ export class LevelSelectorUI {
   }
 
   /**
+   * Create level buttons dynamically
+   * @private
+   */
+  _createLevelButtons() {
+    const levelSelection = document.querySelector('.level-selection');
+    if (!levelSelection) return;
+
+    // Clear existing buttons
+    levelSelection.innerHTML = '';
+
+    // Create buttons from configuration
+    this._levelConfiguration.forEach(({ id }, index) => {
+      const button = document.createElement('button');
+      button.id = id;
+      button.className = 'level-btn';
+      button.textContent = this._getLevelButtonText(id);
+
+      // Set first button as active by default
+      if (index === 0) {
+        button.classList.add('active');
+      }
+
+      levelSelection.appendChild(button);
+    });
+  }
+
+  /**
+   * Get display text for level button
+   * @private
+   */
+  _getLevelButtonText(levelId) {
+    try {
+      const config = getAllLevelConfigurations().find((c) => c.id === levelId);
+      return config ? `Level ${levelId.split('_')[1]}: ${config.name}` : levelId;
+    } catch (error) {
+      // Fallback to level ID if configuration not found
+      return levelId;
+    }
+  }
+
+  /**
    * Setup level selection buttons
    * @private
    */
@@ -70,17 +114,14 @@ export class LevelSelectorUI {
   }
 
   /**
-   * Get default level configuration
+   * Get default level configuration from centralized source
    * @private
    */
   _getDefaultLevelConfiguration() {
-    return [
-      { id: 'level_1', level: 'level_1' },
-      { id: 'level_2', level: 'level_2' },
-      { id: 'level_3', level: 'level_3' },
-      { id: 'level_4', level: 'level_4' },
-      { id: 'level_5', level: 'level_5' },
-    ];
+    return getAllLevelConfigurations().map((config) => ({
+      id: config.id,
+      level: config.id,
+    }));
   }
 
   /**
