@@ -47,99 +47,185 @@ export class DOMGameRenderer extends GameRenderer {
   }
 
   _updateCamera(gameState) {
-    const cursorX = gameState.cursor.position.x;
-    const cursorY = gameState.cursor.position.y;
-    const mapWidth = gameState.map.width || gameState.map.size;
-    const mapHeight = gameState.map.height || gameState.map.size;
+    const cursorPosition = gameState.cursor.position;
+    const currentPositionKey = `${cursorPosition.x},${cursorPosition.y}`;
 
-    // Calculate viewport center
-    const viewportCenterX = Math.floor(this.camera.viewportWidth / 2);
-    const viewportCenterY = Math.floor(this.camera.viewportHeight / 2);
+    if (this._shouldCenterCameraOnZone(cursorPosition, currentPositionKey)) {
+      this._centerCameraOnZoneStart(gameState, cursorPosition, currentPositionKey);
+      return;
+    }
 
-    // Check if this is the first render or cursor position changed significantly (level change)
-    const currentCursorPos = `${cursorX},${cursorY}`;
+    this._updateCameraForScrolling(gameState, cursorPosition, currentPositionKey);
+  }
+
+  _shouldCenterCameraOnZone(cursorPosition, currentPositionKey) {
     const isFirstRender = !this.camera.isInitialized;
-    const cursorPositionChanged = this.camera.lastCursorPosition !== currentCursorPos;
+    const hasPositionChanged = this.camera.lastCursorPosition !== currentPositionKey;
 
-    // Force centering on first render or when cursor jumps to new position (level change)
-    if (isFirstRender || (cursorPositionChanged && this.camera.lastCursorPosition !== null)) {
-      const lastPos = this.camera.lastCursorPosition
-        ? this.camera.lastCursorPosition.split(',').map(Number)
-        : [0, 0];
-      const distanceMoved = Math.abs(cursorX - lastPos[0]) + Math.abs(cursorY - lastPos[1]);
+    if (!isFirstRender && !hasPositionChanged) {
+      return false;
+    }
 
-      // If cursor moved more than 5 tiles, it's likely a level change - force center
-      if (isFirstRender || distanceMoved > 5) {
-        const idealCameraX = Math.max(
-          0,
-          Math.min(cursorX - viewportCenterX, mapWidth - this.camera.viewportWidth)
-        );
-        const idealCameraY = Math.max(
-          0,
-          Math.min(cursorY - viewportCenterY, mapHeight - this.camera.viewportHeight)
-        );
+    if (isFirstRender) {
+      return true;
+    }
 
-        // Set camera position immediately (no smooth scrolling for centering)
-        this.camera.x = idealCameraX;
-        this.camera.y = idealCameraY;
-        this.camera.targetX = idealCameraX;
-        this.camera.targetY = idealCameraY;
-        this.camera.isInitialized = true;
-        this.camera.lastCursorPosition = currentCursorPos;
-        return;
+    const previousPosition = this.camera.lastCursorPosition
+      ? this.camera.lastCursorPosition.split(',').map(Number)
+      : [0, 0];
+
+    const manhattanDistance =
+      Math.abs(cursorPosition.x - previousPosition[0]) +
+      Math.abs(cursorPosition.y - previousPosition[1]);
+
+    return manhattanDistance > 5;
+  }
+
+  _centerCameraOnZoneStart(gameState, cursorPosition, currentPositionKey) {
+    const zoneContentBounds = this._findZoneContentBounds(gameState);
+    const viewportCenter = this._calculateViewportCenter();
+    const mapBounds = this._getMapBounds(gameState);
+
+    const targetCameraPosition = {
+      x: zoneContentBounds.x - viewportCenter.x,
+      y: Math.max(
+        0,
+        Math.min(cursorPosition.y - viewportCenter.y, mapBounds.height - this.camera.viewportHeight)
+      ),
+    };
+
+    this._setCameraPosition(targetCameraPosition);
+    this.camera.isInitialized = true;
+    this.camera.lastCursorPosition = currentPositionKey;
+  }
+
+  _updateCameraForScrolling(gameState, cursorPosition, currentPositionKey) {
+    const viewportCenter = this._calculateViewportCenter();
+    const cursorViewportPosition = this._getCursorViewportPosition(cursorPosition);
+    const scrollThresholds = this._calculateScrollThresholds();
+    const mapBounds = this._getMapBounds(gameState);
+
+    const targetPosition = this._calculateScrollTargetPosition(
+      cursorPosition,
+      viewportCenter,
+      cursorViewportPosition,
+      scrollThresholds
+    );
+
+    const boundedPosition = this._clampCameraToMapBounds(targetPosition, mapBounds);
+
+    this.camera.targetX = boundedPosition.x;
+    this.camera.targetY = boundedPosition.y;
+
+    this._applyCameraMovement();
+    this.camera.lastCursorPosition = currentPositionKey;
+  }
+
+  _findZoneContentBounds(gameState) {
+    const mapBounds = this._getMapBounds(gameState);
+    const contentBounds = { minX: mapBounds.width, minY: mapBounds.height, maxX: 0, maxY: 0 };
+    let hasContent = false;
+
+    for (let y = 0; y < mapBounds.height; y++) {
+      for (let x = 0; x < mapBounds.width; x++) {
+        const tile = gameState.map.getTileAt(new Position(x, y));
+
+        if (tile.name !== 'water') {
+          hasContent = true;
+          contentBounds.minX = Math.min(contentBounds.minX, x);
+          contentBounds.minY = Math.min(contentBounds.minY, y);
+          contentBounds.maxX = Math.max(contentBounds.maxX, x);
+          contentBounds.maxY = Math.max(contentBounds.maxY, y);
+        }
       }
     }
 
-    // Calculate ideal camera position to center cursor
-    let idealCameraX = cursorX - viewportCenterX;
-    let idealCameraY = cursorY - viewportCenterY;
-
-    // Check if cursor is at scroll threshold edges
-    const cursorViewportX = cursorX - this.camera.x;
-    const cursorViewportY = cursorY - this.camera.y;
-
-    const scrollThresholdX = Math.floor(this.camera.viewportWidth * this.camera.scrollThreshold);
-    const scrollThresholdY = Math.floor(this.camera.viewportHeight * this.camera.scrollThreshold);
-
-    // Horizontal scrolling
-    if (cursorViewportX >= scrollThresholdX) {
-      // Cursor is at 70% right edge, scroll right
-      idealCameraX = cursorX - scrollThresholdX;
-    } else if (cursorViewportX <= this.camera.viewportWidth - scrollThresholdX) {
-      // Cursor is at 30% left edge, scroll left
-      idealCameraX = cursorX - (this.camera.viewportWidth - scrollThresholdX);
-    } else {
-      // Keep current camera position
-      idealCameraX = this.camera.targetX;
+    if (!hasContent) {
+      return new Position(Math.floor(mapBounds.width / 2), Math.floor(mapBounds.height / 2));
     }
 
-    // Vertical scrolling
-    if (cursorViewportY >= scrollThresholdY) {
-      // Cursor is at 70% bottom edge, scroll down
-      idealCameraY = cursorY - scrollThresholdY;
-    } else if (cursorViewportY <= this.camera.viewportHeight - scrollThresholdY) {
-      // Cursor is at 30% top edge, scroll up
-      idealCameraY = cursorY - (this.camera.viewportHeight - scrollThresholdY);
+    const contentHeight = contentBounds.maxY - contentBounds.minY + 1;
+    const verticalCenter = contentBounds.minY + Math.floor(contentHeight / 2);
+
+    return new Position(contentBounds.minX, verticalCenter);
+  }
+
+  _calculateViewportCenter() {
+    return {
+      x: Math.floor(this.camera.viewportWidth / 2),
+      y: Math.floor(this.camera.viewportHeight / 2),
+    };
+  }
+
+  _getMapBounds(gameState) {
+    return {
+      width: gameState.map.width || gameState.map.size,
+      height: gameState.map.height || gameState.map.size,
+    };
+  }
+
+  _setCameraPosition(targetPosition) {
+    this.camera.x = targetPosition.x;
+    this.camera.y = targetPosition.y;
+    this.camera.targetX = targetPosition.x;
+    this.camera.targetY = targetPosition.y;
+  }
+
+  _getCursorViewportPosition(cursorPosition) {
+    return {
+      x: cursorPosition.x - this.camera.x,
+      y: cursorPosition.y - this.camera.y,
+    };
+  }
+
+  _calculateScrollThresholds() {
+    return {
+      x: Math.floor(this.camera.viewportWidth * this.camera.scrollThreshold),
+      y: Math.floor(this.camera.viewportHeight * this.camera.scrollThreshold),
+    };
+  }
+
+  _calculateScrollTargetPosition(
+    cursorPosition,
+    viewportCenter,
+    cursorViewportPosition,
+    scrollThresholds
+  ) {
+    let targetX = cursorPosition.x - viewportCenter.x;
+    let targetY = cursorPosition.y - viewportCenter.y;
+
+    if (cursorViewportPosition.x >= scrollThresholds.x) {
+      targetX = cursorPosition.x - scrollThresholds.x;
+    } else if (cursorViewportPosition.x <= this.camera.viewportWidth - scrollThresholds.x) {
+      targetX = cursorPosition.x - (this.camera.viewportWidth - scrollThresholds.x);
     } else {
-      // Keep current camera position
-      idealCameraY = this.camera.targetY;
+      targetX = this.camera.targetX;
     }
 
-    // Clamp camera to map boundaries
-    idealCameraX = Math.max(0, Math.min(idealCameraX, mapWidth - this.camera.viewportWidth));
-    idealCameraY = Math.max(0, Math.min(idealCameraY, mapHeight - this.camera.viewportHeight));
+    if (cursorViewportPosition.y >= scrollThresholds.y) {
+      targetY = cursorPosition.y - scrollThresholds.y;
+    } else if (cursorViewportPosition.y <= this.camera.viewportHeight - scrollThresholds.y) {
+      targetY = cursorPosition.y - (this.camera.viewportHeight - scrollThresholds.y);
+    } else {
+      targetY = this.camera.targetY;
+    }
 
-    // Update target position for smooth scrolling
-    this.camera.targetX = idealCameraX;
-    this.camera.targetY = idealCameraY;
+    return { x: targetX, y: targetY };
+  }
 
-    // Apply smooth scrolling
+  _clampCameraToMapBounds(targetPosition, mapBounds) {
+    return {
+      x: Math.min(targetPosition.x, mapBounds.width - this.camera.viewportWidth),
+      y: Math.max(0, Math.min(targetPosition.y, mapBounds.height - this.camera.viewportHeight)),
+    };
+  }
+
+  _applyCameraMovement() {
     if (this.camera.smoothScrolling) {
       const smoothingFactor = 0.15;
       this.camera.x += (this.camera.targetX - this.camera.x) * smoothingFactor;
       this.camera.y += (this.camera.targetY - this.camera.y) * smoothingFactor;
 
-      // Snap to target if very close
       if (Math.abs(this.camera.targetX - this.camera.x) < 0.1) {
         this.camera.x = this.camera.targetX;
       }
@@ -150,61 +236,51 @@ export class DOMGameRenderer extends GameRenderer {
       this.camera.x = this.camera.targetX;
       this.camera.y = this.camera.targetY;
     }
-
-    // Update last cursor position for next frame
-    this.camera.lastCursorPosition = currentCursorPos;
   }
 
   render(gameState) {
-    // Update camera position based on cursor
     this._updateCamera(gameState);
-
     this.gameBoard.innerHTML = '';
 
-    // Set appropriate CSS class for different levels
     if (gameState.textLabels || gameState.gate) {
       this.gameBoard.className = 'game-board welcome-meadow';
     } else {
       this.gameBoard.className = 'game-board';
     }
 
-    // Set viewport grid dimensions (not full map dimensions)
     this.gameBoard.style.setProperty('--grid-cols', this.camera.viewportWidth);
     this.gameBoard.style.setProperty('--grid-rows', this.camera.viewportHeight);
 
-    // Calculate visible tile range
-    const startX = Math.floor(this.camera.x);
-    const startY = Math.floor(this.camera.y);
+    const cameraTopLeft = {
+      x: Math.floor(this.camera.x),
+      y: Math.floor(this.camera.y),
+    };
 
-    // Render only visible tiles
-    for (let viewportY = 0; viewportY < this.camera.viewportHeight; viewportY++) {
-      for (let viewportX = 0; viewportX < this.camera.viewportWidth; viewportX++) {
-        const worldX = startX + viewportX;
-        const worldY = startY + viewportY;
+    for (let row = 0; row < this.camera.viewportHeight; row++) {
+      for (let col = 0; col < this.camera.viewportWidth; col++) {
+        const worldPosition = {
+          x: cameraTopLeft.x + col,
+          y: cameraTopLeft.y + row,
+        };
 
         const tile = document.createElement('div');
         tile.className = 'tile';
 
-        // Check if this tile is within the map bounds
         if (
-          worldX >= 0 &&
-          worldX < (gameState.map.width || gameState.map.size) &&
-          worldY >= 0 &&
-          worldY < (gameState.map.height || gameState.map.size)
+          worldPosition.x >= 0 &&
+          worldPosition.x < (gameState.map.width || gameState.map.size) &&
+          worldPosition.y >= 0 &&
+          worldPosition.y < (gameState.map.height || gameState.map.size)
         ) {
-          const position = new Position(worldX, worldY);
-
-          // Set base tile type
+          const position = new Position(worldPosition.x, worldPosition.y);
           const tileType = gameState.map.getTileAt(position);
           tile.classList.add(tileType.name);
 
-          // Add cursor
           if (gameState.cursor.position.equals(position)) {
             tile.classList.add('cursor');
             tile.textContent = '●';
           }
 
-          // Add collectible keys
           const key = gameState.availableKeys.find((k) => k.position.equals(position));
           if (key) {
             tile.classList.add('key');
@@ -239,7 +315,7 @@ export class DOMGameRenderer extends GameRenderer {
           if (gameState.npcs) {
             const npc = gameState.npcs.find((n) => {
               if (n.position && Array.isArray(n.position)) {
-                return n.position[0] === worldX && n.position[1] === worldY;
+                return n.position[0] === worldPosition.x && n.position[1] === worldPosition.y;
               }
               return false;
             });
@@ -250,14 +326,11 @@ export class DOMGameRenderer extends GameRenderer {
             }
           }
         } else {
-          // Outside map bounds - render as empty/void
-          tile.classList.add('void');
-          tile.style.backgroundColor = '#1a1a1a';
+          tile.classList.add('water');
         }
 
-        // Set explicit grid position to ensure proper alignment
-        tile.style.gridColumn = viewportX + 1;
-        tile.style.gridRow = viewportY + 1;
+        tile.style.gridColumn = col + 1;
+        tile.style.gridRow = row + 1;
 
         this.gameBoard.appendChild(tile);
       }
