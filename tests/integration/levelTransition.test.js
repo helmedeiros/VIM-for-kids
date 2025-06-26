@@ -93,7 +93,7 @@ describe('Level Transition Integration', () => {
       global.window.vimForKidsGame = game;
     });
 
-    it('should transition to level 2 when completing level 1', () => {
+    it('should transition to level 2 when completing level 1', async () => {
       expect(game.currentLevel).toBe('level_1');
       expect(game.gameState.getCurrentZoneId()).toBe('zone_1');
 
@@ -115,7 +115,7 @@ describe('Level Transition Integration', () => {
       expect(game.gameState.shouldProgressToNextLevel()).toBe(true);
 
       // Test the transitionToLevel method directly
-      game.transitionToLevel('level_2');
+      await game.transitionToLevel('level_2');
 
       // Verify level transition
       expect(game.currentLevel).toBe('level_2');
@@ -131,7 +131,7 @@ describe('Level Transition Integration', () => {
       global.window.vimForKidsGame = game;
     });
 
-    it('should transition through zones then to next level', () => {
+    it('should transition through zones then to next level', async () => {
       expect(game.currentLevel).toBe('level_2');
       expect(game.gameState.getCurrentZoneId()).toBe('zone_2');
       expect(game.gameState.getTotalZones()).toBe(2);
@@ -174,7 +174,7 @@ describe('Level Transition Integration', () => {
       expect(progressionResult2.nextLevelId).toBe('level_3');
 
       // Test the transitionToLevel method
-      game.transitionToLevel('level_3');
+      await game.transitionToLevel('level_3');
 
       // Verify level transition
       expect(game.currentLevel).toBe('level_3');
@@ -192,11 +192,11 @@ describe('Level Transition Integration', () => {
       expect(typeof game.transitionToLevel).toBe('function');
     });
 
-    it('should clean up previous state when transitioning', () => {
+    it('should clean up previous state when transitioning', async () => {
       const originalCleanup = game.cleanup;
       game.cleanup = jest.fn();
 
-      game.transitionToLevel('level_2');
+      await game.transitionToLevel('level_2');
 
       expect(game.cleanup).toHaveBeenCalled();
 
@@ -204,16 +204,16 @@ describe('Level Transition Integration', () => {
       game.cleanup = originalCleanup;
     });
 
-    it('should update current level when transitioning', () => {
+    it('should update current level when transitioning', async () => {
       expect(game.currentLevel).toBe('level_1');
 
-      game.transitionToLevel('level_3');
+      await game.transitionToLevel('level_3');
 
       expect(game.currentLevel).toBe('level_3');
       expect(game.gameState.getCurrentZoneId()).toBe('zone_4');
     });
 
-    it('should update UI button state when transitioning', () => {
+    it('should update UI button state when transitioning', async () => {
       // Mock the level button elements
       const mockLevel1Button = { classList: { add: jest.fn(), remove: jest.fn() } };
       const mockLevel3Button = { classList: { add: jest.fn(), remove: jest.fn() } };
@@ -226,7 +226,7 @@ describe('Level Transition Integration', () => {
         return null;
       });
 
-      game.transitionToLevel('level_3');
+      await game.transitionToLevel('level_3');
 
       // Should remove active class from all buttons
       // eslint-disable-next-line no-undef

@@ -107,9 +107,9 @@ export class MovePlayerUseCase {
     }
 
     // Trigger level transition through the global game instance
-    setTimeout(() => {
+    setTimeout(async () => {
       if (window.vimForKidsGame && typeof window.vimForKidsGame.transitionToLevel === 'function') {
-        window.vimForKidsGame.transitionToLevel(nextLevelId);
+        await window.vimForKidsGame.transitionToLevel(nextLevelId);
       } else {
         // Fallback: reload page with new level parameter
         const currentUrl = new URL(window.location);

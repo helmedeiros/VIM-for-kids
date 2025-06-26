@@ -235,15 +235,27 @@ export class VimForKidsGame {
     window.history.pushState({}, '', currentUrl.toString());
   }
 
-  transitionToLevel(newLevelId) {
+  async transitionToLevel(newLevelId) {
     // Clean up current game state
     this.cleanup();
 
     // Update current level
     this.currentLevel = newLevelId;
 
+    // Recreate UI components that were cleaned up
+    this.gameSelectorUI = new GameSelectorUI();
+    this.inputHandler = new KeyboardInputHandler(this.gameRenderer.gameBoard);
+
     // Re-initialize the game using sync method
     this._initializeGameSync();
+
+    // Then enhance with async features (this sets up the gear icon)
+    await this._initializeGameAsync();
+
+    // Update UI to reflect the current game
+    if (this.currentGameDescriptor) {
+      this.gameSelectorUI.updateCurrentGame(this.currentGameDescriptor);
+    }
 
     // Update the active level button in the UI
     this._updateActiveLevelButton(newLevelId);
