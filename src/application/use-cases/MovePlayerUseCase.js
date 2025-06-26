@@ -21,6 +21,9 @@ export class MovePlayerUseCase {
     // Check for key collection
     this._checkKeyCollection();
 
+    // Check for progression after moving
+    this._checkProgression();
+
     // Re-render the game
     this._gameRenderer.render(this._gameState.getCurrentState());
   }
@@ -32,9 +35,12 @@ export class MovePlayerUseCase {
     }
 
     // Then check if there's a gate at this position and if it's walkable
-    const gate = this._gameState.getGate();
-    if (gate && gate.position.equals(position)) {
-      return gate.isWalkable();
+    // Only check gates if the game state supports them (backward compatibility)
+    if (typeof this._gameState.getGate === 'function') {
+      const gate = this._gameState.getGate();
+      if (gate && gate.position.equals(position)) {
+        return gate.isWalkable();
+      }
     }
 
     return true;
@@ -66,5 +72,50 @@ export class MovePlayerUseCase {
       this._gameState.collectKey(keyAtPosition);
       this._gameRenderer.showKeyInfo(keyAtPosition);
     }
+  }
+
+  _checkProgression() {
+    // Check if progression should happen (only if game state supports it)
+    if (typeof this._gameState.executeProgression === 'function') {
+      const progressionResult = this._gameState.executeProgression();
+
+      if (progressionResult.type === 'zone') {
+        this._handleZoneProgression(progressionResult.newZoneId);
+      } else if (progressionResult.type === 'level') {
+        this._handleLevelProgression(progressionResult.nextLevelId);
+      }
+    }
+  }
+
+  _handleZoneProgression(newZoneId) {
+    // Show zone progression message
+    if (this._gameRenderer.showMessage) {
+      this._gameRenderer.showMessage(`Progressing to ${newZoneId}...`);
+    }
+
+    // The zone has already been loaded by executeProgression
+    // Just need to re-render with new state
+  }
+
+  _handleLevelProgression(nextLevelId) {
+    // Show level progression message
+    if (this._gameRenderer.showMessage) {
+      this._gameRenderer.showMessage(`Level Complete! Progressing to ${nextLevelId}...`);
+    } else {
+      // Fallback to alert if showMessage is not available
+      alert(`Level Complete! Progressing to ${nextLevelId}...`);
+    }
+
+    // Trigger level transition through the global game instance
+    setTimeout(() => {
+      if (window.vimForKidsGame && typeof window.vimForKidsGame.transitionToLevel === 'function') {
+        window.vimForKidsGame.transitionToLevel(nextLevelId);
+      } else {
+        // Fallback: reload page with new level parameter
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.set('level', nextLevelId);
+        window.location.href = currentUrl.toString();
+      }
+    }, 2000); // 2 second delay to show the message
   }
 }

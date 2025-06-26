@@ -29,6 +29,7 @@ export class VimForKidsGame {
         const levelConfig = getLevelConfiguration(this.currentLevel);
         return new LevelGameState(this.zoneProvider, levelConfig);
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.warn(`Level ${this.currentLevel} not found, defaulting to level_1`);
         const defaultConfig = getLevelConfiguration('level_1');
         return new LevelGameState(this.zoneProvider, defaultConfig);
@@ -50,6 +51,44 @@ export class VimForKidsGame {
 
     // Focus the game board
     this.gameRenderer.focus();
+  }
+
+  transitionToLevel(newLevelId) {
+    // Clean up current game state
+    this.cleanup();
+
+    // Update current level
+    this.currentLevel = newLevelId;
+
+    // Create new game state for the new level
+    this.gameState = this._createGameState();
+
+    // Create new move player use case with updated game state
+    this.movePlayerUseCase = new MovePlayerUseCase(this.gameState, this.gameRenderer);
+
+    // Re-initialize the game
+    this.initializeGame();
+
+    // Update the active level button in the UI
+    this._updateActiveLevelButton(newLevelId);
+
+    // Update URL without page reload
+    const currentUrl = new URL(window.location);
+    currentUrl.searchParams.set('level', newLevelId);
+    window.history.pushState({}, '', currentUrl.toString());
+  }
+
+  _updateActiveLevelButton(levelId) {
+    // Remove active class from all level buttons
+    document.querySelectorAll('.level-btn').forEach((btn) => {
+      btn.classList.remove('active');
+    });
+
+    // Add active class to the current level button
+    const activeButton = document.getElementById(levelId);
+    if (activeButton) {
+      activeButton.classList.add('active');
+    }
   }
 
   cleanup() {

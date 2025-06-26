@@ -43,8 +43,22 @@ function setActiveButton(activeBtn) {
   activeBtn.classList.add('active');
 }
 
+// Get level from URL parameters
+function getLevelFromURL() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const level = urlParams.get('level');
+  return level && level.startsWith('level_') ? level : 'level_1';
+}
+
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   setupLevelSelection();
-  initializeGame('level_1'); // Start with Level 1 (Blinking Grove)
+  const initialLevel = getLevelFromURL();
+  initializeGame(initialLevel);
+
+  // Set the active button for the current level
+  const activeButton = document.getElementById(initialLevel);
+  if (activeButton) {
+    setActiveButton(activeButton);
+  }
 });

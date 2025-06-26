@@ -1,4 +1,5 @@
 import { Cursor } from '../domain/entities/Cursor.js';
+import { getNextLevel } from './LevelConfigurations.js';
 
 export class LevelGameState {
   constructor(zoneProvider, levelConfig) {
@@ -76,12 +77,15 @@ export class LevelGameState {
 
   // Level Management
   isLevelComplete() {
-    // Level is complete when all zones are completed AND we're at the last zone and it's complete
-    const allZonesCompleted = this._completedZones.size === this._levelConfig.zones.length - 1;
-    const lastZoneComplete =
-      this.isCurrentZoneComplete() && this._currentZoneIndex === this._levelConfig.zones.length - 1;
+    // Level is complete when:
+    // 1. We're at the last zone (index === length - 1)
+    // 2. The current zone is complete
+    // 3. All previous zones are marked as completed
+    const isAtLastZone = this._currentZoneIndex === this._levelConfig.zones.length - 1;
+    const currentZoneComplete = this.isCurrentZoneComplete();
+    const allPreviousZonesCompleted = this._completedZones.size === this._currentZoneIndex;
 
-    return allZonesCompleted && lastZoneComplete;
+    return isAtLastZone && currentZoneComplete && allPreviousZonesCompleted;
   }
 
   getCompletedZones() {
@@ -145,6 +149,49 @@ export class LevelGameState {
 
   getNPCs() {
     return this.zone.getActiveNPCs();
+  }
+
+  // Progression Methods for Gate Interaction
+  shouldProgressToNextZone() {
+    // Can progress to next zone if:
+    // 1. Current zone is complete
+    // 2. There is a next zone in the current level
+    // 3. Cursor is at the gate position
+    const gate = this.getGate();
+    const isAtGate = gate && this.cursor.position.equals(gate.position);
+
+    return this.isCurrentZoneComplete() && this.hasNextZone() && isAtGate;
+  }
+
+  shouldProgressToNextLevel() {
+    // Can progress to next level if:
+    // 1. Current level is complete (all zones done)
+    // 2. Cursor is at the gate position
+    // 3. There is a next level available
+    const gate = this.getGate();
+    const isAtGate = gate && this.cursor.position.equals(gate.position);
+    const hasNextLevel = getNextLevel(this._levelConfig.id) !== null;
+
+    return this.isLevelComplete() && isAtGate && hasNextLevel;
+  }
+
+  isGameComplete() {
+    // Game is complete when level is complete and there's no next level
+    const hasNextLevel = getNextLevel(this._levelConfig.id) !== null;
+    return this.isLevelComplete() && !hasNextLevel;
+  }
+
+  executeProgression() {
+    // Execute the appropriate progression based on current state
+    if (this.shouldProgressToNextZone()) {
+      this.progressToNextZone();
+      return { type: 'zone', newZoneId: this.getCurrentZoneId() };
+    } else if (this.shouldProgressToNextLevel()) {
+      const nextLevel = getNextLevel(this._levelConfig.id);
+      return { type: 'level', nextLevelId: nextLevel.id };
+    }
+
+    return { type: 'none' };
   }
 
   cleanup() {
