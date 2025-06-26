@@ -251,6 +251,55 @@ describe('Blinking Grove Game Integration', () => {
       expect(game.gameState.cursor.position).toEqual(gatePos);
       expect(game.gameState.map.isWalkable(gatePos)).toBe(true);
     });
+
+    it('should prevent cursor from moving through closed gate', () => {
+      const gate = game.gameState.getGate();
+
+      // Ensure gate is closed (no keys collected)
+      expect(gate.isOpen).toBe(false);
+      expect(gate.isWalkable()).toBe(false);
+
+      // Position cursor adjacent to gate
+      const gatePos = gate.position;
+      const adjacentPos = gatePos.move(-1, 0); // Position to the left of gate
+
+      // Move cursor to position adjacent to gate
+      game.gameState.cursor = game.gameState.cursor.moveTo(adjacentPos);
+      const initialPosition = game.gameState.cursor.position;
+
+      // Try to move through the closed gate using MovePlayerUseCase
+      game.movePlayerUseCase.execute('right'); // Should be blocked
+
+      // Cursor should remain in the same position
+      expect(game.gameState.cursor.position).toEqual(initialPosition);
+    });
+
+    it('should allow cursor to move through open gate using movement commands', () => {
+      const gate = game.gameState.getGate();
+      const keys = game.gameState.availableKeys;
+
+      // Collect all keys to open gate
+      keys.forEach((key) => {
+        game.gameState.collectKey(key);
+      });
+
+      // Ensure gate is now open
+      expect(gate.isOpen).toBe(true);
+      expect(gate.isWalkable()).toBe(true);
+
+      // Position cursor adjacent to gate
+      const gatePos = gate.position;
+      const adjacentPos = gatePos.move(-1, 0); // Position to the left of gate
+
+      // Move cursor to position adjacent to gate
+      game.gameState.cursor = game.gameState.cursor.moveTo(adjacentPos);
+
+      // Move through the open gate using MovePlayerUseCase
+      game.movePlayerUseCase.execute('right'); // Should succeed
+
+      // Cursor should now be at the gate position
+      expect(game.gameState.cursor.position).toEqual(gatePos);
+    });
   });
 
   describe('Level Completion', () => {
