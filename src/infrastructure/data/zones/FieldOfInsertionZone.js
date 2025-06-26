@@ -20,8 +20,8 @@ export class FieldOfInsertionZone {
         'The Scribe waits to share the poetry of the Insert Path.',
       ],
 
-      // Entry connects from Zone 4's gate at [48,31] - place entry at bottom-right
-      cursorStartPosition: new Position(48, 31),
+      // Entry from Zone 4 - place cursor at the beginning of the path
+      cursorStartPosition: new Position(49, 31),
 
       tiles: {
         tileType: 'grass_field',

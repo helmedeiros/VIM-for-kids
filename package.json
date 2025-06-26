@@ -22,6 +22,9 @@
     "prepare": "husky install",
     "pre-commit": "lint-staged",
     "validate": "npm run lint && npm run format:check && npm run test && npm run build",
+    "validate:cursors": "node scripts/validate-cursor-positions.js",
+    "validate:cursors:report": "node scripts/validate-cursor-positions.js --report",
+    "test:cursors": "jest tests/integration/cursorPositionValidation.test.js",
     "commit:help": "./scripts/commit-helper.sh",
     "commit:ai": "./scripts/ai-commit.sh"
   },
@@ -136,5 +139,8 @@
     "*.{json,md,html,css}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "glob": "^10.4.5"
   }
 }

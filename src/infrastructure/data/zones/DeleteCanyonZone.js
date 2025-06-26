@@ -20,8 +20,8 @@ export class DeleteCanyonZone {
         'Learn to cut away the corruption, but be precise - one wrong cut and all is lost.',
       ],
 
-      // Entry connects from Zone 3's gate at [1,30] - place entry at bottom-left
-      cursorStartPosition: new Position(1, 31),
+      // Entry from Zone 3 - place cursor at the beginning of the path
+      cursorStartPosition: new Position(0, 31),
 
       tiles: {
         tileType: 'canyon_floor',

@@ -20,7 +20,7 @@ export class SwampOfWordsZone {
         'The Word Witch watches from the mist, testing your understanding.',
       ],
 
-      // Entry connects from Zone 2's gate at [47,28] - place entry at top-right
+      // Entry from Zone 2 - place cursor at the beginning of the path (within bounds)
       cursorStartPosition: new Position(47, 0),
 
       tiles: {

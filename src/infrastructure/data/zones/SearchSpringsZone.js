@@ -20,7 +20,7 @@ export class SearchSpringsZone {
         'Find the true word to unlock the deep paths.',
       ],
 
-      // Entry connects from Zone 6's gate at [25,31] - place entry at bottom-center
+      // Entry from Zone 6 - place cursor at the beginning of the path
       cursorStartPosition: new Position(25, 31),
 
       tiles: {

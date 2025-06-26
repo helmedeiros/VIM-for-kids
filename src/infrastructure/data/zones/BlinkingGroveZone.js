@@ -14,8 +14,8 @@ export class BlinkingGroveZone {
       skillFocus: ['h', 'j', 'k', 'l'],
       puzzleTheme: 'Basic movement, bump-to-talk',
 
-      // Custom cursor start position - center the cursor horizontally in the 100x8 map
-      cursorStartPosition: new Position(50, 1),
+      // Custom cursor start position - at the beginning of the zone content
+      cursorStartPosition: new Position(1, 1),
       narration: [
         'Once, the world was clear. Text flowed like rivers, perfectly aligned. But the Bugs came...',
         'Then, from the Blinking Grove, a spark appeared. A light not of fire… but of focus. You.',
@@ -153,8 +153,8 @@ export class BlinkingGroveZone {
       skillFocus: ['h', 'j', 'k', 'l'],
       puzzleTheme: 'Basic movement, bump-to-talk',
 
-      // Custom cursor start position - center the cursor horizontally in the 100x8 map
-      cursorStartPosition: new Position(50, 1),
+      // Custom cursor start position - at the beginning of the zone content
+      cursorStartPosition: new Position(1, 1),
       narration: [
         'Once, the world was clear. Text flowed like rivers, perfectly aligned. But the Bugs came...',
         'Then, from the Blinking Grove, a spark appeared. A light not of fire… but of focus. You.',

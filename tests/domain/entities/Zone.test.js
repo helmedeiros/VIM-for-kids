@@ -206,7 +206,7 @@ describe('Zone', () => {
   describe('Cursor Start Position', () => {
     test('should provide cursor start position', () => {
       const startPosition = blinkingGrove.getCursorStartPosition();
-      expect(startPosition).toEqual(new Position(56, 10)); // Absolute position for zone-relative (50, 1)
+      expect(startPosition).toEqual(new Position(7, 10)); // Absolute position for zone-relative (1, 1)
     });
   });
 

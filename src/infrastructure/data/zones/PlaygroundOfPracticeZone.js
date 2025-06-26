@@ -37,8 +37,8 @@ export class PlaygroundOfPracticeZone {
         'The friendly spirits watch, but they offer only encouragement.',
       ],
 
-      // Entry connects from Zone 8's gate at [25,31] - place entry at bottom-center
-      cursorStartPosition: new Position(25, 31),
+      // Entry from Zone 8 - place cursor at the beginning of the path (on walkable tile)
+      cursorStartPosition: new Position(24, 31),
 
       tiles: {
         tileType: 'practice_ground',
