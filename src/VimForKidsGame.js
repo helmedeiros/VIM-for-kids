@@ -182,6 +182,10 @@ export class VimForKidsGame {
     // Persist game selection
     this._persistGameSelection(gameId);
 
+    // Recreate UI components that were cleaned up
+    this.gameSelectorUI = new GameSelectorUI();
+    this.inputHandler = new KeyboardInputHandler(this.gameRenderer.gameBoard);
+
     // Re-initialize the game with new configuration
     this._initializeGameSync();
     await this._initializeGameAsync();
