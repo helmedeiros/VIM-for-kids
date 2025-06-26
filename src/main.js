@@ -3,15 +3,25 @@ import { VimForKidsGame } from './VimForKidsGame.js';
 let currentGame = null;
 
 // Initialize game with level selection
-function initializeGame(level = 'level_1') {
+function initializeGame(options = {}) {
   // Cleanup previous game
   if (currentGame) {
     currentGame.cleanup();
   }
 
-  // Create new game with selected level
-  const options = { level: level };
-  currentGame = new VimForKidsGame(options);
+  // Handle backward compatibility - if options is a string, treat it as level
+  if (typeof options === 'string') {
+    options = { level: options };
+  }
+
+  // Set defaults
+  const gameOptions = {
+    game: options.game || 'cursor-before-clickers',
+    level: options.level || 'level_1',
+    ...options,
+  };
+
+  currentGame = new VimForKidsGame(gameOptions);
   window.vimForKidsGame = currentGame;
 }
 
@@ -50,15 +60,51 @@ function getLevelFromURL() {
   return level && level.startsWith('level_') ? level : 'level_1';
 }
 
+// Get game from URL parameters or localStorage
+function getGameFromURL() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const gameParam = urlParams.get('game');
+
+  // Check URL parameter first
+  if (gameParam) {
+    // Store in localStorage for persistence
+    localStorage.setItem('selectedGame', gameParam);
+    return gameParam;
+  }
+
+  // Fallback to localStorage
+  const storedGame = localStorage.getItem('selectedGame');
+  if (storedGame) {
+    return storedGame;
+  }
+
+  // Default to level-based game
+  return 'cursor-before-clickers';
+}
+
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   setupLevelSelection();
-  const initialLevel = getLevelFromURL();
-  initializeGame(initialLevel);
 
-  // Set the active button for the current level
-  const activeButton = document.getElementById(initialLevel);
-  if (activeButton) {
-    setActiveButton(activeButton);
+  // Get initial game and level
+  const initialGame = getGameFromURL();
+  const initialLevel = getLevelFromURL();
+
+  // Initialize with the appropriate options based on game type
+  let options;
+  if (initialGame === 'cursor-textland') {
+    options = { game: initialGame };
+  } else {
+    options = { game: initialGame, level: initialLevel };
+  }
+
+  initializeGame(options);
+
+  // Set the active button for the current level (only for level-based games)
+  if (initialGame === 'cursor-before-clickers') {
+    const activeButton = document.getElementById(initialLevel);
+    if (activeButton) {
+      setActiveButton(activeButton);
+    }
   }
 });

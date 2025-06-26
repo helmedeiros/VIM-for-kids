@@ -12,7 +12,8 @@ import { GameSelectorUI } from './infrastructure/ui/GameSelectorUI.js';
 export class VimForKidsGame {
   constructor(options = {}) {
     // Support both old level-based initialization and new game-based initialization
-    this.currentGameId = options.gameId || this._mapLevelToGameId(options.level || 'level_1');
+    this.currentGameId =
+      options.game || options.gameId || this._mapLevelToGameId(options.level || 'level_1');
     this.currentLevel = options.level || 'level_1';
 
     // Create infrastructure adapters
@@ -178,6 +179,9 @@ export class VimForKidsGame {
       this.currentLevel = 'level_1';
     }
 
+    // Persist game selection
+    this._persistGameSelection(gameId);
+
     // Re-initialize the game with new configuration
     this._initializeGameSync();
     await this._initializeGameAsync();
@@ -186,6 +190,29 @@ export class VimForKidsGame {
     if (this.currentGameDescriptor) {
       this.gameSelectorUI.updateCurrentGame(this.currentGameDescriptor);
     }
+  }
+
+  /**
+   * Persist game selection to URL and localStorage
+   * @private
+   */
+  _persistGameSelection(gameId) {
+    // Store in localStorage
+    localStorage.setItem('selectedGame', gameId);
+
+    // Update URL without page reload
+    const currentUrl = new URL(window.location);
+    currentUrl.searchParams.set('game', gameId);
+
+    // For level-based games, also set the level parameter
+    if (gameId === 'cursor-before-clickers') {
+      currentUrl.searchParams.set('level', this.currentLevel);
+    } else {
+      // Remove level parameter for non-level games
+      currentUrl.searchParams.delete('level');
+    }
+
+    window.history.pushState({}, '', currentUrl.toString());
   }
 
   transitionToLevel(newLevelId) {
