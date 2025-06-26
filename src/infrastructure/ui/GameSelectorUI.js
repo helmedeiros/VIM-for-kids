@@ -193,6 +193,15 @@ export class GameSelectorUI {
       modal.classList.remove('hidden');
       this._isVisible = true;
 
+      // Debug: Force styles for better visibility
+      modal.style.zIndex = '99999';
+      modal.style.position = 'fixed';
+      modal.style.top = '0';
+      modal.style.left = '0';
+      modal.style.width = '100%';
+      modal.style.height = '100%';
+      modal.style.display = 'flex';
+
       // Focus management for accessibility
       const firstFocusable = modal.querySelector('.close-button');
       if (firstFocusable) {
@@ -210,6 +219,15 @@ export class GameSelectorUI {
     if (modal) {
       modal.classList.add('hidden');
       this._isVisible = false;
+
+      // Clean up inline styles
+      modal.style.zIndex = '';
+      modal.style.position = '';
+      modal.style.top = '';
+      modal.style.left = '';
+      modal.style.width = '';
+      modal.style.height = '';
+      modal.style.display = '';
 
       // Return focus to settings button
       const settingsButton = document.getElementById('gameSettingsButton');
