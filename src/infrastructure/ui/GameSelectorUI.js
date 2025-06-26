@@ -249,10 +249,11 @@ export class GameSelectorUI {
       modal.style.height = '';
       modal.style.display = '';
 
-      // Return focus to settings button
-      const settingsButton = document.getElementById('gameSettingsButton');
-      if (settingsButton) {
-        settingsButton.focus();
+      // Return focus to game board instead of settings button
+      // This ensures keyboard input goes to the game, not the UI
+      const gameBoard = document.getElementById('gameBoard');
+      if (gameBoard) {
+        gameBoard.focus();
       }
     }
   }
