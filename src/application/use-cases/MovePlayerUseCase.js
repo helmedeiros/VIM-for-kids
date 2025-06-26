@@ -10,8 +10,8 @@ export class MovePlayerUseCase {
     const currentPosition = this._gameState.cursor.position;
     const newPosition = this._calculateNewPosition(currentPosition, direction);
 
-    // Check if move is valid
-    if (!this._gameState.map.isWalkable(newPosition)) {
+    // Check if move is valid (both map and gate walkability)
+    if (!this._isPositionWalkable(newPosition)) {
       return; // Invalid move, do nothing
     }
 
@@ -23,6 +23,21 @@ export class MovePlayerUseCase {
 
     // Re-render the game
     this._gameRenderer.render(this._gameState.getCurrentState());
+  }
+
+  _isPositionWalkable(position) {
+    // First check if the map position is walkable
+    if (!this._gameState.map.isWalkable(position)) {
+      return false;
+    }
+
+    // Then check if there's a gate at this position and if it's walkable
+    const gate = this._gameState.getGate();
+    if (gate && gate.position.equals(position)) {
+      return gate.isWalkable();
+    }
+
+    return true;
   }
 
   _calculateNewPosition(currentPosition, direction) {
