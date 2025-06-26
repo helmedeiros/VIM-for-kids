@@ -20,7 +20,7 @@ export class CommandCavernZone {
         'The Syntax Spirit demands exact precision.',
       ],
 
-      // Entry connects from Zone 7's gate at [25,0] - place entry at top-center
+      // Entry from Zone 7 - place cursor at the beginning of the path
       cursorStartPosition: new Position(25, 0),
 
       tiles: {

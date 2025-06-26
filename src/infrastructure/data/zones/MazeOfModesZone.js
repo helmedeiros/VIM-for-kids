@@ -20,7 +20,7 @@ export class MazeOfModesZone {
         'Master the transitions, young Cursor, for modes are the keys to power.',
       ],
 
-      // Entry connects from Zone 1's gate at [8,5] - place entry at [0,5]
+      // Entry from Zone 1 - place cursor at the beginning of the path
       cursorStartPosition: new Position(0, 5),
 
       tiles: {

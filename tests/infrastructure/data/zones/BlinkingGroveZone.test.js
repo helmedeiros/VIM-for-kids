@@ -145,7 +145,7 @@ describe('BlinkingGroveZone', () => {
       const startPosition = zone.getCursorStartPosition();
       // Create a test map with the correct dimensions (100x8)
       // BlinkingGroveZone now has custom cursor start position
-      expect(startPosition).toEqual(new Position(56, 10)); // Absolute position for zone-relative (50, 1)
+      expect(startPosition).toEqual(new Position(7, 10)); // Absolute position for zone-relative (1, 1)
     });
 
     test('should have gate initially closed', () => {

@@ -20,7 +20,7 @@ export class CopyCircleZone {
         'The Yanker teaches the harmony of duplication and placement.',
       ],
 
-      // Entry connects from Zone 5's gate at [25,0] - place entry at top-center
+      // Entry from Zone 5 - place cursor at the beginning of the path
       cursorStartPosition: new Position(25, 0),
 
       tiles: {

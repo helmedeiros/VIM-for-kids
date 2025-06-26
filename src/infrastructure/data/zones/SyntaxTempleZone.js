@@ -20,7 +20,7 @@ export class SyntaxTempleZone {
         'This is your final trial, Cursor. Save Textland.',
       ],
 
-      // Entry connects from Zone 9's gate at [25,0] - place entry at top-center
+      // Entry from Zone 9 - place cursor at the beginning of the path
       cursorStartPosition: new Position(25, 0),
 
       tiles: {
