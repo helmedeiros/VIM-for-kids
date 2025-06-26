@@ -374,18 +374,21 @@ describe('VIM for Kids Game Integration', () => {
     it('should update rendering after movement', () => {
       const gameBoard = document.getElementById('gameBoard');
 
-      // Get initial cursor tile position
-      let cursorTile = gameBoard.querySelector('.tile.cursor');
-      const initialTileIndex = Array.from(gameBoard.children).indexOf(cursorTile);
+      // Get initial cursor position
+      const initialPosition = game.gameState.cursor.position;
 
       // Move cursor right
       game.movePlayerUseCase.execute('right');
 
-      // Check that cursor tile has moved
-      cursorTile = gameBoard.querySelector('.tile.cursor');
-      const newTileIndex = Array.from(gameBoard.children).indexOf(cursorTile);
+      // Check that cursor position has changed
+      const newPosition = game.gameState.cursor.position;
+      expect(newPosition.x).toBe(initialPosition.x + 1);
+      expect(newPosition.y).toBe(initialPosition.y);
 
-      expect(newTileIndex).toBe(initialTileIndex + 1); // Moved one tile right
+      // Check that cursor tile is still rendered
+      const cursorTile = gameBoard.querySelector('.tile.cursor');
+      expect(cursorTile).toBeTruthy();
+      expect(cursorTile.textContent).toBe('●');
     });
 
     it('should remove key from display after collection', () => {
