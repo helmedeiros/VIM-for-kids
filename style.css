@@ -93,13 +93,14 @@ h1 {
   padding: 0;
   outline: none;
   cursor: pointer;
-  width: 100vw;
-  height: 100vh;
+  width: calc(var(--grid-cols, 12) * 32px + var(--grid-cols, 12) * 1px);
+  height: calc(var(--grid-rows, 12) * 32px + var(--grid-rows, 12) * 1px);
   justify-content: center;
   align-content: center;
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 /* Welcome Meadow specific grid */
@@ -246,6 +247,12 @@ h1 {
     8px 8px,
     8px 8px,
     16px 16px;
+}
+
+.tile.void {
+  background-color: #1a1a1a;
+  background-image: none;
+  border: 1px solid #333;
 }
 
 .tile.boss_area {
