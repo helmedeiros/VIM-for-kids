@@ -196,6 +196,9 @@ export class VimForKidsGame {
     if (this.currentGameDescriptor) {
       this.gameSelectorUI.updateCurrentGame(this.currentGameDescriptor);
     }
+
+    // Ensure game board has focus for keyboard input
+    this.gameRenderer.focus();
   }
 
   /**
@@ -264,6 +267,9 @@ export class VimForKidsGame {
     const currentUrl = new URL(window.location);
     currentUrl.searchParams.set('level', newLevelId);
     window.history.pushState({}, '', currentUrl.toString());
+
+    // Ensure game board has focus for keyboard input
+    this.gameRenderer.focus();
   }
 
   _updateActiveLevelButton(levelId) {
