@@ -20,20 +20,24 @@ export class BlinkingGroveZone {
       ],
       tiles: {
         tileType: 'forest_ground',
-        // 12x8 simple forest layout for basic movement
+        // 100x8 extended forest layout with clear navigation paths
         layout: [
-          // Row 0-2: Top forest area
-          'TTTTTTTTTTTT',
-          'TPPPPPPPPPT',
-          'TPDDDDDDPPT',
-          // Row 3-4: Key collection area
-          'TPDHKJLPPT',
-          'TPDDDDDDPPT',
-          // Row 5-6: Text labels and gate area
-          'TPPHHWWGPPT',
-          'TPPPPPPPPPT',
-          // Row 7: Bottom forest border
-          'TTTTTTTTTTTT',
+          // Row 0: Top border with strategic openings
+          'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
+          // Row 1: Main pathway with clearings and instructional areas
+          'TPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPT',
+          // Row 2: Mixed terrain with dirt patches but maintaining clear paths
+          'TPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDPT',
+          // Row 3: Key collection areas with clear access paths (h=2, j=7, k=14, l=21)
+          'TPPHPPPJPPPPPPKPPPPPPPLPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPT',
+          // Row 4: Central exploration area with varied terrain but clear navigation
+          'TPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDPT',
+          // Row 5: Text labels and narrative areas with clear paths to gate (G at position 95)
+          'TPPHHWWPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPT',
+          // Row 6: Lower pathway ensuring full navigation
+          'TPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPT',
+          // Row 7: Bottom border
+          'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
         ],
         legend: {
           T: 'tree',
@@ -42,24 +46,55 @@ export class BlinkingGroveZone {
           H: 'path', // Hello text position
           W: 'path', // world! text position
           G: 'path', // Gate position
-          K: 'path', // VIM key positions (will be handled by specialTiles)
-          J: 'path',
-          L: 'path',
+          // VIM key positions (will be handled by specialTiles)
         },
         specialTiles: [
-          { type: 'vim_key', value: 'h', position: [3, 3] },
-          { type: 'vim_key', value: 'j', position: [4, 3] },
-          { type: 'vim_key', value: 'k', position: [5, 3] },
-          { type: 'vim_key', value: 'l', position: [6, 3] },
+          { type: 'vim_key', value: 'h', position: [2, 3] }, // Left movement key - on path
+          { type: 'vim_key', value: 'j', position: [7, 3] }, // Down movement key - on path
+          { type: 'vim_key', value: 'k', position: [14, 3] }, // Up movement key - on path
+          { type: 'vim_key', value: 'l', position: [21, 3] }, // Right movement key - on path
         ],
         textLabels: [
-          { text: 'Hello', position: [3, 5] },
-          { text: 'world!', position: [4, 5] },
+          // "Hello" - each letter on its own tile
+          { text: 'H', position: [3, 5] },
+          { text: 'e', position: [4, 5] },
+          { text: 'l', position: [5, 5] },
+          { text: 'l', position: [6, 5] },
+          { text: 'o', position: [7, 5] },
+
+          // "world!" - each letter on its own tile
+          { text: 'w', position: [9, 5] },
+          { text: 'o', position: [10, 5] },
+          { text: 'r', position: [11, 5] },
+          { text: 'l', position: [12, 5] },
+          { text: 'd', position: [13, 5] },
+          { text: '!', position: [14, 5] },
+
+          // Instructional text - spaced across the zone
+          { text: 'W', position: [30, 1] },
+          { text: 'e', position: [31, 1] },
+          { text: 'l', position: [32, 1] },
+          { text: 'c', position: [33, 1] },
+          { text: 'o', position: [34, 1] },
+          { text: 'm', position: [35, 1] },
+          { text: 'e', position: [36, 1] },
+
+          { text: 'L', position: [50, 1] },
+          { text: 'e', position: [51, 1] },
+          { text: 'a', position: [52, 1] },
+          { text: 'r', position: [53, 1] },
+          { text: 'n', position: [54, 1] },
+
+          // Key instructions - single characters
+          { text: 'h', position: [2, 4] },
+          { text: 'j', position: [7, 4] },
+          { text: 'k', position: [14, 4] },
+          { text: 'l', position: [21, 4] },
         ],
         gate: {
           locked: true,
           unlocksWhen: { collectedVimKeys: ['h', 'j', 'k', 'l'] },
-          position: [7, 5],
+          position: [92, 5], // Correct position where 'G' character is located
           leadsTo: 'zone_2',
         },
       },
@@ -73,7 +108,7 @@ export class BlinkingGroveZone {
             'Your path continues through the gate.',
             'But beware: not all words are the same. Some are words. Others are WORDS.',
           ],
-          position: [6, 3],
+          position: [90, 5], // Near the gate on the clear pathway
         },
       ],
       events: [
@@ -121,20 +156,24 @@ export class BlinkingGroveZone {
       ],
       tiles: {
         tileType: 'forest_ground',
-        // 12x8 simple forest layout for basic movement
+        // 100x8 extended forest layout with clear navigation paths
         layout: [
-          // Row 0-2: Top forest area
-          'TTTTTTTTTTTT',
-          'TPPPPPPPPPT',
-          'TPDDDDDDPPT',
-          // Row 3-4: Key collection area
-          'TPDHKJLPPT',
-          'TPDDDDDDPPT',
-          // Row 5-6: Text labels and gate area
-          'TPPHHWWGPPT',
-          'TPPPPPPPPPT',
-          // Row 7: Bottom forest border
-          'TTTTTTTTTTTT',
+          // Row 0: Top border with strategic openings
+          'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
+          // Row 1: Main pathway with clearings and instructional areas
+          'TPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPT',
+          // Row 2: Mixed terrain with dirt patches but maintaining clear paths
+          'TPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDPT',
+          // Row 3: Key collection areas with clear access paths (h=2, j=7, k=14, l=21)
+          'TPPHPPPJPPPPPPKPPPPPPPLPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPT',
+          // Row 4: Central exploration area with varied terrain but clear navigation
+          'TPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDPT',
+          // Row 5: Text labels and narrative areas with clear paths to gate (G at position 95)
+          'TPPHHWWPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPT',
+          // Row 6: Lower pathway ensuring full navigation
+          'TPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPT',
+          // Row 7: Bottom border
+          'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
         ],
         legend: {
           T: 'tree',
@@ -143,24 +182,55 @@ export class BlinkingGroveZone {
           H: 'path', // Hello text position
           W: 'path', // world! text position
           G: 'path', // Gate position
-          K: 'path', // VIM key positions (will be handled by specialTiles)
-          J: 'path',
-          L: 'path',
+          // VIM key positions (will be handled by specialTiles)
         },
         specialTiles: [
-          { type: 'vim_key', value: 'h', position: [3, 3] },
-          { type: 'vim_key', value: 'j', position: [4, 3] },
-          { type: 'vim_key', value: 'k', position: [5, 3] },
-          { type: 'vim_key', value: 'l', position: [6, 3] },
+          { type: 'vim_key', value: 'h', position: [2, 3] }, // Left movement key - on path
+          { type: 'vim_key', value: 'j', position: [7, 3] }, // Down movement key - on path
+          { type: 'vim_key', value: 'k', position: [14, 3] }, // Up movement key - on path
+          { type: 'vim_key', value: 'l', position: [21, 3] }, // Right movement key - on path
         ],
         textLabels: [
-          { text: 'Hello', position: [3, 5] },
-          { text: 'world!', position: [4, 5] },
+          // "Hello" - each letter on its own tile
+          { text: 'H', position: [3, 5] },
+          { text: 'e', position: [4, 5] },
+          { text: 'l', position: [5, 5] },
+          { text: 'l', position: [6, 5] },
+          { text: 'o', position: [7, 5] },
+
+          // "world!" - each letter on its own tile
+          { text: 'w', position: [9, 5] },
+          { text: 'o', position: [10, 5] },
+          { text: 'r', position: [11, 5] },
+          { text: 'l', position: [12, 5] },
+          { text: 'd', position: [13, 5] },
+          { text: '!', position: [14, 5] },
+
+          // Instructional text - spaced across the zone
+          { text: 'W', position: [30, 1] },
+          { text: 'e', position: [31, 1] },
+          { text: 'l', position: [32, 1] },
+          { text: 'c', position: [33, 1] },
+          { text: 'o', position: [34, 1] },
+          { text: 'm', position: [35, 1] },
+          { text: 'e', position: [36, 1] },
+
+          { text: 'L', position: [50, 1] },
+          { text: 'e', position: [51, 1] },
+          { text: 'a', position: [52, 1] },
+          { text: 'r', position: [53, 1] },
+          { text: 'n', position: [54, 1] },
+
+          // Key instructions - single characters
+          { text: 'h', position: [2, 4] },
+          { text: 'j', position: [7, 4] },
+          { text: 'k', position: [14, 4] },
+          { text: 'l', position: [21, 4] },
         ],
         gate: {
           locked: true,
           unlocksWhen: { collectedVimKeys: ['h', 'j', 'k', 'l'] },
-          position: [7, 5],
+          position: [92, 5], // Correct position where 'G' character is located
           leadsTo: 'zone_2',
         },
       },
@@ -174,7 +244,7 @@ export class BlinkingGroveZone {
             'Your path continues through the gate.',
             'But beware: not all words are the same. Some are words. Others are WORDS.',
           ],
-          position: [6, 3],
+          position: [90, 5], // Near the gate on the clear pathway
         },
       ],
       events: [

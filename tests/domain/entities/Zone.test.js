@@ -8,8 +8,8 @@ describe('Zone', () => {
 
   // Helper function to convert zone-relative coordinates to absolute coordinates
   const getAbsolutePosition = (zoneX, zoneY) => {
-    // Create a test DynamicZoneMap to get the conversion logic
-    const testMap = new DynamicZoneMap(12, 8);
+    // Use the actual zone dimensions (100x8) for position calculation
+    const testMap = new DynamicZoneMap(100, 8);
     return testMap.zoneToAbsolute(zoneX, zoneY);
   };
 
@@ -36,7 +36,7 @@ describe('Zone', () => {
 
     test('should create a DynamicZoneMap instance', () => {
       expect(blinkingGrove.gameMap).toBeInstanceOf(DynamicZoneMap);
-      expect(blinkingGrove.gameMap._zoneWidth).toBe(12);
+      expect(blinkingGrove.gameMap._zoneWidth).toBe(100);
       expect(blinkingGrove.gameMap._zoneHeight).toBe(8);
     });
   });
@@ -55,10 +55,10 @@ describe('Zone', () => {
       const kKey = blinkingGrove.vimKeys.find((k) => k.key === 'k');
       const lKey = blinkingGrove.vimKeys.find((k) => k.key === 'l');
 
-      expect(hKey.position).toEqual(getAbsolutePosition(3, 3));
-      expect(jKey.position).toEqual(getAbsolutePosition(4, 3));
-      expect(kKey.position).toEqual(getAbsolutePosition(5, 3));
-      expect(lKey.position).toEqual(getAbsolutePosition(6, 3));
+      expect(hKey.position).toEqual(getAbsolutePosition(2, 3));
+      expect(jKey.position).toEqual(getAbsolutePosition(7, 3));
+      expect(kKey.position).toEqual(getAbsolutePosition(14, 3));
+      expect(lKey.position).toEqual(getAbsolutePosition(21, 3));
     });
 
     test('should have descriptive key descriptions', () => {
@@ -80,28 +80,30 @@ describe('Zone', () => {
 
   describe('Text Labels', () => {
     test('should create text labels from configuration', () => {
-      expect(blinkingGrove.textLabels).toHaveLength(2);
+      expect(blinkingGrove.textLabels).toHaveLength(27);
 
-      const helloLabel = blinkingGrove.textLabels.find((l) => l.text === 'Hello');
-      const worldLabel = blinkingGrove.textLabels.find((l) => l.text === 'world!');
-
-      expect(helloLabel).toBeDefined();
-      expect(worldLabel).toBeDefined();
+      const textContents = blinkingGrove.textLabels.map((label) => label.text);
+      expect(textContents).toContain('H');
+      expect(textContents).toContain('e');
+      expect(textContents).toContain('l');
+      expect(textContents).toContain('o');
+      expect(textContents).toContain('w');
+      expect(textContents).toContain('!');
     });
 
     test('should place text labels at correct positions', () => {
-      const helloLabel = blinkingGrove.textLabels.find((l) => l.text === 'Hello');
-      const worldLabel = blinkingGrove.textLabels.find((l) => l.text === 'world!');
+      const hLabel = blinkingGrove.textLabels.find((l) => l.text === 'H');
+      const eLabel = blinkingGrove.textLabels.find((l) => l.text === 'e');
 
-      expect(helloLabel.position).toEqual(getAbsolutePosition(3, 5));
-      expect(worldLabel.position).toEqual(getAbsolutePosition(4, 5));
+      expect(hLabel.position).toEqual(getAbsolutePosition(3, 5));
+      expect(eLabel.position).toEqual(getAbsolutePosition(4, 5));
     });
   });
 
   describe('Gate', () => {
     test('should create a gate at correct position', () => {
       expect(blinkingGrove.gate).toBeInstanceOf(Gate);
-      expect(blinkingGrove.gate.position).toEqual(getAbsolutePosition(7, 5));
+      expect(blinkingGrove.gate.position).toEqual(getAbsolutePosition(92, 5));
     });
 
     test('should start with gate closed', () => {
@@ -164,7 +166,7 @@ describe('Zone', () => {
 
     test('should get NPC position', () => {
       const position = blinkingGrove.getNPCPosition('caret_stone');
-      expect(position).toEqual(getAbsolutePosition(6, 3));
+      expect(position).toEqual(getAbsolutePosition(90, 5));
     });
 
     test('should return null for non-existent NPC position', () => {

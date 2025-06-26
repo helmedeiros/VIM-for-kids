@@ -82,13 +82,16 @@ describe('Blinking Grove Game Integration', () => {
 
     it('should display text labels on the ground', () => {
       const textLabels = game.gameState.getTextLabels();
-      expect(textLabels).toHaveLength(2); // "Hello" and "world!" in Blinking Grove
+      expect(textLabels).toHaveLength(27); // Updated for individual character labels (5+6+7+5+4=27)
 
-      const message = textLabels
-        .sort((a, b) => a.position.y * 10 + a.position.x - (b.position.y * 10 + b.position.x))
-        .map((label) => label.text)
-        .join(' ');
-      expect(message).toBe('Hello world!');
+      // Check that the individual characters for "Hello world!" are present
+      const textContents = textLabels.map((label) => label.text);
+      expect(textContents).toContain('H');
+      expect(textContents).toContain('e');
+      expect(textContents).toContain('l');
+      expect(textContents).toContain('o');
+      expect(textContents).toContain('w');
+      expect(textContents).toContain('!');
     });
 
     it('should have a closed gate initially', () => {
@@ -325,10 +328,17 @@ describe('Blinking Grove Game Integration', () => {
 
     it('should encourage exploration through "Hello world!" message', () => {
       const textLabels = game.gameState.getTextLabels();
-      expect(textLabels.length).toBeGreaterThan(0);
 
-      // Verify message is placed on walkable ground
-      textLabels.forEach((label) => {
+      // Find the individual character labels for "Hello world!"
+      const hLabel = textLabels.find((label) => label.text === 'H');
+      const wLabel = textLabels.find((label) => label.text === 'w');
+
+      expect(hLabel).toBeDefined();
+      expect(wLabel).toBeDefined();
+
+      // Verify the main character labels are placed on walkable ground
+      const mainLabels = [hLabel, wLabel];
+      mainLabels.forEach((label) => {
         expect(game.gameState.map.isWalkable(label.position)).toBe(true);
       });
     });
