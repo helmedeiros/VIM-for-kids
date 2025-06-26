@@ -27,3 +27,13 @@ TileType.WATER = new TileType('water', false);
 TileType.DIRT = new TileType('dirt', true);
 TileType.TREE = new TileType('tree', false);
 TileType.STONE = new TileType('stone', false);
+
+// Additional tile types for different zones
+TileType.PATH = new TileType('path', true);
+TileType.WALL = new TileType('wall', false);
+TileType.BRIDGE = new TileType('bridge', true);
+TileType.SAND = new TileType('sand', true);
+TileType.RUINS = new TileType('ruins', false);
+TileType.FIELD = new TileType('field', true);
+TileType.TEST_GROUND = new TileType('test_ground', true);
+TileType.BOSS_AREA = new TileType('boss_area', true);

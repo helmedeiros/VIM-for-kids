@@ -8,7 +8,7 @@ import { ZoneRegistryAdapter } from './infrastructure/data/zones/ZoneRegistryAda
 
 export class VimForKidsGame {
   constructor(options = {}) {
-    this.currentLevel = options.level || 'level1';
+    this.currentLevel = options.level || 'level_1';
 
     // Create infrastructure adapters
     this.zoneProvider = new ZoneRegistryAdapter();
@@ -23,19 +23,20 @@ export class VimForKidsGame {
   }
 
   _createGameState() {
-    switch (this.currentLevel) {
-      case 'level1': {
-        const level1Config = getLevelConfiguration('level_1');
-        return new LevelGameState(this.zoneProvider, level1Config);
-      }
-      case 'default':
-        return new GameState();
-      default: {
-        // Default to level 1 for now (only level with actual zones)
+    // Handle all levels using LevelGameState with proper configurations
+    if (this.currentLevel.startsWith('level_')) {
+      try {
+        const levelConfig = getLevelConfiguration(this.currentLevel);
+        return new LevelGameState(this.zoneProvider, levelConfig);
+      } catch (error) {
+        console.warn(`Level ${this.currentLevel} not found, defaulting to level_1`);
         const defaultConfig = getLevelConfiguration('level_1');
         return new LevelGameState(this.zoneProvider, defaultConfig);
       }
     }
+
+    // Fallback to basic GameState for non-level modes
+    return new GameState();
   }
 
   initializeGame() {

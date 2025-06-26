@@ -2,7 +2,7 @@ import { VimKey } from '../../../src/domain/entities/VimKey.js';
 import { Position } from '../../../src/domain/value-objects/Position.js';
 
 describe('VimKey', () => {
-    describe('constructor', () => {
+  describe('constructor', () => {
     it('should create VimKey with valid parameters', () => {
       const position = new Position(3, 4);
       const vimKey = new VimKey(position, 'h', 'Move left');
@@ -12,19 +12,29 @@ describe('VimKey', () => {
       expect(vimKey.position).toBe(position);
     });
 
-    it('should throw error for non-single character key', () => {
+    it('should throw error for invalid key', () => {
       const position = new Position(3, 4);
 
-      expect(() => new VimKey(position, '', 'Description')).toThrow('VimKey key must be a single character string');
-      expect(() => new VimKey(position, 'ab', 'Description')).toThrow('VimKey key must be a single character string');
+      expect(() => new VimKey(position, '', 'Description')).toThrow(
+        'VimKey key must be a non-empty string'
+      );
+      // Multi-character keys are now allowed
+      expect(() => new VimKey(position, 'ESC', 'Description')).not.toThrow();
+      expect(() => new VimKey(position, 'dd', 'Description')).not.toThrow();
     });
 
     it('should throw error for non-string key', () => {
       const position = new Position(3, 4);
 
-      expect(() => new VimKey(position, null, 'Description')).toThrow('VimKey key must be a single character string');
-      expect(() => new VimKey(position, 123, 'Description')).toThrow('VimKey key must be a single character string');
-      expect(() => new VimKey(position, {}, 'Description')).toThrow('VimKey key must be a single character string');
+      expect(() => new VimKey(position, null, 'Description')).toThrow(
+        'VimKey key must be a non-empty string'
+      );
+      expect(() => new VimKey(position, 123, 'Description')).toThrow(
+        'VimKey key must be a non-empty string'
+      );
+      expect(() => new VimKey(position, {}, 'Description')).toThrow(
+        'VimKey key must be a non-empty string'
+      );
     });
 
     it('should throw error for non-string description', () => {
@@ -36,13 +46,19 @@ describe('VimKey', () => {
     });
 
     it('should throw error for non-Position position', () => {
-      expect(() => new VimKey({ x: 3, y: 4 }, 'h', 'Description')).toThrow('VimKey position must be a Position instance');
-      expect(() => new VimKey(null, 'h', 'Description')).toThrow('VimKey position must be a Position instance');
-      expect(() => new VimKey('position', 'h', 'Description')).toThrow('VimKey position must be a Position instance');
+      expect(() => new VimKey({ x: 3, y: 4 }, 'h', 'Description')).toThrow(
+        'VimKey position must be a Position instance'
+      );
+      expect(() => new VimKey(null, 'h', 'Description')).toThrow(
+        'VimKey position must be a Position instance'
+      );
+      expect(() => new VimKey('position', 'h', 'Description')).toThrow(
+        'VimKey position must be a Position instance'
+      );
     });
   });
 
-    describe('equals', () => {
+  describe('equals', () => {
     it('should return true for VimKeys with same properties', () => {
       const position1 = new Position(3, 4);
       const position2 = new Position(3, 4);
@@ -80,7 +96,7 @@ describe('VimKey', () => {
     });
   });
 
-    describe('property immutability', () => {
+  describe('property immutability', () => {
     it('should have immutable key property', () => {
       const vimKey = new VimKey(new Position(3, 4), 'h', 'Move left');
 

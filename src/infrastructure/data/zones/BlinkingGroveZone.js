@@ -20,20 +20,46 @@ export class BlinkingGroveZone {
       ],
       tiles: {
         tileType: 'forest_ground',
+        // 12x8 simple forest layout for basic movement
+        layout: [
+          // Row 0-2: Top forest area
+          'TTTTTTTTTTTT',
+          'TPPPPPPPPPT',
+          'TPDDDDDDPPT',
+          // Row 3-4: Key collection area
+          'TPDHKJLPPT',
+          'TPDDDDDDPPT',
+          // Row 5-6: Text labels and gate area
+          'TPPHHWWGPPT',
+          'TPPPPPPPPPT',
+          // Row 7: Bottom forest border
+          'TTTTTTTTTTTT',
+        ],
+        legend: {
+          T: 'tree',
+          P: 'path',
+          D: 'dirt',
+          H: 'path', // Hello text position
+          W: 'path', // world! text position
+          G: 'path', // Gate position
+          K: 'path', // VIM key positions (will be handled by specialTiles)
+          J: 'path',
+          L: 'path',
+        },
         specialTiles: [
           { type: 'vim_key', value: 'h', position: [3, 3] },
-          { type: 'vim_key', value: 'j', position: [3, 4] },
-          { type: 'vim_key', value: 'k', position: [4, 3] },
-          { type: 'vim_key', value: 'l', position: [4, 4] },
+          { type: 'vim_key', value: 'j', position: [4, 3] },
+          { type: 'vim_key', value: 'k', position: [5, 3] },
+          { type: 'vim_key', value: 'l', position: [6, 3] },
         ],
         textLabels: [
-          { text: 'Hello', position: [6, 5] },
-          { text: 'world!', position: [6, 6] },
+          { text: 'Hello', position: [3, 5] },
+          { text: 'world!', position: [4, 5] },
         ],
         gate: {
           locked: true,
           unlocksWhen: { collectedVimKeys: ['h', 'j', 'k', 'l'] },
-          position: [8, 5],
+          position: [7, 5],
           leadsTo: 'zone_2',
         },
       },
@@ -95,20 +121,46 @@ export class BlinkingGroveZone {
       ],
       tiles: {
         tileType: 'forest_ground',
+        // 12x8 simple forest layout for basic movement
+        layout: [
+          // Row 0-2: Top forest area
+          'TTTTTTTTTTTT',
+          'TPPPPPPPPPT',
+          'TPDDDDDDPPT',
+          // Row 3-4: Key collection area
+          'TPDHKJLPPT',
+          'TPDDDDDDPPT',
+          // Row 5-6: Text labels and gate area
+          'TPPHHWWGPPT',
+          'TPPPPPPPPPT',
+          // Row 7: Bottom forest border
+          'TTTTTTTTTTTT',
+        ],
+        legend: {
+          T: 'tree',
+          P: 'path',
+          D: 'dirt',
+          H: 'path', // Hello text position
+          W: 'path', // world! text position
+          G: 'path', // Gate position
+          K: 'path', // VIM key positions (will be handled by specialTiles)
+          J: 'path',
+          L: 'path',
+        },
         specialTiles: [
           { type: 'vim_key', value: 'h', position: [3, 3] },
-          { type: 'vim_key', value: 'j', position: [3, 4] },
-          { type: 'vim_key', value: 'k', position: [4, 3] },
-          { type: 'vim_key', value: 'l', position: [4, 4] },
+          { type: 'vim_key', value: 'j', position: [4, 3] },
+          { type: 'vim_key', value: 'k', position: [5, 3] },
+          { type: 'vim_key', value: 'l', position: [6, 3] },
         ],
         textLabels: [
-          { text: 'Hello', position: [6, 5] },
-          { text: 'world!', position: [6, 6] },
+          { text: 'Hello', position: [3, 5] },
+          { text: 'world!', position: [4, 5] },
         ],
         gate: {
           locked: true,
           unlocksWhen: { collectedVimKeys: ['h', 'j', 'k', 'l'] },
-          position: [8, 5],
+          position: [7, 5],
           leadsTo: 'zone_2',
         },
       },

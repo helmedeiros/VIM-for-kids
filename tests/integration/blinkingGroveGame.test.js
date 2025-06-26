@@ -53,12 +53,12 @@ describe('Blinking Grove Game Integration', () => {
     global.alert = jest.fn();
 
     // Create game with Level 1 (Blinking Grove)
-    game = new VimForKidsGame({ level: 'level1' });
+    game = new VimForKidsGame({ level: 'level_1' });
   });
 
   describe('Game Initialization', () => {
     it('should initialize with Level 1', () => {
-      expect(game.currentLevel).toBe('level1');
+      expect(game.currentLevel).toBe('level_1');
       // BlinkingGrove uses dynamic sizing with water all around (calculated based on screen size)
       expect(game.gameState.map.width).toBeGreaterThanOrEqual(24); // Minimum size with zone + padding
       expect(game.gameState.map.height).toBeGreaterThanOrEqual(16); // Minimum size with zone + padding

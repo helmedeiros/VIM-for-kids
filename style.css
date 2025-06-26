@@ -62,11 +62,12 @@ h1 {
   background-color: #34495e;
   color: #ecf0f1;
   border: 2px solid #2c3e50;
-  padding: 10px 15px;
+  padding: 8px 12px;
   border-radius: 5px;
   cursor: pointer;
   font-family: 'Courier New', monospace;
   font-weight: bold;
+  font-size: 12px;
   transition: all 0.3s ease;
 }
 
@@ -168,6 +169,97 @@ h1 {
   background-size: 8px 8px;
   border: 1px solid #5d6d6e;
   box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* New tile types for zones */
+.tile.path {
+  background-color: #f4d03f;
+  background-image:
+    linear-gradient(45deg, #f7dc6f 25%, transparent 25%),
+    linear-gradient(-45deg, #f7dc6f 25%, transparent 25%);
+  background-size: 4px 4px;
+}
+
+.tile.wall {
+  background-color: #566573;
+  background-image:
+    linear-gradient(90deg, #5d6d7e 1px, transparent 1px),
+    linear-gradient(180deg, #5d6d7e 1px, transparent 1px);
+  background-size: 8px 8px;
+  border: 1px solid #2c3e50;
+}
+
+.tile.bridge {
+  background-color: #8b4513;
+  background-image:
+    linear-gradient(90deg, #a0522d 2px, transparent 2px),
+    linear-gradient(0deg, #cd853f 1px, transparent 1px);
+  background-size: 8px 4px;
+  border-top: 2px solid #654321;
+  border-bottom: 2px solid #654321;
+}
+
+.tile.sand {
+  background-color: #f4d03f;
+  background-image:
+    radial-gradient(circle at 30% 20%, #f7dc6f 1px, transparent 1px),
+    radial-gradient(circle at 70% 60%, #f8c471 0.5px, transparent 0.5px),
+    radial-gradient(circle at 20% 80%, #f5b041 1px, transparent 1px);
+  background-size:
+    12px 12px,
+    8px 8px,
+    16px 16px;
+}
+
+.tile.ruins {
+  background-color: #85929e;
+  background-image:
+    linear-gradient(45deg, #aab7b8 25%, transparent 25%),
+    linear-gradient(-45deg, #aab7b8 25%, transparent 25%),
+    radial-gradient(circle at 60% 40%, #5d6d7e 2px, transparent 2px);
+  background-size:
+    16px 16px,
+    16px 16px,
+    20px 20px;
+  border: 1px solid #34495e;
+}
+
+.tile.field {
+  background-color: #58d68d;
+  background-image:
+    linear-gradient(45deg, #7dcea0 25%, transparent 25%),
+    linear-gradient(-45deg, #7dcea0 25%, transparent 25%),
+    radial-gradient(circle at 25% 75%, #52c882 1px, transparent 1px);
+  background-size:
+    6px 6px,
+    6px 6px,
+    12px 12px;
+}
+
+.tile.test_ground {
+  background-color: #bb8fce;
+  background-image:
+    linear-gradient(45deg, #d2b4de 25%, transparent 25%),
+    linear-gradient(-45deg, #d2b4de 25%, transparent 25%),
+    linear-gradient(90deg, #a569bd 1px, transparent 1px);
+  background-size:
+    8px 8px,
+    8px 8px,
+    16px 16px;
+}
+
+.tile.boss_area {
+  background-color: #e74c3c;
+  background-image:
+    radial-gradient(circle at center, #c0392b 30%, transparent 30%),
+    linear-gradient(45deg, #ec7063 25%, transparent 25%),
+    linear-gradient(-45deg, #ec7063 25%, transparent 25%);
+  background-size:
+    16px 16px,
+    8px 8px,
+    8px 8px;
+  border: 2px solid #922b21;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
 }
 
 /* Cursor */

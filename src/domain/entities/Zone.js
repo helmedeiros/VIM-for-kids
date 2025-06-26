@@ -71,8 +71,18 @@ export class Zone {
   }
 
   _buildZone(config) {
+    // Determine zone dimensions from layout or use defaults
+    let zoneWidth = 12;
+    let zoneHeight = 8;
+
+    if (config.tiles && config.tiles.layout) {
+      // Use layout dimensions
+      zoneHeight = config.tiles.layout.length;
+      zoneWidth = config.tiles.layout[0] ? config.tiles.layout[0].length : 12;
+    }
+
     // Create dynamic zone map with full-screen water and centered zone area
-    this._gameMap = new DynamicZoneMap(12, 8);
+    this._gameMap = new DynamicZoneMap(zoneWidth, zoneHeight);
 
     // Build zone-specific tiles
     this._buildTiles(config.tiles);
@@ -95,10 +105,72 @@ export class Zone {
 
   _buildTiles(tilesConfig) {
     // Build zone-specific tiles using the dynamic map
-    if (tilesConfig && tilesConfig.tileType) {
-      // Create specific tile arrangements for different zone themes
+    if (tilesConfig && tilesConfig.layout && tilesConfig.legend) {
+      // Process the layout array using the legend mapping
+      this._processLayoutWithLegend(tilesConfig.layout, tilesConfig.legend);
+    } else if (tilesConfig && tilesConfig.tileType) {
+      // Fallback to old method for zones without layout
       this._createZoneSpecificTiles(tilesConfig.tileType);
     }
+  }
+
+  _processLayoutWithLegend(layout, legend) {
+    // Process each row of the layout
+    layout.forEach((row, rowIndex) => {
+      // Process each character in the row
+      for (let colIndex = 0; colIndex < row.length; colIndex++) {
+        const char = row[colIndex];
+        const tileTypeName = legend[char];
+
+        if (tileTypeName) {
+          // Convert zone-relative coordinates to absolute coordinates
+          const absolutePosition = this._gameMap.zoneToAbsolute(colIndex, rowIndex);
+
+          // Map legend tile type names to TileType instances
+          const tileType = this._getTileTypeFromName(tileTypeName);
+
+          if (tileType && this._gameMap.isValidPosition(absolutePosition)) {
+            this._gameMap.setTileAt(absolutePosition, tileType);
+          }
+        }
+      }
+    });
+  }
+
+  _getTileTypeFromName(typeName) {
+    // Map tile type names from legend to TileType instances
+    const typeMapping = {
+      grass: TileType.GRASS,
+      water: TileType.WATER,
+      dirt: TileType.DIRT,
+      tree: TileType.TREE,
+      stone: TileType.STONE,
+      path: TileType.PATH,
+      wall: TileType.WALL,
+      bridge: TileType.BRIDGE,
+      sand: TileType.SAND,
+      ruins: TileType.RUINS,
+      field: TileType.FIELD,
+      test_ground: TileType.TEST_GROUND,
+      boss_area: TileType.BOSS_AREA,
+      // Special tiles that should be walkable paths
+      vim_key_spot: TileType.PATH,
+      gate: TileType.PATH,
+      npc_spot: TileType.PATH,
+      // Zone-specific variations
+      forest_ground: TileType.GRASS,
+      canyon_floor: TileType.SAND,
+      cave_floor: TileType.STONE,
+      temple_floor: TileType.STONE,
+      swamp_ground: TileType.GRASS,
+      spring_ground: TileType.GRASS,
+      stone_garden: TileType.STONE,
+      grass_field: TileType.FIELD,
+      practice_ground: TileType.TEST_GROUND,
+      stone_floor: TileType.STONE,
+    };
+
+    return typeMapping[typeName] || TileType.GRASS; // Default to grass if unknown
   }
 
   _createZoneSpecificTiles(tileType) {
@@ -156,7 +228,7 @@ export class Zone {
   }
 
   _buildGate(gateConfig) {
-    if (gateConfig) {
+    if (gateConfig && gateConfig.position) {
       // Convert zone-relative coordinates to absolute coordinates
       const absolutePosition = this._gameMap.zoneToAbsolute(
         gateConfig.position[0],
@@ -169,17 +241,67 @@ export class Zone {
 
       // Store unlock conditions
       this._gateUnlockConditions = gateConfig.unlocksWhen;
+    } else if (gateConfig && gateConfig.position === null) {
+      // Final zone with no exit gate - create a dummy gate for consistency
+      const centerPosition = this._gameMap.zoneToAbsolute(6, 6);
+      this._gate = new Gate(centerPosition);
+      this._gate.open(); // Final zone gate is always "open" (completed)
     }
   }
 
   _getKeyDescription(key) {
     const descriptions = {
+      // Basic movement
       h: 'Move left - The westward wind key',
       j: 'Move down - The earthward root key',
       k: 'Move up - The skyward branch key',
       l: 'Move right - The eastward sun key',
+
+      // Mode switching
+      i: 'Insert mode - the key to creation',
+      ESC: 'Escape to Normal mode - the key to control',
+      ':': 'Command mode - the key to power',
+
+      // Word navigation
+      w: 'word - forward to start of next word',
+      W: 'WORD - forward to start of next WORD',
+      e: 'end - forward to end of word',
+      E: 'End - forward to end of WORD',
+      b: 'back - backward to start of word',
+      B: 'Back - backward to start of WORD',
+
+      // Deletion
+      x: 'x - delete character under cursor',
+      dd: 'dd - delete entire line',
+      D: 'D - delete from cursor to end of line',
+      dw: 'dw - delete word',
+
+      // Insertion
+      a: 'a - append after cursor',
+      o: 'o - open line below',
+      O: 'O - open line above',
+
+      // Copy/paste
+      yy: 'yy - yank (copy) line',
+      p: 'p - put (paste) after cursor',
+      P: 'P - put (paste) before cursor',
+      d: 'd - delete (cut) for pasting',
+
+      // Search
+      '/': '/ - search forward',
+      '?': '? - search backward',
+      n: 'n - next search result',
+      N: 'N - previous search result',
+
+      // Commands
+      ':w': ':w - write (save) file',
+      ':q': ':q - quit vim',
+      ':x': ':x - save and exit',
+
+      // Special
+      mastery: 'Complete mastery of all VIM skills',
     };
-    return descriptions[key] || `Movement key: ${key}`;
+    return descriptions[key] || `VIM key: ${key}`;
   }
 
   // Game logic methods
