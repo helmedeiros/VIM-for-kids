@@ -43,24 +43,31 @@ export const LEVEL_CONFIGURATIONS = {
 
 /**
  * Get level configuration by ID
- * @param {string} levelId - The level identifier
- * @returns {Object} Level configuration object
- * @throws {Error} If level not found
+ * @param {string} levelId - Level identifier
+ * @returns {Object} Level configuration
  */
 export function getLevelConfiguration(levelId) {
   const config = LEVEL_CONFIGURATIONS[levelId];
   if (!config) {
-    throw new Error(`Level configuration '${levelId}' not found`);
+    throw new Error(`Level configuration not found: ${levelId}`);
   }
   return config;
 }
 
 /**
- * Get all available level IDs
+ * Get all available level IDs in order
  * @returns {string[]} Array of level IDs
  */
-export function getAvailableLevels() {
-  return Object.keys(LEVEL_CONFIGURATIONS);
+export function getAvailableLevelIds() {
+  return Object.keys(LEVEL_CONFIGURATIONS).sort();
+}
+
+/**
+ * Get all level configurations as an array
+ * @returns {Object[]} Array of level configurations
+ */
+export function getAllLevelConfigurations() {
+  return getAvailableLevelIds().map((id) => LEVEL_CONFIGURATIONS[id]);
 }
 
 /**
@@ -68,24 +75,54 @@ export function getAvailableLevels() {
  * @returns {Object} First level configuration
  */
 export function getFirstLevel() {
-  return LEVEL_CONFIGURATIONS.level_1;
+  const firstLevelId = getAvailableLevelIds()[0];
+  return LEVEL_CONFIGURATIONS[firstLevelId];
 }
 
 /**
- * Get the next level configuration after completing current level
+ * Get the first level ID
+ * @returns {string} First level ID
+ */
+export function getFirstLevelId() {
+  return getAvailableLevelIds()[0];
+}
+
+/**
+ * Get next level configuration
  * @param {string} currentLevelId - Current level ID
- * @returns {Object|null} Next level configuration or null if no more levels
+ * @returns {Object|null} Next level configuration or null if at last level or invalid level
  */
 export function getNextLevel(currentLevelId) {
-  const levels = getAvailableLevels();
-  const currentIndex = levels.indexOf(currentLevelId);
+  const levelIds = getAvailableLevelIds();
+  const currentIndex = levelIds.indexOf(currentLevelId);
 
-  if (currentIndex === -1 || currentIndex === levels.length - 1) {
+  if (currentIndex === -1) {
+    return null; // Invalid level ID
+  }
+
+  const nextIndex = currentIndex + 1;
+  if (nextIndex >= levelIds.length) {
     return null; // No next level
   }
 
-  const nextLevelId = levels[currentIndex + 1];
-  return LEVEL_CONFIGURATIONS[nextLevelId];
+  return LEVEL_CONFIGURATIONS[levelIds[nextIndex]];
+}
+
+/**
+ * Check if a level exists
+ * @param {string} levelId - Level ID to check
+ * @returns {boolean} True if level exists
+ */
+export function hasLevel(levelId) {
+  return Object.prototype.hasOwnProperty.call(LEVEL_CONFIGURATIONS, levelId);
+}
+
+/**
+ * Get total number of levels
+ * @returns {number} Total level count
+ */
+export function getTotalLevelCount() {
+  return getAvailableLevelIds().length;
 }
 
 /**
@@ -95,19 +132,19 @@ export function getNextLevel(currentLevelId) {
  * @throws {Error} If configuration is invalid
  */
 export function validateLevelConfiguration(config) {
-  if (!config.id || typeof config.id !== 'string') {
+  if (!config || typeof config.id !== 'string' || !config.id.trim()) {
     throw new Error('Level configuration must have a valid id');
   }
 
-  if (!config.name || typeof config.name !== 'string') {
+  if (!config || typeof config.name !== 'string' || !config.name.trim()) {
     throw new Error('Level configuration must have a valid name');
   }
 
-  if (!config.zones || !Array.isArray(config.zones) || config.zones.length === 0) {
+  if (!config || !Array.isArray(config.zones) || config.zones.length === 0) {
     throw new Error('Level configuration must have at least one zone');
   }
 
-  if (!config.description || typeof config.description !== 'string') {
+  if (!config || typeof config.description !== 'string' || !config.description.trim()) {
     throw new Error('Level configuration must have a valid description');
   }
 

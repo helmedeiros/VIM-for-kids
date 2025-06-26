@@ -1,3 +1,5 @@
+import { getFirstLevelId } from '../LevelConfigurations.js';
+
 /**
  * Service responsible for game state persistence
  * Follows Single Responsibility Principle and Dependency Inversion Principle
@@ -39,7 +41,7 @@ export class PersistenceService {
     // Default configuration
     return {
       game: 'cursor-before-clickers',
-      level: levelParam || 'level_1',
+      level: levelParam || getFirstLevelId(),
     };
   }
 
@@ -70,6 +72,6 @@ export class PersistenceService {
    * @private
    */
   _getDefaultLevelForGame(gameId) {
-    return gameId === 'cursor-before-clickers' ? 'level_1' : null;
+    return gameId === 'cursor-before-clickers' ? getFirstLevelId() : null;
   }
 }

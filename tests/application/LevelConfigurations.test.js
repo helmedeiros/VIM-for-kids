@@ -1,7 +1,7 @@
 import {
   LEVEL_CONFIGURATIONS,
   getLevelConfiguration,
-  getAvailableLevels,
+  getAvailableLevelIds,
   getFirstLevel,
   getNextLevel,
   validateLevelConfiguration,
@@ -37,23 +37,23 @@ describe('LevelConfigurations', () => {
 
     test('should throw error for invalid level ID', () => {
       expect(() => getLevelConfiguration('invalid_level')).toThrow(
-        "Level configuration 'invalid_level' not found"
+        'Level configuration not found: invalid_level'
       );
     });
 
     test('should throw error for null level ID', () => {
-      expect(() => getLevelConfiguration(null)).toThrow("Level configuration 'null' not found");
+      expect(() => getLevelConfiguration(null)).toThrow('Level configuration not found: null');
     });
   });
 
-  describe('getAvailableLevels', () => {
+  describe('getAvailableLevelIds', () => {
     test('should return array of all level IDs', () => {
-      const levels = getAvailableLevels();
+      const levels = getAvailableLevelIds();
       expect(levels).toEqual(['level_1', 'level_2', 'level_3', 'level_4', 'level_5']);
     });
 
     test('should return array with correct length', () => {
-      const levels = getAvailableLevels();
+      const levels = getAvailableLevelIds();
       expect(levels).toHaveLength(5);
     });
   });
