@@ -1,110 +1,121 @@
-import { VimForKidsGame } from './VimForKidsGame.js';
+import { GameInitializationService } from './application/services/GameInitializationService.js';
+import { PersistenceService } from './application/services/PersistenceService.js';
+import { GameFactory } from './application/factories/GameFactory.js';
+import { BrowserURLAdapter } from './infrastructure/adapters/BrowserURLAdapter.js';
+import { BrowserStorageAdapter } from './infrastructure/adapters/BrowserStorageAdapter.js';
+import { LevelSelectorUI } from './infrastructure/ui/LevelSelectorUI.js';
 
-let currentGame = null;
-
-// Initialize game with level selection
-function initializeGame(options = {}) {
-  // Cleanup previous game
-  if (currentGame) {
-    currentGame.cleanup();
+/**
+ * Application entry point
+ * Follows SOLID principles with dependency injection
+ */
+class Application {
+  constructor() {
+    this._initializationService = null;
+    this._persistenceService = null;
+    this._levelSelectorUI = null;
   }
 
-  // Handle backward compatibility - if options is a string, treat it as level
-  if (typeof options === 'string') {
-    options = { level: options };
+  /**
+   * Initialize the application
+   */
+  async initialize() {
+    // Create infrastructure adapters
+    const urlAdapter = new BrowserURLAdapter();
+    const storageAdapter = new BrowserStorageAdapter();
+
+    // Create services with dependency injection
+    this._persistenceService = new PersistenceService(urlAdapter, storageAdapter);
+    const gameFactory = new GameFactory();
+    this._initializationService = new GameInitializationService(
+      gameFactory,
+      this._persistenceService
+    );
+
+    // Create UI components
+    this._levelSelectorUI = new LevelSelectorUI();
+
+    // Setup event handlers
+    this._setupEventHandlers();
+
+    // Initialize game based on persisted state
+    await this._initializeGameFromPersistence();
   }
 
-  // Set defaults
-  const gameOptions = {
-    game: options.game || 'cursor-before-clickers',
-    level: options.level || 'level_1',
-    ...options,
-  };
+  /**
+   * Setup event handlers
+   * @private
+   */
+  _setupEventHandlers() {
+    // Level selection handler
+    this._levelSelectorUI.onLevelSelected(async (level) => {
+      await this._initializationService.initializeGame({ level });
+      this._persistenceService.persistGameSelection('cursor-before-clickers', level);
 
-  currentGame = new VimForKidsGame(gameOptions);
-  window.vimForKidsGame = currentGame;
-}
+      // Update global reference for backward compatibility
+      window.vimForKidsGame = this._initializationService.getCurrentGame();
+    });
 
-// Setup level selection buttons
-function setupLevelSelection() {
-  const levelButtons = [
-    { id: 'level_1', level: 'level_1' },
-    { id: 'level_2', level: 'level_2' },
-    { id: 'level_3', level: 'level_3' },
-    { id: 'level_4', level: 'level_4' },
-    { id: 'level_5', level: 'level_5' },
-  ];
-
-  levelButtons.forEach(({ id, level }) => {
-    const button = document.getElementById(id);
-    if (button) {
-      button.addEventListener('click', () => {
-        setActiveButton(button);
-        initializeGame(level);
-      });
-    }
-  });
-}
-
-function setActiveButton(activeBtn) {
-  document.querySelectorAll('.level-btn').forEach((btn) => {
-    btn.classList.remove('active');
-  });
-  activeBtn.classList.add('active');
-}
-
-// Get level from URL parameters
-function getLevelFromURL() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const level = urlParams.get('level');
-  return level && level.startsWith('level_') ? level : 'level_1';
-}
-
-// Get game from URL parameters or localStorage
-function getGameFromURL() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const gameParam = urlParams.get('game');
-
-  // Check URL parameter first
-  if (gameParam) {
-    // Store in localStorage for persistence
-    localStorage.setItem('selectedGame', gameParam);
-    return gameParam;
+    // Initialize UI
+    this._levelSelectorUI.initialize();
   }
 
-  // Fallback to localStorage
-  const storedGame = localStorage.getItem('selectedGame');
-  if (storedGame) {
-    return storedGame;
+  /**
+   * Initialize game from persistence
+   * @private
+   */
+  async _initializeGameFromPersistence() {
+    const config = this._persistenceService.getGameConfiguration();
+
+    // Initialize game
+    const game = await this._initializationService.initializeGame(config);
+
+    // Update UI based on game type
+    this._updateUIForGameType(config);
+
+    // Update global reference for backward compatibility
+    window.vimForKidsGame = game;
   }
 
-  // Default to level-based game
-  return 'cursor-before-clickers';
-}
+  /**
+   * Update UI based on game type
+   * @private
+   */
+  _updateUIForGameType(config) {
+    const isLevelBased = config.game === 'cursor-before-clickers';
 
-// Initialize everything when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  setupLevelSelection();
+    // Show/hide level selection
+    this._levelSelectorUI.setVisible(isLevelBased);
 
-  // Get initial game and level
-  const initialGame = getGameFromURL();
-  const initialLevel = getLevelFromURL();
-
-  // Initialize with the appropriate options based on game type
-  let options;
-  if (initialGame === 'cursor-textland') {
-    options = { game: initialGame };
-  } else {
-    options = { game: initialGame, level: initialLevel };
-  }
-
-  initializeGame(options);
-
-  // Set the active button for the current level (only for level-based games)
-  if (initialGame === 'cursor-before-clickers') {
-    const activeButton = document.getElementById(initialLevel);
-    if (activeButton) {
-      setActiveButton(activeButton);
+    // Set active level for level-based games
+    if (isLevelBased && config.level) {
+      this._levelSelectorUI.setActiveLevel(config.level);
     }
   }
+
+  /**
+   * Cleanup application resources
+   */
+  cleanup() {
+    if (this._initializationService) {
+      this._initializationService.cleanup();
+    }
+    if (this._levelSelectorUI) {
+      this._levelSelectorUI.cleanup();
+    }
+  }
+}
+
+// Initialize application when DOM is loaded
+document.addEventListener('DOMContentLoaded', async () => {
+  const app = new Application();
+
+  try {
+    await app.initialize();
+  } catch (error) {
+    console.error('Failed to initialize application:', error);
+  }
+
+  // Make app available globally for debugging
+  window.app = app;
 });

@@ -10,23 +10,25 @@ import { GameProviderAdapter } from './infrastructure/data/GameProviderAdapter.j
 import { GameSelectorUI } from './infrastructure/ui/GameSelectorUI.js';
 
 export class VimForKidsGame {
-  constructor(options = {}) {
+  constructor(options = {}, dependencies = {}) {
     // Support both old level-based initialization and new game-based initialization
     this.currentGameId =
       options.game || options.gameId || this._mapLevelToGameId(options.level || 'level_1');
     this.currentLevel = options.level || 'level_1';
 
-    // Create infrastructure adapters
-    this.zoneProvider = new ZoneRegistryAdapter();
-    this.gameProvider = new GameProviderAdapter();
+    // Use injected dependencies or create defaults for backward compatibility
+    this.zoneProvider = dependencies.zoneProvider || new ZoneRegistryAdapter();
+    this.gameProvider = dependencies.gameProvider || new GameProviderAdapter();
+    this.gameRenderer = dependencies.gameRenderer || new DOMGameRenderer();
+    this.gameSelectorUI = dependencies.gameSelectorUI || new GameSelectorUI();
+    this.persistenceService = dependencies.persistenceService || null;
 
     // Create use cases
     this.selectGameUseCase = new SelectGameUseCase(this.gameProvider);
 
-    // Create UI components
-    this.gameRenderer = new DOMGameRenderer();
-    this.gameSelectorUI = new GameSelectorUI();
-    this.inputHandler = new KeyboardInputHandler(this.gameRenderer.gameBoard);
+    // Create input handler (needs game renderer)
+    this.inputHandler =
+      dependencies.inputHandler || new KeyboardInputHandler(this.gameRenderer.gameBoard);
 
     // Initialize game synchronously for backward compatibility
     this._initializeGameSync();
@@ -197,10 +199,24 @@ export class VimForKidsGame {
   }
 
   /**
-   * Persist game selection to URL and localStorage
+   * Persist game selection
    * @private
    */
   _persistGameSelection(gameId) {
+    // Use persistence service if available, otherwise fallback to direct implementation
+    if (this.persistenceService) {
+      this.persistenceService.persistGameSelection(gameId, this.currentLevel);
+    } else {
+      // Fallback for backward compatibility
+      this._legacyPersistGameSelection(gameId);
+    }
+  }
+
+  /**
+   * Legacy persistence implementation for backward compatibility
+   * @private
+   */
+  _legacyPersistGameSelection(gameId) {
     // Store in localStorage
     localStorage.setItem('selectedGame', gameId);
 
