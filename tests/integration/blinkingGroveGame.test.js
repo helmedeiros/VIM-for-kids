@@ -67,7 +67,7 @@ describe('Blinking Grove Game Integration', () => {
     it('should place cursor in starting position', () => {
       const startPos = game.gameState.cursor.position;
       const tile = game.gameState.map.getTileAt(startPos);
-      expect(tile.name).toBe('dirt');
+      expect(tile.name).toBe('path'); // Cursor now starts on main pathway (row 1)
     });
 
     it('should have 4 movement keys available', () => {

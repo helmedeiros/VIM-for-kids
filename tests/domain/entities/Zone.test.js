@@ -2,6 +2,7 @@ import { Zone } from '../../../src/domain/entities/Zone.js';
 import { ZoneRegistry } from '../../../src/infrastructure/data/zones/ZoneRegistry.js';
 import { Gate } from '../../../src/domain/entities/Gate.js';
 import { DynamicZoneMap } from '../../../src/domain/entities/DynamicZoneMap.js';
+import { Position } from '../../../src/domain/value-objects/Position.js';
 
 describe('Zone', () => {
   let blinkingGrove;
@@ -205,7 +206,7 @@ describe('Zone', () => {
   describe('Cursor Start Position', () => {
     test('should provide cursor start position', () => {
       const startPosition = blinkingGrove.getCursorStartPosition();
-      expect(startPosition).toEqual(getAbsolutePosition(2, 2));
+      expect(startPosition).toEqual(new Position(56, 10)); // Absolute position for zone-relative (50, 1)
     });
   });
 

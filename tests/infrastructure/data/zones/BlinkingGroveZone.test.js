@@ -1,6 +1,6 @@
 import { BlinkingGroveZone } from '../../../../src/infrastructure/data/zones/BlinkingGroveZone.js';
 import { Zone } from '../../../../src/domain/entities/Zone.js';
-import { DynamicZoneMap } from '../../../../src/domain/entities/DynamicZoneMap.js';
+import { Position } from '../../../../src/domain/value-objects/Position.js';
 
 describe('BlinkingGroveZone', () => {
   describe('Factory Methods', () => {
@@ -144,9 +144,8 @@ describe('BlinkingGroveZone', () => {
     test('should have correct cursor start position', () => {
       const startPosition = zone.getCursorStartPosition();
       // Create a test map with the correct dimensions (100x8)
-      const testMap = new DynamicZoneMap(100, 8);
-      const expectedPosition = testMap.zoneToAbsolute(2, 2);
-      expect(startPosition).toEqual(expectedPosition);
+      // BlinkingGroveZone now has custom cursor start position
+      expect(startPosition).toEqual(new Position(56, 10)); // Absolute position for zone-relative (50, 1)
     });
 
     test('should have gate initially closed', () => {

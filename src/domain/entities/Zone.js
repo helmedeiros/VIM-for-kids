@@ -345,7 +345,11 @@ export class Zone {
   getCursorStartPosition() {
     // Use custom cursor start position if provided, otherwise default to center of dirt area
     if (this._customCursorStartPosition) {
-      return this._customCursorStartPosition;
+      // Convert zone-relative coordinates to absolute coordinates
+      return this._gameMap.zoneToAbsolute(
+        this._customCursorStartPosition.x,
+        this._customCursorStartPosition.y
+      );
     }
     // Start position in the center of the dirt area
     return this._gameMap.zoneToAbsolute(2, 2);

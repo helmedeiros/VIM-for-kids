@@ -1,4 +1,5 @@
 import { Zone } from '../../../domain/entities/Zone.js';
+import { Position } from '../../../domain/value-objects/Position.js';
 
 /**
  * Factory for Zone 1: Blinking Grove
@@ -12,6 +13,9 @@ export class BlinkingGroveZone {
       biome: 'Forest clearing (bottom left)',
       skillFocus: ['h', 'j', 'k', 'l'],
       puzzleTheme: 'Basic movement, bump-to-talk',
+
+      // Custom cursor start position - center the cursor horizontally in the 100x8 map
+      cursorStartPosition: new Position(50, 1), // Center of 100x8 map on main pathway (row 1)
       narration: [
         'Once, the world was clear. Text flowed like rivers, perfectly aligned. But the Bugs came...',
         'Then, from the Blinking Grove, a spark appeared. A light not of fire… but of focus. You.',
@@ -148,6 +152,9 @@ export class BlinkingGroveZone {
       biome: 'Forest clearing (bottom left)',
       skillFocus: ['h', 'j', 'k', 'l'],
       puzzleTheme: 'Basic movement, bump-to-talk',
+
+      // Custom cursor start position - center the cursor horizontally in the 100x8 map
+      cursorStartPosition: new Position(50, 1), // Center of 100x8 map on main pathway (row 1)
       narration: [
         'Once, the world was clear. Text flowed like rivers, perfectly aligned. But the Bugs came...',
         'Then, from the Blinking Grove, a spark appeared. A light not of fire… but of focus. You.',

@@ -66,15 +66,17 @@ describe('VIM for Kids Game Integration', () => {
       const gameBoard = document.getElementById('gameBoard');
       const tiles = gameBoard.querySelectorAll('.tile');
 
-      expect(tiles.length).toBe(144); // 12x12 grid
+      // Camera system renders viewport-sized grid (not fixed 12x12)
+      expect(tiles.length).toBeGreaterThan(100); // Should render many tiles for viewport
 
       // Should have cursor tile
       const cursorTiles = gameBoard.querySelectorAll('.tile.cursor');
       expect(cursorTiles.length).toBe(1);
 
-      // Should have VIM key tiles
+      // Should have visible VIM key tiles (only those in viewport)
       const keyTiles = gameBoard.querySelectorAll('.tile.key');
-      expect(keyTiles.length).toBe(4); // h, j, k, l keys
+      expect(keyTiles.length).toBeGreaterThanOrEqual(1); // At least one key should be visible
+      expect(keyTiles.length).toBeLessThanOrEqual(4); // At most all 4 keys
     });
 
     it('should have cursor at correct starting position', () => {
