@@ -1,4 +1,4 @@
-import { getFirstLevelId } from '../LevelConfigurations.js';
+// Level configurations are now handled by the LevelService and Game entities
 
 /**
  * Service responsible for game state persistence
@@ -41,7 +41,7 @@ export class PersistenceService {
     // Default configuration
     return {
       game: 'cursor-before-clickers',
-      level: levelParam || getFirstLevelId(),
+      level: levelParam || 'level_1',
     };
   }
 
@@ -100,12 +100,23 @@ export class PersistenceService {
   }
 
   /**
-   * Get default level for a game type using GameRegistry
+   * Get default level for a game using GameRegistry
    * @private
    */
   _getDefaultLevelForGame(gameId) {
-    // For now, keep the simple logic to avoid circular dependencies
-    // TODO: Refactor to use GameRegistry when dependency injection is improved
-    return gameId === 'cursor-before-clickers' ? getFirstLevelId() : null;
+    try {
+      // Use dynamic import to avoid circular dependencies
+      import('../../infrastructure/data/GameRegistry.js').then(({ GameRegistry }) => {
+        const game = GameRegistry.getGame(gameId);
+        const firstLevel = game.getFirstLevel();
+        return firstLevel ? firstLevel.id : null;
+      });
+    } catch (error) {
+      // Fallback for now
+      return gameId === 'cursor-before-clickers' ? 'level_1' : null;
+    }
+
+    // Synchronous fallback
+    return gameId === 'cursor-before-clickers' ? 'level_1' : null;
   }
 }

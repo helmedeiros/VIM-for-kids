@@ -18,6 +18,7 @@ export class Game {
     // Extended game configuration (optional with defaults)
     this.defaultLevel = config.defaultLevel || null;
     this.supportedLevels = config.supportedLevels || [];
+    this.levels = config.levels || {};
     this.features = config.features || {};
     this.ui = config.ui || {};
     this.cutscenes = config.cutscenes || {};
@@ -117,6 +118,85 @@ export class Game {
   }
 
   /**
+   * Get level configuration by ID
+   * @param {string} levelId - Level identifier
+   * @returns {Object} Level configuration
+   * @throws {Error} If level not found
+   */
+  getLevelConfiguration(levelId) {
+    const config = this.levels[levelId];
+    if (!config) {
+      throw new Error(`Level '${levelId}' not found in game '${this.id}'`);
+    }
+    return { ...config };
+  }
+
+  /**
+   * Get all level configurations for this game
+   * @returns {Object[]} Array of level configurations
+   */
+  getAllLevelConfigurations() {
+    return this.getSupportedLevels().map((levelId) => this.getLevelConfiguration(levelId));
+  }
+
+  /**
+   * Get the first level configuration
+   * @returns {Object|null} First level configuration or null if no levels
+   */
+  getFirstLevel() {
+    if (this.supportedLevels.length === 0) {
+      return null;
+    }
+    return this.getLevelConfiguration(this.supportedLevels[0]);
+  }
+
+  /**
+   * Get next level after the given level
+   * @param {string} currentLevelId - Current level ID
+   * @returns {Object|null} Next level configuration or null if at last level
+   */
+  getNextLevel(currentLevelId) {
+    const currentIndex = this.supportedLevels.indexOf(currentLevelId);
+    if (currentIndex === -1 || currentIndex === this.supportedLevels.length - 1) {
+      return null;
+    }
+    return this.getLevelConfiguration(this.supportedLevels[currentIndex + 1]);
+  }
+
+  /**
+   * Check if level has specific zones
+   * @param {string} levelId - Level identifier
+   * @param {string} zoneId - Zone identifier
+   * @returns {boolean} True if level contains the zone
+   */
+  levelHasZone(levelId, zoneId) {
+    try {
+      const level = this.getLevelConfiguration(levelId);
+      return level.zones && level.zones.includes(zoneId);
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Get zones for a specific level
+   * @param {string} levelId - Level identifier
+   * @returns {string[]} Array of zone IDs for the level
+   */
+  getLevelZones(levelId) {
+    const level = this.getLevelConfiguration(levelId);
+    return [...(level.zones || [])];
+  }
+
+  /**
+   * Get total number of levels in this game
+   * @returns {number} Total level count
+   */
+  getTotalLevelCount() {
+    return this.supportedLevels.length;
+  }
+
+  /**
    * Create a game instance using this game's factory
    * @param {Object} options - Game creation options
    * @param {Object} dependencies - Injected dependencies
@@ -187,6 +267,7 @@ export class Game {
       gameType: this.gameType.toString(),
       defaultLevel: this.defaultLevel,
       supportedLevels: this.supportedLevels,
+      levels: this.levels,
       features: this.features,
       ui: this.ui,
       cutscenes: this.cutscenes,

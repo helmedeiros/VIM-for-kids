@@ -1,6 +1,6 @@
 import { GameState } from './application/GameState.js';
 import { LevelGameState } from './application/LevelGameState.js';
-import { getLevelConfiguration, getFirstLevelId } from './application/LevelConfigurations.js';
+import { GameRegistry } from './infrastructure/data/GameRegistry.js';
 import { MovePlayerUseCase } from './application/use-cases/MovePlayerUseCase.js';
 import { SelectGameUseCase } from './application/use-cases/SelectGameUseCase.js';
 import { DOMGameRenderer } from './infrastructure/ui/DOMGameRenderer.js';
@@ -13,8 +13,10 @@ export class VimForKidsGame {
   constructor(options = {}, dependencies = {}) {
     // Support both old level-based initialization and new game-based initialization
     this.currentGameId =
-      options.game || options.gameId || this._mapLevelToGameId(options.level || getFirstLevelId());
-    this.currentLevel = options.level || getFirstLevelId();
+      options.game ||
+      options.gameId ||
+      this._mapLevelToGameId(options.level || this._getFirstLevelId());
+    this.currentLevel = options.level || this._getFirstLevelId();
 
     // Use injected dependencies or create defaults for backward compatibility
     this.zoneProvider = dependencies.zoneProvider || new ZoneRegistryAdapter();
@@ -55,6 +57,33 @@ export class VimForKidsGame {
   }
 
   /**
+   * Get first level ID from GameRegistry
+   * @private
+   */
+  _getFirstLevelId() {
+    try {
+      const game = GameRegistry.getGame('cursor-before-clickers');
+      const firstLevel = game.getFirstLevel();
+      return firstLevel ? firstLevel.id : 'level_1';
+    } catch (error) {
+      return 'level_1';
+    }
+  }
+
+  /**
+   * Get level configuration from GameRegistry
+   * @private
+   */
+  _getLevelConfiguration(levelId) {
+    try {
+      const game = GameRegistry.getGame(this.currentGameId);
+      return game.getLevelConfiguration(levelId);
+    } catch (error) {
+      throw new Error(`Level configuration not found: ${levelId}`);
+    }
+  }
+
+  /**
    * Synchronous initialization for backward compatibility
    * @private
    */
@@ -65,8 +94,8 @@ export class VimForKidsGame {
     } else {
       // For level-based games, try to create with level config
       try {
-        const levelConfig = getLevelConfiguration(this.currentLevel);
-        this.gameState = new LevelGameState(this.zoneProvider, levelConfig);
+        const levelConfig = this._getLevelConfiguration(this.currentLevel);
+        this.gameState = new LevelGameState(this.zoneProvider, levelConfig, this.currentGameId);
       } catch (error) {
         // Fallback to basic game state
         this.gameState = new GameState();
@@ -140,8 +169,8 @@ export class VimForKidsGame {
 
     if (gameDescriptor.gameType.isLevelBased()) {
       // For level-based games, use the current level configuration
-      const levelConfig = getLevelConfiguration(this.currentLevel);
-      return await gameStateFactory(this.zoneProvider, levelConfig);
+      const levelConfig = this._getLevelConfiguration(this.currentLevel);
+      return await gameStateFactory(this.zoneProvider, levelConfig, this.currentGameId);
     } else if (gameDescriptor.gameType.isTextland()) {
       // For textland games, create basic game state
       return await gameStateFactory();
@@ -178,7 +207,7 @@ export class VimForKidsGame {
 
     // For level-based games, reset to first level
     if (gameId === 'cursor-before-clickers') {
-      this.currentLevel = getFirstLevelId();
+      this.currentLevel = this._getFirstLevelId();
     }
 
     // Persist game selection

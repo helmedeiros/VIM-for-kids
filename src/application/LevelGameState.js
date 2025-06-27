@@ -1,8 +1,8 @@
 import { Cursor } from '../domain/entities/Cursor.js';
-import { getNextLevel } from './LevelConfigurations.js';
+import { GameRegistry } from '../infrastructure/data/GameRegistry.js';
 
 export class LevelGameState {
-  constructor(zoneProvider, levelConfig) {
+  constructor(zoneProvider, levelConfig, gameId = null) {
     if (!zoneProvider || !levelConfig) {
       throw new Error('LevelGameState requires zoneProvider and levelConfig');
     }
@@ -13,6 +13,7 @@ export class LevelGameState {
 
     this._zoneProvider = zoneProvider;
     this._levelConfig = levelConfig;
+    this._gameId = gameId;
     this._currentZoneIndex = 0;
     this._completedZones = new Set();
 
@@ -170,14 +171,14 @@ export class LevelGameState {
     // 3. There is a next level available
     const gate = this.getGate();
     const isAtGate = gate && this.cursor.position.equals(gate.position);
-    const hasNextLevel = getNextLevel(this._levelConfig.id) !== null;
+    const hasNextLevel = this._getNextLevel() !== null;
 
     return this.isLevelComplete() && isAtGate && hasNextLevel;
   }
 
   isGameComplete() {
     // Game is complete when level is complete and there's no next level
-    const hasNextLevel = getNextLevel(this._levelConfig.id) !== null;
+    const hasNextLevel = this._getNextLevel() !== null;
     return this.isLevelComplete() && !hasNextLevel;
   }
 
@@ -187,11 +188,28 @@ export class LevelGameState {
       this.progressToNextZone();
       return { type: 'zone', newZoneId: this.getCurrentZoneId() };
     } else if (this.shouldProgressToNextLevel()) {
-      const nextLevel = getNextLevel(this._levelConfig.id);
+      const nextLevel = this._getNextLevel();
       return { type: 'level', nextLevelId: nextLevel.id };
     }
 
     return { type: 'none' };
+  }
+
+  /**
+   * Get next level using GameRegistry
+   * @private
+   */
+  _getNextLevel() {
+    if (!this._gameId) {
+      return null;
+    }
+
+    try {
+      const game = GameRegistry.getGame(this._gameId);
+      return game.getNextLevel(this._levelConfig.id);
+    } catch (error) {
+      return null;
+    }
   }
 
   cleanup() {
