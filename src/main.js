@@ -1,9 +1,13 @@
 import { GameInitializationService } from './application/services/GameInitializationService.js';
 import { PersistenceService } from './application/services/PersistenceService.js';
+import { CutsceneService } from './application/services/CutsceneService.js';
 import { GameFactory } from './application/factories/GameFactory.js';
 import { BrowserURLAdapter } from './infrastructure/adapters/BrowserURLAdapter.js';
 import { BrowserStorageAdapter } from './infrastructure/adapters/BrowserStorageAdapter.js';
+import { CutsceneProviderAdapter } from './infrastructure/data/CutsceneProviderAdapter.js';
+import { CutsceneRenderer } from './infrastructure/ui/CutsceneRenderer.js';
 import { LevelSelectorUI } from './infrastructure/ui/LevelSelectorUI.js';
+import { FeatureFlags } from './infrastructure/FeatureFlags.js';
 
 /**
  * Application entry point
@@ -13,6 +17,8 @@ class Application {
   constructor() {
     this._initializationService = null;
     this._persistenceService = null;
+    this._cutsceneService = null;
+    this._cutsceneRenderer = null;
     this._levelSelectorUI = null;
   }
 
@@ -26,10 +32,35 @@ class Application {
 
     // Create services with dependency injection
     this._persistenceService = new PersistenceService(urlAdapter, storageAdapter);
-    const gameFactory = new GameFactory();
+
+    // Create cutscene services
+    const cutsceneProvider = new CutsceneProviderAdapter();
+    const featureFlags = new FeatureFlags();
+    this._cutsceneService = new CutsceneService(
+      cutsceneProvider,
+      this._persistenceService,
+      featureFlags
+    );
+
+    // Create cutscene renderer (using main game container)
+    try {
+      this._cutsceneRenderer = new CutsceneRenderer('game-container');
+    } catch (error) {
+      // If game-container doesn't exist, create a fallback container or skip cutscene rendering
+      console.warn('Game container not found, cutscenes will be disabled:', error);
+      this._cutsceneRenderer = null;
+    }
+
+    // Create game factory and initialization service
+    const gameFactory = new GameFactory({
+      cutsceneService: this._cutsceneService,
+      cutsceneRenderer: this._cutsceneRenderer,
+    });
     this._initializationService = new GameInitializationService(
       gameFactory,
-      this._persistenceService
+      this._persistenceService,
+      this._cutsceneService,
+      this._cutsceneRenderer
     );
 
     // Create UI components
