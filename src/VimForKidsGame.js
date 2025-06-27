@@ -145,7 +145,7 @@ export class VimForKidsGame {
     try {
       // Get the current game configuration
       const gameSelection = await this.selectGameUseCase.selectGame(this.currentGameId);
-      this.currentGameDescriptor = gameSelection.gameDescriptor;
+      this.currentGame = gameSelection.game;
 
       // Setup game selector UI (this is the main enhancement)
       this._setupGameSelectorUI();
@@ -165,17 +165,17 @@ export class VimForKidsGame {
   }
 
   async _createGameState(gameSelection) {
-    const { gameDescriptor, gameStateFactory } = gameSelection;
+    const { game, gameStateFactory } = gameSelection;
 
-    if (gameDescriptor.gameType.isLevelBased()) {
+    if (game.gameType.isLevelBased()) {
       // For level-based games, use the current level configuration
       const levelConfig = this._getLevelConfiguration(this.currentLevel);
       return await gameStateFactory(this.zoneProvider, levelConfig, this.currentGameId);
-    } else if (gameDescriptor.gameType.isTextland()) {
+    } else if (game.gameType.isTextland()) {
       // For textland games, create basic game state
       return await gameStateFactory();
     } else {
-      throw new Error(`Unsupported game type: ${gameDescriptor.gameType.type}`);
+      throw new Error(`Unsupported game type: ${game.gameType.type}`);
     }
   }
 
@@ -193,8 +193,8 @@ export class VimForKidsGame {
     });
 
     // Update UI with current game
-    if (this.currentGameDescriptor) {
-      this.gameSelectorUI.updateCurrentGame(this.currentGameDescriptor);
+    if (this.currentGame) {
+      this.gameSelectorUI.updateCurrentGame(this.currentGame);
     }
   }
 
@@ -222,8 +222,8 @@ export class VimForKidsGame {
     await this._initializeGameAsync();
 
     // Update UI to reflect the new game
-    if (this.currentGameDescriptor) {
-      this.gameSelectorUI.updateCurrentGame(this.currentGameDescriptor);
+    if (this.currentGame) {
+      this.gameSelectorUI.updateCurrentGame(this.currentGame);
     }
 
     // Ensure game board has focus for keyboard input
@@ -285,8 +285,8 @@ export class VimForKidsGame {
     await this._initializeGameAsync();
 
     // Update UI to reflect the current game
-    if (this.currentGameDescriptor) {
-      this.gameSelectorUI.updateCurrentGame(this.currentGameDescriptor);
+    if (this.currentGame) {
+      this.gameSelectorUI.updateCurrentGame(this.currentGame);
     }
 
     // Update the active level button in the UI

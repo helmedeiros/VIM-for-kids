@@ -1,5 +1,4 @@
 import { GameProvider } from '../../ports/data/GameProvider.js';
-import { GameDescriptor } from '../../domain/entities/GameDescriptor.js';
 import { GameRegistry } from './GameRegistry.js';
 
 /**
@@ -9,28 +8,18 @@ import { GameRegistry } from './GameRegistry.js';
  */
 export class GameProviderAdapter extends GameProvider {
   async getAvailableGames() {
-    return GameRegistry.getAllGames().map((game) => this._toGameDescriptor(game));
+    return GameRegistry.getAllGames();
   }
 
   async getGame(gameId) {
-    const game = GameRegistry.getGame(gameId);
-    return this._toGameDescriptor(game);
+    return GameRegistry.getGame(gameId);
   }
 
   async getDefaultGame() {
-    const game = GameRegistry.getDefaultGame();
-    return this._toGameDescriptor(game);
+    return GameRegistry.getDefaultGame();
   }
 
   async hasGame(gameId) {
     return GameRegistry.hasGame(gameId);
-  }
-
-  /**
-   * Convert Game entity to GameDescriptor instance
-   * @private
-   */
-  _toGameDescriptor(game) {
-    return new GameDescriptor(game.id, game.name, game.description, game.gameType);
   }
 }

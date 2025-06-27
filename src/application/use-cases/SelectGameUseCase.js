@@ -1,6 +1,5 @@
 /**
- * Use case for selecting and switching between games
- * Coordinates between the game provider and the game state creation
+ * Use case for game selection and management
  */
 export class SelectGameUseCase {
   constructor(gameProvider) {
@@ -12,7 +11,7 @@ export class SelectGameUseCase {
 
   /**
    * Get all available games for selection
-   * @returns {Promise<GameDescriptor[]>} Available games
+   * @returns {Promise<Game[]>} Available games
    */
   async getAvailableGames() {
     return await this._gameProvider.getAvailableGames();
@@ -20,7 +19,7 @@ export class SelectGameUseCase {
 
   /**
    * Get the default game
-   * @returns {Promise<GameDescriptor>} Default game descriptor
+   * @returns {Promise<Game>} Default game entity
    */
   async getDefaultGame() {
     return await this._gameProvider.getDefaultGame();
@@ -29,20 +28,20 @@ export class SelectGameUseCase {
   /**
    * Select a specific game by ID
    * @param {string} gameId - The game to select
-   * @returns {Promise<{gameDescriptor: GameDescriptor, gameStateFactory: Function}>}
+   * @returns {Promise<{game: Game, gameStateFactory: Function}>}
    */
   async selectGame(gameId) {
-    const gameDescriptor = await this._gameProvider.getGame(gameId);
-    const gameStateFactory = this._createGameStateFactory(gameDescriptor);
+    const game = await this._gameProvider.getGame(gameId);
+    const gameStateFactory = this._createGameStateFactory(game);
 
     return {
-      gameDescriptor,
+      game,
       gameStateFactory,
     };
   }
 
   /**
-   * Validate if a game selection is valid
+   * Check if a game selection is valid
    * @param {string} gameId - The game ID to validate
    * @returns {Promise<boolean>} True if valid
    */
@@ -54,8 +53,8 @@ export class SelectGameUseCase {
    * Create appropriate game state factory based on game type
    * @private
    */
-  _createGameStateFactory(gameDescriptor) {
-    const gameType = gameDescriptor.gameType;
+  _createGameStateFactory(game) {
+    const gameType = game.gameType;
 
     if (gameType.isLevelBased()) {
       return async (zoneProvider, levelConfig) => {

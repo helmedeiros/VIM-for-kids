@@ -13,26 +13,32 @@ describe('GameProvider', () => {
     });
   });
 
-  describe('Abstract methods', () => {
-    it('should throw error when getAvailableGames is called on base class', async () => {
+  describe('getAvailableGames', () => {
+    it('should throw error when not implemented', async () => {
       await expect(gameProvider.getAvailableGames()).rejects.toThrow(
         'Method getAvailableGames must be implemented'
       );
     });
+  });
 
-    it('should throw error when getGame is called on base class', async () => {
+  describe('getGame', () => {
+    it('should throw error when not implemented', async () => {
       await expect(gameProvider.getGame('test-game')).rejects.toThrow(
         'Method getGame must be implemented'
       );
     });
+  });
 
-    it('should throw error when getDefaultGame is called on base class', async () => {
+  describe('getDefaultGame', () => {
+    it('should throw error when not implemented', async () => {
       await expect(gameProvider.getDefaultGame()).rejects.toThrow(
         'Method getDefaultGame must be implemented'
       );
     });
+  });
 
-    it('should throw error when hasGame is called on base class', async () => {
+  describe('hasGame', () => {
+    it('should throw error when not implemented', async () => {
       await expect(gameProvider.hasGame('test-game')).rejects.toThrow(
         'Method hasGame must be implemented'
       );
