@@ -114,7 +114,7 @@ class Application {
    */
   async _updateUIForGameType(config) {
     try {
-      const { GameRegistry } = await import('./infrastructure/data/GameRegistry.js');
+      const { GameRegistry } = await import('./infrastructure/data/games/GameRegistry.js');
       const game = GameRegistry.getGame(config.game);
       const uiConfig = game.getUIConfig();
 

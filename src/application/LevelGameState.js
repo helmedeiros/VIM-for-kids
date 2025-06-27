@@ -1,5 +1,5 @@
 import { Cursor } from '../domain/entities/Cursor.js';
-import { GameRegistry } from '../infrastructure/data/GameRegistry.js';
+import { GameRegistry } from '../infrastructure/data/games/GameRegistry.js';
 
 export class LevelGameState {
   constructor(zoneProvider, levelConfig, gameId = null) {

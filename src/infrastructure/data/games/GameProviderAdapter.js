@@ -1,4 +1,4 @@
-import { GameProvider } from '../../ports/data/GameProvider.js';
+import { GameProvider } from '../../../ports/data/GameProvider.js';
 import { GameRegistry } from './GameRegistry.js';
 
 /**

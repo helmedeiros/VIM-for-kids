@@ -1,12 +1,12 @@
 import { GameState } from './application/GameState.js';
 import { LevelGameState } from './application/LevelGameState.js';
-import { GameRegistry } from './infrastructure/data/GameRegistry.js';
+import { GameRegistry } from './infrastructure/data/games/GameRegistry.js';
 import { MovePlayerUseCase } from './application/use-cases/MovePlayerUseCase.js';
 import { SelectGameUseCase } from './application/use-cases/SelectGameUseCase.js';
 import { DOMGameRenderer } from './infrastructure/ui/DOMGameRenderer.js';
 import { KeyboardInputHandler } from './infrastructure/input/KeyboardInputHandler.js';
 import { ZoneRegistryAdapter } from './infrastructure/data/zones/ZoneRegistryAdapter.js';
-import { GameProviderAdapter } from './infrastructure/data/GameProviderAdapter.js';
+import { GameProviderAdapter } from './infrastructure/data/games/GameProviderAdapter.js';
 import { GameSelectorUI } from './infrastructure/ui/GameSelectorUI.js';
 
 export class VimForKidsGame {
