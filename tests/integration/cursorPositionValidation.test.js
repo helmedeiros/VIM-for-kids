@@ -272,7 +272,7 @@ describe('Cursor Position Validation Integration', () => {
 
       // If this test fails after adding zones, it means the new zone has invalid cursor position
       const validZoneCount = zones.filter((z) => z.valid).length;
-      expect(validZoneCount).toBe(currentZoneCount);
+      expect(validZoneCount).toBe(11); // Update to include textland exploration zone
     });
   });
 

@@ -1,5 +1,6 @@
-import { GameState } from './application/GameState.js';
+// GameState removed - now using TextlandGameState for textland games
 import { LevelGameState } from './application/LevelGameState.js';
+import { TextlandGameState } from './application/TextlandGameState.js';
 import { GameRegistry } from './infrastructure/data/games/GameRegistry.js';
 import { MovePlayerUseCase } from './application/use-cases/MovePlayerUseCase.js';
 import { SelectGameUseCase } from './application/use-cases/SelectGameUseCase.js';
@@ -90,15 +91,15 @@ export class VimForKidsGame {
   _initializeGameSync() {
     // Create fallback game state immediately for tests
     if (this.currentGameId === 'cursor-textland') {
-      this.gameState = new GameState();
+      this.gameState = new TextlandGameState(this.zoneProvider);
     } else {
       // For level-based games, try to create with level config
       try {
         const levelConfig = this._getLevelConfiguration(this.currentLevel);
         this.gameState = new LevelGameState(this.zoneProvider, levelConfig, this.currentGameId);
       } catch (error) {
-        // Fallback to basic game state
-        this.gameState = new GameState();
+        // Fallback to textland game state
+        this.gameState = new TextlandGameState(this.zoneProvider);
       }
     }
 
@@ -172,8 +173,8 @@ export class VimForKidsGame {
       const levelConfig = this._getLevelConfiguration(this.currentLevel);
       return await gameStateFactory(this.zoneProvider, levelConfig, this.currentGameId);
     } else if (game.gameType.isTextland()) {
-      // For textland games, create basic game state
-      return await gameStateFactory();
+      // For textland games, create game state with zone provider
+      return await gameStateFactory(this.zoneProvider);
     } else {
       throw new Error(`Unsupported game type: ${game.gameType.type}`);
     }

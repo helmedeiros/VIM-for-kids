@@ -60,7 +60,7 @@ describe('ZoneRegistryAdapter', () => {
       const zoneIds = adapter.getAvailableZoneIds();
 
       expect(zoneIds).toContain('zone_1');
-      expect(zoneIds).toHaveLength(10);
+      expect(zoneIds).toHaveLength(11);
     });
 
     test('should check zone existence through adapter', () => {
@@ -71,7 +71,7 @@ describe('ZoneRegistryAdapter', () => {
     test('should get all zone information through adapter', () => {
       const zoneInfo = adapter.getAllZoneInfo();
 
-      expect(zoneInfo).toHaveLength(10);
+      expect(zoneInfo).toHaveLength(11);
       expect(zoneInfo[0]).toEqual({
         zoneId: 'zone_1',
         name: '1. Blinking Grove',

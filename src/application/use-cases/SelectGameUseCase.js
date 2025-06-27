@@ -63,10 +63,10 @@ export class SelectGameUseCase {
         return new LevelGameState(zoneProvider, levelConfig);
       };
     } else if (gameType.isTextland()) {
-      return async () => {
+      return async (zoneProvider) => {
         // Import dynamically to avoid circular dependencies
-        const { GameState } = await import('../GameState.js');
-        return new GameState();
+        const { TextlandGameState } = await import('../TextlandGameState.js');
+        return new TextlandGameState(zoneProvider);
       };
     } else {
       throw new Error(`Unsupported game type: ${gameType.type}`);
