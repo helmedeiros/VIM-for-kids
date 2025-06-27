@@ -16,6 +16,7 @@ class FeatureFlags {
       MULTIPLAYER_MODE: false,
       SOUND_EFFECTS: true,
       TOUCH_CONTROLS: true,
+      ORIGIN_STORY_CUTSCENES: true,
 
       // Development features
       DEBUG_MODE: this.isLocalDevelopment(),

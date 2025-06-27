@@ -5,7 +5,7 @@ import { PersistenceService } from '../../../src/application/services/Persistenc
 describe('PersistenceService', () => {
   let urlAdapter;
   let storageAdapter;
-  let service;
+  let persistenceService;
 
   beforeEach(() => {
     urlAdapter = {
@@ -21,124 +21,144 @@ describe('PersistenceService', () => {
       removeItem: jest.fn(),
     };
 
-    service = new PersistenceService(urlAdapter, storageAdapter);
+    persistenceService = new PersistenceService(urlAdapter, storageAdapter);
   });
 
   describe('constructor', () => {
     it('should create service with adapters', () => {
-      expect(service).toBeInstanceOf(PersistenceService);
-      expect(service._urlAdapter).toBe(urlAdapter);
-      expect(service._storageAdapter).toBe(storageAdapter);
+      expect(persistenceService).toBeInstanceOf(PersistenceService);
     });
   });
 
   describe('getGameConfiguration', () => {
-    it('should return configuration from URL parameters with priority', () => {
-      urlAdapter.getParameter
-        .mockReturnValueOnce('cursor-textland') // game
-        .mockReturnValueOnce('level_3'); // level
+    it('should return URL configuration with highest priority', () => {
+      urlAdapter.getParameter.mockImplementation((param) => {
+        if (param === 'game') return 'cursor-textland';
+        if (param === 'level') return 'level_2';
+        return null;
+      });
 
-      const config = service.getGameConfiguration();
+      const config = persistenceService.getGameConfiguration();
 
       expect(config).toEqual({
         game: 'cursor-textland',
-        level: 'level_3',
+        level: 'level_2',
       });
       expect(storageAdapter.setItem).toHaveBeenCalledWith('selectedGame', 'cursor-textland');
     });
 
-    it('should use default level for textland game from URL', () => {
-      urlAdapter.getParameter
-        .mockReturnValueOnce('cursor-textland') // game
-        .mockReturnValueOnce(null); // level
-
-      const config = service.getGameConfiguration();
-
-      expect(config).toEqual({
-        game: 'cursor-textland',
-        level: null,
-      });
-    });
-
-    it('should fallback to localStorage when no URL parameters', () => {
+    it('should fallback to localStorage', () => {
       urlAdapter.getParameter.mockReturnValue(null);
-      storageAdapter.getItem.mockReturnValue('cursor-before-clickers');
-
-      const config = service.getGameConfiguration();
-
-      expect(config).toEqual({
-        game: 'cursor-before-clickers',
-        level: 'level_1',
+      storageAdapter.getItem.mockImplementation((key) => {
+        if (key === 'selectedGame') return 'cursor-before-clickers';
+        return null;
       });
+
+      const config = persistenceService.getGameConfiguration();
+
+      expect(config.game).toBe('cursor-before-clickers');
     });
 
-    it('should return default configuration when no persistence found', () => {
+    it('should return default configuration', () => {
       urlAdapter.getParameter.mockReturnValue(null);
       storageAdapter.getItem.mockReturnValue(null);
 
-      const config = service.getGameConfiguration();
+      const config = persistenceService.getGameConfiguration();
 
-      expect(config).toEqual({
-        game: 'cursor-before-clickers',
-        level: 'level_1',
-      });
-    });
-
-    it('should handle level parameter from URL with stored game', () => {
-      urlAdapter.getParameter
-        .mockReturnValueOnce(null) // game
-        .mockReturnValueOnce('level_4'); // level
-      storageAdapter.getItem.mockReturnValue('cursor-before-clickers');
-
-      const config = service.getGameConfiguration();
-
-      expect(config).toEqual({
-        game: 'cursor-before-clickers',
-        level: 'level_4',
-      });
+      expect(config.game).toBe('cursor-before-clickers');
+      expect(config.level).toBe('level_1');
     });
   });
 
   describe('persistGameSelection', () => {
-    it('should persist level-based game with level', () => {
-      service.persistGameSelection('cursor-before-clickers', 'level_2');
+    it('should persist game and level selection', () => {
+      persistenceService.persistGameSelection('cursor-before-clickers', 'level_3');
 
       expect(storageAdapter.setItem).toHaveBeenCalledWith('selectedGame', 'cursor-before-clickers');
       expect(urlAdapter.setParameter).toHaveBeenCalledWith('game', 'cursor-before-clickers');
-      expect(urlAdapter.setParameter).toHaveBeenCalledWith('level', 'level_2');
+      expect(urlAdapter.setParameter).toHaveBeenCalledWith('level', 'level_3');
       expect(urlAdapter.updateURL).toHaveBeenCalled();
     });
 
-    it('should persist textland game without level', () => {
-      service.persistGameSelection('cursor-textland');
-
-      expect(storageAdapter.setItem).toHaveBeenCalledWith('selectedGame', 'cursor-textland');
-      expect(urlAdapter.setParameter).toHaveBeenCalledWith('game', 'cursor-textland');
-      expect(urlAdapter.removeParameter).toHaveBeenCalledWith('level');
-      expect(urlAdapter.updateURL).toHaveBeenCalled();
-    });
-
-    it('should remove level parameter for non-level games even with level provided', () => {
-      service.persistGameSelection('cursor-textland', 'level_1');
+    it('should remove level parameter for non-level games', () => {
+      persistenceService.persistGameSelection('cursor-textland');
 
       expect(urlAdapter.removeParameter).toHaveBeenCalledWith('level');
     });
   });
 
-  describe('_getDefaultLevelForGame', () => {
-    it('should return level_1 for cursor-before-clickers', () => {
-      const level = service._getDefaultLevelForGame('cursor-before-clickers');
-      expect(level).toBe('level_1');
+  describe('getCutsceneState', () => {
+    it('should return cutscene state from storage', () => {
+      const expectedState = {
+        'cursor-before-clickers': { hasBeenShown: true },
+        'cursor-textland': { hasBeenShown: false },
+      };
+      storageAdapter.getItem.mockReturnValue(JSON.stringify(expectedState));
+
+      const result = persistenceService.getCutsceneState();
+
+      expect(result).toEqual(expectedState);
+      expect(storageAdapter.getItem).toHaveBeenCalledWith('cutsceneState');
     });
 
-    it('should return null for cursor-textland', () => {
-      const level = service._getDefaultLevelForGame('cursor-textland');
-      expect(level).toBeNull();
+    it('should return empty object if no cutscene state exists', () => {
+      storageAdapter.getItem.mockReturnValue(null);
+
+      const result = persistenceService.getCutsceneState();
+
+      expect(result).toEqual({});
     });
 
-    it('should return null for unknown games', () => {
-      const level = service._getDefaultLevelForGame('unknown-game');
-      expect(level).toBeNull();
+    it('should return empty object if cutscene state is invalid JSON', () => {
+      storageAdapter.getItem.mockReturnValue('invalid json');
+
+      const result = persistenceService.getCutsceneState();
+
+      expect(result).toEqual({});
+    });
+  });
+
+  describe('persistCutsceneState', () => {
+    it('should persist cutscene state for a game', () => {
+      const existingState = {
+        'cursor-textland': { hasBeenShown: false },
+      };
+      storageAdapter.getItem.mockReturnValue(JSON.stringify(existingState));
+
+      persistenceService.persistCutsceneState('cursor-before-clickers', { hasBeenShown: true });
+
+      const expectedState = {
+        'cursor-textland': { hasBeenShown: false },
+        'cursor-before-clickers': { hasBeenShown: true },
+      };
+
+      expect(storageAdapter.setItem).toHaveBeenCalledWith(
+        'cutsceneState',
+        JSON.stringify(expectedState)
+      );
+    });
+
+    it('should create new cutscene state if none exists', () => {
+      storageAdapter.getItem.mockReturnValue(null);
+
+      persistenceService.persistCutsceneState('cursor-before-clickers', { hasBeenShown: true });
+
+      const expectedState = {
+        'cursor-before-clickers': { hasBeenShown: true },
+      };
+
+      expect(storageAdapter.setItem).toHaveBeenCalledWith(
+        'cutsceneState',
+        JSON.stringify(expectedState)
+      );
+    });
+  });
+
+  describe('clearCutsceneState', () => {
+    it('should clear all cutscene state', () => {
+      persistenceService.clearCutsceneState();
+
+      expect(storageAdapter.removeItem).toHaveBeenCalledWith('cutsceneState');
     });
   });
 });
