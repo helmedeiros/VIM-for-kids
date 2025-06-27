@@ -1,6 +1,6 @@
 /* eslint-env node, jest */
-import { GameRegistry } from '../../../src/infrastructure/data/GameRegistry.js';
-import { Game } from '../../../src/domain/entities/Game.js';
+import { GameRegistry } from '../../../../src/infrastructure/data/games/GameRegistry.js';
+import { Game } from '../../../../src/domain/entities/Game.js';
 
 describe('GameRegistry', () => {
   beforeEach(() => {

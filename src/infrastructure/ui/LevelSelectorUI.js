@@ -1,4 +1,4 @@
-import { GameRegistry } from '../data/GameRegistry.js';
+import { GameRegistry } from '../data/games/GameRegistry.js';
 
 /**
  * UI component responsible for level selection

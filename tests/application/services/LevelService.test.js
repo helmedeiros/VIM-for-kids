@@ -1,6 +1,6 @@
 /* eslint-env node, jest */
 import { LevelService } from '../../../src/application/services/LevelService.js';
-import { GameRegistry } from '../../../src/infrastructure/data/GameRegistry.js';
+import { GameRegistry } from '../../../src/infrastructure/data/games/GameRegistry.js';
 
 describe('LevelService', () => {
   let levelService;

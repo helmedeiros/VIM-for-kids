@@ -1,4 +1,4 @@
-import { GameRegistry } from '../../infrastructure/data/GameRegistry.js';
+import { GameRegistry } from '../../infrastructure/data/games/GameRegistry.js';
 
 /**
  * Factory for creating game instances using the centralized GameRegistry

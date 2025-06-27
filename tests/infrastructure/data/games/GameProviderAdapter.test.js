@@ -1,7 +1,7 @@
-import { GameProviderAdapter } from '../../../src/infrastructure/data/GameProviderAdapter.js';
-import { Game } from '../../../src/domain/entities/Game.js';
-import { GameType } from '../../../src/domain/value-objects/GameType.js';
-import { GameRegistry } from '../../../src/infrastructure/data/GameRegistry.js';
+import { GameProviderAdapter } from '../../../../src/infrastructure/data/games/GameProviderAdapter.js';
+import { Game } from '../../../../src/domain/entities/Game.js';
+import { GameType } from '../../../../src/domain/value-objects/GameType.js';
+import { GameRegistry } from '../../../../src/infrastructure/data/games/GameRegistry.js';
 
 describe('GameProviderAdapter', () => {
   let adapter;

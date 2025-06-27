@@ -106,7 +106,7 @@ export class PersistenceService {
   _getDefaultLevelForGame(gameId) {
     try {
       // Use dynamic import to avoid circular dependencies
-      import('../../infrastructure/data/GameRegistry.js').then(({ GameRegistry }) => {
+      import('../../infrastructure/data/games/GameRegistry.js').then(({ GameRegistry }) => {
         const game = GameRegistry.getGame(gameId);
         const firstLevel = game.getFirstLevel();
         return firstLevel ? firstLevel.id : null;

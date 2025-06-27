@@ -1,5 +1,5 @@
 // Level configurations are now handled by the Game entity
-import { GameRegistry } from '../../infrastructure/data/GameRegistry.js';
+import { GameRegistry } from '../../infrastructure/data/games/GameRegistry.js';
 
 /**
  * Service responsible for game initialization logic
