@@ -5,7 +5,7 @@
 export class GameProvider {
   /**
    * Get all available games
-   * @returns {Promise<GameDescriptor[]>} Array of game descriptors
+   * @returns {Promise<Game[]>} Array of game entities
    */
   async getAvailableGames() {
     throw new Error('Method getAvailableGames must be implemented');
@@ -14,7 +14,7 @@ export class GameProvider {
   /**
    * Get a specific game by ID
    * @param {string} gameId - The game identifier
-   * @returns {Promise<GameDescriptor>} The game descriptor
+   * @returns {Promise<Game>} The game entity
    */
   async getGame(gameId) {
     // eslint-disable-line no-unused-vars
@@ -23,7 +23,7 @@ export class GameProvider {
 
   /**
    * Get the default game
-   * @returns {Promise<GameDescriptor>} The default game descriptor
+   * @returns {Promise<Game>} The default game entity
    */
   async getDefaultGame() {
     throw new Error('Method getDefaultGame must be implemented');

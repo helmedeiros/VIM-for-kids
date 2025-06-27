@@ -1,5 +1,5 @@
 import { SelectGameUseCase } from '../../../src/application/use-cases/SelectGameUseCase.js';
-import { GameDescriptor } from '../../../src/domain/entities/GameDescriptor.js';
+import { Game } from '../../../src/domain/entities/Game.js';
 import { GameType } from '../../../src/domain/value-objects/GameType.js';
 
 // Mock GameProvider
@@ -33,10 +33,10 @@ class MockGameProvider {
   }
 
   // Test helper methods
-  addGame(gameDescriptor) {
-    this.games.set(gameDescriptor.id, gameDescriptor);
+  addGame(game) {
+    this.games.set(game.id, game);
     if (!this.defaultGameId) {
-      this.defaultGameId = gameDescriptor.id;
+      this.defaultGameId = game.id;
     }
   }
 }
@@ -51,20 +51,20 @@ describe('SelectGameUseCase', () => {
     mockGameProvider = new MockGameProvider();
     useCase = new SelectGameUseCase(mockGameProvider);
 
-    // Setup test games
-    levelBasedGame = new GameDescriptor(
-      'level-game',
-      'Level Game',
-      'A level-based game',
-      new GameType(GameType.LEVEL_BASED)
-    );
+    // Create test games
+    levelBasedGame = new Game({
+      id: 'level-game',
+      name: 'Level Game',
+      description: 'A level-based game',
+      gameType: new GameType(GameType.LEVEL_BASED),
+    });
 
-    textlandGame = new GameDescriptor(
-      'textland-game',
-      'Textland Game',
-      'A textland game',
-      new GameType(GameType.TEXTLAND)
-    );
+    textlandGame = new Game({
+      id: 'textland-game',
+      name: 'Textland Game',
+      description: 'A textland game',
+      gameType: new GameType(GameType.TEXTLAND),
+    });
 
     mockGameProvider.addGame(levelBasedGame);
     mockGameProvider.addGame(textlandGame);
@@ -90,28 +90,44 @@ describe('SelectGameUseCase', () => {
       expect(games).toContain(levelBasedGame);
       expect(games).toContain(textlandGame);
     });
+
+    it('should return empty array when no games available', async () => {
+      const emptyProvider = new MockGameProvider();
+      const emptyUseCase = new SelectGameUseCase(emptyProvider);
+
+      const games = await emptyUseCase.getAvailableGames();
+
+      expect(games).toHaveLength(0);
+    });
   });
 
   describe('getDefaultGame', () => {
     it('should return the default game', async () => {
       const defaultGame = await useCase.getDefaultGame();
 
-      expect(defaultGame).toBe(levelBasedGame); // First added becomes default
+      expect(defaultGame).toBe(levelBasedGame);
+    });
+
+    it('should throw error when no default game is set', async () => {
+      const emptyProvider = new MockGameProvider();
+      const emptyUseCase = new SelectGameUseCase(emptyProvider);
+
+      await expect(emptyUseCase.getDefaultGame()).rejects.toThrow('No default game set');
     });
   });
 
   describe('selectGame', () => {
-    it('should return game descriptor and factory for level-based game', async () => {
+    it('should return game and factory for level-based game', async () => {
       const result = await useCase.selectGame('level-game');
 
-      expect(result.gameDescriptor).toBe(levelBasedGame);
+      expect(result.game).toBe(levelBasedGame);
       expect(result.gameStateFactory).toBeInstanceOf(Function);
     });
 
-    it('should return game descriptor and factory for textland game', async () => {
+    it('should return game and factory for textland game', async () => {
       const result = await useCase.selectGame('textland-game');
 
-      expect(result.gameDescriptor).toBe(textlandGame);
+      expect(result.game).toBe(textlandGame);
       expect(result.gameStateFactory).toBeInstanceOf(Function);
     });
 
