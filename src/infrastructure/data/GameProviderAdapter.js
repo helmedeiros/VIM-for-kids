@@ -9,22 +9,28 @@ import { GameRegistry } from './GameRegistry.js';
  */
 export class GameProviderAdapter extends GameProvider {
   async getAvailableGames() {
-    return GameRegistry.getAllGames().map(
-      (game) => new GameDescriptor(game.id, game.name, game.description, game.gameType)
-    );
+    return GameRegistry.getAllGames().map((game) => this._toGameDescriptor(game));
   }
 
   async getGame(gameId) {
     const game = GameRegistry.getGame(gameId);
-    return new GameDescriptor(game.id, game.name, game.description, game.gameType);
+    return this._toGameDescriptor(game);
   }
 
   async getDefaultGame() {
     const game = GameRegistry.getDefaultGame();
-    return new GameDescriptor(game.id, game.name, game.description, game.gameType);
+    return this._toGameDescriptor(game);
   }
 
   async hasGame(gameId) {
     return GameRegistry.hasGame(gameId);
+  }
+
+  /**
+   * Convert Game entity to GameDescriptor instance
+   * @private
+   */
+  _toGameDescriptor(game) {
+    return new GameDescriptor(game.id, game.name, game.description, game.gameType);
   }
 }

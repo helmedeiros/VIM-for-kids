@@ -236,11 +236,143 @@ describe('Game', () => {
         gameType: 'level_based',
         defaultLevel: 'level_1',
         supportedLevels: ['level_1', 'level_2'],
+        levels: {},
         features: { cutscenes: true },
         ui: { showLevelSelector: true },
         cutscenes: { hasOriginStory: true },
         persistence: { saveProgress: true },
         canCreateInstances: true,
+      });
+    });
+  });
+
+  describe('Level Management', () => {
+    let gameWithLevels;
+
+    beforeEach(() => {
+      gameWithLevels = new Game({
+        ...validConfig,
+        supportedLevels: ['level_1', 'level_2'],
+        levels: {
+          level_1: {
+            id: 'level_1',
+            name: 'First Level',
+            zones: ['zone_1'],
+            description: 'The first level',
+          },
+          level_2: {
+            id: 'level_2',
+            name: 'Second Level',
+            zones: ['zone_2', 'zone_3'],
+            description: 'The second level',
+          },
+        },
+      });
+    });
+
+    describe('getLevelConfiguration', () => {
+      it('should return level configuration for valid level', () => {
+        const level = gameWithLevels.getLevelConfiguration('level_1');
+
+        expect(level).toEqual({
+          id: 'level_1',
+          name: 'First Level',
+          zones: ['zone_1'],
+          description: 'The first level',
+        });
+      });
+
+      it('should throw error for invalid level', () => {
+        expect(() => gameWithLevels.getLevelConfiguration('invalid')).toThrow(
+          "Level 'invalid' not found in game 'test-game'"
+        );
+      });
+    });
+
+    describe('getAllLevelConfigurations', () => {
+      it('should return all level configurations', () => {
+        const levels = gameWithLevels.getAllLevelConfigurations();
+
+        expect(levels).toHaveLength(2);
+        expect(levels[0].id).toBe('level_1');
+        expect(levels[1].id).toBe('level_2');
+      });
+    });
+
+    describe('getFirstLevel', () => {
+      it('should return first level configuration', () => {
+        const firstLevel = gameWithLevels.getFirstLevel();
+
+        expect(firstLevel.id).toBe('level_1');
+        expect(firstLevel.name).toBe('First Level');
+      });
+
+      it('should return null for game with no levels', () => {
+        const gameWithoutLevels = new Game(validConfig);
+
+        expect(gameWithoutLevels.getFirstLevel()).toBeNull();
+      });
+    });
+
+    describe('getNextLevel', () => {
+      it('should return next level configuration', () => {
+        const nextLevel = gameWithLevels.getNextLevel('level_1');
+
+        expect(nextLevel.id).toBe('level_2');
+        expect(nextLevel.name).toBe('Second Level');
+      });
+
+      it('should return null for last level', () => {
+        const nextLevel = gameWithLevels.getNextLevel('level_2');
+
+        expect(nextLevel).toBeNull();
+      });
+
+      it('should return null for invalid level', () => {
+        const nextLevel = gameWithLevels.getNextLevel('invalid');
+
+        expect(nextLevel).toBeNull();
+      });
+    });
+
+    describe('levelHasZone', () => {
+      it('should return true when level has zone', () => {
+        expect(gameWithLevels.levelHasZone('level_1', 'zone_1')).toBe(true);
+        expect(gameWithLevels.levelHasZone('level_2', 'zone_2')).toBe(true);
+      });
+
+      it('should return false when level does not have zone', () => {
+        expect(gameWithLevels.levelHasZone('level_1', 'zone_2')).toBe(false);
+      });
+
+      it('should return false for invalid level', () => {
+        expect(gameWithLevels.levelHasZone('invalid', 'zone_1')).toBe(false);
+      });
+    });
+
+    describe('getLevelZones', () => {
+      it('should return zones for level', () => {
+        const zones = gameWithLevels.getLevelZones('level_2');
+
+        expect(zones).toEqual(['zone_2', 'zone_3']);
+      });
+
+      it('should throw error for invalid level', () => {
+        expect(() => gameWithLevels.getLevelZones('invalid')).toThrow(
+          "Level 'invalid' not found in game 'test-game'"
+        );
+      });
+    });
+
+    describe('getTotalLevelCount', () => {
+      it('should return total number of levels', () => {
+        expect(gameWithLevels.getTotalLevelCount()).toBe(2);
+      });
+
+      it('should return 0 for game with no levels', () => {
+        const gameWithoutLevels = new Game(validConfig);
+
+        expect(gameWithoutLevels.getTotalLevelCount()).toBe(0);
       });
     });
   });

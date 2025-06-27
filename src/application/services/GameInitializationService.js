@@ -1,4 +1,5 @@
-import { getFirstLevelId } from '../LevelConfigurations.js';
+// Level configurations are now handled by the Game entity
+import { GameRegistry } from '../../infrastructure/data/GameRegistry.js';
 
 /**
  * Service responsible for game initialization logic
@@ -99,10 +100,23 @@ export class GameInitializationService {
       options = { level: options };
     }
 
+    const gameId = options.game || 'cursor-before-clickers';
+
+    // Get first level from the game
+    let defaultLevel = null;
+    try {
+      const game = GameRegistry.getGame(gameId);
+      const firstLevel = game.getFirstLevel();
+      defaultLevel = firstLevel ? firstLevel.id : null;
+    } catch (error) {
+      // Fallback to level_1 if game not found
+      defaultLevel = 'level_1';
+    }
+
     // Set defaults
     return {
-      game: options.game || 'cursor-before-clickers',
-      level: options.level || getFirstLevelId(),
+      game: gameId,
+      level: options.level || defaultLevel,
       ...options,
     };
   }

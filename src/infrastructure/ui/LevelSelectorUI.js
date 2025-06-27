@@ -1,11 +1,12 @@
-import { getAllLevelConfigurations } from '../../application/LevelConfigurations.js';
+import { GameRegistry } from '../data/GameRegistry.js';
 
 /**
  * UI component responsible for level selection
  * Follows Single Responsibility Principle
  */
 export class LevelSelectorUI {
-  constructor(levelConfiguration = null) {
+  constructor(levelConfiguration = null, gameId = 'cursor-before-clickers') {
+    this._gameId = gameId;
     this._levelConfiguration = levelConfiguration || this._getDefaultLevelConfiguration();
     this._onLevelSelected = null;
   }
@@ -87,7 +88,8 @@ export class LevelSelectorUI {
    */
   _getLevelButtonText(levelId) {
     try {
-      const config = getAllLevelConfigurations().find((c) => c.id === levelId);
+      const game = GameRegistry.getGame(this._gameId);
+      const config = game.getLevelConfiguration(levelId);
       return config ? `Level ${levelId.split('_')[1]}: ${config.name}` : levelId;
     } catch (error) {
       // Fallback to level ID if configuration not found
@@ -118,10 +120,16 @@ export class LevelSelectorUI {
    * @private
    */
   _getDefaultLevelConfiguration() {
-    return getAllLevelConfigurations().map((config) => ({
-      id: config.id,
-      level: config.id,
-    }));
+    try {
+      const game = GameRegistry.getGame(this._gameId);
+      return game.getAllLevelConfigurations().map((config) => ({
+        id: config.id,
+        level: config.id,
+      }));
+    } catch (error) {
+      // Fallback to empty array if game not found
+      return [];
+    }
   }
 
   /**
