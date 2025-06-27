@@ -1,4 +1,51 @@
 /**
+ * Storage operations that can be tested in isolation
+ * Contains pure logic without browser dependencies
+ */
+export class StorageOperations {
+  /**
+   * Validate storage key
+   * @param {string} key - Storage key to validate
+   * @returns {boolean} True if key is valid
+   */
+  static isValidKey(key) {
+    return typeof key === 'string' && key.trim() !== '';
+  }
+
+  /**
+   * Validate storage value
+   * @param {*} value - Value to validate
+   * @returns {boolean} True if value can be stored
+   */
+  static isValidValue(value) {
+    return value !== undefined;
+  }
+
+  /**
+   * Process storage error and return appropriate response
+   * @param {Error} error - Storage error
+   * @param {string} operation - Operation that failed
+   * @returns {*} Appropriate return value for the operation
+   */
+  static handleStorageError(error, operation) {
+    const message = `Failed to ${operation} localStorage: ${error.message}`;
+    // eslint-disable-next-line no-console
+    console.warn(message);
+
+    // Return appropriate default values based on operation
+    switch (operation) {
+      case 'read from':
+        return null;
+      case 'write to':
+      case 'remove from':
+      case 'clear':
+      default:
+        return undefined;
+    }
+  }
+}
+
+/**
  * Adapter for browser localStorage operations
  * Implements abstraction for storage operations
  */
@@ -9,11 +56,14 @@ export class BrowserStorageAdapter {
    * @returns {string|null} Stored value or null
    */
   getItem(key) {
+    if (!StorageOperations.isValidKey(key)) {
+      return null;
+    }
+
     try {
       return localStorage.getItem(key);
     } catch (error) {
-      console.warn('Failed to read from localStorage:', error);
-      return null;
+      return StorageOperations.handleStorageError(error, 'read from');
     }
   }
 
@@ -23,10 +73,14 @@ export class BrowserStorageAdapter {
    * @param {string} value - Value to store
    */
   setItem(key, value) {
+    if (!StorageOperations.isValidKey(key) || !StorageOperations.isValidValue(value)) {
+      return;
+    }
+
     try {
       localStorage.setItem(key, value);
     } catch (error) {
-      console.warn('Failed to write to localStorage:', error);
+      StorageOperations.handleStorageError(error, 'write to');
     }
   }
 
@@ -35,10 +89,14 @@ export class BrowserStorageAdapter {
    * @param {string} key - Storage key
    */
   removeItem(key) {
+    if (!StorageOperations.isValidKey(key)) {
+      return;
+    }
+
     try {
       localStorage.removeItem(key);
     } catch (error) {
-      console.warn('Failed to remove from localStorage:', error);
+      StorageOperations.handleStorageError(error, 'remove from');
     }
   }
 
@@ -49,7 +107,7 @@ export class BrowserStorageAdapter {
     try {
       localStorage.clear();
     } catch (error) {
-      console.warn('Failed to clear localStorage:', error);
+      StorageOperations.handleStorageError(error, 'clear');
     }
   }
 }

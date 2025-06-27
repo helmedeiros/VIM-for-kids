@@ -68,6 +68,38 @@ export class PersistenceService {
   }
 
   /**
+   * Get cutscene state from storage
+   * @returns {Object} Cutscene state object where keys are game IDs
+   */
+  getCutsceneState() {
+    try {
+      const stateString = this._storageAdapter.getItem('cutsceneState');
+      return stateString ? JSON.parse(stateString) : {};
+    } catch (error) {
+      // Return empty object if parsing fails
+      return {};
+    }
+  }
+
+  /**
+   * Persist cutscene state for a specific game
+   * @param {string} gameId - Game identifier
+   * @param {Object} state - Cutscene state for the game
+   */
+  persistCutsceneState(gameId, state) {
+    const currentState = this.getCutsceneState();
+    currentState[gameId] = state;
+    this._storageAdapter.setItem('cutsceneState', JSON.stringify(currentState));
+  }
+
+  /**
+   * Clear all cutscene state (useful for testing/reset)
+   */
+  clearCutsceneState() {
+    this._storageAdapter.removeItem('cutsceneState');
+  }
+
+  /**
    * Get default level for a game type
    * @private
    */
