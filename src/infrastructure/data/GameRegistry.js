@@ -1,16 +1,16 @@
-import { GameDefinition } from '../../domain/entities/GameDefinition.js';
+import { Game } from '../../domain/entities/Game.js';
 import { GameType } from '../../domain/value-objects/GameType.js';
 import { VimForKidsGame } from '../../VimForKidsGame.js';
 
 /**
- * Centralized registry for all game definitions
+ * Centralized registry for all games
  * Single source of truth for game configuration
  * Follows Registry pattern for better maintainability
  */
 export class GameRegistry {
   /**
-   * Get all game definitions
-   * @returns {Map<string, GameDefinition>} Map of game ID to GameDefinition
+   * Get all games
+   * @returns {Map<string, Game>} Map of game ID to Game
    */
   static getGames() {
     if (!this._games) {
@@ -20,9 +20,9 @@ export class GameRegistry {
   }
 
   /**
-   * Initialize all game definitions
+   * Initialize all games
    * @private
-   * @returns {Map<string, GameDefinition>} Initialized games map
+   * @returns {Map<string, Game>} Initialized games map
    */
   static _initializeGames() {
     const games = new Map();
@@ -30,7 +30,7 @@ export class GameRegistry {
     // Game 1: "Cursor - Before the Clickers" (Level-based adventure game)
     games.set(
       'cursor-before-clickers',
-      new GameDefinition({
+      new Game({
         id: 'cursor-before-clickers',
         name: 'Cursor - Before the Clickers',
         description:
@@ -83,7 +83,7 @@ export class GameRegistry {
     // Game 2: "Cursor and the Textland" (Open exploration game)
     games.set(
       'cursor-textland',
-      new GameDefinition({
+      new Game({
         id: 'cursor-textland',
         name: 'Cursor and the Textland',
         description:
@@ -135,9 +135,9 @@ export class GameRegistry {
   }
 
   /**
-   * Get a specific game definition by ID
+   * Get a specific game by ID
    * @param {string} gameId - Game identifier
-   * @returns {GameDefinition} Game definition
+   * @returns {Game} Game instance
    * @throws {Error} If game not found
    */
   static getGame(gameId) {
@@ -149,16 +149,16 @@ export class GameRegistry {
   }
 
   /**
-   * Get all game definitions as an array
-   * @returns {GameDefinition[]} Array of all game definitions
+   * Get all games as an array
+   * @returns {Game[]} Array of all games
    */
   static getAllGames() {
     return Array.from(this.getGames().values());
   }
 
   /**
-   * Get the default game definition
-   * @returns {GameDefinition} Default game definition
+   * Get the default game
+   * @returns {Game} Default game
    */
   static getDefaultGame() {
     return this.getGame('cursor-before-clickers');
@@ -184,7 +184,7 @@ export class GameRegistry {
   /**
    * Get games by type
    * @param {GameType} gameType - Game type to filter by
-   * @returns {GameDefinition[]} Array of games matching the type
+   * @returns {Game[]} Array of games matching the type
    */
   static getGamesByType(gameType) {
     return this.getAllGames().filter((game) => game.gameType.equals(gameType));
@@ -193,22 +193,22 @@ export class GameRegistry {
   /**
    * Get games with a specific feature
    * @param {string} feature - Feature name
-   * @returns {GameDefinition[]} Array of games with the feature
+   * @returns {Game[]} Array of games with the feature
    */
   static getGamesWithFeature(feature) {
     return this.getAllGames().filter((game) => game.hasFeature(feature));
   }
 
   /**
-   * Register a new game definition
+   * Register a new game
    * @param {string} gameId - Game identifier
-   * @param {GameDefinition} gameDefinition - Game definition
+   * @param {Game} game - Game instance
    */
-  static registerGame(gameId, gameDefinition) {
-    if (!(gameDefinition instanceof GameDefinition)) {
-      throw new Error('Must provide a GameDefinition instance');
+  static registerGame(gameId, game) {
+    if (!(game instanceof Game)) {
+      throw new Error('Must provide a Game instance');
     }
-    this.getGames().set(gameId, gameDefinition);
+    this.getGames().set(gameId, game);
   }
 
   /**

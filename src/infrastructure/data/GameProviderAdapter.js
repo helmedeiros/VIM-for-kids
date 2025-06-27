@@ -10,18 +10,18 @@ import { GameRegistry } from './GameRegistry.js';
 export class GameProviderAdapter extends GameProvider {
   async getAvailableGames() {
     return GameRegistry.getAllGames().map(
-      (def) => new GameDescriptor(def.id, def.name, def.description, def.gameType)
+      (game) => new GameDescriptor(game.id, game.name, game.description, game.gameType)
     );
   }
 
   async getGame(gameId) {
-    const def = GameRegistry.getGame(gameId);
-    return new GameDescriptor(def.id, def.name, def.description, def.gameType);
+    const game = GameRegistry.getGame(gameId);
+    return new GameDescriptor(game.id, game.name, game.description, game.gameType);
   }
 
   async getDefaultGame() {
-    const def = GameRegistry.getDefaultGame();
-    return new GameDescriptor(def.id, def.name, def.description, def.gameType);
+    const game = GameRegistry.getDefaultGame();
+    return new GameDescriptor(game.id, game.name, game.description, game.gameType);
   }
 
   async hasGame(gameId) {

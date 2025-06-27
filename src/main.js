@@ -115,14 +115,14 @@ class Application {
   async _updateUIForGameType(config) {
     try {
       const { GameRegistry } = await import('./infrastructure/data/GameRegistry.js');
-      const gameDefinition = GameRegistry.getGame(config.game);
-      const uiConfig = gameDefinition.getUIConfig();
+      const game = GameRegistry.getGame(config.game);
+      const uiConfig = game.getUIConfig();
 
-      // Show/hide level selection based on game definition
+      // Show/hide level selection based on game configuration
       this._levelSelectorUI.setVisible(uiConfig.showLevelSelector);
 
       // Set active level for level-based games
-      if (gameDefinition.supportsLevels() && config.level) {
+      if (game.supportsLevels() && config.level) {
         this._levelSelectorUI.setActiveLevel(config.level);
       }
     } catch (error) {

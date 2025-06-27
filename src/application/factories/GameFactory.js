@@ -17,23 +17,23 @@ export class GameFactory {
    */
   async createGame(options) {
     const gameId = this._determineGameId(options);
-    const gameDefinition = GameRegistry.getGame(gameId);
+    const game = GameRegistry.getGame(gameId);
 
-    return await gameDefinition.createGame(options, this._dependencies);
+    return await game.createGame(options, this._dependencies);
   }
 
   /**
-   * Register a new game creator (delegates to GameRegistry)
+   * Register a new game (delegates to GameRegistry)
    * @param {string} gameId - Game identifier
-   * @param {GameDefinition} gameDefinition - Game definition
+   * @param {Game} game - Game instance
    */
-  registerGame(gameId, gameDefinition) {
-    GameRegistry.registerGame(gameId, gameDefinition);
+  registerGame(gameId, game) {
+    GameRegistry.registerGame(gameId, game);
   }
 
   /**
    * Get all available games
-   * @returns {GameDefinition[]} Array of game definitions
+   * @returns {Game[]} Array of games
    */
   getAvailableGames() {
     return GameRegistry.getAllGames();

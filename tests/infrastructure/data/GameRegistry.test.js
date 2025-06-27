@@ -1,6 +1,6 @@
 /* eslint-env node, jest */
 import { GameRegistry } from '../../../src/infrastructure/data/GameRegistry.js';
-import { GameDefinition } from '../../../src/domain/entities/GameDefinition.js';
+import { Game } from '../../../src/domain/entities/Game.js';
 
 describe('GameRegistry', () => {
   beforeEach(() => {
@@ -21,9 +21,9 @@ describe('GameRegistry', () => {
   });
 
   describe('getGame', () => {
-    it('should return the correct game definition', () => {
+    it('should return the correct game', () => {
       const game = GameRegistry.getGame('cursor-before-clickers');
-      expect(game).toBeInstanceOf(GameDefinition);
+      expect(game).toBeInstanceOf(Game);
       expect(game.id).toBe('cursor-before-clickers');
     });
 
@@ -33,10 +33,11 @@ describe('GameRegistry', () => {
   });
 
   describe('getAllGames', () => {
-    it('should return array of all game definitions', () => {
+    it('should return array of all games', () => {
       const games = GameRegistry.getAllGames();
       expect(Array.isArray(games)).toBe(true);
       expect(games.length).toBe(2);
+      expect(games.every((game) => game instanceof Game)).toBe(true);
     });
   });
 
