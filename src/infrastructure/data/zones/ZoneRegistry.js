@@ -8,6 +8,7 @@ import { SearchSpringsZone } from './SearchSpringsZone.js';
 import { CommandCavernZone } from './CommandCavernZone.js';
 import { PlaygroundOfPracticeZone } from './PlaygroundOfPracticeZone.js';
 import { SyntaxTempleZone } from './SyntaxTempleZone.js';
+import { TextlandExplorationZone } from './TextlandExplorationZone.js';
 
 /**
  * Central registry for all zone factories
@@ -26,6 +27,7 @@ export class ZoneRegistry {
       ['zone_8', CommandCavernZone],
       ['zone_9', PlaygroundOfPracticeZone],
       ['zone_10', SyntaxTempleZone],
+      ['textland_exploration', TextlandExplorationZone],
     ]);
   }
 

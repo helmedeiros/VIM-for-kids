@@ -37,7 +37,7 @@ describe('ZoneRegistry', () => {
       const zoneIds = ZoneRegistry.getAvailableZoneIds();
 
       expect(zoneIds).toContain('zone_1');
-      expect(zoneIds).toHaveLength(10); // All 10 zones implemented
+      expect(zoneIds).toHaveLength(11); // All 10 main zones + textland exploration zone
     });
 
     test('should check if zone exists', () => {
@@ -48,7 +48,7 @@ describe('ZoneRegistry', () => {
     test('should get all zone information', () => {
       const zoneInfo = ZoneRegistry.getAllZoneInfo();
 
-      expect(zoneInfo).toHaveLength(10);
+      expect(zoneInfo).toHaveLength(11);
       expect(zoneInfo[0]).toEqual({
         zoneId: 'zone_1',
         name: '1. Blinking Grove',
@@ -118,7 +118,7 @@ describe('ZoneRegistry', () => {
       const zones = ZoneRegistry.getZones();
 
       expect(zones).toBeInstanceOf(Map);
-      expect(zones.size).toBe(10);
+      expect(zones.size).toBe(11);
       expect(zones.has('zone_1')).toBe(true);
       expect(zones.has('zone_10')).toBe(true);
     });
