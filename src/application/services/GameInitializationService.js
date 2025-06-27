@@ -5,9 +5,11 @@ import { getFirstLevelId } from '../LevelConfigurations.js';
  * Follows Single Responsibility Principle
  */
 export class GameInitializationService {
-  constructor(gameFactory, persistenceService) {
+  constructor(gameFactory, persistenceService, cutsceneService = null, cutsceneRenderer = null) {
     this._gameFactory = gameFactory;
     this._persistenceService = persistenceService;
+    this._cutsceneService = cutsceneService;
+    this._cutsceneRenderer = cutsceneRenderer;
     this._currentGame = null;
   }
 
@@ -24,6 +26,9 @@ export class GameInitializationService {
 
     // Normalize options
     const normalizedOptions = this._normalizeOptions(options);
+
+    // Show origin story cutscene if applicable
+    await this._showOriginStoryIfNeeded(normalizedOptions.game);
 
     // Create game instance
     this._currentGame = await this._gameFactory.createGame(normalizedOptions);
@@ -46,6 +51,41 @@ export class GameInitializationService {
     if (this._currentGame) {
       this._currentGame.cleanup();
       this._currentGame = null;
+    }
+  }
+
+  /**
+   * Show origin story cutscene if conditions are met
+   * @param {string} gameId - Game identifier
+   * @private
+   */
+  async _showOriginStoryIfNeeded(gameId) {
+    // Skip if cutscene services are not available
+    if (!this._cutsceneService || !this._cutsceneRenderer) {
+      return;
+    }
+
+    try {
+      // Check if origin story should be shown
+      const shouldShow = await this._cutsceneService.shouldShowOriginStory(gameId);
+      if (!shouldShow) {
+        return;
+      }
+
+      // Get origin story
+      const originStory = await this._cutsceneService.getOriginStory(gameId);
+      if (!originStory) {
+        return;
+      }
+
+      // Show cutscene and wait for completion
+      await this._cutsceneRenderer.showCutscene(originStory);
+
+      // Mark as shown
+      await this._cutsceneService.markOriginStoryAsShown(gameId);
+    } catch (error) {
+      // Log error but don't prevent game initialization
+      console.error('Failed to show origin story cutscene:', error);
     }
   }
 
