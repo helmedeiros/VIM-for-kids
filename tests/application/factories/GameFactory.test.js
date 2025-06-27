@@ -63,7 +63,7 @@ describe('GameFactory', () => {
 
     it('should throw error for unknown game type', async () => {
       await expect(gameFactory.createGame({ game: 'unknown-game' })).rejects.toThrow(
-        'No creator registered for game type: unknown-game'
+        "Game 'unknown-game' not found"
       );
     });
 
@@ -76,43 +76,25 @@ describe('GameFactory', () => {
     });
   });
 
-  describe('registerGameCreator', () => {
-    it('should register new game creator', async () => {
-      const mockCreator = jest.fn().mockResolvedValue({ gameType: 'custom-game' });
+  describe('getAvailableGames', () => {
+    it('should return all available games from registry', () => {
+      const games = gameFactory.getAvailableGames();
 
-      gameFactory.registerGameCreator('custom-game', mockCreator);
-      const game = await gameFactory.createGame({ game: 'custom-game' });
-
-      expect(mockCreator).toHaveBeenCalledWith({ game: 'custom-game' }, mockDependencies);
-      expect(game.gameType).toBe('custom-game');
-    });
-
-    it('should override existing game creator', async () => {
-      const mockCreator = jest
-        .fn()
-        .mockResolvedValue({ gameType: 'custom-cursor-before-clickers' });
-
-      gameFactory.registerGameCreator('cursor-before-clickers', mockCreator);
-      const game = await gameFactory.createGame({ game: 'cursor-before-clickers' });
-
-      expect(mockCreator).toHaveBeenCalledWith(
-        { game: 'cursor-before-clickers' },
-        mockDependencies
-      );
-      expect(VimForKidsGame).not.toHaveBeenCalled();
-      expect(game.gameType).toBe('custom-cursor-before-clickers');
+      expect(Array.isArray(games)).toBe(true);
+      expect(games.length).toBe(2);
+      expect(games.some((game) => game.id === 'cursor-before-clickers')).toBe(true);
+      expect(games.some((game) => game.id === 'cursor-textland')).toBe(true);
     });
   });
 
-  describe('_determineGameType', () => {
-    it('should return default game type when no game specified', () => {
-      const result = gameFactory._determineGameType({});
-      expect(result).toBe('cursor-before-clickers');
+  describe('supportsGame', () => {
+    it('should return true for supported games', () => {
+      expect(gameFactory.supportsGame('cursor-before-clickers')).toBe(true);
+      expect(gameFactory.supportsGame('cursor-textland')).toBe(true);
     });
 
-    it('should return specified game type', () => {
-      const result = gameFactory._determineGameType({ game: 'cursor-textland' });
-      expect(result).toBe('cursor-textland');
+    it('should return false for unsupported games', () => {
+      expect(gameFactory.supportsGame('non-existent')).toBe(false);
     });
   });
 });

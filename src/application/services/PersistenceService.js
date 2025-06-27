@@ -100,10 +100,12 @@ export class PersistenceService {
   }
 
   /**
-   * Get default level for a game type
+   * Get default level for a game type using GameRegistry
    * @private
    */
   _getDefaultLevelForGame(gameId) {
+    // For now, keep the simple logic to avoid circular dependencies
+    // TODO: Refactor to use GameRegistry when dependency injection is improved
     return gameId === 'cursor-before-clickers' ? getFirstLevelId() : null;
   }
 }

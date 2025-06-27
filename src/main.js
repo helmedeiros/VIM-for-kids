@@ -102,25 +102,37 @@ class Application {
     const game = await this._initializationService.initializeGame(config);
 
     // Update UI based on game type
-    this._updateUIForGameType(config);
+    await this._updateUIForGameType(config);
 
     // Update global reference for backward compatibility
     window.vimForKidsGame = game;
   }
 
   /**
-   * Update UI based on game type
+   * Update UI based on game type using GameRegistry
    * @private
    */
-  _updateUIForGameType(config) {
-    const isLevelBased = config.game === 'cursor-before-clickers';
+  async _updateUIForGameType(config) {
+    try {
+      const { GameRegistry } = await import('./infrastructure/data/GameRegistry.js');
+      const gameDefinition = GameRegistry.getGame(config.game);
+      const uiConfig = gameDefinition.getUIConfig();
 
-    // Show/hide level selection
-    this._levelSelectorUI.setVisible(isLevelBased);
+      // Show/hide level selection based on game definition
+      this._levelSelectorUI.setVisible(uiConfig.showLevelSelector);
 
-    // Set active level for level-based games
-    if (isLevelBased && config.level) {
-      this._levelSelectorUI.setActiveLevel(config.level);
+      // Set active level for level-based games
+      if (gameDefinition.supportsLevels() && config.level) {
+        this._levelSelectorUI.setActiveLevel(config.level);
+      }
+    } catch (error) {
+      // Fallback to old behavior if GameRegistry fails
+      console.warn('Failed to load GameRegistry, using fallback UI logic:', error);
+      const isLevelBased = config.game === 'cursor-before-clickers';
+      this._levelSelectorUI.setVisible(isLevelBased);
+      if (isLevelBased && config.level) {
+        this._levelSelectorUI.setActiveLevel(config.level);
+      }
     }
   }
 
