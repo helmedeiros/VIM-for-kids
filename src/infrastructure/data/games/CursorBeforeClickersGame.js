@@ -36,24 +36,59 @@ export class CursorBeforeClickersGame {
           name: 'Text Manipulation',
           zones: ['zone_2', 'zone_3'], // Maze of Modes, Swamp of Words
           description: 'Master VIM modes and word navigation',
+          cutscene: [
+            'You have learned the basics of movement.',
+            'Now the real challenge begins...',
+            '🏛️ Welcome to the realm of Text Manipulation.',
+            'Here you will master the sacred modes of VIM:',
+            '• Normal Mode - Where you navigate and command',
+            '• Insert Mode - Where you create and modify',
+            '• Command Mode - Where you wield true power',
+            'The Maze of Modes and Swamp of Words await your mastery.',
+          ],
         },
         level_3: {
           id: 'level_3',
           name: 'Advanced Movement',
           zones: ['zone_4', 'zone_5', 'zone_6'], // Delete Canyon, Field of Insertion, Copy Circle
           description: 'Navigate efficiently with advanced movement commands',
+          cutscene: [
+            '⚡ You have conquered the modes!',
+            'But now, the text itself calls to you...',
+            'Welcome to Advanced Movement - where every keystroke has purpose.',
+            'Delete Canyon will teach you precision in removal.',
+            'Field of Insertion will show you the art of placement.',
+            'Copy Circle will reveal the mysteries of duplication.',
+            'Master these skills, and text will bend to your will.',
+          ],
         },
         level_4: {
           id: 'level_4',
           name: 'Text Operations',
           zones: ['zone_7', 'zone_8'], // Search Springs, Command Cavern
           description: 'Master deletion, copying, and pasting operations',
+          cutscene: [
+            '🔥 The cursor grows stronger...',
+            'Text Operations await - the true power of VIM.',
+            'In Search Springs, you will learn to find anything.',
+            'In Command Cavern, you will discover the deep magic.',
+            'These are not mere tools - they are extensions of thought.',
+            'Prepare yourself for mastery beyond movement.',
+          ],
         },
         level_5: {
           id: 'level_5',
           name: 'Search & Command',
           zones: ['zone_9', 'zone_10'], // Playground of Practice, Syntax Temple
           description: 'Find, search, and command like a VIM master',
+          cutscene: [
+            '✨ The final trials await...',
+            'You stand at the threshold of true VIM mastery.',
+            'Playground of Practice will test everything you know.',
+            'Syntax Temple holds the ultimate challenge - the Bug King himself.',
+            'This is where legends are made, young Cursor.',
+            'The fate of Textland rests in your keystrokes.',
+          ],
         },
       },
 
