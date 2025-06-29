@@ -6,8 +6,12 @@ import { Position } from '../../../domain/value-objects/Position.js';
  * Stone labyrinth where the Cursor learns mode switching (i, ESC, :)
  */
 export class MazeOfModesZone {
-  static create() {
-    const config = {
+  /**
+   * Get the shared configuration metadata for this zone
+   * @private
+   */
+  static _getSharedConfig() {
+    return {
       zoneId: 'zone_2',
       name: '2. Maze of Modes',
       biome: 'Stone labyrinth',
@@ -19,6 +23,12 @@ export class MazeOfModesZone {
         'Command mode is where you command the very fabric of text.',
         'Master the transitions, young Cursor, for modes are the keys to power.',
       ],
+    };
+  }
+
+  static create() {
+    const config = {
+      ...this._getSharedConfig(),
 
       // Entry from Zone 1 - place cursor at the beginning of the path
       cursorStartPosition: new Position(0, 5),
@@ -167,18 +177,6 @@ export class MazeOfModesZone {
   }
 
   static getConfig() {
-    return {
-      zoneId: 'zone_2',
-      name: '2. Maze of Modes',
-      biome: 'Stone labyrinth',
-      skillFocus: ['i', 'ESC', ':', 'mode switching'],
-      puzzleTheme: 'Switching between Normal, Insert, Visual',
-      narration: [
-        'The stone walls whisper of ancient modes...',
-        'Normal mode is where you begin, Insert mode is where you create.',
-        'Command mode is where you command the very fabric of text.',
-        'Master the transitions, young Cursor, for modes are the keys to power.',
-      ],
-    };
+    return this._getSharedConfig();
   }
 }

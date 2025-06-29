@@ -6,8 +6,12 @@ import { Position } from '../../../domain/value-objects/Position.js';
  * Calm, ring-shaped stone garden where the Cursor learns copying and pasting
  */
 export class CopyCircleZone {
-  static create() {
-    const config = {
+  /**
+   * Get the shared configuration metadata for this zone
+   * @private
+   */
+  static _getSharedConfig() {
+    return {
       zoneId: 'zone_6',
       name: '6. Copy Circle',
       biome: 'Calm, ring-shaped stone garden',
@@ -19,6 +23,12 @@ export class CopyCircleZone {
         'Learn to copy without corruption, paste without chaos.',
         'The Yanker teaches the harmony of duplication and placement.',
       ],
+    };
+  }
+
+  static create() {
+    const config = {
+      ...this._getSharedConfig(),
 
       // Entry from Zone 5 - place cursor at the beginning of the path
       cursorStartPosition: new Position(25, 0),
@@ -164,18 +174,16 @@ export class CopyCircleZone {
   }
 
   static getConfig() {
+    // Create a temporary zone instance and extract its configuration
+    const tempZone = this.create();
+
+    // Extract the configuration from the zone instance
     return {
-      zoneId: 'zone_6',
-      name: '6. Copy Circle',
-      biome: 'Calm, ring-shaped stone garden',
-      skillFocus: ['yy', 'p', 'P', 'd'],
-      puzzleTheme: 'Copying, pasting, deleting',
-      narration: [
-        'The stone circle hums with echoes of duplicated text...',
-        'Here, the ancient art of yank and put is practiced.',
-        'Learn to copy without corruption, paste without chaos.',
-        'The Yanker teaches the harmony of duplication and placement.',
-      ],
+      ...this._getSharedConfig(),
+      cursorStartPosition: tempZone.cursorStartPosition,
+      tiles: tempZone.tiles,
+      npcs: tempZone.npcs,
+      events: tempZone.events,
     };
   }
 }

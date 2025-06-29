@@ -6,8 +6,12 @@ import { Position } from '../../../domain/value-objects/Position.js';
  * Wetlands with unstable bridges where the Cursor learns word navigation
  */
 export class SwampOfWordsZone {
-  static create() {
-    const config = {
+  /**
+   * Get the shared configuration metadata for this zone
+   * @private
+   */
+  static _getSharedConfig() {
+    return {
       zoneId: 'zone_3',
       name: '3. Swamp of Words',
       biome: 'Wetlands with unstable bridges',
@@ -19,6 +23,12 @@ export class SwampOfWordsZone {
         'Learn the difference, for one misstep means a watery grave.',
         'The Word Witch watches from the mist, testing your understanding.',
       ],
+    };
+  }
+
+  static create() {
+    const config = {
+      ...this._getSharedConfig(),
 
       // Entry from Zone 2 - place cursor at the beginning of the path (within bounds)
       cursorStartPosition: new Position(47, 0),
@@ -192,18 +202,6 @@ export class SwampOfWordsZone {
   }
 
   static getConfig() {
-    return {
-      zoneId: 'zone_3',
-      name: '3. Swamp of Words',
-      biome: 'Wetlands with unstable bridges',
-      skillFocus: ['w', 'W', 'e', 'E', 'b', 'B'],
-      puzzleTheme: 'Word vs WORD movement',
-      narration: [
-        'The swamp bubbles with forgotten words...',
-        'Some bridges hold only words, others support WORDS.',
-        'Learn the difference, for one misstep means a watery grave.',
-        'The Word Witch watches from the mist, testing your understanding.',
-      ],
-    };
+    return this._getSharedConfig();
   }
 }

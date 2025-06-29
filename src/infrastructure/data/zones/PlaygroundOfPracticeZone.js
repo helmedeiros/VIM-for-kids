@@ -6,8 +6,12 @@ import { Position } from '../../../domain/value-objects/Position.js';
  * Testing grounds and sandbox where the Cursor reinforces all skills
  */
 export class PlaygroundOfPracticeZone {
-  static create() {
-    const config = {
+  /**
+   * Get the shared configuration metadata for this zone
+   * @private
+   */
+  static _getSharedConfig() {
+    return {
       zoneId: 'zone_9',
       name: '9. Playground of Practice',
       biome: 'Testing grounds, sandbox',
@@ -36,6 +40,12 @@ export class PlaygroundOfPracticeZone {
         'No hints, no help - only your mastery and intuition.',
         'The friendly spirits watch, but they offer only encouragement.',
       ],
+    };
+  }
+
+  static create() {
+    const config = {
+      ...this._getSharedConfig(),
 
       // Entry from Zone 8 - place cursor at the beginning of the path (on walkable tile)
       cursorStartPosition: new Position(24, 31),
@@ -241,35 +251,16 @@ export class PlaygroundOfPracticeZone {
   }
 
   static getConfig() {
+    // Create a temporary zone instance and extract its configuration
+    const tempZone = this.create();
+
+    // Extract the configuration from the zone instance
     return {
-      zoneId: 'zone_9',
-      name: '9. Playground of Practice',
-      biome: 'Testing grounds, sandbox',
-      skillFocus: [
-        'h',
-        'j',
-        'k',
-        'l',
-        'i',
-        'ESC',
-        'w',
-        'e',
-        'b',
-        'x',
-        'dd',
-        'yy',
-        'p',
-        '/',
-        'n',
-        ':w',
-      ],
-      puzzleTheme: 'Freestyle challenges',
-      narration: [
-        'Welcome to the Playground, young Cursor...',
-        'Here, all your skills will be tested without guidance.',
-        'No hints, no help - only your mastery and intuition.',
-        'The friendly spirits watch, but they offer only encouragement.',
-      ],
+      ...this._getSharedConfig(),
+      cursorStartPosition: tempZone.cursorStartPosition,
+      tiles: tempZone.tiles,
+      npcs: tempZone.npcs,
+      events: tempZone.events,
     };
   }
 }

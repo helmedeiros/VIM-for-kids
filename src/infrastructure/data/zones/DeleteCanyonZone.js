@@ -6,8 +6,12 @@ import { Position } from '../../../domain/value-objects/Position.js';
  * Red cliffs and ledges where the Cursor learns deletion mechanics
  */
 export class DeleteCanyonZone {
-  static create() {
-    const config = {
+  /**
+   * Get the shared configuration metadata for this zone
+   * @private
+   */
+  static _getSharedConfig() {
+    return {
       zoneId: 'zone_4',
       name: '4. Delete Canyon',
       biome: 'Red cliffs and ledges',
@@ -19,6 +23,12 @@ export class DeleteCanyonZone {
         'Only deletion can cleanse this place.',
         'Learn to cut away the corruption, but be precise - one wrong cut and all is lost.',
       ],
+    };
+  }
+
+  static create() {
+    const config = {
+      ...this._getSharedConfig(),
 
       // Entry from Zone 3 - place cursor at the beginning of the path
       cursorStartPosition: new Position(0, 31),
@@ -169,18 +179,16 @@ export class DeleteCanyonZone {
   }
 
   static getConfig() {
+    // Create a temporary zone instance and extract its configuration
+    const tempZone = this.create();
+
+    // Extract the configuration from the zone instance
     return {
-      zoneId: 'zone_4',
-      name: '4. Delete Canyon',
-      biome: 'Red cliffs and ledges',
-      skillFocus: ['x', 'dd', 'D', 'dw'],
-      puzzleTheme: 'Deletion mechanics',
-      narration: [
-        'The canyon walls bleed red with corrupted syntax...',
-        'Bugs crawl through broken lines, spreading chaos.',
-        'Only deletion can cleanse this place.',
-        'Learn to cut away the corruption, but be precise - one wrong cut and all is lost.',
-      ],
+      ...this._getSharedConfig(),
+      cursorStartPosition: tempZone.cursorStartPosition,
+      tiles: tempZone.tiles,
+      npcs: tempZone.npcs,
+      events: tempZone.events,
     };
   }
 }

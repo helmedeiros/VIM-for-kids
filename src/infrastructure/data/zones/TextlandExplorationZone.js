@@ -7,8 +7,12 @@ import { Position } from '../../../domain/value-objects/Position.js';
  * Provides basic movement practice without complex puzzles or progression
  */
 export class TextlandExplorationZone {
-  static create() {
-    const config = {
+  /**
+   * Get the shared configuration metadata for this zone
+   * @private
+   */
+  static _getSharedConfig() {
+    return {
       zoneId: 'textland_exploration',
       name: 'Textland Exploration Area',
       biome: 'Open plains with scattered elements',
@@ -20,6 +24,12 @@ export class TextlandExplorationZone {
         'Use h, j, k, l to move around and collect keys at your own pace.',
         'There are no complex puzzles here - just enjoy exploring!',
       ],
+    };
+  }
+
+  static create() {
+    const config = {
+      ...this._getSharedConfig(),
 
       tiles: {
         tileType: 'textland_ground',
@@ -82,30 +92,16 @@ export class TextlandExplorationZone {
     return new Zone(config);
   }
 
-  /**
-   * Get zone configuration (compatibility with zone registry)
-   */
   static getConfig() {
+    // Create a temporary zone instance and extract its configuration
+    const tempZone = this.create();
+
+    // Extract the configuration from the zone instance
     return {
-      zoneId: 'textland_exploration',
-      name: 'Textland Exploration Area',
-      biome: 'Open plains with scattered elements',
-      skillFocus: ['h', 'j', 'k', 'l'],
-      puzzleTheme: 'Free exploration and movement practice',
-      narration: [
-        'Welcome to the Textland!',
-        'This is a free exploration area where you can practice basic VIM movements.',
-        'Use h, j, k, l to move around and collect keys at your own pace.',
-        'There are no complex puzzles here - just enjoy exploring!',
-      ],
-      npcs: [],
-      events: [
-        {
-          trigger: 'allKeysCollected',
-          action: 'showMessage',
-          message: 'Great! You collected all the keys. Keep exploring!',
-        },
-      ],
+      ...this._getSharedConfig(),
+      tiles: tempZone.tiles,
+      npcs: tempZone.npcs,
+      events: tempZone.events,
     };
   }
 }
