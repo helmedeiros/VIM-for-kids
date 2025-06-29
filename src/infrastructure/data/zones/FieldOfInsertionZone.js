@@ -6,8 +6,12 @@ import { Position } from '../../../domain/value-objects/Position.js';
  * Lush plains with chalk paths where the Cursor learns insertion mechanics
  */
 export class FieldOfInsertionZone {
-  static create() {
-    const config = {
+  /**
+   * Get the shared configuration metadata for this zone
+   * @private
+   */
+  static _getSharedConfig() {
+    return {
       zoneId: 'zone_5',
       name: '5. Field of Insertion',
       biome: 'Lush plains, chalk paths',
@@ -19,6 +23,12 @@ export class FieldOfInsertionZone {
         'Learn the four ways to enter the realm of insertion.',
         'The Scribe waits to share the poetry of the Insert Path.',
       ],
+    };
+  }
+
+  static create() {
+    const config = {
+      ...this._getSharedConfig(),
 
       // Entry from Zone 4 - place cursor at the beginning of the path
       cursorStartPosition: new Position(49, 31),
@@ -160,18 +170,16 @@ export class FieldOfInsertionZone {
   }
 
   static getConfig() {
+    // Create a temporary zone instance and extract its configuration
+    const tempZone = this.create();
+
+    // Extract the configuration from the zone instance
     return {
-      zoneId: 'zone_5',
-      name: '5. Field of Insertion',
-      biome: 'Lush plains, chalk paths',
-      skillFocus: ['i', 'a', 'o', 'O'],
-      puzzleTheme: 'Insertion and line positioning',
-      narration: [
-        'The fields shimmer with potential text...',
-        'Here, creation flows like rivers of ink.',
-        'Learn the four ways to enter the realm of insertion.',
-        'The Scribe waits to share the poetry of the Insert Path.',
-      ],
+      ...this._getSharedConfig(),
+      cursorStartPosition: tempZone.cursorStartPosition,
+      tiles: tempZone.tiles,
+      npcs: tempZone.npcs,
+      events: tempZone.events,
     };
   }
 }

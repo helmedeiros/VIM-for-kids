@@ -6,8 +6,12 @@ import { Position } from '../../../domain/value-objects/Position.js';
  * Reflective pools where the Cursor learns search navigation
  */
 export class SearchSpringsZone {
-  static create() {
-    const config = {
+  /**
+   * Get the shared configuration metadata for this zone
+   * @private
+   */
+  static _getSharedConfig() {
+    return {
       zoneId: 'zone_7',
       name: '7. Search Springs',
       biome: 'Reflective pools',
@@ -19,6 +23,12 @@ export class SearchSpringsZone {
         'Search forward, search backward, navigate the matches.',
         'Find the true word to unlock the deep paths.',
       ],
+    };
+  }
+
+  static create() {
+    const config = {
+      ...this._getSharedConfig(),
 
       // Entry from Zone 6 - place cursor at the beginning of the path
       cursorStartPosition: new Position(25, 31),
@@ -153,18 +163,16 @@ export class SearchSpringsZone {
   }
 
   static getConfig() {
+    // Create a temporary zone instance and extract its configuration
+    const tempZone = this.create();
+
+    // Extract the configuration from the zone instance
     return {
-      zoneId: 'zone_7',
-      name: '7. Search Springs',
-      biome: 'Reflective pools',
-      skillFocus: ['/', '?', 'n', 'N'],
-      puzzleTheme: 'Searching and navigating matches',
-      narration: [
-        'The pools reflect symbols out of order...',
-        'Truth lies hidden in the patterns of reflection.',
-        'Search forward, search backward, navigate the matches.',
-        'Find the true word to unlock the deep paths.',
-      ],
+      ...this._getSharedConfig(),
+      cursorStartPosition: tempZone.cursorStartPosition,
+      tiles: tempZone.tiles,
+      npcs: tempZone.npcs,
+      events: tempZone.events,
     };
   }
 }

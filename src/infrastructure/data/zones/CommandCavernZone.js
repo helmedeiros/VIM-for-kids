@@ -6,8 +6,12 @@ import { Position } from '../../../domain/value-objects/Position.js';
  * Rocky cave walls where the Cursor learns command mode
  */
 export class CommandCavernZone {
-  static create() {
-    const config = {
+  /**
+   * Get the shared configuration metadata for this zone
+   * @private
+   */
+  static _getSharedConfig() {
+    return {
       zoneId: 'zone_8',
       name: '8. Command Cavern',
       biome: 'Rocky cave walls',
@@ -19,6 +23,12 @@ export class CommandCavernZone {
         'Learn the sacred phrases to unlock the depths.',
         'The Syntax Spirit demands exact precision.',
       ],
+    };
+  }
+
+  static create() {
+    const config = {
+      ...this._getSharedConfig(),
 
       // Entry from Zone 7 - place cursor at the beginning of the path
       cursorStartPosition: new Position(25, 0),
@@ -152,18 +162,16 @@ export class CommandCavernZone {
   }
 
   static getConfig() {
+    // Create a temporary zone instance and extract its configuration
+    const tempZone = this.create();
+
+    // Extract the configuration from the zone instance
     return {
-      zoneId: 'zone_8',
-      name: '8. Command Cavern',
-      biome: 'Rocky cave walls',
-      skillFocus: [':w', ':q', ':x', ':help'],
-      puzzleTheme: 'Mastering command mode',
-      narration: [
-        'Ancient terminal doors block the paths...',
-        'The cavern speaks only in the language of command.',
-        'Learn the sacred phrases to unlock the depths.',
-        'The Syntax Spirit demands exact precision.',
-      ],
+      ...this._getSharedConfig(),
+      cursorStartPosition: tempZone.cursorStartPosition,
+      tiles: tempZone.tiles,
+      npcs: tempZone.npcs,
+      events: tempZone.events,
     };
   }
 }

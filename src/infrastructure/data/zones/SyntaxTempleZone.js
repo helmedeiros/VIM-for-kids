@@ -6,8 +6,12 @@ import { Position } from '../../../domain/value-objects/Position.js';
  * Final boss zone with coastal ruins where the Cursor faces the Bug King
  */
 export class SyntaxTempleZone {
-  static create() {
-    const config = {
+  /**
+   * Get the shared configuration metadata for this zone
+   * @private
+   */
+  static _getSharedConfig() {
+    return {
       zoneId: 'zone_10',
       name: '10. The Syntax Temple',
       biome: 'Coastal ruins, golden gates',
@@ -19,6 +23,12 @@ export class SyntaxTempleZone {
         'Every skill you have learned will be tested here.',
         'This is your final trial, Cursor. Save Textland.',
       ],
+    };
+  }
+
+  static create() {
+    const config = {
+      ...this._getSharedConfig(),
 
       // Entry from Zone 9 - place cursor at the beginning of the path
       cursorStartPosition: new Position(25, 0),
@@ -196,18 +206,16 @@ export class SyntaxTempleZone {
   }
 
   static getConfig() {
+    // Create a temporary zone instance and extract its configuration
+    const tempZone = this.create();
+
+    // Extract the configuration from the zone instance
     return {
-      zoneId: 'zone_10',
-      name: '10. The Syntax Temple',
-      biome: 'Coastal ruins, golden gates',
-      skillFocus: ['all_vim_skills'],
-      puzzleTheme: 'Apply all skills to save Textland',
-      narration: [
-        'The temple rises from the mist, ancient and corrupted...',
-        'The Bug King awaits at the summit, chaos incarnate.',
-        'Every skill you have learned will be tested here.',
-        'This is your final trial, Cursor. Save Textland.',
-      ],
+      ...this._getSharedConfig(),
+      cursorStartPosition: tempZone.cursorStartPosition,
+      tiles: tempZone.tiles,
+      npcs: tempZone.npcs,
+      events: tempZone.events,
     };
   }
 }
