@@ -23,6 +23,16 @@ export class SyntaxWisp {
     this._description = 'Optional lore spirit that explains advanced concepts';
     this._etherealLevel = Math.floor(Math.random() * 30) + 70; // 70-100 ethereal
     this._conceptDifficulty = this._calculateConceptDifficulty();
+
+    // Visual appearance properties
+    this._appearance = {
+      symbol: '~',
+      baseColor: '#DDA0DD', // Plum/ethereal purple
+      glowColor: '#E6E6FA', // Lavender glow
+      floatingGlyphs: ['\\', '/', '*', '.', '%', '@', '#'],
+      cssClass: 'syntax-wisp',
+      animationType: 'ethereal-float',
+    };
   }
 
   get position() {
@@ -55,6 +65,31 @@ export class SyntaxWisp {
 
   get conceptDifficulty() {
     return this._conceptDifficulty;
+  }
+
+  get appearance() {
+    return { ...this._appearance };
+  }
+
+  // Get the visual symbol based on activation state
+  getVisualSymbol() {
+    if (!this._isActivated) {
+      return '·'; // Dim wisp when not activated
+    }
+    return this._appearance.symbol;
+  }
+
+  // Get floating glyph for animation
+  getFloatingGlyph() {
+    const glyphs = this._appearance.floatingGlyphs;
+    return glyphs[Math.floor(Math.random() * glyphs.length)];
+  }
+
+  // Get ethereal-based opacity
+  getEtherealOpacity() {
+    const baseOpacity = this._isActivated ? 0.9 : 0.6;
+    const etherealBonus = (this._etherealLevel / 100) * 0.3;
+    return Math.min(1.0, baseOpacity + etherealBonus);
   }
 
   moveTo(newPosition) {

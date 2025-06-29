@@ -208,11 +208,60 @@ describe('BugKing', () => {
 
   describe('createFinalBoss', () => {
     it('should create a final boss with full corruption', () => {
-      const finalBoss = BugKing.createFinalBoss(validPosition);
+      const boss = BugKing.createFinalBoss(validPosition);
 
-      expect(finalBoss.position).toEqual(validPosition);
-      expect(finalBoss.corruptionLevel).toBe(100);
-      expect(finalBoss.isDefeated).toBe(false);
+      expect(boss.position).toEqual(validPosition);
+      expect(boss.corruptionLevel).toBe(100);
+      expect(boss.isDefeated).toBe(false);
+    });
+  });
+
+  describe('visual appearance', () => {
+    it('should have appearance properties', () => {
+      const bugKing = new BugKing(validPosition);
+
+      expect(bugKing.appearance).toBeDefined();
+      expect(bugKing.appearance.symbol).toBe('♛');
+      expect(bugKing.appearance.baseColor).toBe('#8B0000');
+      expect(bugKing.appearance.glowColor).toBe('#DC143C');
+      expect(bugKing.appearance.cssClass).toBe('bug-king');
+      expect(bugKing.appearance.floatingGlyphs).toContain('⚠');
+      expect(bugKing.appearance.floatingGlyphs).toContain('!');
+    });
+
+    it('should return peace symbol when defeated', () => {
+      const bugKing = new BugKing(validPosition, 0, true);
+
+      expect(bugKing.getVisualSymbol()).toBe('☮');
+    });
+
+    it('should return king symbol when not defeated', () => {
+      const bugKing = new BugKing(validPosition, 100, false);
+
+      expect(bugKing.getVisualSymbol()).toBe('♛');
+    });
+
+    it('should return sparkles when defeated for floating glyph', () => {
+      const bugKing = new BugKing(validPosition, 0, true);
+
+      expect(bugKing.getFloatingGlyph()).toBe('✨');
+    });
+
+    it('should return random corruption glyph when not defeated', () => {
+      const bugKing = new BugKing(validPosition, 100, false);
+      const glyph = bugKing.getFloatingGlyph();
+
+      expect(bugKing.appearance.floatingGlyphs).toContain(glyph);
+    });
+
+    it('should calculate corruption intensity based on corruption level', () => {
+      const fullCorruption = new BugKing(validPosition, 100);
+      const halfCorruption = new BugKing(validPosition, 50);
+      const noCorruption = new BugKing(validPosition, 0);
+
+      expect(fullCorruption.getCorruptionIntensity()).toBe(10);
+      expect(halfCorruption.getCorruptionIntensity()).toBe(5);
+      expect(noCorruption.getCorruptionIntensity()).toBe(0);
     });
   });
 });

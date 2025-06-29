@@ -320,9 +320,27 @@ export class DOMGameRenderer extends GameRenderer {
               return false;
             });
             if (npc) {
-              tile.classList.add('npc');
-              tile.textContent = '🧙‍♂️'; // Wizard emoji for NPCs
-              tile.title = npc.name;
+              // Determine NPC CSS class based on ID or type
+              const npcCssClass = this._getNpcCssClass(npc);
+
+              tile.classList.add('npc', npcCssClass);
+
+              // Use the NPC's visual symbol or fall back based on type
+              if (npc.getVisualSymbol && typeof npc.getVisualSymbol === 'function') {
+                tile.textContent = npc.getVisualSymbol();
+              } else {
+                tile.textContent = this._getNpcFallbackSymbol(npc);
+              }
+
+              tile.title = npc.name || npc.id || 'Unknown NPC';
+
+              // Add floating glyphs for enhanced visual effect
+              if (npc.getFloatingGlyph && typeof npc.getFloatingGlyph === 'function') {
+                const glyphSpan = document.createElement('span');
+                glyphSpan.className = 'floating-glyph';
+                glyphSpan.textContent = npc.getFloatingGlyph();
+                tile.appendChild(glyphSpan);
+              }
             }
           }
         } else {
@@ -375,5 +393,98 @@ export class DOMGameRenderer extends GameRenderer {
     this.camera.targetY = 0;
     this.camera.isInitialized = false;
     this.camera.lastCursorPosition = null;
+  }
+
+  /**
+   * Determine the appropriate CSS class for an NPC based on its ID or type
+   * @param {Object} npc - The NPC object
+   * @returns {string} - The CSS class name
+   */
+  _getNpcCssClass(npc) {
+    // If NPC has appearance.cssClass, use it directly
+    if (npc.appearance && npc.appearance.cssClass) {
+      return npc.appearance.cssClass.replace('npc-', ''); // Remove npc- prefix for CSS
+    }
+
+    // Map NPC IDs to CSS classes
+    const npcIdToCssClass = {
+      caret_spirit: 'caret-spirit',
+      syntax_wisp: 'syntax-wisp',
+      bug_king: 'bug-king',
+      bug_king_boss: 'bug-king',
+      caret_stone: 'caret-stone',
+      maze_scribe: 'maze-scribe',
+      mode_guardian: 'maze-scribe', // Legacy ID maps to maze-scribe styling
+      deletion_echo: 'deletion-echo',
+      insert_scribe: 'insert-scribe',
+      scribe_poet: 'insert-scribe', // Legacy ID maps to insert-scribe styling
+      the_yanker: 'practice-buddy', // The Yanker gets cheerful styling
+      mirror_sprite: 'mirror-sprite',
+      reflection_spirit: 'mirror-sprite', // Legacy ID maps to mirror-sprite styling
+      practice_buddy: 'practice-buddy',
+      practice_spirit_1: 'practice-buddy',
+      practice_spirit_2: 'practice-buddy',
+      practice_spirit_3: 'practice-buddy',
+      final_encourager: 'practice-buddy',
+      syntax_spirit: 'maze-scribe', // Syntax spirit gets mystical scribe styling
+      word_witch: 'deletion-echo', // Word witch gets spooky styling
+    };
+
+    // Try to match by ID first
+    if (npc.id && npcIdToCssClass[npc.id]) {
+      return npcIdToCssClass[npc.id];
+    }
+
+    // Try to match by type
+    if (npc.type && npcIdToCssClass[npc.type]) {
+      return npcIdToCssClass[npc.type];
+    }
+
+    // Default fallback
+    return '';
+  }
+
+  /**
+   * Get fallback symbol for NPCs without getVisualSymbol method
+   * @param {Object} npc - The NPC object
+   * @returns {string} - The fallback symbol
+   */
+  _getNpcFallbackSymbol(npc) {
+    // Map NPC IDs/types to fallback symbols
+    const npcSymbols = {
+      caret_spirit: '🔥',
+      syntax_wisp: '~',
+      bug_king: '♛',
+      bug_king_boss: '♛',
+      caret_stone: '🗿',
+      maze_scribe: '📜',
+      mode_guardian: '📜',
+      deletion_echo: '👻',
+      insert_scribe: '✏️',
+      scribe_poet: '✏️',
+      the_yanker: '🎉',
+      mirror_sprite: '💧',
+      reflection_spirit: '💧',
+      practice_buddy: '🎉',
+      practice_spirit_1: '🎉',
+      practice_spirit_2: '🎉',
+      practice_spirit_3: '🎉',
+      final_encourager: '🎉',
+      syntax_spirit: '📜',
+      word_witch: '👻',
+    };
+
+    // Try to match by ID first
+    if (npc.id && npcSymbols[npc.id]) {
+      return npcSymbols[npc.id];
+    }
+
+    // Try to match by type
+    if (npc.type && npcSymbols[npc.type]) {
+      return npcSymbols[npc.type];
+    }
+
+    // Default fallback
+    return '🧙‍♂️';
   }
 }

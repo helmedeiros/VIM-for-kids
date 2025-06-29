@@ -18,6 +18,18 @@ export class CaretSpirit {
     this._name = 'Caret Spirit';
     this._description = 'Guardian of VIM knowledge scattered across the land';
     this._wisdomLevel = Math.floor(Math.random() * 50) + 50; // 50-100 wisdom
+
+    // Visual appearance properties
+    this._appearance = {
+      symbol: '🔥', // Primary: Flame emoji (we'll color it cyan with CSS)
+      alternativeSymbols: ['♦', '◆', '▲', '🕯️', '🔮'], // Backup symbols for different platforms
+      baseColor: '#40E0D0', // Turquoise/cyan to match the pixel art
+      glowColor: '#E0FFFF', // Light cyan glow
+      accentColor: '#87CEEB', // Sky blue for depth
+      floatingGlyphs: [':', 'w', 'q', 'h', 'j', 'k', 'l', '^'],
+      cssClass: 'caret-spirit',
+      animationType: 'flame-wisdom',
+    };
   }
 
   get position() {
@@ -42,6 +54,38 @@ export class CaretSpirit {
 
   get wisdomLevel() {
     return this._wisdomLevel;
+  }
+
+  get appearance() {
+    return { ...this._appearance };
+  }
+
+  // Get the visual symbol based on discovery state
+  getVisualSymbol() {
+    if (!this._isDiscovered) {
+      return '?'; // Mystery until discovered
+    }
+    return this._appearance.symbol;
+  }
+
+  // Get alternative visual symbol for fallback
+  getAlternativeSymbol(index = 0) {
+    if (!this._isDiscovered) {
+      return '?';
+    }
+    const alternatives = this._appearance.alternativeSymbols;
+    return alternatives[index % alternatives.length];
+  }
+
+  // Get floating glyph for animation
+  getFloatingGlyph() {
+    const glyphs = this._appearance.floatingGlyphs;
+    return glyphs[Math.floor(Math.random() * glyphs.length)];
+  }
+
+  // Get wisdom-based glow intensity
+  getGlowIntensity() {
+    return Math.floor((this._wisdomLevel / 100) * 10); // 0-10 scale
   }
 
   moveTo(newPosition) {
