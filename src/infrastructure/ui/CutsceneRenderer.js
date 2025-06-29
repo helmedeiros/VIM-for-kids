@@ -85,17 +85,37 @@ export class CutsceneLogic {
   }
 
   /**
-   * Generate overlay CSS styles
+   * Generate overlay CSS styles based on cutscene type
+   * @param {string} cutsceneType - Type of cutscene ('game', 'level', 'zone')
    * @returns {string} CSS text for the overlay
    */
-  static generateOverlayStyles() {
+  static generateOverlayStyles(cutsceneType = 'game') {
+    let backgroundColor;
+
+    switch (cutsceneType) {
+      case 'game':
+        // Origin Story - keep current dark background
+        backgroundColor = 'rgba(0, 0, 0, 0.95)';
+        break;
+      case 'level':
+        // Level cutscenes - dark gray background
+        backgroundColor = 'rgba(64, 64, 64, 0.95)';
+        break;
+      case 'zone':
+        // Zone cutscenes - transparent dark background
+        backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        break;
+      default:
+        backgroundColor = 'rgba(0, 0, 0, 0.95)';
+    }
+
     return `
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.95);
+      background: ${backgroundColor};
       color: #ffffff;
       font-family: 'Courier New', monospace;
       font-size: 18px;
@@ -146,27 +166,30 @@ export class CutsceneRenderer {
   }
 
   /**
-   * Show a cutscene with the given origin story
-   * @param {OriginStory} originStory - The origin story to display
+   * Show a cutscene with the given cutscene story
+   * @param {Object} cutsceneStory - The cutscene story to display (can be OriginStory or CutsceneStory)
    * @returns {Promise} Promise that resolves when cutscene is complete
    */
-  async showCutscene(originStory) {
-    if (!originStory || !CutsceneLogic.isValidScript(originStory.script)) {
+  async showCutscene(cutsceneStory) {
+    if (!cutsceneStory || !CutsceneLogic.isValidScript(cutsceneStory.script)) {
       return Promise.resolve();
     }
 
     return new Promise((resolve) => {
-      this._createCutsceneOverlay();
+      // Determine cutscene type from the story object
+      const cutsceneType = cutsceneStory.type || 'game';
+
+      this._createCutsceneOverlay(cutsceneType);
       this._isVisible = true;
 
       // Setup completion handler
       const completeHandler = () => {
-        this._handleCutsceneComplete(originStory);
+        this._handleCutsceneComplete(cutsceneStory);
         resolve();
       };
 
       // Display script lines with timing
-      this._displayScript(originStory.script, completeHandler);
+      this._displayScript(cutsceneStory.script, completeHandler);
 
       // Allow click to skip
       this._cutsceneOverlay.addEventListener('click', completeHandler, { once: true });
@@ -203,11 +226,12 @@ export class CutsceneRenderer {
 
   /**
    * Create the cutscene overlay DOM element
+   * @param {string} cutsceneType - Type of cutscene for styling
    * @private
    */
-  _createCutsceneOverlay() {
+  _createCutsceneOverlay(cutsceneType = 'game') {
     this._cutsceneOverlay = document.createElement('div');
-    this._cutsceneOverlay.style.cssText = CutsceneLogic.generateOverlayStyles();
+    this._cutsceneOverlay.style.cssText = CutsceneLogic.generateOverlayStyles(cutsceneType);
     this._cutsceneOverlay.innerHTML = CutsceneLogic.generateOverlayContent();
     document.body.appendChild(this._cutsceneOverlay);
   }
@@ -251,9 +275,9 @@ export class CutsceneRenderer {
    * Handle cutscene completion
    * @private
    */
-  _handleCutsceneComplete(originStory) {
+  _handleCutsceneComplete(cutsceneStory) {
     if (this._completionCallback) {
-      this._completionCallback(originStory);
+      this._completionCallback(cutsceneStory);
     }
     this.hideCutscene();
   }

@@ -1,6 +1,9 @@
 /* eslint-env node, jest */
 import { jest } from '@jest/globals';
-import { CutsceneLogic } from '../../../src/infrastructure/ui/CutsceneRenderer.js';
+import {
+  CutsceneLogic,
+  CutsceneRenderer,
+} from '../../../src/infrastructure/ui/CutsceneRenderer.js';
 
 // Note: CutsceneRenderer is primarily an integration component that deals with DOM manipulation
 // These tests focus on the core logic and interfaces rather than complex DOM interactions
@@ -254,5 +257,114 @@ describe('CutsceneLogic', () => {
       const closeDivs = (content.match(/<\/div>/g) || []).length;
       expect(openDivs).toBe(closeDivs);
     });
+  });
+});
+
+describe('Cutscene Background Styling', () => {
+  it('should generate correct overlay styles for game cutscenes (origin story)', () => {
+    const styles = CutsceneLogic.generateOverlayStyles('game');
+    expect(styles).toContain('background: rgba(0, 0, 0, 0.95)');
+  });
+
+  it('should generate correct overlay styles for level cutscenes (dark gray)', () => {
+    const styles = CutsceneLogic.generateOverlayStyles('level');
+    expect(styles).toContain('background: rgba(64, 64, 64, 0.95)');
+  });
+
+  it('should generate correct overlay styles for zone cutscenes (transparent dark)', () => {
+    const styles = CutsceneLogic.generateOverlayStyles('zone');
+    expect(styles).toContain('background: rgba(0, 0, 0, 0.7)');
+  });
+
+  it('should default to game style for unknown cutscene types', () => {
+    const styles = CutsceneLogic.generateOverlayStyles('unknown');
+    expect(styles).toContain('background: rgba(0, 0, 0, 0.95)');
+  });
+
+  it('should default to game style when no type is provided', () => {
+    const styles = CutsceneLogic.generateOverlayStyles();
+    expect(styles).toContain('background: rgba(0, 0, 0, 0.95)');
+  });
+});
+
+describe('Cutscene Type Detection', () => {
+  let renderer;
+  let mockContainer;
+
+  beforeEach(() => {
+    mockContainer = document.createElement('div');
+    mockContainer.id = 'test-container';
+    document.body.appendChild(mockContainer);
+    renderer = new CutsceneRenderer('test-container');
+  });
+
+  afterEach(() => {
+    renderer.hideCutscene();
+    if (mockContainer && mockContainer.parentNode) {
+      document.body.removeChild(mockContainer);
+    }
+  });
+
+  it('should use game background for origin stories', async () => {
+    const originStory = {
+      gameId: 'test-game',
+      script: ['Test origin story line'],
+      // No type property - should default to 'game'
+    };
+
+    const showCutscenePromise = renderer.showCutscene(originStory);
+
+    // Check that overlay was created with correct background
+    const overlay = document.querySelector('div[style*="background: rgba(0, 0, 0, 0.95)"]');
+    expect(overlay).toBeTruthy();
+
+    // Complete the cutscene
+    if (overlay) {
+      overlay.click();
+    }
+    await showCutscenePromise;
+  });
+
+  it('should use level background for level cutscenes', async () => {
+    const levelStory = {
+      gameId: 'test-game',
+      type: 'level',
+      levelId: 'test-level',
+      script: ['Test level cutscene line'],
+    };
+
+    const showCutscenePromise = renderer.showCutscene(levelStory);
+
+    // Check that overlay was created with correct background
+    const overlay = document.querySelector('div[style*="background: rgba(64, 64, 64, 0.95)"]');
+    expect(overlay).toBeTruthy();
+
+    // Complete the cutscene
+    if (overlay) {
+      overlay.click();
+    }
+    await showCutscenePromise;
+  });
+
+  it('should use zone background for zone cutscenes', async () => {
+    const zoneStory = {
+      gameId: 'test-game',
+      type: 'zone',
+      levelId: 'test-level',
+      zoneId: 'test-zone',
+      script: ['Test zone cutscene line'],
+    };
+
+    const showCutscenePromise = renderer.showCutscene(zoneStory);
+
+    // Check that overlay was created with correct background
+    const overlay = document.querySelector('div[style*="background: rgba(0, 0, 0, 0.7)"]');
+    expect(overlay).toBeTruthy();
+
+    // Complete the cutscene
+    if (overlay) {
+      overlay.click();
+    }
+    await showCutscenePromise;
   });
 });
