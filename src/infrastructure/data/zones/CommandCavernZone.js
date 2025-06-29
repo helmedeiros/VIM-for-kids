@@ -158,6 +158,12 @@ export class CommandCavernZone {
       biome: 'Rocky cave walls',
       skillFocus: [':w', ':q', ':x', ':help'],
       puzzleTheme: 'Mastering command mode',
+      narration: [
+        'Ancient terminal doors block the paths...',
+        'The cavern speaks only in the language of command.',
+        'Learn the sacred phrases to unlock the depths.',
+        'The Syntax Spirit demands exact precision.',
+      ],
     };
   }
 }

@@ -166,6 +166,12 @@ export class FieldOfInsertionZone {
       biome: 'Lush plains, chalk paths',
       skillFocus: ['i', 'a', 'o', 'O'],
       puzzleTheme: 'Insertion and line positioning',
+      narration: [
+        'The fields shimmer with potential text...',
+        'Here, creation flows like rivers of ink.',
+        'Learn the four ways to enter the realm of insertion.',
+        'The Scribe waits to share the poetry of the Insert Path.',
+      ],
     };
   }
 }

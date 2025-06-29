@@ -173,6 +173,12 @@ export class MazeOfModesZone {
       biome: 'Stone labyrinth',
       skillFocus: ['i', 'ESC', ':', 'mode switching'],
       puzzleTheme: 'Switching between Normal, Insert, Visual',
+      narration: [
+        'The stone walls whisper of ancient modes...',
+        'Normal mode is where you begin, Insert mode is where you create.',
+        'Command mode is where you command the very fabric of text.',
+        'Master the transitions, young Cursor, for modes are the keys to power.',
+      ],
     };
   }
 }

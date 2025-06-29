@@ -159,6 +159,12 @@ export class SearchSpringsZone {
       biome: 'Reflective pools',
       skillFocus: ['/', '?', 'n', 'N'],
       puzzleTheme: 'Searching and navigating matches',
+      narration: [
+        'The pools reflect symbols out of order...',
+        'Truth lies hidden in the patterns of reflection.',
+        'Search forward, search backward, navigate the matches.',
+        'Find the true word to unlock the deep paths.',
+      ],
     };
   }
 }
