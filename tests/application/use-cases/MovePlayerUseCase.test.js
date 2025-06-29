@@ -24,7 +24,6 @@ describe('MovePlayerUseCase', () => {
       collectKey: jest.fn(),
       getCurrentState: jest.fn().mockReturnValue({}),
       getGate: jest.fn().mockReturnValue(null),
-      executeProgression: jest.fn().mockReturnValue({ type: 'none' }),
     };
 
     mockGameRenderer = {
@@ -37,32 +36,43 @@ describe('MovePlayerUseCase', () => {
   });
 
   describe('execute', () => {
-    it('should move cursor to valid position', () => {
-      movePlayerUseCase.execute('right');
+    it('should move cursor to valid position and return success', () => {
+      const result = movePlayerUseCase.execute('right');
 
       expect(mockGameState.cursor.position.x).toBe(6);
       expect(mockGameState.cursor.position.y).toBe(5);
       expect(mockGameRenderer.render).toHaveBeenCalled();
+      expect(result).toEqual({
+        success: true,
+        newPosition: new Position(6, 5),
+        keyCollected: null,
+        progressionResult: { type: 'none' },
+      });
     });
 
-    it('should not move cursor to invalid position', () => {
+    it('should not move cursor to invalid position and return failure', () => {
       mockMap.isWalkable.mockReturnValue(false);
 
-      movePlayerUseCase.execute('right');
+      const result = movePlayerUseCase.execute('right');
 
       expect(mockGameState.cursor.position.x).toBe(5);
       expect(mockGameState.cursor.position.y).toBe(5);
       expect(mockGameRenderer.render).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        success: false,
+        reason: 'invalid_position',
+      });
     });
 
     it('should collect key when moving to key position', () => {
       const key = new VimKey(new Position(6, 5), 'h', 'Move left');
       mockGameState.availableKeys = [key];
 
-      movePlayerUseCase.execute('right');
+      const result = movePlayerUseCase.execute('right');
 
       expect(mockGameState.collectKey).toHaveBeenCalledWith(key);
       expect(mockGameRenderer.showKeyInfo).toHaveBeenCalledWith(key);
+      expect(result.keyCollected).toBe(key);
     });
 
     it('should handle gate walkability check', () => {
@@ -72,126 +82,65 @@ describe('MovePlayerUseCase', () => {
       };
       mockGameState.getGate.mockReturnValue(mockGate);
 
-      movePlayerUseCase.execute('right');
+      const result = movePlayerUseCase.execute('right');
 
       expect(mockGameState.cursor.position.x).toBe(5);
       expect(mockGameState.cursor.position.y).toBe(5);
       expect(mockGameRenderer.render).not.toHaveBeenCalled();
+      expect(result.success).toBe(false);
     });
 
-    it('should handle zone progression', () => {
-      mockGameState.executeProgression.mockReturnValue({
-        type: 'zone',
-        newZoneId: 'zone_2',
-      });
+    it('should delegate progression to progression use case when available', () => {
+      const mockProgressionUseCase = {
+        shouldExecuteProgression: jest.fn().mockReturnValue(true),
+        execute: jest.fn().mockReturnValue({ type: 'zone', newZoneId: 'zone_2' }),
+      };
 
-      movePlayerUseCase.execute('right');
-
-      expect(mockGameRenderer.showMessage).toHaveBeenCalledWith('Progressing to zone_2...');
-    });
-
-    it('should handle level progression with showMessage available', () => {
-      mockGameState.executeProgression.mockReturnValue({
-        type: 'level',
-        nextLevelId: 'level_2',
-      });
-
-      // Mock window.vimForKidsGame
-      const mockTransitionToLevel = jest.fn();
-      Object.defineProperty(window, 'vimForKidsGame', {
-        value: {
-          transitionToLevel: mockTransitionToLevel,
-        },
-        writable: true,
-      });
-
-      jest.useFakeTimers();
-
-      movePlayerUseCase.execute('right');
-
-      expect(mockGameRenderer.showMessage).toHaveBeenCalledWith(
-        'Level Complete! Progressing to level_2...'
+      movePlayerUseCase = new MovePlayerUseCase(
+        mockGameState,
+        mockGameRenderer,
+        mockProgressionUseCase
       );
 
-      // Fast-forward timer
-      jest.advanceTimersByTime(2000);
+      const result = movePlayerUseCase.execute('right');
 
-      expect(mockTransitionToLevel).toHaveBeenCalledWith('level_2');
-
-      jest.useRealTimers();
+      expect(mockProgressionUseCase.shouldExecuteProgression).toHaveBeenCalled();
+      expect(mockProgressionUseCase.execute).toHaveBeenCalled();
+      expect(result.progressionResult).toEqual({ type: 'zone', newZoneId: 'zone_2' });
     });
 
-    it('should handle level progression without showMessage (fallback to alert)', () => {
-      mockGameState.executeProgression.mockReturnValue({
-        type: 'level',
-        nextLevelId: 'level_2',
-      });
+    it('should not execute progression when progression use case is not available', () => {
+      const result = movePlayerUseCase.execute('right');
 
-      // Remove showMessage method
-      delete mockGameRenderer.showMessage;
-
-      // Mock alert
-      window.alert = jest.fn();
-
-      // Mock window.vimForKidsGame
-      const mockTransitionToLevel = jest.fn();
-      Object.defineProperty(window, 'vimForKidsGame', {
-        value: {
-          transitionToLevel: mockTransitionToLevel,
-        },
-        writable: true,
-      });
-
-      jest.useFakeTimers();
-
-      movePlayerUseCase.execute('right');
-
-      expect(window.alert).toHaveBeenCalledWith('Level Complete! Progressing to level_2...');
-
-      // Fast-forward timer
-      jest.advanceTimersByTime(2000);
-
-      expect(mockTransitionToLevel).toHaveBeenCalledWith('level_2');
-
-      jest.useRealTimers();
+      expect(result.progressionResult).toEqual({ type: 'none' });
     });
 
-    it('should handle level progression fallback when game instance not available', () => {
-      mockGameState.executeProgression.mockReturnValue({
-        type: 'level',
-        nextLevelId: 'level_2',
-      });
+    it('should not execute progression when progression use case says no progression needed', () => {
+      const mockProgressionUseCase = {
+        shouldExecuteProgression: jest.fn().mockReturnValue(false),
+        execute: jest.fn(),
+      };
 
-      // Remove showMessage method
-      delete mockGameRenderer.showMessage;
+      movePlayerUseCase = new MovePlayerUseCase(
+        mockGameState,
+        mockGameRenderer,
+        mockProgressionUseCase
+      );
 
-      // Remove vimForKidsGame from window
-      delete window.vimForKidsGame;
+      const result = movePlayerUseCase.execute('right');
 
-      window.alert = jest.fn();
-
-      jest.useFakeTimers();
-
-      movePlayerUseCase.execute('right');
-
-      expect(window.alert).toHaveBeenCalledWith('Level Complete! Progressing to level_2...');
-
-      jest.useRealTimers();
-    });
-
-    it('should handle backward compatibility with game states without progression', () => {
-      // Remove executeProgression method
-      delete mockGameState.executeProgression;
-
-      expect(() => movePlayerUseCase.execute('right')).not.toThrow();
-      expect(mockGameRenderer.render).toHaveBeenCalled();
+      expect(mockProgressionUseCase.shouldExecuteProgression).toHaveBeenCalled();
+      expect(mockProgressionUseCase.execute).not.toHaveBeenCalled();
+      expect(result.progressionResult).toEqual({ type: 'none' });
     });
 
     it('should handle backward compatibility with game states without gates', () => {
       // Remove getGate method
       delete mockGameState.getGate;
 
-      expect(() => movePlayerUseCase.execute('right')).not.toThrow();
+      const result = movePlayerUseCase.execute('right');
+
+      expect(result.success).toBe(true);
       expect(mockGameRenderer.render).toHaveBeenCalled();
     });
   });

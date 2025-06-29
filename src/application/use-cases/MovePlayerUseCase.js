@@ -1,9 +1,15 @@
 import { Position } from '../../domain/value-objects/Position.js'; // eslint-disable-line no-unused-vars
 
+/**
+ * Use case for handling player movement
+ * Focused solely on cursor movement and immediate consequences (key collection)
+ * Progression handling is delegated to HandleProgressionUseCase
+ */
 export class MovePlayerUseCase {
-  constructor(gameState, gameRenderer) {
+  constructor(gameState, gameRenderer, progressionUseCase = null) {
     this._gameState = gameState;
     this._gameRenderer = gameRenderer;
+    this._progressionUseCase = progressionUseCase;
   }
 
   execute(direction) {
@@ -12,20 +18,30 @@ export class MovePlayerUseCase {
 
     // Check if move is valid (both map and gate walkability)
     if (!this._isPositionWalkable(newPosition)) {
-      return; // Invalid move, do nothing
+      return { success: false, reason: 'invalid_position' }; // Invalid move, do nothing
     }
 
     // Update cursor position
     this._gameState.cursor = this._gameState.cursor.moveTo(newPosition);
 
     // Check for key collection
-    this._checkKeyCollection();
+    const keyCollected = this._checkKeyCollection();
 
-    // Check for progression after moving
-    this._checkProgression();
-
-    // Re-render the game
+    // Re-render the game with new state
     this._gameRenderer.render(this._gameState.getCurrentState());
+
+    // Delegate progression check to progression use case if available
+    let progressionResult = { type: 'none' };
+    if (this._progressionUseCase && this._progressionUseCase.shouldExecuteProgression()) {
+      progressionResult = this._progressionUseCase.execute();
+    }
+
+    return {
+      success: true,
+      newPosition,
+      keyCollected,
+      progressionResult,
+    };
   }
 
   _isPositionWalkable(position) {
@@ -71,51 +87,9 @@ export class MovePlayerUseCase {
     if (keyAtPosition) {
       this._gameState.collectKey(keyAtPosition);
       this._gameRenderer.showKeyInfo(keyAtPosition);
-    }
-  }
-
-  _checkProgression() {
-    // Check if progression should happen (only if game state supports it)
-    if (typeof this._gameState.executeProgression === 'function') {
-      const progressionResult = this._gameState.executeProgression();
-
-      if (progressionResult.type === 'zone') {
-        this._handleZoneProgression(progressionResult.newZoneId);
-      } else if (progressionResult.type === 'level') {
-        this._handleLevelProgression(progressionResult.nextLevelId);
-      }
-    }
-  }
-
-  _handleZoneProgression(newZoneId) {
-    // Show zone progression message
-    if (this._gameRenderer.showMessage) {
-      this._gameRenderer.showMessage(`Progressing to ${newZoneId}...`);
+      return keyAtPosition;
     }
 
-    // The zone has already been loaded by executeProgression
-    // Just need to re-render with new state
-  }
-
-  _handleLevelProgression(nextLevelId) {
-    // Show level progression message
-    if (this._gameRenderer.showMessage) {
-      this._gameRenderer.showMessage(`Level Complete! Progressing to ${nextLevelId}...`);
-    } else {
-      // Fallback to alert if showMessage is not available
-      alert(`Level Complete! Progressing to ${nextLevelId}...`);
-    }
-
-    // Trigger level transition through the global game instance
-    setTimeout(async () => {
-      if (window.vimForKidsGame && typeof window.vimForKidsGame.transitionToLevel === 'function') {
-        await window.vimForKidsGame.transitionToLevel(nextLevelId);
-      } else {
-        // Fallback: reload page with new level parameter
-        const currentUrl = new URL(window.location);
-        currentUrl.searchParams.set('level', nextLevelId);
-        window.location.href = currentUrl.toString();
-      }
-    }, 2000); // 2 second delay to show the message
+    return null;
   }
 }
