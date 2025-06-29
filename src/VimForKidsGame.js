@@ -3,6 +3,7 @@ import { LevelGameState } from './application/LevelGameState.js';
 import { TextlandGameState } from './application/TextlandGameState.js';
 import { GameRegistry } from './infrastructure/data/games/GameRegistry.js';
 import { MovePlayerUseCase } from './application/use-cases/MovePlayerUseCase.js';
+import { HandleProgressionUseCase } from './application/use-cases/HandleProgressionUseCase.js';
 import { SelectGameUseCase } from './application/use-cases/SelectGameUseCase.js';
 import { DOMGameRenderer } from './infrastructure/ui/DOMGameRenderer.js';
 import { KeyboardInputHandler } from './infrastructure/input/KeyboardInputHandler.js';
@@ -120,8 +121,19 @@ export class VimForKidsGame {
       }
     }
 
-    // Create move player use case
-    this.movePlayerUseCase = new MovePlayerUseCase(this.gameState, this.gameRenderer);
+    // Create progression use case
+    this.handleProgressionUseCase = new HandleProgressionUseCase(
+      this.gameState,
+      this.gameRenderer,
+      this // Pass game instance for level transitions
+    );
+
+    // Create move player use case with progression use case
+    this.movePlayerUseCase = new MovePlayerUseCase(
+      this.gameState,
+      this.gameRenderer,
+      this.handleProgressionUseCase
+    );
 
     // Initial render
     this.gameRenderer.render(this.gameState.getCurrentState());
