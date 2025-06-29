@@ -1,6 +1,7 @@
 import { CutsceneProvider } from '../../ports/data/CutsceneProvider.js';
 import { Story } from '../../domain/value-objects/Story.js';
 import { ZoneRegistry } from './zones/ZoneRegistry.js';
+import { GameRegistry } from './games/GameRegistry.js';
 
 /**
  * Infrastructure adapter that provides cutscene configurations
@@ -232,60 +233,27 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
    * @private
    */
   _addLevelStories(stories) {
-    // Level 2 story - Text Manipulation
-    const level2Script = [
-      'You have learned the basics of movement.',
-      'Now the real challenge begins...',
-      '🏛️ Welcome to the realm of Text Manipulation.',
-      'Here you will master the sacred modes of VIM:',
-      '• Normal Mode - Where you navigate and command',
-      '• Insert Mode - Where you create and modify',
-      '• Command Mode - Where you wield true power',
-      'The Maze of Modes and Swamp of Words await your mastery.',
-    ];
+    try {
+      // Get level configurations from actual game configurations
+      // This avoids duplication and ensures we use the source of truth
+      const levelConfigs = this._getLevelConfigurations();
 
-    const level2Story = Story.createLevelStory('cursor-before-clickers', 'level_2', level2Script);
-    stories.set(level2Story.identifier, level2Story);
+      levelConfigs.forEach((config) => {
+        if (config.cutscene && Array.isArray(config.cutscene) && config.cutscene.length > 0) {
+          // Create a level cutscene story from the level's cutscene configuration
+          const levelStory = Story.createLevelStory(
+            config.gameId,
+            config.levelId,
+            [...config.cutscene] // Copy the cutscene array
+          );
 
-    // Level 3 story - Advanced Movement
-    const level3Script = [
-      '⚡ You have conquered the modes!',
-      'But now, the text itself calls to you...',
-      'Welcome to Advanced Movement - where every keystroke has purpose.',
-      'Delete Canyon will teach you precision in removal.',
-      'Field of Insertion will show you the art of placement.',
-      'Copy Circle will reveal the mysteries of duplication.',
-      'Master these skills, and text will bend to your will.',
-    ];
-
-    const level3Story = Story.createLevelStory('cursor-before-clickers', 'level_3', level3Script);
-    stories.set(level3Story.identifier, level3Story);
-
-    // Level 4 story - Text Operations
-    const level4Script = [
-      '🔥 The cursor grows stronger...',
-      'Text Operations await - the true power of VIM.',
-      'In Search Springs, you will learn to find anything.',
-      'In Command Cavern, you will discover the deep magic.',
-      'These are not mere tools - they are extensions of thought.',
-      'Prepare yourself for mastery beyond movement.',
-    ];
-
-    const level4Story = Story.createLevelStory('cursor-before-clickers', 'level_4', level4Script);
-    stories.set(level4Story.identifier, level4Story);
-
-    // Level 5 story - Search & Command
-    const level5Script = [
-      '✨ The final trials await...',
-      'You stand at the threshold of true VIM mastery.',
-      'Playground of Practice will test everything you know.',
-      'Syntax Temple holds the ultimate challenge - the Bug King himself.',
-      'This is where legends are made, young Cursor.',
-      'The fate of Textland rests in your keystrokes.',
-    ];
-
-    const level5Story = Story.createLevelStory('cursor-before-clickers', 'level_5', level5Script);
-    stories.set(level5Story.identifier, level5Story);
+          stories.set(levelStory.identifier, levelStory);
+        }
+      });
+    } catch (error) {
+      // If game system is not available, continue without level stories
+      console.warn('Game system not available for level cutscene integration:', error.message);
+    }
   }
 
   /**
@@ -352,6 +320,47 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
     } catch (error) {
       // Fallback: if ZoneRegistry is not available, return empty array
       console.warn('ZoneRegistry not available for cutscene integration:', error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get level configurations from the actual game classes
+   * @private
+   */
+  _getLevelConfigurations() {
+    try {
+      // Use GameRegistry to get actual level configurations
+      // This avoids duplication and ensures we use the source of truth
+      const levelConfigs = [];
+      const availableGameIds = GameRegistry.getGameIds();
+
+      // Get configurations from actual game classes
+      for (const gameId of availableGameIds) {
+        try {
+          const game = GameRegistry.getGame(gameId);
+          if (game && game.levels) {
+            // Extract level configurations with cutscenes
+            Object.values(game.levels).forEach((levelConfig) => {
+              if (levelConfig.cutscene && Array.isArray(levelConfig.cutscene)) {
+                levelConfigs.push({
+                  gameId: game.id,
+                  levelId: levelConfig.id,
+                  cutscene: [...levelConfig.cutscene], // Copy the cutscene array
+                });
+              }
+            });
+          }
+        } catch (error) {
+          // Skip games that can't be loaded
+          console.warn(`Failed to load game config for ${gameId}:`, error.message);
+        }
+      }
+
+      return levelConfigs;
+    } catch (error) {
+      // Fallback: if GameRegistry is not available, return empty array
+      console.warn('GameRegistry not available for level cutscene integration:', error.message);
       return [];
     }
   }
