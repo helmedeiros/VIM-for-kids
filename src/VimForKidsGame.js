@@ -105,7 +105,7 @@ export class VimForKidsGame {
    * Synchronous initialization for backward compatibility
    * @private
    */
-  _initializeGameSync() {
+  _initializeGameSync(skipAsyncInit = false) {
     // Create fallback game state immediately for tests
     if (this.currentGameId === 'cursor-textland') {
       this.gameState = new TextlandGameState(this.zoneProvider);
@@ -156,8 +156,10 @@ export class VimForKidsGame {
     // Focus the game board
     this.gameRenderer.focus();
 
-    // Handle async initialization separately
-    this._initializeGameAsync();
+    // Handle async initialization separately (unless explicitly skipped)
+    if (!skipAsyncInit) {
+      this._initializeGameAsync();
+    }
   }
 
   /**
@@ -264,7 +266,10 @@ export class VimForKidsGame {
     this.gameSelectorUI = new GameSelectorUI();
     this.inputHandler = new KeyboardInputHandler(this.gameRenderer.gameBoard);
 
-    // Re-initialize the game with new configuration
+    // Re-initialize the game with new configuration (sync part)
+    this._initializeGameSync(true); // Skip async init since we'll call it explicitly
+
+    // Wait for async initialization to complete (for cutscenes and enhanced features)
     await this._initializeGameAsync();
 
     // Update UI to reflect the new game
