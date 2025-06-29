@@ -19,6 +19,16 @@ export class BugKing {
     this._description = 'The final enemy who corrupts logic and overwrites order';
     this._corruptionRadius = 2; // How far corruption spreads
     this._vulnerabilities = ['clean-code', 'proper-syntax', 'vim-mastery'];
+
+    // Visual appearance properties
+    this._appearance = {
+      symbol: '♛',
+      baseColor: '#8B0000', // Dark red
+      glowColor: '#DC143C', // Crimson glow
+      floatingGlyphs: ['⚠', '!', '✗', '☠', '⚡', '◇', '▲'],
+      cssClass: 'bug-king',
+      animationType: 'corruption-pulse',
+    };
   }
 
   get position() {
@@ -47,6 +57,32 @@ export class BugKing {
 
   get vulnerabilities() {
     return [...this._vulnerabilities]; // Return a copy
+  }
+
+  get appearance() {
+    return { ...this._appearance };
+  }
+
+  // Get the visual symbol based on defeat state
+  getVisualSymbol() {
+    if (this._isDefeated) {
+      return '☮'; // Peace symbol when defeated
+    }
+    return this._appearance.symbol;
+  }
+
+  // Get floating glyph for animation
+  getFloatingGlyph() {
+    if (this._isDefeated) {
+      return '✨'; // Sparkles when defeated
+    }
+    const glyphs = this._appearance.floatingGlyphs;
+    return glyphs[Math.floor(Math.random() * glyphs.length)];
+  }
+
+  // Get corruption-based intensity
+  getCorruptionIntensity() {
+    return Math.floor((this._corruptionLevel / 100) * 10); // 0-10 scale
   }
 
   moveTo(newPosition) {

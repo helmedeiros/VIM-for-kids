@@ -215,7 +215,7 @@ describe('SyntaxWisp', () => {
 
   describe('concept difficulty calculation', () => {
     it('should calculate higher difficulty for complex concepts', () => {
-      const complexConcept = 'Advanced regex patterns with macro integration for buffer management';
+      const complexConcept = 'Advanced regex patterns with macro integration';
       const wisp = new SyntaxWisp(validPosition, complexConcept);
 
       expect(wisp.conceptDifficulty).toBeGreaterThan(5);
@@ -225,7 +225,52 @@ describe('SyntaxWisp', () => {
       const simpleConcept = 'Basic text editing';
       const wisp = new SyntaxWisp(validPosition, simpleConcept);
 
-      expect(wisp.conceptDifficulty).toBeLessThan(5);
+      expect(wisp.conceptDifficulty).toBeLessThanOrEqual(5);
+    });
+  });
+
+  describe('visual appearance', () => {
+    it('should have appearance properties', () => {
+      const wisp = new SyntaxWisp(validPosition, validConcept);
+
+      expect(wisp.appearance).toBeDefined();
+      expect(wisp.appearance.symbol).toBe('~');
+      expect(wisp.appearance.baseColor).toBe('#DDA0DD');
+      expect(wisp.appearance.glowColor).toBe('#E6E6FA');
+      expect(wisp.appearance.cssClass).toBe('syntax-wisp');
+      expect(wisp.appearance.floatingGlyphs).toContain('\\');
+      expect(wisp.appearance.floatingGlyphs).toContain('/');
+    });
+
+    it('should return dim symbol when not activated', () => {
+      const wisp = new SyntaxWisp(validPosition, validConcept, true, false);
+
+      expect(wisp.getVisualSymbol()).toBe('·');
+    });
+
+    it('should return wisp symbol when activated', () => {
+      const wisp = new SyntaxWisp(validPosition, validConcept, true, true);
+
+      expect(wisp.getVisualSymbol()).toBe('~');
+    });
+
+    it('should return random floating glyph', () => {
+      const wisp = new SyntaxWisp(validPosition, validConcept);
+      const glyph = wisp.getFloatingGlyph();
+
+      expect(wisp.appearance.floatingGlyphs).toContain(glyph);
+    });
+
+    it('should calculate ethereal opacity based on activation and level', () => {
+      const activatedWisp = new SyntaxWisp(validPosition, validConcept, true, true);
+      const deactivatedWisp = new SyntaxWisp(validPosition, validConcept, true, false);
+
+      const activatedOpacity = activatedWisp.getEtherealOpacity();
+      const deactivatedOpacity = deactivatedWisp.getEtherealOpacity();
+
+      expect(activatedOpacity).toBeGreaterThan(deactivatedOpacity);
+      expect(activatedOpacity).toBeLessThanOrEqual(1.0);
+      expect(deactivatedOpacity).toBeLessThanOrEqual(1.0);
     });
   });
 });

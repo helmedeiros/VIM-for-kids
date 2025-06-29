@@ -118,7 +118,7 @@ export class BlinkingGroveZone {
       },
       npcs: [
         {
-          id: 'caret_stone',
+          id: 'caret_spirit',
           appearsWhen: { collectedVimKeys: ['h', 'j', 'k', 'l'] },
           dialogue: [
             'Very good, oh Shadowy One.',
@@ -143,7 +143,7 @@ export class BlinkingGroveZone {
           trigger: 'onVimKeysCollected',
           conditions: { collectedKeys: ['h', 'j', 'k', 'l'] },
           actions: [
-            { type: 'showNPC', npcId: 'caret_stone' },
+            { type: 'showNPC', npcId: 'caret_spirit' },
             { type: 'unlockGate', targetZone: 'zone_2' },
             { type: 'playMusic', track: 'zone1_complete' },
             { type: 'showNarration', text: 'And so begins your journey...' },

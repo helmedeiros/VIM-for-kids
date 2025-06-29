@@ -671,12 +671,236 @@ h1 {
 
 /* NPCs */
 .tile.npc {
-  color: #9b59b6;
   font-size: 16px;
   font-weight: bold;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  animation: npcGlow 3s infinite;
   cursor: pointer;
+  position: relative;
+  overflow: visible;
+}
+
+/* CaretSpirit - Wise ancient spirit with flame appearance matching pixel art */
+.tile.npc.caret-spirit {
+  color: #40e0d0; /* Turquoise/cyan to match pixel art */
+  text-shadow:
+    0 0 3px #e0ffff,
+    0 0 6px #40e0d0,
+    0 0 12px #40e0d0,
+    0 0 18px #87ceeb,
+    1px 1px 2px rgba(0, 0, 0, 0.6);
+  animation: flame-wisdom 2s infinite ease-in-out;
+  filter: hue-rotate(120deg) saturate(1.2); /* Make fire emoji appear cyan/blue */
+}
+
+@keyframes flame-wisdom {
+  0%,
+  100% {
+    text-shadow:
+      0 0 3px #e0ffff,
+      0 0 6px #40e0d0,
+      0 0 12px #40e0d0,
+      0 0 18px #87ceeb,
+      1px 1px 2px rgba(0, 0, 0, 0.6);
+    transform: scale(1) translateY(0px);
+    filter: hue-rotate(120deg) saturate(1.2);
+  }
+  25% {
+    transform: scale(1.02) translateY(-1px);
+    filter: hue-rotate(115deg) saturate(1.3);
+  }
+  50% {
+    text-shadow:
+      0 0 5px #e0ffff,
+      0 0 10px #40e0d0,
+      0 0 18px #40e0d0,
+      0 0 25px #87ceeb,
+      0 0 35px #e0ffff,
+      1px 1px 2px rgba(0, 0, 0, 0.6);
+    transform: scale(1.05) translateY(-2px);
+    filter: hue-rotate(110deg) saturate(1.4);
+  }
+  75% {
+    transform: scale(1.03) translateY(-1px);
+    filter: hue-rotate(115deg) saturate(1.3);
+  }
+}
+
+/* Alternative flame characters for better cross-platform support */
+.tile.npc.caret-spirit::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  color: #e0ffff;
+  opacity: 0.8;
+  animation: caret-float 3s infinite ease-in-out;
+}
+
+@keyframes caret-float {
+  0%,
+  100% {
+    content: '^';
+    opacity: 0.6;
+    transform: translateX(-50%) translateY(0px);
+  }
+  50% {
+    content: '^';
+    opacity: 0.9;
+    transform: translateX(-50%) translateY(-3px);
+  }
+}
+
+/* SyntaxWisp - Ethereal purple spirit for advanced concepts */
+.tile.npc.syntax-wisp {
+  color: #dda0dd; /* Plum */
+  text-shadow:
+    0 0 4px #e6e6fa,
+    0 0 8px #dda0dd,
+    0 0 12px #dda0dd,
+    1px 1px 2px rgba(0, 0, 0, 0.8);
+  animation: ethereal-float 3s infinite ease-in-out;
+  opacity: 0.85;
+}
+
+@keyframes ethereal-float {
+  0%,
+  100% {
+    text-shadow:
+      0 0 4px #e6e6fa,
+      0 0 8px #dda0dd,
+      0 0 12px #dda0dd,
+      1px 1px 2px rgba(0, 0, 0, 0.8);
+    transform: translateY(0px) scale(1);
+  }
+  33% {
+    transform: translateY(-2px) scale(1.02);
+    text-shadow:
+      0 0 6px #e6e6fa,
+      0 0 12px #dda0dd,
+      0 0 18px #dda0dd,
+      1px 1px 2px rgba(0, 0, 0, 0.8);
+  }
+  66% {
+    transform: translateY(1px) scale(0.98);
+  }
+}
+
+/* BugKing - Menacing final boss with corruption effects */
+.tile.npc.bug-king {
+  color: #8b0000; /* Dark red */
+  text-shadow:
+    0 0 6px #dc143c,
+    0 0 12px #8b0000,
+    0 0 18px #8b0000,
+    1px 1px 2px rgba(0, 0, 0, 0.9);
+  animation: corruption-pulse 1.5s infinite ease-in-out;
+  font-size: 18px;
+}
+
+@keyframes corruption-pulse {
+  0%,
+  100% {
+    text-shadow:
+      0 0 6px #dc143c,
+      0 0 12px #8b0000,
+      0 0 18px #8b0000,
+      1px 1px 2px rgba(0, 0, 0, 0.9);
+    transform: scale(1);
+  }
+  50% {
+    text-shadow:
+      0 0 10px #dc143c,
+      0 0 20px #8b0000,
+      0 0 30px #8b0000,
+      0 0 40px #dc143c,
+      1px 1px 2px rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+}
+
+/* Floating glyphs animation */
+.floating-glyph {
+  position: absolute;
+  font-size: 8px;
+  pointer-events: none;
+  opacity: 0.7;
+  animation: float-around 4s infinite linear;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.tile.npc.caret-spirit .floating-glyph {
+  color: #e0ffff;
+  text-shadow: 0 0 3px #40e0d0;
+}
+
+.tile.npc.syntax-wisp .floating-glyph {
+  color: #e6e6fa;
+  text-shadow: 0 0 3px #dda0dd;
+}
+
+.tile.npc.bug-king .floating-glyph {
+  color: #dc143c;
+  text-shadow: 0 0 3px #8b0000;
+  animation: float-corruption 2s infinite linear;
+}
+
+@keyframes float-around {
+  0% {
+    transform: translateX(-50%) translateY(0px) rotate(0deg);
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 0.7;
+  }
+  25% {
+    transform: translateX(-30%) translateY(-12px) rotate(90deg);
+  }
+  50% {
+    transform: translateX(-70%) translateY(-8px) rotate(180deg);
+  }
+  75% {
+    transform: translateX(-30%) translateY(-4px) rotate(270deg);
+  }
+  100% {
+    transform: translateX(-50%) translateY(0px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes float-corruption {
+  0% {
+    transform: translateX(-50%) translateY(0px) rotate(0deg) scale(1);
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 0.8;
+  }
+  25% {
+    transform: translateX(-20%) translateY(-10px) rotate(45deg) scale(1.2);
+  }
+  50% {
+    transform: translateX(-80%) translateY(-6px) rotate(90deg) scale(0.8);
+  }
+  75% {
+    transform: translateX(-20%) translateY(-2px) rotate(135deg) scale(1.1);
+  }
+  100% {
+    transform: translateX(-50%) translateY(0px) rotate(180deg) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Legacy NPC styling for NPCs without specific appearance */
+.tile.npc:not(.caret-spirit):not(.syntax-wisp):not(.bug-king) {
+  color: #9b59b6;
+  animation: npcGlow 3s infinite;
 }
 
 @keyframes npcGlow {
