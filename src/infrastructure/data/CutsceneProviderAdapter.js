@@ -1,6 +1,5 @@
 import { CutsceneProvider } from '../../ports/data/CutsceneProvider.js';
-import { CutsceneStory } from '../../domain/value-objects/CutsceneStory.js';
-import { OriginStory } from '../../domain/value-objects/OriginStory.js';
+import { Story } from '../../domain/value-objects/Story.js';
 
 /**
  * Infrastructure adapter that provides cutscene configurations
@@ -22,7 +21,7 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
         return null;
       }
 
-      if (!type || !['game', 'level', 'zone'].includes(type)) {
+      if (!type || !['origin', 'level', 'zone'].includes(type)) {
         return null;
       }
 
@@ -40,7 +39,7 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
       }
 
       // Create identifier
-      const tempStory = new CutsceneStory(gameId, type, levelId, zoneId, ['temp']);
+      const tempStory = new Story(gameId, type, ['temp'], { levelId, zoneId });
       const identifier = tempStory.identifier;
 
       // Get story from map
@@ -58,7 +57,7 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
         return false;
       }
 
-      if (!type || !['game', 'level', 'zone'].includes(type)) {
+      if (!type || !['origin', 'level', 'zone'].includes(type)) {
         return false;
       }
 
@@ -76,7 +75,7 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
       }
 
       // Create identifier
-      const tempStory = new CutsceneStory(gameId, type, levelId, zoneId, ['temp']);
+      const tempStory = new Story(gameId, type, ['temp'], { levelId, zoneId });
       const identifier = tempStory.identifier;
 
       return this._cutsceneStories.has(identifier);
@@ -142,25 +141,25 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
   // Legacy methods for backward compatibility
 
   async getOriginStory(gameId) {
-    const gameStory = await this.getCutsceneStory(gameId, 'game');
+    const gameStory = await this.getCutsceneStory(gameId, 'origin');
     if (!gameStory) {
       return null;
     }
 
-    // Convert back to OriginStory for backward compatibility
-    return new OriginStory(gameStory.gameId, gameStory.script);
+    // Convert back to Story for backward compatibility
+    return Story.createOriginStory(gameStory.gameId, gameStory.script);
   }
 
   async hasOriginStory(gameId) {
-    return await this.hasCutsceneStory(gameId, 'game');
+    return await this.hasCutsceneStory(gameId, 'origin');
   }
 
   async getAllOriginStories() {
     const gameStories = Array.from(this._cutsceneStories.values()).filter(
-      (story) => story.type === 'game'
+      (story) => story.type === 'origin'
     );
 
-    return gameStories.map((story) => new OriginStory(story.gameId, story.script));
+    return gameStories.map((story) => Story.createOriginStory(story.gameId, story.script));
   }
 
   /**
@@ -219,13 +218,7 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
       '[Player control begins — movement keys are disabled]',
     ];
 
-    const gameStory = new CutsceneStory(
-      'cursor-before-clickers',
-      'game',
-      null,
-      null,
-      cursorBeforeClickersScript
-    );
+    const gameStory = Story.createOriginStory('cursor-before-clickers', cursorBeforeClickersScript);
 
     stories.set(gameStory.identifier, gameStory);
 
@@ -248,13 +241,7 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
       'Master these transitions, young Cursor.',
     ];
 
-    const level2Story = new CutsceneStory(
-      'cursor-before-clickers',
-      'level',
-      'level_2',
-      null,
-      level2Script
-    );
+    const level2Story = Story.createLevelStory('cursor-before-clickers', 'level_2', level2Script);
 
     stories.set(level2Story.identifier, level2Story);
 
@@ -273,9 +260,8 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
       zoneConfigs.forEach((config) => {
         if (config.narration && Array.isArray(config.narration) && config.narration.length > 0) {
           // Create a zone cutscene story from the zone's narration
-          const zoneStory = new CutsceneStory(
+          const zoneStory = Story.createZoneStory(
             'cursor-before-clickers', // Default game
-            'zone',
             this._getLevelIdForZone(config.zoneId),
             config.zoneId,
             [...config.narration] // Copy the narration array

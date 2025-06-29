@@ -1,7 +1,6 @@
 /* eslint-env node, jest */
 import { CutsceneProviderAdapter } from '../../../src/infrastructure/data/CutsceneProviderAdapter.js';
-import { CutsceneStory } from '../../../src/domain/value-objects/CutsceneStory.js';
-import { OriginStory } from '../../../src/domain/value-objects/OriginStory.js';
+import { Story } from '../../../src/domain/value-objects/Story.js';
 
 describe('CutsceneProviderAdapter', () => {
   let adapter;
@@ -22,30 +21,30 @@ describe('CutsceneProviderAdapter', () => {
   });
 
   describe('game-level cutscenes', () => {
-    it('should return game-level cutscene for cursor-before-clickers', async () => {
-      const story = await adapter.getCutsceneStory('cursor-before-clickers', 'game');
+    it('should return origin cutscene for cursor-before-clickers', async () => {
+      const story = await adapter.getCutsceneStory('cursor-before-clickers', 'origin');
 
       expect(story).not.toBeNull();
       expect(story.gameId).toBe('cursor-before-clickers');
-      expect(story.type).toBe('game');
+      expect(story.type).toBe('origin');
       expect(story.levelId).toBeNull();
       expect(story.zoneId).toBeNull();
       expect(Array.isArray(story.script)).toBe(true);
       expect(story.script.length).toBeGreaterThan(0);
     });
 
-    it('should check if game-level cutscene exists', async () => {
-      const exists = await adapter.hasCutsceneStory('cursor-before-clickers', 'game');
+    it('should check if origin cutscene exists', async () => {
+      const exists = await adapter.hasCutsceneStory('cursor-before-clickers', 'origin');
       expect(exists).toBe(true);
     });
 
     it('should return null for non-existent game', async () => {
-      const story = await adapter.getCutsceneStory('non-existent-game', 'game');
+      const story = await adapter.getCutsceneStory('non-existent-game', 'origin');
       expect(story).toBeNull();
     });
 
     it('should return false for non-existent game check', async () => {
-      const exists = await adapter.hasCutsceneStory('non-existent-game', 'game');
+      const exists = await adapter.hasCutsceneStory('non-existent-game', 'origin');
       expect(exists).toBe(false);
     });
   });
@@ -153,7 +152,7 @@ describe('CutsceneProviderAdapter', () => {
         expect(story).toHaveProperty('gameId');
         expect(story).toHaveProperty('type');
         expect(story).toHaveProperty('script');
-        expect(['game', 'level', 'zone']).toContain(story.type);
+        expect(['origin', 'level', 'zone']).toContain(story.type);
       });
     });
 
@@ -237,7 +236,7 @@ describe('CutsceneProviderAdapter', () => {
       const story = await adapter.getOriginStory('cursor-before-clickers');
 
       expect(story).not.toBeNull();
-      expect(story).toBeInstanceOf(OriginStory);
+      expect(story).toBeInstanceOf(Story);
       expect(story.gameId).toBe('cursor-before-clickers');
     });
 
@@ -251,15 +250,15 @@ describe('CutsceneProviderAdapter', () => {
 
       expect(Array.isArray(stories)).toBe(true);
       stories.forEach((story) => {
-        expect(story).toBeInstanceOf(OriginStory);
+        expect(story).toBeInstanceOf(Story);
       });
     });
   });
 
   describe('error handling', () => {
     it('should handle invalid parameters gracefully', async () => {
-      await expect(adapter.getCutsceneStory('', 'game')).resolves.toBeNull();
-      await expect(adapter.getCutsceneStory(null, 'game')).resolves.toBeNull();
+      await expect(adapter.getCutsceneStory('', 'origin')).resolves.toBeNull();
+      await expect(adapter.getCutsceneStory(null, 'origin')).resolves.toBeNull();
       await expect(adapter.getCutsceneStory('game1', 'invalid-type')).resolves.toBeNull();
     });
 
@@ -274,13 +273,13 @@ describe('CutsceneProviderAdapter', () => {
   });
 
   describe('story validation', () => {
-    it('should return valid CutsceneStory objects', async () => {
-      const gameStory = await adapter.getCutsceneStory('cursor-before-clickers', 'game');
+    it('should return valid Story objects', async () => {
+      const originStory = await adapter.getCutsceneStory('cursor-before-clickers', 'origin');
 
-      if (gameStory) {
-        // Verify it can be reconstructed as a CutsceneStory
-        const reconstructed = CutsceneStory.fromJSON(gameStory);
-        expect(reconstructed).toBeInstanceOf(CutsceneStory);
+      if (originStory) {
+        // Verify it can be reconstructed as a Story
+        const reconstructed = Story.fromJSON(originStory);
+        expect(reconstructed).toBeInstanceOf(Story);
         expect(reconstructed.isValid()).toBe(true);
       }
     });
@@ -289,7 +288,7 @@ describe('CutsceneProviderAdapter', () => {
       const allStories = await adapter.getAllCutsceneStories();
 
       allStories.forEach((storyData) => {
-        const story = CutsceneStory.fromJSON(storyData);
+        const story = Story.fromJSON(storyData);
         expect(story.identifier).toBe(storyData.identifier);
       });
     });

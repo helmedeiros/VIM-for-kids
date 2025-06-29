@@ -70,12 +70,14 @@ const parseZoneFile = (filePath) => {
 
     const legendContent = legendMatch[1];
     const legend = {};
-    const legendEntries = legendContent.match(/(\w+):\s*['"`]([^'"`]+)['"`]/g);
+    const legendEntries = legendContent.match(/(['"`]?[^'"`:\s]+['"`]?):\s*['"`]([^'"`]+)['"`]/g);
     if (legendEntries) {
       legendEntries.forEach((entry) => {
-        const match = entry.match(/(\w+):\s*['"`]([^'"`]+)['"`]/);
+        const match = entry.match(/(['"`]?[^'"`:\s]+['"`]?):\s*['"`]([^'"`]+)['"`]/);
         if (match) {
-          legend[match[1]] = match[2];
+          // Remove quotes from key if present
+          const key = match[1].replace(/['"`]/g, '');
+          legend[key] = match[2];
         }
       });
     }

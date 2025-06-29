@@ -82,7 +82,7 @@ describe('VIM for Kids Game Integration', () => {
     it('should have cursor at correct starting position', () => {
       game = new VimForKidsGame({ level: 'default' });
 
-      expect(game.gameState.cursor.position).toHavePosition(5, 2);
+      expect(game.gameState.cursor.position).toHavePosition(7, 10);
     });
 
     it('should have all VIM keys available initially', () => {
@@ -194,31 +194,29 @@ describe('VIM for Kids Game Integration', () => {
     });
 
     it('should collect key when cursor moves to key position', () => {
-      // Move to a key position (2, 3) where 'h' key is located
+      // Move to a key position (8, 12) where 'h' key is located
       const targetKey = game.gameState.availableKeys.find((key) =>
-        key.position.equals(new Position(2, 3))
+        key.position.equals(new Position(8, 12))
       );
 
       expect(targetKey).toBeDefined();
       expect(targetKey.key).toBe('h');
 
       // Navigate to the key position
-      // From (5,2) to (2,3): left 3, down 1
-      game.movePlayerUseCase.execute('left');
-      game.movePlayerUseCase.execute('left');
-      game.movePlayerUseCase.execute('left');
+      // From (7,10) to (8,12): right 1, down 2
+      game.movePlayerUseCase.execute('right');
+      game.movePlayerUseCase.execute('down');
       game.movePlayerUseCase.execute('down');
 
-      expect(game.gameState.cursor.position).toHavePosition(2, 3);
+      expect(game.gameState.cursor.position).toHavePosition(8, 12);
       expect(game.gameState.collectedKeys.has('h')).toBe(true);
       expect(game.gameState.availableKeys.length).toBe(3);
     });
 
     it('should collect key without popup when key is collected', () => {
       // Navigate to key position and verify key is collected
-      game.movePlayerUseCase.execute('left');
-      game.movePlayerUseCase.execute('left');
-      game.movePlayerUseCase.execute('left');
+      game.movePlayerUseCase.execute('right');
+      game.movePlayerUseCase.execute('down');
       game.movePlayerUseCase.execute('down');
 
       // Verify key was collected
@@ -228,9 +226,8 @@ describe('VIM for Kids Game Integration', () => {
 
     it('should update UI when key is collected', () => {
       // Collect a key
-      game.movePlayerUseCase.execute('left');
-      game.movePlayerUseCase.execute('left');
-      game.movePlayerUseCase.execute('left');
+      game.movePlayerUseCase.execute('right');
+      game.movePlayerUseCase.execute('down');
       game.movePlayerUseCase.execute('down');
 
       // Check that key display is updated
@@ -241,77 +238,56 @@ describe('VIM for Kids Game Integration', () => {
       expect(collectedKeyElements[0].textContent).toBe('h');
     });
 
-    it('should collect keys placed in labyrinth', () => {
-      // Test collecting the 'k' key at position (9, 5) in the labyrinth
+    it('should collect keys placed in forest paths', () => {
+      // Test collecting the 'k' key at position (20, 12) in the forest
       const targetKey = game.gameState.availableKeys.find((key) =>
-        key.position.equals(new Position(9, 5))
+        key.position.equals(new Position(20, 12))
       );
 
       expect(targetKey).toBeDefined();
       expect(targetKey.key).toBe('k');
 
-      // Navigate to labyrinth key: right to (6,2), then through labyrinth
-      game.movePlayerUseCase.execute('right'); // (6,2)
-      game.movePlayerUseCase.execute('right'); // (7,2)
-      game.movePlayerUseCase.execute('right'); // (8,2)
-      game.movePlayerUseCase.execute('down'); // (8,3)
-      game.movePlayerUseCase.execute('right'); // (9,3)
-      game.movePlayerUseCase.execute('down'); // (9,4)
-      game.movePlayerUseCase.execute('down'); // (9,5)
+      // Navigate to the 'k' key: from (7,10) to (20,12): right 13, down 2
+      for (let i = 0; i < 13; i++) {
+        game.movePlayerUseCase.execute('right');
+      }
+      game.movePlayerUseCase.execute('down');
+      game.movePlayerUseCase.execute('down');
 
-      expect(game.gameState.cursor.position).toHavePosition(9, 5);
+      expect(game.gameState.cursor.position).toHavePosition(20, 12);
       expect(game.gameState.collectedKeys.has('k')).toBe(true);
       expect(game.gameState.availableKeys.length).toBe(3);
     });
 
-    it('should collect the deepest labyrinth key', () => {
-      // Test collecting the 'l' key at position (10, 8) in the labyrinth
+    it('should collect the furthest forest key', () => {
+      // Test collecting the 'l' key at position (27, 12) in the forest
       const targetKey = game.gameState.availableKeys.find((key) =>
-        key.position.equals(new Position(10, 8))
+        key.position.equals(new Position(27, 12))
       );
 
       expect(targetKey).toBeDefined();
       expect(targetKey.key).toBe('l');
 
-      // Navigate to deep labyrinth key
-      game.movePlayerUseCase.execute('right'); // (6,2)
-      game.movePlayerUseCase.execute('right'); // (7,2)
-      game.movePlayerUseCase.execute('right'); // (8,2)
-      game.movePlayerUseCase.execute('down'); // (8,3)
-      game.movePlayerUseCase.execute('right'); // (9,3)
-      game.movePlayerUseCase.execute('right'); // (10,3)
-      game.movePlayerUseCase.execute('down'); // (10,4)
-      game.movePlayerUseCase.execute('down'); // (10,5)
-      game.movePlayerUseCase.execute('down'); // (10,6) - This should fail if blocked by stone
-
-      // Alternative path if direct route is blocked
-      if (!game.gameState.cursor.position.equals(new Position(10, 6))) {
-        // Try alternative route through (9,6) then (10,6)
-        game.movePlayerUseCase.execute('left'); // (9,5)
-        game.movePlayerUseCase.execute('down'); // (9,6)
-        game.movePlayerUseCase.execute('right'); // (10,6)
+      // Navigate to the 'l' key: from (7,10) to (27,12): right 20, down 2
+      for (let i = 0; i < 20; i++) {
+        game.movePlayerUseCase.execute('right');
       }
+      game.movePlayerUseCase.execute('down');
+      game.movePlayerUseCase.execute('down');
 
-      game.movePlayerUseCase.execute('down'); // (10,7)
-      game.movePlayerUseCase.execute('down'); // (10,8)
-
-      expect(game.gameState.cursor.position).toHavePosition(10, 8);
+      expect(game.gameState.cursor.position).toHavePosition(27, 12);
       expect(game.gameState.collectedKeys.has('l')).toBe(true);
       expect(game.gameState.availableKeys.length).toBe(3);
     });
   });
 
-  describe('Labyrinth Navigation', () => {
+  describe('Forest Navigation', () => {
     beforeEach(() => {
       game = new VimForKidsGame({ level: 'default' });
     });
 
-    it('should block movement into stone walls', () => {
-      // Navigate to labyrinth entry
-      game.movePlayerUseCase.execute('right'); // (6,2)
-      game.movePlayerUseCase.execute('right'); // (7,2)
-
-      // Try to move up into stone wall at (7,1)
+    it('should block movement into tree barriers', () => {
+      // Try to move up from starting position (1,1) into tree barrier at (1,0)
       const positionBeforeMove = game.gameState.cursor.position;
       game.movePlayerUseCase.execute('up');
 
@@ -319,34 +295,28 @@ describe('VIM for Kids Game Integration', () => {
       expect(game.gameState.cursor.position).toEqual(positionBeforeMove);
     });
 
-    it('should allow movement through labyrinth paths', () => {
-      // Navigate through the labyrinth entry path
-      game.movePlayerUseCase.execute('right'); // (6,2)
-      expect(game.gameState.cursor.position).toHavePosition(6, 2);
+    it('should allow movement through forest paths', () => {
+      // Navigate through the forest paths from starting position
+      game.movePlayerUseCase.execute('right'); // (8,10)
+      expect(game.gameState.cursor.position).toHavePosition(8, 10);
 
-      game.movePlayerUseCase.execute('right'); // (7,2)
-      expect(game.gameState.cursor.position).toHavePosition(7, 2);
+      game.movePlayerUseCase.execute('right'); // (9,10)
+      expect(game.gameState.cursor.position).toHavePosition(9, 10);
 
-      game.movePlayerUseCase.execute('right'); // (8,2)
-      expect(game.gameState.cursor.position).toHavePosition(8, 2);
+      game.movePlayerUseCase.execute('down'); // (9,11)
+      expect(game.gameState.cursor.position).toHavePosition(9, 11);
 
-      game.movePlayerUseCase.execute('down'); // (8,3)
-      expect(game.gameState.cursor.position).toHavePosition(8, 3);
+      game.movePlayerUseCase.execute('down'); // (9,12)
+      expect(game.gameState.cursor.position).toHavePosition(9, 12);
     });
 
-    it('should prevent movement into stone walls within labyrinth', () => {
-      // Navigate to a position in the labyrinth
-      game.movePlayerUseCase.execute('right'); // (6,2)
-      game.movePlayerUseCase.execute('right'); // (7,2)
-      game.movePlayerUseCase.execute('right'); // (8,2)
-      game.movePlayerUseCase.execute('down'); // (8,3)
+    it('should prevent movement into tree barriers within forest', () => {
+      // Navigate to a position in the forest
+      game.movePlayerUseCase.execute('right'); // (8,10)
+      game.movePlayerUseCase.execute('right'); // (9,10)
+      game.movePlayerUseCase.execute('right'); // (10,10)
 
-      // Try to move left into stone wall at (7,3) - should be allowed as it's a path
-      // Instead, try to move up to (8,2) then left to (7,2) then up to (7,1) which is stone
-      game.movePlayerUseCase.execute('up'); // (8,2)
-      game.movePlayerUseCase.execute('left'); // (7,2)
-
-      // Try to move up into stone wall at (7,1) - should be blocked
+      // Try to move up into tree barrier - should be blocked
       const positionBeforeMove = game.gameState.cursor.position;
       game.movePlayerUseCase.execute('up');
 
@@ -354,15 +324,15 @@ describe('VIM for Kids Game Integration', () => {
       expect(game.gameState.cursor.position).toEqual(positionBeforeMove);
     });
 
-    it('should connect starting area to labyrinth seamlessly', () => {
-      // Test that player can move from starting area into labyrinth
-      expect(game.gameState.cursor.position).toHavePosition(5, 2); // Starting position
+    it('should connect starting area to forest paths seamlessly', () => {
+      // Test that player can move from starting area into forest paths
+      expect(game.gameState.cursor.position).toHavePosition(7, 10); // Starting position
 
-      game.movePlayerUseCase.execute('right'); // (6,2) - transition point
-      expect(game.gameState.cursor.position).toHavePosition(6, 2);
+      game.movePlayerUseCase.execute('right'); // (8,10) - forest path
+      expect(game.gameState.cursor.position).toHavePosition(8, 10);
 
-      game.movePlayerUseCase.execute('right'); // (7,2) - now in labyrinth
-      expect(game.gameState.cursor.position).toHavePosition(7, 2);
+      game.movePlayerUseCase.execute('down'); // (8,11) - continue through forest
+      expect(game.gameState.cursor.position).toHavePosition(8, 11);
     });
   });
 
@@ -394,19 +364,19 @@ describe('VIM for Kids Game Integration', () => {
     it('should remove key from display after collection', () => {
       const gameBoard = document.getElementById('gameBoard');
 
-      // Check initial key tiles
+      // Check initial key tiles (only those visible in viewport)
       let keyTiles = gameBoard.querySelectorAll('.tile.key');
-      expect(keyTiles.length).toBe(4);
+      const initialKeyCount = keyTiles.length;
+      expect(initialKeyCount).toBeGreaterThan(0); // Should have at least one visible key
 
       // Collect a key
-      game.movePlayerUseCase.execute('left');
-      game.movePlayerUseCase.execute('left');
-      game.movePlayerUseCase.execute('left');
+      game.movePlayerUseCase.execute('right');
+      game.movePlayerUseCase.execute('down');
       game.movePlayerUseCase.execute('down');
 
       // Check that one key tile is removed
       keyTiles = gameBoard.querySelectorAll('.tile.key');
-      expect(keyTiles.length).toBe(3);
+      expect(keyTiles.length).toBe(initialKeyCount - 1);
     });
   });
 

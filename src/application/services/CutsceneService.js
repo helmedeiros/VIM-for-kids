@@ -1,4 +1,4 @@
-import { CutsceneStory } from '../../domain/value-objects/CutsceneStory.js';
+import { Story } from '../../domain/value-objects/Story.js';
 
 /**
  * Service responsible for managing cutscene logic
@@ -245,11 +245,11 @@ export class CutsceneService {
    */
   _createStoryIdentifier(gameId, type, levelId, zoneId) {
     try {
-      // Use the same identifier logic as CutsceneStory
-      const tempStory = new CutsceneStory(gameId, type, levelId, zoneId, ['temp']);
+      // Use the same identifier logic as Story
+      const tempStory = new Story(gameId, type, ['temp'], { levelId, zoneId });
       return tempStory.identifier;
     } catch (error) {
-      // Fallback to simple concatenation if CutsceneStory creation fails
+      // Fallback to simple concatenation if Story creation fails
       let identifier = `${gameId}:${type}`;
       if (levelId) identifier += `:${levelId}`;
       if (zoneId) identifier += `:${zoneId}`;

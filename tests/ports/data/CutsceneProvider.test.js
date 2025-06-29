@@ -1,7 +1,7 @@
 /* eslint-env node, jest */
 
 import { CutsceneProvider } from '../../../src/ports/data/CutsceneProvider.js';
-import { CutsceneStory } from '../../../src/domain/value-objects/CutsceneStory.js';
+import { Story } from '../../../src/domain/value-objects/Story.js';
 
 class MockCutsceneProvider extends CutsceneProvider {
   constructor() {
@@ -11,7 +11,7 @@ class MockCutsceneProvider extends CutsceneProvider {
 
   async getCutsceneStory(gameId, type, levelId = null, zoneId = null) {
     try {
-      const tempStory = new CutsceneStory(gameId, type, levelId, zoneId, ['Mock script']);
+      const tempStory = new Story(gameId, type, ['Mock script'], { levelId, zoneId });
       const key = tempStory.identifier;
       const storedStory = this.stories.get(key);
       return storedStory ? storedStory.toJSON() : null;
@@ -22,7 +22,7 @@ class MockCutsceneProvider extends CutsceneProvider {
 
   async hasCutsceneStory(gameId, type, levelId = null, zoneId = null) {
     try {
-      const tempStory = new CutsceneStory(gameId, type, levelId, zoneId, ['Mock script']);
+      const tempStory = new Story(gameId, type, ['Mock script'], { levelId, zoneId });
       const key = tempStory.identifier;
       return this.stories.has(key);
     } catch (error) {
@@ -79,14 +79,14 @@ describe('CutsceneProvider', () => {
   describe('abstract methods', () => {
     it('should define getCutsceneStory as abstract method', async () => {
       const baseProvider = new CutsceneProvider();
-      await expect(baseProvider.getCutsceneStory('game1', 'game')).rejects.toThrow(
+      await expect(baseProvider.getCutsceneStory('game1', 'origin')).rejects.toThrow(
         'Abstract method must be implemented'
       );
     });
 
     it('should define hasCutsceneStory as abstract method', async () => {
       const baseProvider = new CutsceneProvider();
-      await expect(baseProvider.hasCutsceneStory('game1', 'game')).rejects.toThrow(
+      await expect(baseProvider.hasCutsceneStory('game1', 'origin')).rejects.toThrow(
         'Abstract method must be implemented'
       );
     });
@@ -121,18 +121,16 @@ describe('CutsceneProvider', () => {
   });
 
   describe('getCutsceneStory', () => {
-    it('should get game-level cutscene story', async () => {
-      const gameStory = new CutsceneStory('cursor-before-clickers', 'game', null, null, [
-        'Game intro',
-      ]);
+    it('should get origin cutscene story', async () => {
+      const gameStory = Story.createOriginStory('cursor-before-clickers', ['Game intro']);
       provider.addStory(gameStory);
 
-      const result = await provider.getCutsceneStory('cursor-before-clickers', 'game');
+      const result = await provider.getCutsceneStory('cursor-before-clickers', 'origin');
       expect(result).toEqual(gameStory.toJSON()); // Mock returns the stored story
     });
 
     it('should get level-level cutscene story', async () => {
-      const levelStory = new CutsceneStory('cursor-before-clickers', 'level', 'level_2', null, [
+      const levelStory = Story.createLevelStory('cursor-before-clickers', 'level_2', [
         'Level intro',
       ]);
       provider.addStory(levelStory);
@@ -142,7 +140,7 @@ describe('CutsceneProvider', () => {
     });
 
     it('should get zone-level cutscene story', async () => {
-      const zoneStory = new CutsceneStory('cursor-before-clickers', 'zone', 'level_1', 'zone_1', [
+      const zoneStory = Story.createZoneStory('cursor-before-clickers', 'level_1', 'zone_1', [
         'Zone intro',
       ]);
       provider.addStory(zoneStory);
@@ -163,8 +161,8 @@ describe('CutsceneProvider', () => {
   });
 
   describe('hasCutsceneStory', () => {
-    it('should check if game-level story exists', async () => {
-      const result = await provider.hasCutsceneStory('cursor-before-clickers', 'game');
+    it('should check if origin story exists', async () => {
+      const result = await provider.hasCutsceneStory('cursor-before-clickers', 'origin');
       expect(typeof result).toBe('boolean');
     });
 
@@ -245,8 +243,8 @@ describe('CutsceneProvider', () => {
 
   describe('error handling', () => {
     it('should handle invalid parameters gracefully', async () => {
-      await expect(provider.getCutsceneStory('', 'game')).resolves.not.toThrow();
-      await expect(provider.hasCutsceneStory(null, 'game')).resolves.not.toThrow();
+      await expect(provider.getCutsceneStory('', 'origin')).resolves.not.toThrow();
+      await expect(provider.hasCutsceneStory(null, 'origin')).resolves.not.toThrow();
     });
   });
 });
