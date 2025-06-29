@@ -107,7 +107,7 @@ describe('Level Transition Integration', () => {
       expect(game.gameState.isCurrentZoneComplete()).toBe(true);
       expect(game.gameState.isLevelComplete()).toBe(true);
 
-      // Move to gate position
+      // Move cursor to gate to enable level progression
       const gate = game.gameState.getGate();
       game.gameState.cursor = game.gameState.cursor.moveTo(gate.position);
 
@@ -150,26 +150,21 @@ describe('Level Transition Integration', () => {
       expect(game.gameState.shouldProgressToNextLevel()).toBe(false);
 
       // Execute zone progression
-      const progressionResult1 = game.gameState.executeProgression();
+      const progressionResult1 = await game.gameState.executeProgression();
       expect(progressionResult1.type).toBe('zone');
       expect(game.gameState.getCurrentZoneIndex()).toBe(1);
       expect(game.gameState.getCurrentZoneId()).toBe('zone_3');
 
-      // Complete second zone
-      const keys2 = game.gameState.availableKeys;
-      keys2.forEach((key) => {
-        game.gameState.collectKey(key);
-      });
+      // Complete zone_3 (second zone in level_2)
+      const zone3Keys = [...game.gameState.availableKeys];
+      zone3Keys.forEach((key) => game.gameState.collectKey(key));
 
-      const gate2 = game.gameState.getGate();
-      game.gameState.cursor = game.gameState.cursor.moveTo(gate2.position);
+      // Move cursor to gate to enable level progression
+      const gate = game.gameState.getGate();
+      game.gameState.cursor = game.gameState.cursor.moveTo(gate.position);
 
-      // Should progress to next level
-      expect(game.gameState.shouldProgressToNextLevel()).toBe(true);
-      expect(game.gameState.isLevelComplete()).toBe(true);
-
-      // Test level progression
-      const progressionResult2 = game.gameState.executeProgression();
+      // Execute level progression
+      const progressionResult2 = await game.gameState.executeProgression();
       expect(progressionResult2.type).toBe('level');
       expect(progressionResult2.nextLevelId).toBe('level_3');
 

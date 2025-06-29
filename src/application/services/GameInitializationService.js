@@ -31,6 +31,9 @@ export class GameInitializationService {
     // Show origin story cutscene if applicable
     await this._showOriginStoryIfNeeded(normalizedOptions.game);
 
+    // Show level cutscene if applicable
+    await this._showLevelCutsceneIfNeeded(normalizedOptions.game, normalizedOptions.level);
+
     // Create game instance
     this._currentGame = await this._gameFactory.createGame(normalizedOptions);
 
@@ -87,6 +90,51 @@ export class GameInitializationService {
     } catch (error) {
       // Log error but don't prevent game initialization
       console.error('Failed to show origin story cutscene:', error);
+    }
+  }
+
+  /**
+   * Show level cutscene if conditions are met
+   * @param {string} gameId - Game identifier
+   * @param {string} levelId - Level identifier
+   * @private
+   */
+  async _showLevelCutsceneIfNeeded(gameId, levelId) {
+    // Skip if cutscene services are not available
+    if (!this._cutsceneService || !this._cutsceneRenderer) {
+      return;
+    }
+
+    // Skip if no level ID provided
+    if (!levelId) {
+      return;
+    }
+
+    try {
+      // Check if level cutscene should be shown
+      const shouldShow = await this._cutsceneService.shouldShowCutsceneStory(
+        gameId,
+        'level',
+        levelId
+      );
+      if (!shouldShow) {
+        return;
+      }
+
+      // Get level cutscene story
+      const levelStory = await this._cutsceneService.getCutsceneStory(gameId, 'level', levelId);
+      if (!levelStory) {
+        return;
+      }
+
+      // Show cutscene and wait for completion
+      await this._cutsceneRenderer.showCutscene(levelStory);
+
+      // Mark as shown
+      await this._cutsceneService.markCutsceneStoryAsShown(gameId, 'level', levelId);
+    } catch (error) {
+      // Log error but don't prevent game initialization
+      console.error('Failed to show level cutscene:', error);
     }
   }
 

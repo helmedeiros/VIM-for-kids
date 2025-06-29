@@ -231,21 +231,60 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
    * @private
    */
   _addLevelStories(stories) {
-    // Example level story for level 2
+    // Level 2 story - Text Manipulation
     const level2Script = [
       'You have learned the basics of movement.',
       'Now the real challenge begins...',
-      'The Maze of Modes awaits.',
-      'Here you will learn to switch between the three sacred modes:',
-      'Normal, Insert, and Command.',
-      'Master these transitions, young Cursor.',
+      '🏛️ Welcome to the realm of Text Manipulation.',
+      'Here you will master the sacred modes of VIM:',
+      '• Normal Mode - Where you navigate and command',
+      '• Insert Mode - Where you create and modify',
+      '• Command Mode - Where you wield true power',
+      'The Maze of Modes and Swamp of Words await your mastery.',
     ];
 
     const level2Story = Story.createLevelStory('cursor-before-clickers', 'level_2', level2Script);
-
     stories.set(level2Story.identifier, level2Story);
 
-    // Future: Add more level stories as needed
+    // Level 3 story - Advanced Movement
+    const level3Script = [
+      '⚡ You have conquered the modes!',
+      'But now, the text itself calls to you...',
+      'Welcome to Advanced Movement - where every keystroke has purpose.',
+      'Delete Canyon will teach you precision in removal.',
+      'Field of Insertion will show you the art of placement.',
+      'Copy Circle will reveal the mysteries of duplication.',
+      'Master these skills, and text will bend to your will.',
+    ];
+
+    const level3Story = Story.createLevelStory('cursor-before-clickers', 'level_3', level3Script);
+    stories.set(level3Story.identifier, level3Story);
+
+    // Level 4 story - Text Operations
+    const level4Script = [
+      '🔥 The cursor grows stronger...',
+      'Text Operations await - the true power of VIM.',
+      'In Search Springs, you will learn to find anything.',
+      'In Command Cavern, you will discover the deep magic.',
+      'These are not mere tools - they are extensions of thought.',
+      'Prepare yourself for mastery beyond movement.',
+    ];
+
+    const level4Story = Story.createLevelStory('cursor-before-clickers', 'level_4', level4Script);
+    stories.set(level4Story.identifier, level4Story);
+
+    // Level 5 story - Search & Command
+    const level5Script = [
+      '✨ The final trials await...',
+      'You stand at the threshold of true VIM mastery.',
+      'Playground of Practice will test everything you know.',
+      'Syntax Temple holds the ultimate challenge - the Bug King himself.',
+      'This is where legends are made, young Cursor.',
+      'The fate of Textland rests in your keystrokes.',
+    ];
+
+    const level5Story = Story.createLevelStory('cursor-before-clickers', 'level_5', level5Script);
+    stories.set(level5Story.identifier, level5Story);
   }
 
   /**
@@ -254,7 +293,7 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
    */
   _addZoneStories(stories) {
     try {
-      // Get all zone configurations from the registry
+      // Get all zone configurations from the actual zone classes
       const zoneConfigs = this._getZoneConfigurations();
 
       zoneConfigs.forEach((config) => {
@@ -277,23 +316,19 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
   }
 
   /**
-   * Get zone configurations from the zone registry
+   * Get zone configurations from the actual zone classes
    * @private
    */
   _getZoneConfigurations() {
     try {
-      // Import zone classes and get their configurations
+      // Import and get configurations from all zone classes
       const zoneConfigs = [];
 
-      // Import each zone class and get its configuration
-      // This is a simplified approach - in a real implementation,
-      // you might want to use dynamic imports or a registry pattern
+      // For now, return synchronous configurations to avoid async complexity
+      // In a real implementation, you might want to dynamically import zone classes
+      // and extract their narration directly from the zone configurations
 
-      // For now, we'll create a few example zone stories manually
-      // since integrating with the full zone system would require
-      // more complex dependency management
-
-      // Example zone story for zone_1 (Blinking Grove)
+      // Manually add zone configurations with their narration
       zoneConfigs.push({
         zoneId: 'zone_1',
         narration: [
@@ -301,6 +336,97 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
           'Then, from the Blinking Grove, a spark appeared. A light not of fire… but of focus. You.',
           "✨ *Hello, Cursor.* You don't remember much. But the land does. And the land remembers you.",
           '> Try walking with the keys the wind left behind...',
+        ],
+      });
+
+      zoneConfigs.push({
+        zoneId: 'zone_2',
+        narration: [
+          'The stone walls whisper of ancient modes...',
+          'Normal mode is where you begin, Insert mode is where you create.',
+          'Command mode is where you command the very fabric of text.',
+          'Master the transitions, young Cursor, for modes are the keys to power.',
+        ],
+      });
+
+      zoneConfigs.push({
+        zoneId: 'zone_3',
+        narration: [
+          'The swamp bubbles with words and WORDS...',
+          'Here, case matters. Here, boundaries blur.',
+          'w moves by word, W moves by WORD.',
+          'Learn the difference, or be lost in the linguistic mire.',
+        ],
+      });
+
+      zoneConfigs.push({
+        zoneId: 'zone_4',
+        narration: [
+          'The canyon echoes with the ghosts of deleted text...',
+          'Here you will learn the precision of removal.',
+          'dd deletes a line, dw deletes a word.',
+          'But remember - with great power comes great responsibility.',
+        ],
+      });
+
+      zoneConfigs.push({
+        zoneId: 'zone_5',
+        narration: [
+          'Fields of possibility stretch before you...',
+          'This is where text comes to life.',
+          'i to insert before, a to append after.',
+          'I for the beginning, A for the end.',
+          'Master insertion, and you master creation itself.',
+        ],
+      });
+
+      zoneConfigs.push({
+        zoneId: 'zone_6',
+        narration: [
+          'In this circle, nothing is lost, everything is copied...',
+          'yy to copy a line, yw to copy a word.',
+          'p to paste after, P to paste before.',
+          'The circle of text continues, unbroken.',
+        ],
+      });
+
+      zoneConfigs.push({
+        zoneId: 'zone_7',
+        narration: [
+          'Springs of knowledge bubble with search wisdom...',
+          '/ to search forward, ? to search backward.',
+          'n for next, N for previous.',
+          'Find what you seek, and the text will reveal its secrets.',
+        ],
+      });
+
+      zoneConfigs.push({
+        zoneId: 'zone_8',
+        narration: [
+          'Deep in the cavern, commands echo with power...',
+          ': opens the gateway to command mode.',
+          ':w to save, :q to quit, :wq to save and quit.',
+          'These are the words that shape reality itself.',
+        ],
+      });
+
+      zoneConfigs.push({
+        zoneId: 'zone_9',
+        narration: [
+          'This playground tests all you have learned...',
+          'Movement, modes, editing, searching, commanding.',
+          'Show your mastery here, and prove you are ready.',
+          'The final challenge awaits beyond.',
+        ],
+      });
+
+      zoneConfigs.push({
+        zoneId: 'zone_10',
+        narration: [
+          'The temple trembles with corrupted power...',
+          'Here dwells the Bug King, source of all text corruption.',
+          'This is the final battle, young Cursor.',
+          'Use everything you have learned. Save Textland.',
         ],
       });
 

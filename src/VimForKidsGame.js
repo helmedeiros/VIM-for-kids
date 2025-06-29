@@ -26,6 +26,8 @@ export class VimForKidsGame {
     this.gameRenderer = dependencies.gameRenderer || new DOMGameRenderer();
     this.gameSelectorUI = dependencies.gameSelectorUI || new GameSelectorUI();
     this.persistenceService = dependencies.persistenceService || null;
+    this.cutsceneService = dependencies.cutsceneService || null;
+    this.cutsceneRenderer = dependencies.cutsceneRenderer || null;
 
     // Create use cases
     this.selectGameUseCase = new SelectGameUseCase(this.gameProvider);
@@ -36,9 +38,6 @@ export class VimForKidsGame {
 
     // Initialize game synchronously for backward compatibility
     this._initializeGameSync();
-
-    // Then enhance with async features
-    this._initializeGameAsync();
   }
 
   /**
@@ -114,7 +113,13 @@ export class VimForKidsGame {
       // For level-based games, try to create with level config
       try {
         const levelConfig = this._getLevelConfiguration(this.currentLevel);
-        this.gameState = new LevelGameState(this.zoneProvider, levelConfig, this.currentGameId);
+        this.gameState = new LevelGameState(
+          this.zoneProvider,
+          levelConfig,
+          this.currentGameId,
+          this.cutsceneService,
+          this.cutsceneRenderer
+        );
       } catch (error) {
         // Fallback to textland game state
         this.gameState = new TextlandGameState(this.zoneProvider);
@@ -125,7 +130,9 @@ export class VimForKidsGame {
     this.handleProgressionUseCase = new HandleProgressionUseCase(
       this.gameState,
       this.gameRenderer,
-      this // Pass game instance for level transitions
+      this, // Pass game instance for level transitions
+      this.cutsceneService,
+      this.cutsceneRenderer
     );
 
     // Create move player use case with progression use case
@@ -139,8 +146,8 @@ export class VimForKidsGame {
     this.gameRenderer.render(this.gameState.getCurrentState());
 
     // Setup input handling
-    this.inputHandler.setupInputHandling((direction) => {
-      this.movePlayerUseCase.execute(direction);
+    this.inputHandler.setupInputHandling(async (direction) => {
+      await this.movePlayerUseCase.execute(direction);
     });
 
     // Update level selection visibility based on current game
@@ -148,6 +155,9 @@ export class VimForKidsGame {
 
     // Focus the game board
     this.gameRenderer.focus();
+
+    // Handle async initialization separately
+    this._initializeGameAsync();
   }
 
   /**
@@ -173,6 +183,13 @@ export class VimForKidsGame {
    */
   async _initializeGameAsync() {
     try {
+      // Initialize first zone with potential cutscenes for level-based games
+      if (this.gameState instanceof LevelGameState) {
+        await this.gameState.initializeFirstZone();
+        // Re-render after async initialization
+        this.gameRenderer.render(this.gameState.getCurrentState());
+      }
+
       // Get the current game configuration
       const gameSelection = await this.selectGameUseCase.selectGame(this.currentGameId);
       this.currentGame = gameSelection.game;
@@ -189,9 +206,9 @@ export class VimForKidsGame {
   /**
    * Initialize game (for backward compatibility)
    */
-  initializeGame() {
-    // Delegate to sync initialization
-    this._initializeGameSync();
+  async initializeGame() {
+    // Delegate to async initialization
+    await this._initializeGameSync();
   }
 
   async _createGameState(gameSelection) {
@@ -248,7 +265,6 @@ export class VimForKidsGame {
     this.inputHandler = new KeyboardInputHandler(this.gameRenderer.gameBoard);
 
     // Re-initialize the game with new configuration
-    this._initializeGameSync();
     await this._initializeGameAsync();
 
     // Update UI to reflect the new game
@@ -298,6 +314,9 @@ export class VimForKidsGame {
   }
 
   async transitionToLevel(newLevelId) {
+    // Show level cutscene if applicable
+    await this._showLevelCutsceneIfNeeded(this.currentGameId, newLevelId);
+
     // Clean up current game state
     this.cleanup();
 
@@ -308,11 +327,8 @@ export class VimForKidsGame {
     this.gameSelectorUI = new GameSelectorUI();
     this.inputHandler = new KeyboardInputHandler(this.gameRenderer.gameBoard);
 
-    // Re-initialize the game using sync method
+    // Re-initialize the game with the new level
     this._initializeGameSync();
-
-    // Then enhance with async features (this sets up the gear icon)
-    await this._initializeGameAsync();
 
     // Update UI to reflect the current game
     if (this.currentGame) {
@@ -329,6 +345,51 @@ export class VimForKidsGame {
 
     // Ensure game board has focus for keyboard input
     this.gameRenderer.focus();
+  }
+
+  /**
+   * Show level cutscene if conditions are met
+   * @param {string} gameId - Game identifier
+   * @param {string} levelId - Level identifier
+   * @private
+   */
+  async _showLevelCutsceneIfNeeded(gameId, levelId) {
+    // Skip if cutscene services are not available
+    if (!this.cutsceneService || !this.cutsceneRenderer) {
+      return;
+    }
+
+    // Skip if no level ID provided
+    if (!levelId) {
+      return;
+    }
+
+    try {
+      // Check if level cutscene should be shown
+      const shouldShow = await this.cutsceneService.shouldShowCutsceneStory(
+        gameId,
+        'level',
+        levelId
+      );
+      if (!shouldShow) {
+        return;
+      }
+
+      // Get level cutscene story
+      const levelStory = await this.cutsceneService.getCutsceneStory(gameId, 'level', levelId);
+      if (!levelStory) {
+        return;
+      }
+
+      // Show cutscene and wait for completion
+      await this.cutsceneRenderer.showCutscene(levelStory);
+
+      // Mark as shown
+      await this.cutsceneService.markCutsceneStoryAsShown(gameId, 'level', levelId);
+    } catch (error) {
+      // Log error but don't prevent level transition
+      console.error('Failed to show level cutscene:', error);
+    }
   }
 
   _updateActiveLevelButton(levelId) {
