@@ -25,15 +25,11 @@ export default defineConfig({
           domain: [
             './src/domain/entities/Cursor.js',
             './src/domain/entities/VimKey.js',
-            './src/domain/entities/GameMap.js',
             './src/domain/value-objects/Position.js',
             './src/domain/value-objects/TileType.js',
           ],
           // Split application logic into separate chunk
-          application: [
-            './src/application/GameState.js',
-            './src/application/use-cases/MovePlayerUseCase.js',
-          ],
+          application: ['./src/application/use-cases/MovePlayerUseCase.js'],
           // Split infrastructure into separate chunk
           infrastructure: [
             './src/infrastructure/ui/DOMGameRenderer.js',

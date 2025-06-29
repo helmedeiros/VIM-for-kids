@@ -1,7 +1,7 @@
 /* eslint-env node, jest */
 import { jest } from '@jest/globals';
 import { CutsceneService } from '../../../src/application/services/CutsceneService.js';
-import { OriginStory } from '../../../src/domain/value-objects/OriginStory.js';
+import { Story } from '../../../src/domain/value-objects/Story.js';
 
 describe('CutsceneService', () => {
   let cutsceneService;
@@ -412,7 +412,7 @@ describe('CutsceneService', () => {
 
     describe('getOriginStory', () => {
       it('should delegate to cutscene provider', async () => {
-        const mockStory = new OriginStory('test-game', ['Test script']);
+        const mockStory = Story.createOriginStory('test-game', ['Test script']);
         mockCutsceneProvider.getOriginStory.mockResolvedValue(mockStory);
 
         const result = await cutsceneService.getOriginStory('test-game');
@@ -453,7 +453,7 @@ describe('CutsceneService', () => {
       });
 
       it('should reset single story', async () => {
-        const story1 = new OriginStory('game1', ['Script 1']);
+        const story1 = Story.createOriginStory('game1', ['Script 1']);
         mockCutsceneProvider.getAllOriginStories.mockResolvedValue([story1]);
         const resetSpy = jest.spyOn(cutsceneService, 'resetOriginStoryState');
 
@@ -463,9 +463,9 @@ describe('CutsceneService', () => {
       });
 
       it('should reset multiple stories', async () => {
-        const story1 = new OriginStory('game1', ['Script 1']);
-        const story2 = new OriginStory('game2', ['Script 2']);
-        const story3 = new OriginStory('game3', ['Script 3']);
+        const story1 = Story.createOriginStory('game1', ['Script 1']);
+        const story2 = Story.createOriginStory('game2', ['Script 2']);
+        const story3 = Story.createOriginStory('game3', ['Script 3']);
 
         mockCutsceneProvider.getAllOriginStories.mockResolvedValue([story1, story2, story3]);
         const resetSpy = jest.spyOn(cutsceneService, 'resetOriginStoryState');

@@ -17,7 +17,7 @@ export class VimForKidsGame {
       options.game ||
       options.gameId ||
       this._mapLevelToGameId(options.level || this._getFirstLevelId());
-    this.currentLevel = options.level || this._getFirstLevelId();
+    this.currentLevel = this._mapLevelToActualLevel(options.level || this._getFirstLevelId());
 
     // Use injected dependencies or create defaults for backward compatibility
     this.zoneProvider = dependencies.zoneProvider || new ZoneRegistryAdapter();
@@ -49,12 +49,29 @@ export class VimForKidsGame {
     if (level && level.startsWith('level_')) {
       return 'cursor-before-clickers';
     }
-    // Non-level games (default, welcomeMeadow, etc.) map to textland
-    if (level === 'default' || level === 'welcomeMeadow' || !level) {
+    // Default level should map to cursor-before-clickers for backward compatibility
+    if (level === 'default' || !level) {
+      return 'cursor-before-clickers';
+    }
+    // Non-level games (welcomeMeadow, etc.) map to textland
+    if (level === 'welcomeMeadow') {
       return 'cursor-textland';
     }
-    // Default to textland for unknown levels
-    return 'cursor-textland';
+    // Default to cursor-before-clickers for backward compatibility
+    return 'cursor-before-clickers';
+  }
+
+  /**
+   * Map legacy level parameter to actual level ID for backward compatibility
+   * @private
+   */
+  _mapLevelToActualLevel(level) {
+    // Map 'default' to the first level of cursor-before-clickers
+    if (level === 'default' || !level) {
+      return 'level_1';
+    }
+    // Return the level as-is for all other cases
+    return level;
   }
 
   /**
