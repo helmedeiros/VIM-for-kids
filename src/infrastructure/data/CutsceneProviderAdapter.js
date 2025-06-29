@@ -188,44 +188,30 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
    * @private
    */
   _addGameStories(stories) {
-    // Game story for "Cursor - Before the Clickers"
-    const cursorBeforeClickersScript = [
-      '🎵 [Background: soft ambient melody, typewriter clacks echo gently]',
-      '',
-      '[BLACK SCREEN]',
-      '',
-      'NARRATOR (calm, magical voice):',
-      'Once, the world was clear.',
-      'Text flowed like rivers, perfectly aligned.',
-      'But the Bugs came.',
-      'They chewed through the order,',
-      'left commands scrambled,',
-      'and the caret spirits lost their voice.',
-      '',
-      '[FADE IN: a soft blinking dot in a forest clearing—Cursor]',
-      '',
-      'NARRATOR:',
-      'Then, from the Blinking Grove, a spark appeared.',
-      'A light not of fire…',
-      'but of focus.',
-      'You.',
-      '',
-      '[TEXT APPEARS]',
-      '',
-      '✨ *Hello, Cursor.*',
-      "You don't remember much.",
-      'But the land does.',
-      'And the land remembers you.',
-      '',
-      '[Player control begins — movement keys are disabled]',
-    ];
+    try {
+      // Get game configurations from actual game configurations
+      // This avoids duplication and ensures we use the source of truth
+      const gameConfigs = this._getGameConfigurations();
 
-    const gameStory = Story.createOriginStory('cursor-before-clickers', cursorBeforeClickersScript);
+      gameConfigs.forEach((config) => {
+        if (
+          config.originStory &&
+          Array.isArray(config.originStory) &&
+          config.originStory.length > 0
+        ) {
+          // Create a game origin story from the game's cutscene configuration
+          const gameStory = Story.createOriginStory(
+            config.gameId,
+            [...config.originStory] // Copy the origin story array
+          );
 
-    stories.set(gameStory.identifier, gameStory);
-
-    // Future: Add game stories for other games here
-    // Example for cursor-textland could be added later
+          stories.set(gameStory.identifier, gameStory);
+        }
+      });
+    } catch (error) {
+      // If game system is not available, continue without game stories
+      console.warn('Game system not available for game cutscene integration:', error.message);
+    }
   }
 
   /**
@@ -267,15 +253,19 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
 
       zoneConfigs.forEach((config) => {
         if (config.narration && Array.isArray(config.narration) && config.narration.length > 0) {
-          // Create a zone cutscene story from the zone's narration
-          const zoneStory = Story.createZoneStory(
-            'cursor-before-clickers', // Default game
-            this._getLevelIdForZone(config.zoneId),
-            config.zoneId,
-            [...config.narration] // Copy the narration array
-          );
+          // Get the game and level for this zone dynamically
+          const zoneMapping = this._getZoneToGameLevelMapping(config.zoneId);
+          if (zoneMapping) {
+            // Create a zone cutscene story from the zone's narration
+            const zoneStory = Story.createZoneStory(
+              zoneMapping.gameId,
+              zoneMapping.levelId,
+              config.zoneId,
+              [...config.narration] // Copy the narration array
+            );
 
-          stories.set(zoneStory.identifier, zoneStory);
+            stories.set(zoneStory.identifier, zoneStory);
+          }
         }
       });
     } catch (error) {
@@ -297,11 +287,6 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
 
       // Get configurations from actual zone classes
       for (const zoneId of availableZoneIds) {
-        // Skip textland_exploration as it's not part of cursor-before-clickers
-        if (zoneId === 'textland_exploration') {
-          continue;
-        }
-
         try {
           const config = ZoneRegistry.getZoneConfig(zoneId);
           if (config && config.narration && Array.isArray(config.narration)) {
@@ -320,6 +305,42 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
     } catch (error) {
       // Fallback: if ZoneRegistry is not available, return empty array
       console.warn('ZoneRegistry not available for cutscene integration:', error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get game configurations from the actual game classes
+   * @private
+   */
+  _getGameConfigurations() {
+    try {
+      // Use GameRegistry to get actual game configurations
+      // This avoids duplication and ensures we use the source of truth
+      const gameConfigs = [];
+      const availableGameIds = GameRegistry.getGameIds();
+
+      // Get configurations from actual game classes
+      for (const gameId of availableGameIds) {
+        try {
+          const game = GameRegistry.getGame(gameId);
+          if (game && game.cutscenes && game.cutscenes.originStory) {
+            // Extract game configurations with origin stories
+            gameConfigs.push({
+              gameId: game.id,
+              originStory: [...game.cutscenes.originStory], // Copy the origin story array
+            });
+          }
+        } catch (error) {
+          // Skip games that can't be loaded
+          console.warn(`Failed to load game config for ${gameId}:`, error.message);
+        }
+      }
+
+      return gameConfigs;
+    } catch (error) {
+      // Fallback: if GameRegistry is not available, return empty array
+      console.warn('GameRegistry not available for game cutscene integration:', error.message);
       return [];
     }
   }
@@ -366,24 +387,39 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
   }
 
   /**
-   * Get level ID for a given zone ID
+   * Get game and level mapping for a given zone ID by dynamically searching game configurations
    * @private
    */
-  _getLevelIdForZone(zoneId) {
-    // Simple mapping - in a real implementation, this would come from level configurations
-    const zoneToLevelMap = {
-      zone_1: 'level_1',
-      zone_2: 'level_2',
-      zone_3: 'level_2',
-      zone_4: 'level_3',
-      zone_5: 'level_3',
-      zone_6: 'level_3',
-      zone_7: 'level_4',
-      zone_8: 'level_4',
-      zone_9: 'level_5',
-      zone_10: 'level_5',
-    };
+  _getZoneToGameLevelMapping(zoneId) {
+    try {
+      const availableGameIds = GameRegistry.getGameIds();
 
-    return zoneToLevelMap[zoneId] || 'level_1';
+      // Search through all games and their levels to find the zone
+      for (const gameId of availableGameIds) {
+        try {
+          const game = GameRegistry.getGame(gameId);
+          if (game && game.levels) {
+            // Search through all levels in this game
+            for (const levelConfig of Object.values(game.levels)) {
+              if (levelConfig.zones && levelConfig.zones.includes(zoneId)) {
+                return {
+                  gameId: game.id,
+                  levelId: levelConfig.id,
+                };
+              }
+            }
+          }
+        } catch (error) {
+          // Skip games that can't be loaded
+          console.warn(`Failed to load game config for ${gameId}:`, error.message);
+        }
+      }
+
+      // If not found in any game, return null
+      return null;
+    } catch (error) {
+      console.warn('Failed to get zone-to-game-level mapping:', error.message);
+      return null;
+    }
   }
 }
