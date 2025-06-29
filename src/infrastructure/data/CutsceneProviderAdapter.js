@@ -1,5 +1,6 @@
 import { CutsceneProvider } from '../../ports/data/CutsceneProvider.js';
 import { Story } from '../../domain/value-objects/Story.js';
+import { ZoneRegistry } from './zones/ZoneRegistry.js';
 
 /**
  * Infrastructure adapter that provides cutscene configurations
@@ -321,117 +322,36 @@ export class CutsceneProviderAdapter extends CutsceneProvider {
    */
   _getZoneConfigurations() {
     try {
-      // Import and get configurations from all zone classes
+      // Use ZoneRegistry to get actual zone configurations
+      // This avoids duplication and ensures we use the source of truth
       const zoneConfigs = [];
+      const availableZoneIds = ZoneRegistry.getAvailableZoneIds();
 
-      // For now, return synchronous configurations to avoid async complexity
-      // In a real implementation, you might want to dynamically import zone classes
-      // and extract their narration directly from the zone configurations
+      // Get configurations from actual zone classes
+      for (const zoneId of availableZoneIds) {
+        // Skip textland_exploration as it's not part of cursor-before-clickers
+        if (zoneId === 'textland_exploration') {
+          continue;
+        }
 
-      // Manually add zone configurations with their narration
-      zoneConfigs.push({
-        zoneId: 'zone_1',
-        narration: [
-          'Once, the world was clear. Text flowed like rivers, perfectly aligned. But the Bugs came...',
-          'Then, from the Blinking Grove, a spark appeared. A light not of fire… but of focus. You.',
-          "✨ *Hello, Cursor.* You don't remember much. But the land does. And the land remembers you.",
-          '> Try walking with the keys the wind left behind...',
-        ],
-      });
-
-      zoneConfigs.push({
-        zoneId: 'zone_2',
-        narration: [
-          'The stone walls whisper of ancient modes...',
-          'Normal mode is where you begin, Insert mode is where you create.',
-          'Command mode is where you command the very fabric of text.',
-          'Master the transitions, young Cursor, for modes are the keys to power.',
-        ],
-      });
-
-      zoneConfigs.push({
-        zoneId: 'zone_3',
-        narration: [
-          'The swamp bubbles with words and WORDS...',
-          'Here, case matters. Here, boundaries blur.',
-          'w moves by word, W moves by WORD.',
-          'Learn the difference, or be lost in the linguistic mire.',
-        ],
-      });
-
-      zoneConfigs.push({
-        zoneId: 'zone_4',
-        narration: [
-          'The canyon echoes with the ghosts of deleted text...',
-          'Here you will learn the precision of removal.',
-          'dd deletes a line, dw deletes a word.',
-          'But remember - with great power comes great responsibility.',
-        ],
-      });
-
-      zoneConfigs.push({
-        zoneId: 'zone_5',
-        narration: [
-          'Fields of possibility stretch before you...',
-          'This is where text comes to life.',
-          'i to insert before, a to append after.',
-          'I for the beginning, A for the end.',
-          'Master insertion, and you master creation itself.',
-        ],
-      });
-
-      zoneConfigs.push({
-        zoneId: 'zone_6',
-        narration: [
-          'In this circle, nothing is lost, everything is copied...',
-          'yy to copy a line, yw to copy a word.',
-          'p to paste after, P to paste before.',
-          'The circle of text continues, unbroken.',
-        ],
-      });
-
-      zoneConfigs.push({
-        zoneId: 'zone_7',
-        narration: [
-          'Springs of knowledge bubble with search wisdom...',
-          '/ to search forward, ? to search backward.',
-          'n for next, N for previous.',
-          'Find what you seek, and the text will reveal its secrets.',
-        ],
-      });
-
-      zoneConfigs.push({
-        zoneId: 'zone_8',
-        narration: [
-          'Deep in the cavern, commands echo with power...',
-          ': opens the gateway to command mode.',
-          ':w to save, :q to quit, :wq to save and quit.',
-          'These are the words that shape reality itself.',
-        ],
-      });
-
-      zoneConfigs.push({
-        zoneId: 'zone_9',
-        narration: [
-          'This playground tests all you have learned...',
-          'Movement, modes, editing, searching, commanding.',
-          'Show your mastery here, and prove you are ready.',
-          'The final challenge awaits beyond.',
-        ],
-      });
-
-      zoneConfigs.push({
-        zoneId: 'zone_10',
-        narration: [
-          'The temple trembles with corrupted power...',
-          'Here dwells the Bug King, source of all text corruption.',
-          'This is the final battle, young Cursor.',
-          'Use everything you have learned. Save Textland.',
-        ],
-      });
+        try {
+          const config = ZoneRegistry.getZoneConfig(zoneId);
+          if (config && config.narration && Array.isArray(config.narration)) {
+            zoneConfigs.push({
+              zoneId: config.zoneId || zoneId,
+              narration: [...config.narration], // Copy the narration array
+            });
+          }
+        } catch (error) {
+          // Skip zones that can't be loaded
+          console.warn(`Failed to load zone config for ${zoneId}:`, error.message);
+        }
+      }
 
       return zoneConfigs;
     } catch (error) {
+      // Fallback: if ZoneRegistry is not available, return empty array
+      console.warn('ZoneRegistry not available for cutscene integration:', error.message);
       return [];
     }
   }
