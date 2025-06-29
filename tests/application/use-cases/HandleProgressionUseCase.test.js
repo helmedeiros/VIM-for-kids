@@ -61,35 +61,35 @@ describe('HandleProgressionUseCase', () => {
   });
 
   describe('execute', () => {
-    it('should return none when progression is not supported', () => {
+    it('should return none when progression is not supported', async () => {
       delete mockGameState.executeProgression;
 
-      const result = handleProgressionUseCase.execute();
+      const result = await handleProgressionUseCase.execute();
 
       expect(result).toEqual({ type: 'none', reason: 'progression_not_supported' });
     });
 
-    it('should handle zone progression', () => {
+    it('should handle zone progression', async () => {
       mockGameState.executeProgression.mockReturnValue({
         type: 'zone',
         newZoneId: 'zone_2',
       });
       mockGameState.getCurrentState.mockReturnValue({ test: 'state' });
 
-      const result = handleProgressionUseCase.execute();
+      const result = await handleProgressionUseCase.execute();
 
       expect(result).toEqual({ type: 'zone', newZoneId: 'zone_2' });
       expect(mockGameRenderer.showMessage).toHaveBeenCalledWith('Progressing to zone_2...');
       expect(mockGameRenderer.render).toHaveBeenCalledWith({ test: 'state' });
     });
 
-    it('should handle level progression', () => {
+    it('should handle level progression', async () => {
       mockGameState.executeProgression.mockReturnValue({
         type: 'level',
         nextLevelId: 'level_2',
       });
 
-      const result = handleProgressionUseCase.execute();
+      const result = await handleProgressionUseCase.execute();
 
       expect(result).toEqual({ type: 'level', nextLevelId: 'level_2' });
       expect(mockGameRenderer.showMessage).toHaveBeenCalledWith(
@@ -97,19 +97,19 @@ describe('HandleProgressionUseCase', () => {
       );
     });
 
-    it('should handle no progression needed', () => {
+    it('should handle no progression needed', async () => {
       mockGameState.executeProgression.mockReturnValue({ type: 'none' });
 
-      const result = handleProgressionUseCase.execute();
+      const result = await handleProgressionUseCase.execute();
 
       expect(result).toEqual({ type: 'none' });
       expect(mockGameRenderer.showMessage).not.toHaveBeenCalled();
     });
 
-    it('should warn about unknown progression types', () => {
+    it('should warn about unknown progression types', async () => {
       mockGameState.executeProgression.mockReturnValue({ type: 'unknown' });
 
-      const result = handleProgressionUseCase.execute();
+      const result = await handleProgressionUseCase.execute();
 
       expect(result).toEqual({ type: 'unknown' });
       expect(console.warn).toHaveBeenCalledWith('Unknown progression type: unknown');
@@ -169,7 +169,7 @@ describe('HandleProgressionUseCase', () => {
         nextLevelId: 'level_2',
       });
 
-      handleProgressionUseCase.execute();
+      await handleProgressionUseCase.execute();
 
       // Fast-forward timers
       jest.advanceTimersByTime(2000);
@@ -178,7 +178,7 @@ describe('HandleProgressionUseCase', () => {
       expect(mockGameInstance.transitionToLevel).toHaveBeenCalledWith('level_2');
     });
 
-    it('should schedule level transition when no local game instance available', () => {
+    it('should schedule level transition when no local game instance available', async () => {
       // Create use case without game instance
       const useCaseWithoutInstance = new HandleProgressionUseCase(mockGameState, mockGameRenderer);
 
@@ -187,7 +187,7 @@ describe('HandleProgressionUseCase', () => {
         nextLevelId: 'level_2',
       });
 
-      const result = useCaseWithoutInstance.execute();
+      const result = await useCaseWithoutInstance.execute();
 
       expect(result).toEqual({ type: 'level', nextLevelId: 'level_2' });
       expect(mockGameRenderer.showMessage).toHaveBeenCalledWith(
@@ -195,13 +195,13 @@ describe('HandleProgressionUseCase', () => {
       );
     });
 
-    it('should handle level progression messaging correctly', () => {
+    it('should handle level progression messaging correctly', async () => {
       mockGameState.executeProgression.mockReturnValue({
         type: 'level',
         nextLevelId: 'level_3',
       });
 
-      const result = handleProgressionUseCase.execute();
+      const result = await handleProgressionUseCase.execute();
 
       expect(result).toEqual({ type: 'level', nextLevelId: 'level_3' });
       expect(mockGameRenderer.showMessage).toHaveBeenCalledWith(
@@ -209,13 +209,13 @@ describe('HandleProgressionUseCase', () => {
       );
     });
 
-    it('should handle level progression with game instance correctly', () => {
+    it('should handle level progression with game instance correctly', async () => {
       mockGameState.executeProgression.mockReturnValue({
         type: 'level',
         nextLevelId: 'level_4',
       });
 
-      const result = handleProgressionUseCase.execute();
+      const result = await handleProgressionUseCase.execute();
 
       expect(result).toEqual({ type: 'level', nextLevelId: 'level_4' });
       expect(mockGameRenderer.showMessage).toHaveBeenCalledWith(
@@ -322,7 +322,7 @@ describe('HandleProgressionUseCase', () => {
   });
 
   describe('zone progression without showMessage', () => {
-    it('should handle zone progression when showMessage is not available', () => {
+    it('should handle zone progression when showMessage is not available', async () => {
       delete mockGameRenderer.showMessage;
       mockGameState.executeProgression.mockReturnValue({
         type: 'zone',
@@ -330,7 +330,7 @@ describe('HandleProgressionUseCase', () => {
       });
       mockGameState.getCurrentState.mockReturnValue({ test: 'state' });
 
-      const result = handleProgressionUseCase.execute();
+      const result = await handleProgressionUseCase.execute();
 
       expect(result).toEqual({ type: 'zone', newZoneId: 'zone_2' });
       expect(mockGameRenderer.render).toHaveBeenCalledWith({ test: 'state' });
@@ -338,7 +338,7 @@ describe('HandleProgressionUseCase', () => {
   });
 
   describe('level progression without showMessage', () => {
-    it('should use alert as fallback when showMessage is not available', () => {
+    it('should use alert as fallback when showMessage is not available', async () => {
       delete mockGameRenderer.showMessage;
       global.alert = jest.fn();
 
@@ -347,10 +347,196 @@ describe('HandleProgressionUseCase', () => {
         nextLevelId: 'level_2',
       });
 
-      const result = handleProgressionUseCase.execute();
+      const result = await handleProgressionUseCase.execute();
 
       expect(result).toEqual({ type: 'level', nextLevelId: 'level_2' });
       expect(global.alert).toHaveBeenCalledWith('Level Complete! Progressing to level_2...');
+    });
+  });
+
+  describe('cutscene integration', () => {
+    let mockCutsceneService;
+    let mockCutsceneRenderer;
+    let handleProgressionUseCaseWithCutscenes;
+
+    beforeEach(() => {
+      mockCutsceneService = {
+        shouldShowCutsceneStory: jest.fn(),
+        getCutsceneStory: jest.fn(),
+        markCutsceneStoryAsShown: jest.fn(),
+      };
+
+      mockCutsceneRenderer = {
+        showCutscene: jest.fn().mockResolvedValue(),
+      };
+
+      handleProgressionUseCaseWithCutscenes = new HandleProgressionUseCase(
+        mockGameState,
+        mockGameRenderer,
+        mockGameInstance,
+        mockCutsceneService,
+        mockCutsceneRenderer
+      );
+    });
+
+    it('should show zone cutscene during zone progression', async () => {
+      mockGameState.executeProgression.mockReturnValue({
+        type: 'zone',
+        newZoneId: 'zone_2',
+      });
+      mockGameState.getCurrentState.mockReturnValue({ test: 'state' });
+      mockGameState._levelConfig = { id: 'level_2' };
+
+      mockCutsceneService.shouldShowCutsceneStory.mockResolvedValue(true);
+      mockCutsceneService.getCutsceneStory.mockResolvedValue({
+        script: ['Welcome to Zone 2!', 'The adventure continues...'],
+      });
+
+      const result = await handleProgressionUseCaseWithCutscenes.execute();
+
+      expect(result).toEqual({ type: 'zone', newZoneId: 'zone_2' });
+      expect(mockCutsceneService.shouldShowCutsceneStory).toHaveBeenCalledWith(
+        'cursor-before-clickers',
+        'zone',
+        'level_2',
+        'zone_2'
+      );
+      expect(mockCutsceneService.getCutsceneStory).toHaveBeenCalledWith(
+        'cursor-before-clickers',
+        'zone',
+        'level_2',
+        'zone_2'
+      );
+      expect(mockCutsceneRenderer.showCutscene).toHaveBeenCalledWith({
+        script: ['Welcome to Zone 2!', 'The adventure continues...'],
+      });
+      expect(mockCutsceneService.markCutsceneStoryAsShown).toHaveBeenCalledWith(
+        'cursor-before-clickers',
+        'zone',
+        'level_2',
+        'zone_2'
+      );
+    });
+
+    it('should show level cutscene during level progression', async () => {
+      mockGameState.executeProgression.mockReturnValue({
+        type: 'level',
+        nextLevelId: 'level_3',
+      });
+
+      mockCutsceneService.shouldShowCutsceneStory.mockResolvedValue(true);
+      mockCutsceneService.getCutsceneStory.mockResolvedValue({
+        script: ['Welcome to Level 3!', 'Advanced challenges await...'],
+      });
+
+      const result = await handleProgressionUseCaseWithCutscenes.execute();
+
+      expect(result).toEqual({ type: 'level', nextLevelId: 'level_3' });
+      expect(mockCutsceneService.shouldShowCutsceneStory).toHaveBeenCalledWith(
+        'cursor-before-clickers',
+        'level',
+        'level_3'
+      );
+      expect(mockCutsceneService.getCutsceneStory).toHaveBeenCalledWith(
+        'cursor-before-clickers',
+        'level',
+        'level_3'
+      );
+      expect(mockCutsceneRenderer.showCutscene).toHaveBeenCalledWith({
+        script: ['Welcome to Level 3!', 'Advanced challenges await...'],
+      });
+      expect(mockCutsceneService.markCutsceneStoryAsShown).toHaveBeenCalledWith(
+        'cursor-before-clickers',
+        'level',
+        'level_3'
+      );
+    });
+
+    it('should skip cutscene when service says not to show', async () => {
+      mockGameState.executeProgression.mockReturnValue({
+        type: 'zone',
+        newZoneId: 'zone_2',
+      });
+      mockGameState.getCurrentState.mockReturnValue({ test: 'state' });
+
+      mockCutsceneService.shouldShowCutsceneStory.mockResolvedValue(false);
+
+      const result = await handleProgressionUseCaseWithCutscenes.execute();
+
+      expect(result).toEqual({ type: 'zone', newZoneId: 'zone_2' });
+      expect(mockCutsceneService.shouldShowCutsceneStory).toHaveBeenCalled();
+      expect(mockCutsceneService.getCutsceneStory).not.toHaveBeenCalled();
+      expect(mockCutsceneRenderer.showCutscene).not.toHaveBeenCalled();
+    });
+
+    it('should handle cutscene errors gracefully', async () => {
+      mockGameState.executeProgression.mockReturnValue({
+        type: 'zone',
+        newZoneId: 'zone_2',
+      });
+      mockGameState.getCurrentState.mockReturnValue({ test: 'state' });
+
+      mockCutsceneService.shouldShowCutsceneStory.mockRejectedValue(new Error('Service error'));
+
+      const result = await handleProgressionUseCaseWithCutscenes.execute();
+
+      expect(result).toEqual({ type: 'zone', newZoneId: 'zone_2' });
+      expect(mockGameRenderer.showMessage).toHaveBeenCalledWith('Progressing to zone_2...');
+      expect(mockGameRenderer.render).toHaveBeenCalledWith({ test: 'state' });
+    });
+
+    it('should work without cutscene services (backward compatibility)', async () => {
+      // Test with original use case that has no cutscene services
+      mockGameState.executeProgression.mockReturnValue({
+        type: 'zone',
+        newZoneId: 'zone_2',
+      });
+      mockGameState.getCurrentState.mockReturnValue({ test: 'state' });
+
+      const result = await handleProgressionUseCase.execute();
+
+      expect(result).toEqual({ type: 'zone', newZoneId: 'zone_2' });
+      expect(mockGameRenderer.showMessage).toHaveBeenCalledWith('Progressing to zone_2...');
+      expect(mockGameRenderer.render).toHaveBeenCalledWith({ test: 'state' });
+    });
+
+    it('should get game ID from game state when available', async () => {
+      mockGameState.getGameId = jest.fn().mockReturnValue('custom-game');
+      mockGameState.executeProgression.mockReturnValue({
+        type: 'zone',
+        newZoneId: 'zone_2',
+      });
+      mockGameState.getCurrentState.mockReturnValue({ test: 'state' });
+
+      mockCutsceneService.shouldShowCutsceneStory.mockResolvedValue(false);
+
+      await handleProgressionUseCaseWithCutscenes.execute();
+
+      expect(mockCutsceneService.shouldShowCutsceneStory).toHaveBeenCalledWith(
+        'custom-game',
+        'zone',
+        'level_1',
+        'zone_2'
+      );
+    });
+
+    it('should fallback to default game ID when game state method not available', async () => {
+      mockGameState.executeProgression.mockReturnValue({
+        type: 'zone',
+        newZoneId: 'zone_2',
+      });
+      mockGameState.getCurrentState.mockReturnValue({ test: 'state' });
+
+      mockCutsceneService.shouldShowCutsceneStory.mockResolvedValue(false);
+
+      await handleProgressionUseCaseWithCutscenes.execute();
+
+      expect(mockCutsceneService.shouldShowCutsceneStory).toHaveBeenCalledWith(
+        'cursor-before-clickers',
+        'zone',
+        'level_1',
+        'zone_2'
+      );
     });
   });
 });

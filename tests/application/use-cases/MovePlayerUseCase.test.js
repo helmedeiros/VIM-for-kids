@@ -36,8 +36,8 @@ describe('MovePlayerUseCase', () => {
   });
 
   describe('execute', () => {
-    it('should move cursor to valid position and return success', () => {
-      const result = movePlayerUseCase.execute('right');
+    it('should move cursor to valid position and return success', async () => {
+      const result = await movePlayerUseCase.execute('right');
 
       expect(mockGameState.cursor.position.x).toBe(6);
       expect(mockGameState.cursor.position.y).toBe(5);
@@ -50,10 +50,10 @@ describe('MovePlayerUseCase', () => {
       });
     });
 
-    it('should not move cursor to invalid position and return failure', () => {
+    it('should not move cursor to invalid position and return failure', async () => {
       mockMap.isWalkable.mockReturnValue(false);
 
-      const result = movePlayerUseCase.execute('right');
+      const result = await movePlayerUseCase.execute('right');
 
       expect(mockGameState.cursor.position.x).toBe(5);
       expect(mockGameState.cursor.position.y).toBe(5);
@@ -64,25 +64,25 @@ describe('MovePlayerUseCase', () => {
       });
     });
 
-    it('should collect key when moving to key position', () => {
+    it('should collect key when moving to key position', async () => {
       const key = new VimKey(new Position(6, 5), 'h', 'Move left');
       mockGameState.availableKeys = [key];
 
-      const result = movePlayerUseCase.execute('right');
+      const result = await movePlayerUseCase.execute('right');
 
       expect(mockGameState.collectKey).toHaveBeenCalledWith(key);
       expect(mockGameRenderer.showKeyInfo).toHaveBeenCalledWith(key);
       expect(result.keyCollected).toBe(key);
     });
 
-    it('should handle gate walkability check', () => {
+    it('should handle gate walkability check', async () => {
       const mockGate = {
         position: new Position(6, 5),
         isWalkable: jest.fn().mockReturnValue(false),
       };
       mockGameState.getGate.mockReturnValue(mockGate);
 
-      const result = movePlayerUseCase.execute('right');
+      const result = await movePlayerUseCase.execute('right');
 
       expect(mockGameState.cursor.position.x).toBe(5);
       expect(mockGameState.cursor.position.y).toBe(5);
@@ -90,7 +90,7 @@ describe('MovePlayerUseCase', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should delegate progression to progression use case when available', () => {
+    it('should delegate progression to progression use case when available', async () => {
       const mockProgressionUseCase = {
         shouldExecuteProgression: jest.fn().mockReturnValue(true),
         execute: jest.fn().mockReturnValue({ type: 'zone', newZoneId: 'zone_2' }),
@@ -102,20 +102,20 @@ describe('MovePlayerUseCase', () => {
         mockProgressionUseCase
       );
 
-      const result = movePlayerUseCase.execute('right');
+      const result = await movePlayerUseCase.execute('right');
 
       expect(mockProgressionUseCase.shouldExecuteProgression).toHaveBeenCalled();
       expect(mockProgressionUseCase.execute).toHaveBeenCalled();
       expect(result.progressionResult).toEqual({ type: 'zone', newZoneId: 'zone_2' });
     });
 
-    it('should not execute progression when progression use case is not available', () => {
-      const result = movePlayerUseCase.execute('right');
+    it('should not execute progression when progression use case is not available', async () => {
+      const result = await movePlayerUseCase.execute('right');
 
       expect(result.progressionResult).toEqual({ type: 'none' });
     });
 
-    it('should not execute progression when progression use case says no progression needed', () => {
+    it('should not execute progression when progression use case says no progression needed', async () => {
       const mockProgressionUseCase = {
         shouldExecuteProgression: jest.fn().mockReturnValue(false),
         execute: jest.fn(),
@@ -127,21 +127,54 @@ describe('MovePlayerUseCase', () => {
         mockProgressionUseCase
       );
 
-      const result = movePlayerUseCase.execute('right');
+      const result = await movePlayerUseCase.execute('right');
 
       expect(mockProgressionUseCase.shouldExecuteProgression).toHaveBeenCalled();
       expect(mockProgressionUseCase.execute).not.toHaveBeenCalled();
       expect(result.progressionResult).toEqual({ type: 'none' });
     });
 
-    it('should handle backward compatibility with game states without gates', () => {
+    it('should handle backward compatibility with game states without gates', async () => {
       // Remove getGate method
       delete mockGameState.getGate;
 
-      const result = movePlayerUseCase.execute('right');
+      const result = await movePlayerUseCase.execute('right');
 
       expect(result.success).toBe(true);
       expect(mockGameRenderer.render).toHaveBeenCalled();
+    });
+
+    it('should provide synchronous executeSync method for backward compatibility', () => {
+      const result = movePlayerUseCase.executeSync('right');
+
+      expect(mockGameState.cursor.position.x).toBe(6);
+      expect(mockGameState.cursor.position.y).toBe(5);
+      expect(mockGameRenderer.render).toHaveBeenCalled();
+      expect(result).toEqual({
+        success: true,
+        newPosition: new Position(6, 5),
+        keyCollected: null,
+        progressionResult: { type: 'none' },
+      });
+    });
+
+    it('should skip progression in executeSync method', () => {
+      const mockProgressionUseCase = {
+        shouldExecuteProgression: jest.fn().mockReturnValue(true),
+        execute: jest.fn().mockReturnValue({ type: 'zone', newZoneId: 'zone_2' }),
+      };
+
+      movePlayerUseCase = new MovePlayerUseCase(
+        mockGameState,
+        mockGameRenderer,
+        mockProgressionUseCase
+      );
+
+      const result = movePlayerUseCase.executeSync('right');
+
+      expect(mockProgressionUseCase.shouldExecuteProgression).not.toHaveBeenCalled();
+      expect(mockProgressionUseCase.execute).not.toHaveBeenCalled();
+      expect(result.progressionResult).toEqual({ type: 'none' });
     });
   });
 

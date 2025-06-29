@@ -218,20 +218,35 @@ describe('Zone and Level Progression Integration', () => {
       expect(typeof game.gameState.executeProgression).toBe('function');
     });
 
-    it('should execute zone progression correctly', () => {
-      const keys = game.gameState.availableKeys;
-      keys.forEach((key) => game.gameState.collectKey(key));
+    it('should execute zone progression correctly', async () => {
+      // Test progression API
+      expect(typeof game.gameState.executeProgression).toBe('function');
 
+      // Complete zone_2 (first zone in level_2, collect all keys)
+      const zone2Keys = [...game.gameState.availableKeys];
+      zone2Keys.forEach((key) => game.gameState.collectKey(key));
+
+      // Move cursor to gate position to enable progression
       const gate = game.gameState.getGate();
       game.gameState.cursor = game.gameState.cursor.moveTo(gate.position);
 
-      const initialZoneIndex = game.gameState.getCurrentZoneIndex();
-
       // Execute progression
-      game.gameState.executeProgression();
+      await game.gameState.executeProgression();
 
-      // Should progress to next zone
-      expect(game.gameState.getCurrentZoneIndex()).toBe(initialZoneIndex + 1);
+      // Should be at zone_3 now (second zone in level_2)
+      expect(game.gameState.getCurrentZoneId()).toBe('zone_3');
+      expect(game.gameState.getCurrentZoneIndex()).toBe(1);
+    });
+
+    it('should handle progression when no progression is possible', async () => {
+      const game = new VimForKidsGame({ level: 'level_1' });
+
+      // Without completing the zone or moving to gate, no progression should occur
+      await game.gameState.executeProgression();
+
+      // Should still be at zone_1
+      expect(game.gameState.getCurrentZoneId()).toBe('zone_1');
+      expect(game.gameState.getCurrentZoneIndex()).toBe(0);
     });
 
     it('should execute level progression correctly', () => {

@@ -2,7 +2,13 @@ import { Cursor } from '../domain/entities/Cursor.js';
 import { GameRegistry } from '../infrastructure/data/games/GameRegistry.js';
 
 export class LevelGameState {
-  constructor(zoneProvider, levelConfig, gameId = null) {
+  constructor(
+    zoneProvider,
+    levelConfig,
+    gameId = null,
+    cutsceneService = null,
+    cutsceneRenderer = null
+  ) {
     if (!zoneProvider || !levelConfig) {
       throw new Error('LevelGameState requires zoneProvider and levelConfig');
     }
@@ -14,14 +20,30 @@ export class LevelGameState {
     this._zoneProvider = zoneProvider;
     this._levelConfig = levelConfig;
     this._gameId = gameId;
+    this._cutsceneService = cutsceneService;
+    this._cutsceneRenderer = cutsceneRenderer;
     this._currentZoneIndex = 0;
     this._completedZones = new Set();
 
-    // Initialize first zone
-    this._loadZone(this._getCurrentZoneId());
+    // Initialize first zone synchronously for backward compatibility
+    this._loadZoneSync(this._getCurrentZoneId());
   }
 
-  _loadZone(zoneId) {
+  /**
+   * Initialize the first zone with potential cutscenes
+   * This method is called after construction to allow for async zone loading
+   */
+  async initializeFirstZone() {
+    // Show zone entry cutscene for the first zone if applicable
+    await this._showZoneEntryCutsceneIfNeeded(this._getCurrentZoneId());
+  }
+
+  /**
+   * Load zone synchronously (for backward compatibility)
+   * @param {string} zoneId - Zone identifier
+   * @private
+   */
+  _loadZoneSync(zoneId) {
     try {
       this.zone = this._zoneProvider.createZone(zoneId);
       this.map = this.zone.gameMap;
@@ -30,6 +52,126 @@ export class LevelGameState {
       this.collectedKeys = new Set();
     } catch (error) {
       throw new Error(`Zone '${zoneId}' not found in registry`);
+    }
+  }
+
+  async _loadZone(zoneId) {
+    // Load zone synchronously first
+    this._loadZoneSync(zoneId);
+
+    // Show zone progression cutscene if applicable (not for first zone entry)
+    if (this._currentZoneIndex > 0) {
+      await this._showZoneProgressionCutsceneIfNeeded(zoneId);
+    }
+  }
+
+  /**
+   * Show zone progression cutscene if conditions are met (for zone-to-zone progression)
+   * @param {string} zoneId - Zone identifier
+   * @private
+   */
+  async _showZoneProgressionCutsceneIfNeeded(zoneId) {
+    // Skip if cutscene services are not available
+    if (!this._cutsceneService || !this._cutsceneRenderer) {
+      return;
+    }
+
+    // Skip if no game ID or level config
+    if (!this._gameId || !this._levelConfig) {
+      return;
+    }
+
+    try {
+      // Check if zone progression cutscene should be shown
+      const shouldShow = await this._cutsceneService.shouldShowCutsceneStory(
+        this._gameId,
+        'zone',
+        this._levelConfig.id,
+        zoneId
+      );
+      if (!shouldShow) {
+        return;
+      }
+
+      // Get zone progression cutscene story
+      const zoneStory = await this._cutsceneService.getCutsceneStory(
+        this._gameId,
+        'zone',
+        this._levelConfig.id,
+        zoneId
+      );
+      if (!zoneStory) {
+        return;
+      }
+
+      // Show cutscene and wait for completion
+      await this._cutsceneRenderer.showCutscene(zoneStory);
+
+      // Mark as shown
+      await this._cutsceneService.markCutsceneStoryAsShown(
+        this._gameId,
+        'zone',
+        this._levelConfig.id,
+        zoneId
+      );
+    } catch (error) {
+      // Log error but don't prevent zone loading
+      console.error('Failed to show zone progression cutscene:', error);
+    }
+  }
+
+  /**
+   * Show zone entry cutscene if conditions are met
+   * @param {string} zoneId - Zone identifier
+   * @private
+   */
+  async _showZoneEntryCutsceneIfNeeded(zoneId) {
+    // Skip if cutscene services are not available
+    if (!this._cutsceneService || !this._cutsceneRenderer) {
+      return;
+    }
+
+    // Skip if no game ID or level config
+    if (!this._gameId || !this._levelConfig) {
+      return;
+    }
+
+    try {
+      // Check if zone entry cutscene should be shown
+      const shouldShow = await this._cutsceneService.shouldShowCutsceneStory(
+        this._gameId,
+        'zone',
+        this._levelConfig.id,
+        zoneId
+      );
+      if (!shouldShow) {
+        return;
+      }
+
+      // Get zone entry cutscene story
+      const zoneStory = await this._cutsceneService.getCutsceneStory(
+        this._gameId,
+        'zone',
+        this._levelConfig.id,
+        zoneId
+      );
+      if (!zoneStory) {
+        return;
+      }
+
+      // Show cutscene and wait for completion
+      await this._cutsceneRenderer.showCutscene(zoneStory);
+
+      // Mark as shown
+      await this._cutsceneService.markCutsceneStoryAsShown(
+        this._gameId,
+        'zone',
+        this._levelConfig.id,
+        zoneId
+      );
+    } catch (error) {
+      // Log error but don't prevent zone loading
+      console.error('Failed to show zone entry cutscene:', error);
     }
   }
 
@@ -55,7 +197,7 @@ export class LevelGameState {
   }
 
   // Zone Progression
-  progressToNextZone() {
+  async progressToNextZone() {
     if (!this.isCurrentZoneComplete()) {
       throw new Error('Cannot progress: current zone not complete');
     }
@@ -69,7 +211,7 @@ export class LevelGameState {
 
     // Move to next zone
     this._currentZoneIndex++;
-    this._loadZone(this._getCurrentZoneId());
+    await this._loadZone(this._getCurrentZoneId());
   }
 
   isCurrentZoneComplete() {
@@ -182,10 +324,10 @@ export class LevelGameState {
     return this.isLevelComplete() && !hasNextLevel;
   }
 
-  executeProgression() {
+  async executeProgression() {
     // Execute the appropriate progression based on current state
     if (this.shouldProgressToNextZone()) {
-      this.progressToNextZone();
+      await this.progressToNextZone();
       return { type: 'zone', newZoneId: this.getCurrentZoneId() };
     } else if (this.shouldProgressToNextLevel()) {
       const nextLevel = this._getNextLevel();

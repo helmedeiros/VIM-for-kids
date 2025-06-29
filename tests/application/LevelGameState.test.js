@@ -81,7 +81,7 @@ describe('LevelGameState', () => {
   });
 
   describe('Zone Progression', () => {
-    test('should progress to next zone when current zone is completed', () => {
+    test('should progress to next zone when current zone is completed', async () => {
       const levelState = new LevelGameState(mockZoneProvider, multiZoneLevelConfig);
 
       // Complete zone_1
@@ -91,22 +91,22 @@ describe('LevelGameState', () => {
       expect(levelState.isCurrentZoneComplete()).toBe(true);
 
       // Progress to next zone
-      levelState.progressToNextZone();
+      await levelState.progressToNextZone();
 
       expect(levelState.getCurrentZoneId()).toBe('zone_2');
       expect(levelState.getCurrentZoneIndex()).toBe(1);
     });
 
-    test('should not progress if current zone is not complete', () => {
+    test('should not progress if current zone is not complete', async () => {
       const levelState = new LevelGameState(mockZoneProvider, multiZoneLevelConfig);
 
       expect(levelState.isCurrentZoneComplete()).toBe(false);
-      expect(() => levelState.progressToNextZone()).toThrow(
+      await expect(levelState.progressToNextZone()).rejects.toThrow(
         'Cannot progress: current zone not complete'
       );
     });
 
-    test('should track completed zones', () => {
+    test('should track completed zones', async () => {
       const levelState = new LevelGameState(mockZoneProvider, multiZoneLevelConfig);
 
       expect(levelState.getCompletedZones()).toEqual([]);
@@ -114,12 +114,12 @@ describe('LevelGameState', () => {
       // Complete zone_1
       const zone1Keys = [...levelState.availableKeys];
       zone1Keys.forEach((key) => levelState.collectKey(key));
-      levelState.progressToNextZone();
+      await levelState.progressToNextZone();
 
       expect(levelState.getCompletedZones()).toContain('zone_1');
     });
 
-    test('should handle progression through all zones in level', () => {
+    test('should handle progression through all zones in level', async () => {
       const levelState = new LevelGameState(mockZoneProvider, multiZoneLevelConfig);
 
       // Progress through zone_1 -> zone_2 -> zone_3
@@ -129,7 +129,7 @@ describe('LevelGameState', () => {
 
         if (i < 2) {
           // Not the last zone
-          levelState.progressToNextZone();
+          await levelState.progressToNextZone();
         }
       }
 
@@ -198,7 +198,7 @@ describe('LevelGameState', () => {
       expect(levelState.getNPCs()).toBeDefined();
     });
 
-    test('should reset cursor position when changing zones', () => {
+    test('should reset cursor position when changing zones', async () => {
       const levelState = new LevelGameState(mockZoneProvider, multiZoneLevelConfig);
 
       const zone1CursorPos = levelState.cursor.position;
@@ -206,7 +206,7 @@ describe('LevelGameState', () => {
       // Complete zone and progress
       const keys = [...levelState.availableKeys];
       keys.forEach((key) => levelState.collectKey(key));
-      levelState.progressToNextZone();
+      await levelState.progressToNextZone();
 
       const zone2CursorPos = levelState.cursor.position;
 
@@ -235,7 +235,7 @@ describe('LevelGameState', () => {
       );
     });
 
-    test('should handle progression beyond last zone', () => {
+    test('should handle progression beyond last zone', async () => {
       const singleZoneConfig = {
         id: 'level_single',
         zones: ['zone_1'],
@@ -247,7 +247,7 @@ describe('LevelGameState', () => {
       const keys = [...levelState.availableKeys];
       keys.forEach((key) => levelState.collectKey(key));
 
-      expect(() => levelState.progressToNextZone()).toThrow(
+      await expect(levelState.progressToNextZone()).rejects.toThrow(
         'Cannot progress: already at last zone'
       );
     });
