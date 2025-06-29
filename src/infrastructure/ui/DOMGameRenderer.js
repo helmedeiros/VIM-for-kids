@@ -320,9 +320,29 @@ export class DOMGameRenderer extends GameRenderer {
               return false;
             });
             if (npc) {
-              tile.classList.add('npc');
-              tile.textContent = '🧙‍♂️'; // Wizard emoji for NPCs
-              tile.title = npc.name;
+              // Remove the generic npc class and add specific NPC styling
+              if (npc.appearance && npc.appearance.cssClass) {
+                tile.classList.add('npc', npc.appearance.cssClass);
+              } else {
+                tile.classList.add('npc'); // Fallback for NPCs without appearance
+              }
+
+              // Use the NPC's visual symbol or fall back to generic emoji
+              if (npc.getVisualSymbol && typeof npc.getVisualSymbol === 'function') {
+                tile.textContent = npc.getVisualSymbol();
+              } else {
+                tile.textContent = '🧙‍♂️'; // Fallback for NPCs without visual symbols
+              }
+
+              tile.title = npc.name || 'Unknown NPC';
+
+              // Add floating glyphs for enhanced visual effect
+              if (npc.getFloatingGlyph && typeof npc.getFloatingGlyph === 'function') {
+                const glyphSpan = document.createElement('span');
+                glyphSpan.className = 'floating-glyph';
+                glyphSpan.textContent = npc.getFloatingGlyph();
+                tile.appendChild(glyphSpan);
+              }
             }
           }
         } else {

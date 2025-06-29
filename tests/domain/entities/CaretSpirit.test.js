@@ -124,28 +124,83 @@ describe('CaretSpirit', () => {
       const spirit = CaretSpirit.createVimMovementGuardian(validPosition);
 
       expect(spirit.position).toEqual(validPosition);
+      expect(spirit.knowledge).toContain('sacred movement keys');
       expect(spirit.knowledge).toContain('h moves left');
-      expect(spirit.knowledge).toContain('j moves down');
-      expect(spirit.knowledge).toContain('k moves up');
-      expect(spirit.knowledge).toContain('l moves right');
     });
 
     it('should create VIM command guardian', () => {
       const spirit = CaretSpirit.createVimCommandGuardian(validPosition);
 
       expect(spirit.position).toEqual(validPosition);
+      expect(spirit.knowledge).toContain('Beyond movement lies power');
       expect(spirit.knowledge).toContain('i for insert');
-      expect(spirit.knowledge).toContain(': for command mode');
-      expect(spirit.knowledge).toContain('/ for search');
     });
 
     it('should create VIM edit guardian', () => {
       const spirit = CaretSpirit.createVimEditGuardian(validPosition);
 
       expect(spirit.position).toEqual(validPosition);
+      expect(spirit.knowledge).toContain('Transform text with purpose');
       expect(spirit.knowledge).toContain('dd to delete');
-      expect(spirit.knowledge).toContain('yy to copy');
-      expect(spirit.knowledge).toContain('p to paste');
+    });
+  });
+
+  describe('visual appearance', () => {
+    it('should have appearance properties', () => {
+      const spirit = new CaretSpirit(validPosition, validKnowledge);
+
+      expect(spirit.appearance).toBeDefined();
+      expect(spirit.appearance.symbol).toBe('🔥');
+      expect(spirit.appearance.baseColor).toBe('#40E0D0');
+      expect(spirit.appearance.glowColor).toBe('#E0FFFF');
+      expect(spirit.appearance.accentColor).toBe('#87CEEB');
+      expect(spirit.appearance.cssClass).toBe('caret-spirit');
+      expect(spirit.appearance.alternativeSymbols).toContain('♦');
+      expect(spirit.appearance.floatingGlyphs).toContain(':');
+      expect(spirit.appearance.floatingGlyphs).toContain('h');
+      expect(spirit.appearance.floatingGlyphs).toContain('^');
+    });
+
+    it('should return mystery symbol when not discovered', () => {
+      const spirit = new CaretSpirit(validPosition, validKnowledge, false);
+
+      expect(spirit.getVisualSymbol()).toBe('?');
+    });
+
+    it('should return flame symbol when discovered', () => {
+      const spirit = new CaretSpirit(validPosition, validKnowledge, true);
+
+      expect(spirit.getVisualSymbol()).toBe('🔥');
+    });
+
+    it('should return alternative symbols for fallback', () => {
+      const spirit = new CaretSpirit(validPosition, validKnowledge, true);
+
+      expect(spirit.getAlternativeSymbol(0)).toBe('♦');
+      expect(spirit.getAlternativeSymbol(1)).toBe('◆');
+      expect(spirit.getAlternativeSymbol(2)).toBe('▲');
+    });
+
+    it('should return mystery symbol for alternatives when not discovered', () => {
+      const spirit = new CaretSpirit(validPosition, validKnowledge, false);
+
+      expect(spirit.getAlternativeSymbol()).toBe('?');
+    });
+
+    it('should return random floating glyph', () => {
+      const spirit = new CaretSpirit(validPosition, validKnowledge);
+      const glyph = spirit.getFloatingGlyph();
+
+      expect(spirit.appearance.floatingGlyphs).toContain(glyph);
+    });
+
+    it('should calculate glow intensity based on wisdom level', () => {
+      const spirit = new CaretSpirit(validPosition, validKnowledge);
+      const intensity = spirit.getGlowIntensity();
+
+      expect(intensity).toBeGreaterThanOrEqual(5); // Min wisdom is 50
+      expect(intensity).toBeLessThanOrEqual(10); // Max wisdom is 100
+      expect(typeof intensity).toBe('number');
     });
   });
 });
