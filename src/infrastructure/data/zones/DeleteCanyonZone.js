@@ -175,6 +175,12 @@ export class DeleteCanyonZone {
       biome: 'Red cliffs and ledges',
       skillFocus: ['x', 'dd', 'D', 'dw'],
       puzzleTheme: 'Deletion mechanics',
+      narration: [
+        'The canyon walls bleed red with corrupted syntax...',
+        'Bugs crawl through broken lines, spreading chaos.',
+        'Only deletion can cleanse this place.',
+        'Learn to cut away the corruption, but be precise - one wrong cut and all is lost.',
+      ],
     };
   }
 }

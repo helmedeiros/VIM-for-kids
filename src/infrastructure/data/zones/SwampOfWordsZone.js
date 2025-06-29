@@ -198,6 +198,12 @@ export class SwampOfWordsZone {
       biome: 'Wetlands with unstable bridges',
       skillFocus: ['w', 'W', 'e', 'E', 'b', 'B'],
       puzzleTheme: 'Word vs WORD movement',
+      narration: [
+        'The swamp bubbles with forgotten words...',
+        'Some bridges hold only words, others support WORDS.',
+        'Learn the difference, for one misstep means a watery grave.',
+        'The Word Witch watches from the mist, testing your understanding.',
+      ],
     };
   }
 }

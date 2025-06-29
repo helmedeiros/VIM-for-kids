@@ -170,6 +170,12 @@ export class CopyCircleZone {
       biome: 'Calm, ring-shaped stone garden',
       skillFocus: ['yy', 'p', 'P', 'd'],
       puzzleTheme: 'Copying, pasting, deleting',
+      narration: [
+        'The stone circle hums with echoes of duplicated text...',
+        'Here, the ancient art of yank and put is practiced.',
+        'Learn to copy without corruption, paste without chaos.',
+        'The Yanker teaches the harmony of duplication and placement.',
+      ],
     };
   }
 }

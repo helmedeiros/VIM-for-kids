@@ -264,6 +264,12 @@ export class PlaygroundOfPracticeZone {
         ':w',
       ],
       puzzleTheme: 'Freestyle challenges',
+      narration: [
+        'Welcome to the Playground, young Cursor...',
+        'Here, all your skills will be tested without guidance.',
+        'No hints, no help - only your mastery and intuition.',
+        'The friendly spirits watch, but they offer only encouragement.',
+      ],
     };
   }
 }

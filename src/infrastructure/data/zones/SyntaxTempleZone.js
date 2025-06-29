@@ -202,6 +202,12 @@ export class SyntaxTempleZone {
       biome: 'Coastal ruins, golden gates',
       skillFocus: ['all_vim_skills'],
       puzzleTheme: 'Apply all skills to save Textland',
+      narration: [
+        'The temple rises from the mist, ancient and corrupted...',
+        'The Bug King awaits at the summit, chaos incarnate.',
+        'Every skill you have learned will be tested here.',
+        'This is your final trial, Cursor. Save Textland.',
+      ],
     };
   }
 }
