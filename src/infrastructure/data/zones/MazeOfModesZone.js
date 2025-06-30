@@ -118,13 +118,16 @@ export class MazeOfModesZone {
       },
       npcs: [
         {
-          id: 'mode_guardian',
+          id: 'maze_scribe',
+          type: 'maze_scribe',
           appearsWhen: { collectedVimKeys: ['i', 'ESC', ':'] },
           dialogue: [
-            'Excellent, Cursor. You have mastered the Three Modes.',
-            'Normal mode for navigation, Insert mode for creation, Command mode for power.',
-            'The maze has tested your understanding. You may pass.',
-            'But beware - ahead lies the Swamp of Words, where words and WORDS are not the same.',
+            '*The scroll glows with ancient power*',
+            'Magnificent! The Three Modes are yours!',
+            'Normal for navigation and precision.',
+            'Insert for creation and inspiration.',
+            'Command for power and transformation.',
+            'The maze yields to your understanding.',
           ],
           position: [46, 27],
         },

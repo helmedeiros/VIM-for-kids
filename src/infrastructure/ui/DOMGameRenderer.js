@@ -487,4 +487,91 @@ export class DOMGameRenderer extends GameRenderer {
     // Default fallback
     return '🧙‍♂️';
   }
+
+  /**
+   * Show a message bubble on screen
+   * @param {string} message - The message to display
+   * @param {Object} options - Display options
+   */
+  showMessage(message, options = {}) {
+    const { duration = 4000, position = 'center', type = 'info', speaker = null } = options;
+
+    // Remove any existing message
+    this.hideMessage();
+
+    // Create message bubble
+    const messageElement = document.createElement('div');
+    messageElement.className = `message-bubble ${type}`;
+    messageElement.setAttribute('data-position', position);
+
+    // Add speaker name if provided
+    if (speaker) {
+      const speakerElement = document.createElement('div');
+      speakerElement.className = 'message-speaker';
+      speakerElement.textContent = speaker;
+      messageElement.appendChild(speakerElement);
+    }
+
+    // Add message text
+    const textElement = document.createElement('div');
+    textElement.className = 'message-text';
+    textElement.textContent = message;
+    messageElement.appendChild(textElement);
+
+    // Add close button
+    const closeButton = document.createElement('button');
+    closeButton.className = 'message-close';
+    closeButton.innerHTML = '×';
+    closeButton.onclick = () => this.hideMessage();
+    messageElement.appendChild(closeButton);
+
+    // Add to game container
+    const gameContainer = document.getElementById('game-container') || document.body;
+    gameContainer.appendChild(messageElement);
+
+    // Store reference for cleanup
+    this.currentMessage = messageElement;
+
+    // Auto-hide after duration (if not set to 0)
+    if (duration > 0) {
+      this.messageTimeout = setTimeout(() => {
+        this.hideMessage();
+      }, duration);
+    }
+
+    return messageElement;
+  }
+
+  /**
+   * Hide the current message bubble
+   */
+  hideMessage() {
+    if (this.currentMessage) {
+      this.currentMessage.remove();
+      this.currentMessage = null;
+    }
+    if (this.messageTimeout) {
+      clearTimeout(this.messageTimeout);
+      this.messageTimeout = null;
+    }
+  }
+
+  /**
+   * Show NPC dialogue with proper formatting
+   * @param {Object} npc - The NPC speaking
+   * @param {Array<string>|string} dialogue - The dialogue lines
+   * @param {Object} options - Display options
+   */
+  showNPCDialogue(npc, dialogue, options = {}) {
+    const dialogueText = Array.isArray(dialogue) ? dialogue.join('\n\n') : dialogue;
+    const speakerName = npc.name || npc.id || 'Unknown';
+
+    return this.showMessage(dialogueText, {
+      ...options,
+      speaker: speakerName,
+      type: 'dialogue',
+      position: 'center',
+      duration: options.duration || 6000, // Longer duration for dialogue
+    });
+  }
 }

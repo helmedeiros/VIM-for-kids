@@ -139,7 +139,7 @@ describe('Zone', () => {
   describe('NPCs', () => {
     test('should store NPC configuration', () => {
       expect(blinkingGrove.npcs).toHaveLength(1);
-      expect(blinkingGrove.npcs[0].id).toBe('caret_spirit');
+      expect(blinkingGrove.npcs[0].id).toBe('caret_stone');
     });
 
     test('should not show NPCs initially', () => {
@@ -156,17 +156,17 @@ describe('Zone', () => {
 
       const activeNPCs = blinkingGrove.getActiveNPCs();
       expect(activeNPCs).toHaveLength(1);
-      expect(activeNPCs[0].id).toBe('caret_spirit');
+      expect(activeNPCs[0].id).toBe('caret_stone');
     });
 
     test('should get NPC dialogue', () => {
-      const dialogue = blinkingGrove.getNPCDialogue('caret_spirit');
+      const dialogue = blinkingGrove.getNPCDialogue('caret_stone');
       expect(dialogue).toHaveLength(4);
-      expect(dialogue[0]).toContain('Very good, oh Shadowy One');
+      expect(dialogue[0]).toContain('Yes... the foundation');
     });
 
     test('should get NPC position', () => {
-      const position = blinkingGrove.getNPCPosition('caret_spirit');
+      const position = blinkingGrove.getNPCPosition('caret_stone');
       expect(position).toEqual(getAbsolutePosition(90, 5));
     });
 

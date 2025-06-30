@@ -14,6 +14,7 @@
     "test:coverage:report": "jest --coverage && open coverage/lcov-report/index.html",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
+    "lint:errors-only": "eslint src/**/*.js --quiet",
     "format": "prettier --write src/**/*.js",
     "format:check": "prettier --check src/**/*.js",
     "clean": "rm -rf dist coverage",
@@ -21,12 +22,21 @@
     "build:analyze": "vite build --mode analyze",
     "prepare": "husky install",
     "pre-commit": "lint-staged",
-    "validate": "npm run lint && npm run format:check && npm run test && npm run build",
+    "validate": "npm run lint:errors-only && npm run format:check && npm run test:coverage && npm run build",
+    "validate:quick": "npm run lint:errors-only && npm run format:check && npm run test",
     "validate:cursors": "node scripts/validate-cursor-positions.js",
     "validate:cursors:report": "node scripts/validate-cursor-positions.js --report",
     "test:cursors": "jest tests/integration/cursorPositionValidation.test.js",
     "commit:help": "./scripts/commit-helper.sh",
-    "commit:ai": "./scripts/ai-commit.sh"
+    "commit:ai": "./scripts/ai-commit.sh",
+    "quality:check": "npm run validate",
+    "quality:fix": "npm run lint:fix && npm run format && npm run test",
+    "coverage:open": "open coverage/lcov-report/index.html",
+    "coverage:check": "npm run test:coverage && echo 'Coverage report generated at coverage/lcov-report/index.html'",
+    "coverage:enforce": "npm run test:coverage && echo '✅ All coverage thresholds met!'",
+    "quality:dashboard": "echo '📊 Quality Dashboard:' && npm run test:coverage && npm run lint",
+    "coverage:gaps": "npm run test:coverage -- --verbose",
+    "quality:performance": "time npm run validate"
   },
   "keywords": [
     "vim",
@@ -106,10 +116,21 @@
       "sourceType": "module"
     },
     "rules": {
-      "no-console": "warn",
+      "no-console": [
+        "warn",
+        {
+          "allow": [
+            "warn",
+            "error",
+            "info"
+          ]
+        }
+      ],
       "no-unused-vars": "error",
       "prefer-const": "error",
-      "no-var": "error"
+      "no-var": "error",
+      "no-debugger": "error",
+      "no-alert": "warn"
     }
   },
   "prettier": {

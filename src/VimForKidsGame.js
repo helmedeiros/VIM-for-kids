@@ -3,8 +3,10 @@ import { LevelGameState } from './application/LevelGameState.js';
 import { TextlandGameState } from './application/TextlandGameState.js';
 import { GameRegistry } from './infrastructure/data/games/GameRegistry.js';
 import { MovePlayerUseCase } from './application/use-cases/MovePlayerUseCase.js';
+import { NPCInteractionUseCase } from './application/use-cases/NPCInteractionUseCase.js';
 import { HandleProgressionUseCase } from './application/use-cases/HandleProgressionUseCase.js';
 import { SelectGameUseCase } from './application/use-cases/SelectGameUseCase.js';
+import { DialogueService } from './application/services/DialogueService.js';
 import { DOMGameRenderer } from './infrastructure/ui/DOMGameRenderer.js';
 import { KeyboardInputHandler } from './infrastructure/input/KeyboardInputHandler.js';
 import { ZoneRegistryAdapter } from './infrastructure/data/zones/ZoneRegistryAdapter.js';
@@ -135,11 +137,18 @@ export class VimForKidsGame {
       this.cutsceneRenderer
     );
 
-    // Create move player use case with progression use case
+    // Create dialogue service for NPC interactions
+    this.dialogueService = new DialogueService();
+
+    // Create NPC interaction use case
+    this.npcInteractionUseCase = new NPCInteractionUseCase(this.gameRenderer, this.dialogueService);
+
+    // Create move player use case with progression and NPC interaction use cases
     this.movePlayerUseCase = new MovePlayerUseCase(
       this.gameState,
       this.gameRenderer,
-      this.handleProgressionUseCase
+      this.handleProgressionUseCase,
+      this.npcInteractionUseCase
     );
 
     // Initial render

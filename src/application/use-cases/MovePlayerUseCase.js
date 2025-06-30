@@ -4,12 +4,14 @@ import { Position } from '../../domain/value-objects/Position.js'; // eslint-dis
  * Use case for handling player movement
  * Focused solely on cursor movement and immediate consequences (key collection)
  * Progression handling is delegated to HandleProgressionUseCase
+ * NPC interactions are delegated to NPCInteractionUseCase
  */
 export class MovePlayerUseCase {
-  constructor(gameState, gameRenderer, progressionUseCase = null) {
+  constructor(gameState, gameRenderer, progressionUseCase = null, npcInteractionUseCase = null) {
     this._gameState = gameState;
     this._gameRenderer = gameRenderer;
     this._progressionUseCase = progressionUseCase;
+    this._npcInteractionUseCase = npcInteractionUseCase;
   }
 
   async execute(direction) {
@@ -27,6 +29,9 @@ export class MovePlayerUseCase {
     // Check for key collection
     const keyCollected = this._checkKeyCollection();
 
+    // Check for NPC interaction
+    const npcInteraction = this._checkNPCInteraction();
+
     // Re-render the game with new state
     this._gameRenderer.render(this._gameState.getCurrentState());
 
@@ -40,6 +45,7 @@ export class MovePlayerUseCase {
       success: true,
       newPosition,
       keyCollected,
+      npcInteraction,
       progressionResult,
     };
   }
@@ -60,6 +66,9 @@ export class MovePlayerUseCase {
     // Check for key collection
     const keyCollected = this._checkKeyCollection();
 
+    // Check for NPC interaction
+    const npcInteraction = this._checkNPCInteraction();
+
     // Re-render the game with new state
     this._gameRenderer.render(this._gameState.getCurrentState());
 
@@ -70,6 +79,7 @@ export class MovePlayerUseCase {
       success: true,
       newPosition,
       keyCollected,
+      npcInteraction,
       progressionResult,
     };
   }
@@ -121,5 +131,17 @@ export class MovePlayerUseCase {
     }
 
     return null;
+  }
+
+  _checkNPCInteraction() {
+    // Delegate NPC interaction to dedicated use case if available
+    if (this._npcInteractionUseCase) {
+      const cursorPosition = this._gameState.cursor.position;
+      const gameState = this._gameState.getCurrentState();
+      return this._npcInteractionUseCase.execute(cursorPosition, gameState);
+    }
+
+    // Fallback: no interaction occurred
+    return { interactionOccurred: false, npc: null };
   }
 }

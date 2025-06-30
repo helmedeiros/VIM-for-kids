@@ -118,13 +118,14 @@ export class BlinkingGroveZone {
       },
       npcs: [
         {
-          id: 'caret_spirit',
+          id: 'caret_stone',
+          type: 'caret_stone',
           appearsWhen: { collectedVimKeys: ['h', 'j', 'k', 'l'] },
           dialogue: [
-            'Very good, oh Shadowy One.',
-            'You have learned the Four Motions: h, j, k, l – the Way of the Cursor.',
-            'Your path continues through the gate.',
-            'But beware: not all words are the same. Some are words. Others are WORDS.',
+            'Yes... the foundation is strong.',
+            'h left, j down, k up, l right.',
+            'You understand the ancient ways.',
+            'The paths ahead... await your steps.',
           ],
           position: [90, 5], // Near the gate on the clear pathway
         },

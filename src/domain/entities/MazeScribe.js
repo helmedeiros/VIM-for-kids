@@ -67,28 +67,133 @@ export class MazeScribe {
   }
 
   /**
-   * Get a cryptic riddle about VIM modes
+   * Get cryptic riddles about VIM modes
+   * @returns {string} - Random riddle about modes
    */
   getRiddle() {
     const riddles = [
-      'Three paths diverge... Normal, Insert, Visual. Which do you choose first?',
-      'To create, you must enter. To command, you must exit. What am I?',
-      'ESC is the key that opens all doors. But which door do you seek?',
-      'In the maze of modes, only one path leads to mastery. Find it.',
+      'Three realms exist in the text realm...',
+      'One for moving, one for creating, one for commanding.',
+      'i opens the door to creation...',
+      'ESC returns you to safety...',
+      ': unlocks the power of commands...',
+      'Which mode allows the cursor to dance?',
+      'Which mode brings forth new text?',
+      'Which mode speaks to the editor itself?',
     ];
     return riddles[Math.floor(Math.random() * riddles.length)];
   }
 
   /**
-   * Get mode wisdom
+   * Get mode-specific wisdom
+   * @returns {string} - Wisdom about specific VIM modes
    */
   getModeWisdom() {
     const wisdom = [
-      'Normal mode: where you navigate.',
-      'Insert mode: where you create.',
-      'Visual mode: where you select.',
-      'Command mode: where you command.',
+      'Normal mode: where the cursor is king.',
+      'Insert mode: where thoughts become text.',
+      'Command mode: where the editor obeys.',
+      'ESC is your sanctuary in any storm.',
+      'i opens creation, ESC preserves it.',
+      'Three modes, infinite possibilities.',
     ];
     return wisdom[Math.floor(Math.random() * wisdom.length)];
+  }
+
+  /**
+   * Get contextual dialogue based on the player's understanding of modes
+   * @param {Object} gameState - Current game state with collected keys
+   * @returns {Array<string>} - Array of dialogue lines
+   */
+  getDialogue(gameState = {}) {
+    const collectedKeys = gameState.collectedKeys || new Set();
+    const hasInsert = collectedKeys.has('i');
+    const hasEscape = collectedKeys.has('ESC');
+    const hasCommand = collectedKeys.has(':');
+    const hasModes = hasInsert && hasEscape && hasCommand;
+
+    if (!this.scrollUnfurled) {
+      return [
+        '*The hooded figure looks up from ancient scrolls*',
+        'Ah... a seeker approaches.',
+        'You wish to understand the Three Sacred Modes?',
+        'First... show me you can enter creation.',
+        '*Points to the glowing "i" in the distance*',
+      ];
+    }
+
+    if (!hasInsert) {
+      return [
+        '*Unfurls an ancient scroll*',
+        'Behold the first mystery: INSERT.',
+        'Press "i" to enter the realm of creation.',
+        'There, your thoughts become reality.',
+        this.getRiddle(),
+      ];
+    }
+
+    if (!hasEscape) {
+      return [
+        'Good... you have tasted creation.',
+        'But how do you return to safety?',
+        'ESC is your sanctuary, young one.',
+        'It brings you back to Normal mode.',
+        'Find it, and you shall be free.',
+      ];
+    }
+
+    if (!hasCommand) {
+      return [
+        'Two modes mastered... one remains.',
+        'The colon ":" opens the greatest power.',
+        "Command mode speaks to the editor's soul.",
+        'Seek it in the deepest part of the maze.',
+        '*Whispers* :w saves, :q quits, :help reveals all.',
+      ];
+    }
+
+    if (hasModes) {
+      return [
+        '*The scroll glows with ancient power*',
+        'Magnificent! The Three Modes are yours!',
+        'Normal for navigation and precision.',
+        'Insert for creation and inspiration.',
+        'Command for power and transformation.',
+        'The maze yields to your understanding.',
+        this.getModeWisdom(),
+      ];
+    }
+
+    return ['*Continues studying scrolls*', 'The modes await your discovery...', this.getRiddle()];
+  }
+
+  /**
+   * Get mode-specific teaching when player demonstrates understanding
+   * @param {string} mode - The mode being learned (i, ESC, :)
+   * @returns {string} - Teaching dialogue for that mode
+   */
+  getModeTeaching(mode) {
+    const teachings = {
+      i: 'INSERT mode awakens! Your thoughts flow into text.',
+      ESC: 'NORMAL mode embraces you! Safety and navigation return.',
+      ':': 'COMMAND mode responds! The editor awaits your instruction.',
+      v: 'VISUAL mode emerges! Text bends to your selection.',
+    };
+    return teachings[mode] || 'Practice the sacred transitions...';
+  }
+
+  /**
+   * Get cryptic hints when player seems lost
+   * @returns {string} - Mysterious hint
+   */
+  getHint() {
+    const hints = [
+      '*Points mystically* The answer lies in transition...',
+      '*Whispers* Three realms, three keys, one understanding.',
+      '*Nods knowingly* Mode is state of mind.',
+      '*Traces symbols in air* i-ESC-:, the eternal dance.',
+      '*Gazes into distance* Where you are determines what you can do.',
+    ];
+    return hints[Math.floor(Math.random() * hints.length)];
   }
 }

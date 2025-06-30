@@ -100,12 +100,12 @@ describe('BlinkingGroveZone', () => {
 
       expect(config.npcs).toHaveLength(1);
 
-      const caretSpirit = config.npcs[0];
-      expect(caretSpirit.id).toBe('caret_spirit');
-      expect(caretSpirit.position).toEqual([90, 5]); // Updated for new position on clear pathway
-      expect(caretSpirit.appearsWhen.collectedVimKeys).toEqual(['h', 'j', 'k', 'l']);
-      expect(caretSpirit.dialogue).toHaveLength(4);
-      expect(caretSpirit.dialogue[0]).toContain('Very good, oh Shadowy One');
+      const caretStone = config.npcs[0];
+      expect(caretStone.id).toBe('caret_stone');
+      expect(caretStone.position).toEqual([90, 5]); // Updated for new position on clear pathway
+      expect(caretStone.appearsWhen.collectedVimKeys).toEqual(['h', 'j', 'k', 'l']);
+      expect(caretStone.dialogue).toHaveLength(4);
+      expect(caretStone.dialogue[0]).toContain('Yes... the foundation');
     });
 
     test('should have correct events configuration', () => {
@@ -171,7 +171,7 @@ describe('BlinkingGroveZone', () => {
 
       const activeNPCs = zone.getActiveNPCs();
       expect(activeNPCs).toHaveLength(1);
-      expect(activeNPCs[0].id).toBe('caret_spirit');
+      expect(activeNPCs[0].id).toBe('caret_stone');
     });
 
     test('should have correct key descriptions', () => {

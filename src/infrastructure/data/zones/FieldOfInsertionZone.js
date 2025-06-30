@@ -114,13 +114,16 @@ export class FieldOfInsertionZone {
       },
       npcs: [
         {
-          id: 'scribe_poet',
+          id: 'insert_scribe',
+          type: 'insert_scribe',
           appearsWhen: { collectedVimKeys: ['i', 'a', 'o', 'O'] },
           dialogue: [
-            'Ah, young Cursor, you have learned the Four Insertions!',
-            'i before, a after, o below, O above - the sacred rhythm.',
-            'Text flows like poetry when you know where to place your words.',
-            'The field remembers your creativity. Go forth to the Circle of Copying.',
+            '*Sets down quill with satisfied flourish*',
+            'Magnificent! The Four Insertions sing in harmony!',
+            '"i" before, "a" after, "o" below, "O" above,\n    Like cardinal directions, but for love of words.',
+            '*Scrolls glow with completed verses*',
+            'You have mastered the art of creation!',
+            'Text flows like poetry through your fingers.',
           ],
           position: [47, 31],
         },

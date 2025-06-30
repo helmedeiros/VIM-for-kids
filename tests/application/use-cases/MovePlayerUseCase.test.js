@@ -9,6 +9,7 @@ describe('MovePlayerUseCase', () => {
   let mockGameRenderer;
   let mockCursor;
   let mockMap;
+  let mockNPCInteractionUseCase;
 
   beforeEach(() => {
     mockCursor = new Cursor(new Position(5, 5));
@@ -32,7 +33,16 @@ describe('MovePlayerUseCase', () => {
       showMessage: jest.fn(),
     };
 
-    movePlayerUseCase = new MovePlayerUseCase(mockGameState, mockGameRenderer);
+    mockNPCInteractionUseCase = {
+      execute: jest.fn().mockReturnValue({ interactionOccurred: false, npc: null }),
+    };
+
+    movePlayerUseCase = new MovePlayerUseCase(
+      mockGameState,
+      mockGameRenderer,
+      null, // No progression use case
+      mockNPCInteractionUseCase
+    );
   });
 
   describe('execute', () => {
@@ -46,6 +56,7 @@ describe('MovePlayerUseCase', () => {
         success: true,
         newPosition: new Position(6, 5),
         keyCollected: null,
+        npcInteraction: { interactionOccurred: false, npc: null },
         progressionResult: { type: 'none' },
       });
     });
@@ -99,7 +110,8 @@ describe('MovePlayerUseCase', () => {
       movePlayerUseCase = new MovePlayerUseCase(
         mockGameState,
         mockGameRenderer,
-        mockProgressionUseCase
+        mockProgressionUseCase,
+        mockNPCInteractionUseCase
       );
 
       const result = await movePlayerUseCase.execute('right');
@@ -124,7 +136,8 @@ describe('MovePlayerUseCase', () => {
       movePlayerUseCase = new MovePlayerUseCase(
         mockGameState,
         mockGameRenderer,
-        mockProgressionUseCase
+        mockProgressionUseCase,
+        mockNPCInteractionUseCase
       );
 
       const result = await movePlayerUseCase.execute('right');
@@ -154,6 +167,7 @@ describe('MovePlayerUseCase', () => {
         success: true,
         newPosition: new Position(6, 5),
         keyCollected: null,
+        npcInteraction: { interactionOccurred: false, npc: null },
         progressionResult: { type: 'none' },
       });
     });
@@ -167,7 +181,8 @@ describe('MovePlayerUseCase', () => {
       movePlayerUseCase = new MovePlayerUseCase(
         mockGameState,
         mockGameRenderer,
-        mockProgressionUseCase
+        mockProgressionUseCase,
+        mockNPCInteractionUseCase
       );
 
       const result = movePlayerUseCase.executeSync('right');
@@ -175,6 +190,59 @@ describe('MovePlayerUseCase', () => {
       expect(mockProgressionUseCase.shouldExecuteProgression).not.toHaveBeenCalled();
       expect(mockProgressionUseCase.execute).not.toHaveBeenCalled();
       expect(result.progressionResult).toEqual({ type: 'none' });
+    });
+
+    it('should delegate NPC interaction to NPCInteractionUseCase', async () => {
+      const mockNPC = {
+        id: 'test_npc',
+        name: 'Test NPC',
+        position: [6, 5],
+        dialogue: ['Hello!', 'Welcome to the test zone!'],
+      };
+      const expectedInteraction = {
+        interactionOccurred: true,
+        npc: mockNPC,
+        dialogue: ['Hello!', 'Welcome to the test zone!'],
+      };
+      mockNPCInteractionUseCase.execute.mockReturnValue(expectedInteraction);
+
+      const result = await movePlayerUseCase.execute('right');
+
+      expect(mockNPCInteractionUseCase.execute).toHaveBeenCalledWith(
+        new Position(6, 5),
+        mockGameState.getCurrentState()
+      );
+      expect(result.npcInteraction).toBe(expectedInteraction);
+    });
+
+    it('should handle no NPC interaction when NPCInteractionUseCase returns none', async () => {
+      mockNPCInteractionUseCase.execute.mockReturnValue({
+        interactionOccurred: false,
+        npc: null,
+      });
+
+      const result = await movePlayerUseCase.execute('right');
+
+      expect(mockNPCInteractionUseCase.execute).toHaveBeenCalledWith(
+        new Position(6, 5),
+        mockGameState.getCurrentState()
+      );
+      expect(result.npcInteraction.interactionOccurred).toBe(false);
+      expect(result.npcInteraction.npc).toBe(null);
+    });
+
+    it('should handle missing NPCInteractionUseCase gracefully', async () => {
+      movePlayerUseCase = new MovePlayerUseCase(
+        mockGameState,
+        mockGameRenderer,
+        null, // No progression use case
+        null // No NPC interaction use case
+      );
+
+      const result = await movePlayerUseCase.execute('right');
+
+      expect(result.npcInteraction.interactionOccurred).toBe(false);
+      expect(result.npcInteraction.npc).toBe(null);
     });
   });
 
