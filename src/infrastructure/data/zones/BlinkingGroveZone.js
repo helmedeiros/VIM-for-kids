@@ -14,7 +14,7 @@ export class BlinkingGroveZone {
     return {
       zoneId: 'zone_1',
       name: '1. Blinking Grove',
-      biome: 'Forest clearing (bottom left)',
+      biome: 'Forest clearing with water and stone maze',
       skillFocus: ['h', 'j', 'k', 'l'],
       puzzleTheme: 'Basic movement, bump-to-talk',
       narration: [
@@ -34,85 +34,117 @@ export class BlinkingGroveZone {
     return {
       ...this._getSharedConfig(),
 
-      // Custom cursor start position - at the beginning of the zone content
-      cursorStartPosition: new Position(1, 1),
+      // Custom cursor start position - on the green grassy area (avoiding key positions)
+      cursorStartPosition: new Position(33, 8),
       tiles: {
-        tileType: 'forest_ground',
-        // 100x8 extended forest layout with clear navigation paths
+        tileType: 'mixed_terrain',
+        // Large layout matching the image: water left, grass center-left, stone maze right
         layout: [
-          // Row 0: Top border with strategic openings
-          'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
-          // Row 1: Main pathway with clearings and instructional areas
-          'TPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPT',
-          // Row 2: Mixed terrain with dirt patches but maintaining clear paths
-          'TPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDPT',
-          // Row 3: Key collection areas with clear access paths (h=2, j=7, k=14, l=21)
-          'TPPHPPPJPPPPPPKPPPPPPPLPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPT',
-          // Row 4: Central exploration area with varied terrain but clear navigation
-          'TPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDDDPPPPDDDDPT',
-          // Row 5: Text labels and narrative areas with clear paths to gate (G at position 95)
-          'TPPHHWWPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPT',
-          // Row 6: Lower pathway ensuring full navigation
-          'TPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPT',
-          // Row 7: Bottom border
-          'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
+          // Row 0: Top border with "Remember words are not WORD" text area
+          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
+          // Row 1: Water and stone with text labels
+          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWSREMEMRERWOSSSSARESSSSNOTSSSSWORDSSSSSSSSSSSSSSSS',
+          // Row 2: Transition to grass and stone maze
+          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
+          // Row 3: Water, grass patch with keys and stone maze with openings
+          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGGGGGGGGGGGGGGGGGGGGGGSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
+          // Row 4: Water, grass with dirt patches, and stone maze
+          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGGDDGDDDGGGGDDGDDGGGGSSSSSSSSSSSSSsssSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
+          // Row 5: Water, grass with keys h,j,l and dirt, stone maze
+          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGhGDjGDDDGGGGGDlDGGGGSSSSSSSSSSSSSsssSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
+          // Row 6: Water, grass area, stone maze
+          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGGGGGDDDGGGGGGGGGGGGGSSSSSSSSSSSSSsssSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSsSS',
+          // Row 7: Water, grass with "Hello" text area, stone maze
+          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGGGGGGGGGGGGGGGGGGGGGSSSSSsssSSSSSsssSSSSSSSSSSSSsssSSSSSSSSSSSSSSSssSS',
+          // Row 8: Water, grass with "world!" text, stone maze with NPC
+          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGkGGGGGGGGGGGGGGGGGGGGSSSSSsssSSSSSSSSSSSSSSSSSSsssSSSSSSSSSSSSSSSSsNSS',
+          // Row 9: Water, grass area continues, stone maze
+          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGGGGGGGGGGGGGGGGGGGGGGSSSSSSSSSSSSsssSSSSSSSSSSSSsssSSSSSSSSSSSSSSSSssSS',
+          // Row 10: Water, grass area, stone maze
+          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGGGGGGGGGGGGGGGGGGGGGGSSSSSSSSSSSSSsssSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
+          // Row 11: Water and stone base
+          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
         ],
         legend: {
-          T: 'tree',
-          P: 'path',
+          W: 'water',
+          G: 'grass',
           D: 'dirt',
-          H: 'path', // Hello text position
-          W: 'path', // world! text position
-          G: 'path', // Gate position
-          // VIM key positions (will be handled by specialTiles)
+          S: 'stone',
+          s: 'stone', // path stone
+          N: 'stone', // NPC position
+          // Text positions will be handled by textLabels
+          R: 'stone', // Remember
+          e: 'stone', // letters
+          m: 'stone',
+          b: 'stone',
+          r: 'stone',
+          w: 'stone', // words
+          o: 'stone',
+          d: 'stone',
+          a: 'stone', // are
+          n: 'stone', // not
+          t: 'stone',
+          // Keys will be handled by specialTiles
+          h: 'grass',
+          j: 'grass',
+          k: 'grass',
+          l: 'grass',
         },
         specialTiles: [
-          { type: 'vim_key', value: 'h', position: [2, 3] }, // Left movement key - on path
-          { type: 'vim_key', value: 'j', position: [7, 3] }, // Down movement key - on path
-          { type: 'vim_key', value: 'k', position: [14, 3] }, // Up movement key - on path
-          { type: 'vim_key', value: 'l', position: [21, 3] }, // Right movement key - on path
+          { type: 'vim_key', value: 'h', position: [31, 5] }, // Left movement key - on grass
+          { type: 'vim_key', value: 'j', position: [34, 5] }, // Down movement key - on grass
+          { type: 'vim_key', value: 'k', position: [31, 8] }, // Up movement key - on grass
+          { type: 'vim_key', value: 'l', position: [37, 5] }, // Right movement key - on grass
         ],
         textLabels: [
-          // "Hello" - each letter on its own tile
-          { text: 'H', position: [3, 5] },
-          { text: 'e', position: [4, 5] },
-          { text: 'l', position: [5, 5] },
-          { text: 'l', position: [6, 5] },
-          { text: 'o', position: [7, 5] },
+          // "Remember words are not WORD" text at the top
+          { text: 'R', position: [52, 1], color: '#000', fontSize: '14px' },
+          { text: 'e', position: [53, 1], color: '#000', fontSize: '14px' },
+          { text: 'm', position: [54, 1], color: '#000', fontSize: '14px' },
+          { text: 'e', position: [55, 1], color: '#000', fontSize: '14px' },
+          { text: 'm', position: [56, 1], color: '#000', fontSize: '14px' },
+          { text: 'b', position: [57, 1], color: '#000', fontSize: '14px' },
+          { text: 'e', position: [58, 1], color: '#000', fontSize: '14px' },
+          { text: 'r', position: [59, 1], color: '#000', fontSize: '14px' },
 
-          // "world!" - each letter on its own tile
-          { text: 'w', position: [9, 5] },
-          { text: 'o', position: [10, 5] },
-          { text: 'r', position: [11, 5] },
-          { text: 'l', position: [12, 5] },
-          { text: 'd', position: [13, 5] },
-          { text: '!', position: [14, 5] },
+          { text: 'w', position: [62, 1], color: '#000', fontSize: '14px' },
+          { text: 'o', position: [63, 1], color: '#000', fontSize: '14px' },
+          { text: 'r', position: [64, 1], color: '#000', fontSize: '14px' },
+          { text: 'd', position: [65, 1], color: '#000', fontSize: '14px' },
+          { text: 's', position: [66, 1], color: '#000', fontSize: '14px' },
 
-          // Instructional text - spaced across the zone
-          { text: 'W', position: [30, 1] },
-          { text: 'e', position: [31, 1] },
-          { text: 'l', position: [32, 1] },
-          { text: 'c', position: [33, 1] },
-          { text: 'o', position: [34, 1] },
-          { text: 'm', position: [35, 1] },
-          { text: 'e', position: [36, 1] },
+          { text: 'a', position: [69, 1], color: '#000', fontSize: '14px' },
+          { text: 'r', position: [70, 1], color: '#000', fontSize: '14px' },
+          { text: 'e', position: [71, 1], color: '#000', fontSize: '14px' },
 
-          { text: 'L', position: [50, 1] },
-          { text: 'e', position: [51, 1] },
-          { text: 'a', position: [52, 1] },
-          { text: 'r', position: [53, 1] },
-          { text: 'n', position: [54, 1] },
+          { text: 'n', position: [74, 1], color: '#000', fontSize: '14px' },
+          { text: 'o', position: [75, 1], color: '#000', fontSize: '14px' },
+          { text: 't', position: [76, 1], color: '#000', fontSize: '14px' },
 
-          // Key instructions - single characters
-          { text: 'h', position: [2, 4] },
-          { text: 'j', position: [7, 4] },
-          { text: 'k', position: [14, 4] },
-          { text: 'l', position: [21, 4] },
+          { text: 'W', position: [79, 1], color: '#000', fontSize: '14px' },
+          { text: 'O', position: [80, 1], color: '#000', fontSize: '14px' },
+          { text: 'R', position: [81, 1], color: '#000', fontSize: '14px' },
+          { text: 'D', position: [82, 1], color: '#000', fontSize: '14px' },
+
+          // "Hello" text on the grass area
+          { text: 'H', position: [32, 7], color: '#22c55e', fontSize: '16px' },
+          { text: 'e', position: [33, 7], color: '#22c55e', fontSize: '16px' },
+          { text: 'l', position: [34, 7], color: '#22c55e', fontSize: '16px' },
+          { text: 'l', position: [35, 7], color: '#22c55e', fontSize: '16px' },
+          { text: 'o', position: [36, 7], color: '#22c55e', fontSize: '16px' },
+
+          // "world!" text on the grass area
+          { text: 'w', position: [32, 8], color: '#22c55e', fontSize: '16px' },
+          { text: 'o', position: [33, 8], color: '#22c55e', fontSize: '16px' },
+          { text: 'r', position: [34, 8], color: '#22c55e', fontSize: '16px' },
+          { text: 'l', position: [35, 8], color: '#22c55e', fontSize: '16px' },
+          { text: 'd', position: [36, 8], color: '#22c55e', fontSize: '16px' },
+          { text: '!', position: [37, 8], color: '#22c55e', fontSize: '16px' },
         ],
         gate: {
           locked: true,
           unlocksWhen: { collectedVimKeys: ['h', 'j', 'k', 'l'] },
-          position: [92, 5], // Correct position where 'G' character is located
+          position: [85, 8], // Gate position in the stone maze
           leadsTo: 'zone_2',
         },
       },
@@ -127,7 +159,7 @@ export class BlinkingGroveZone {
             'You understand the ancient ways.',
             'The paths ahead... await your steps.',
           ],
-          position: [90, 5], // Near the gate on the clear pathway
+          position: [81, 8], // NPC position in the stone maze
         },
       ],
       events: [
