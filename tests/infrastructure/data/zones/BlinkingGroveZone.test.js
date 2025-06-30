@@ -87,7 +87,7 @@ describe('BlinkingGroveZone', () => {
       const config = BlinkingGroveZone.getConfig();
 
       expect(config.tiles.gate.locked).toBe(true);
-      expect(config.tiles.gate.position).toEqual([85, 8]); // Updated gate position
+      expect(config.tiles.gate.position).toEqual([74, 1]); // Updated gate position
       expect(config.tiles.gate.leadsTo).toBe('zone_2');
       expect(config.tiles.gate.unlocksWhen.collectedVimKeys).toEqual(['h', 'j', 'k', 'l']);
     });
@@ -99,7 +99,7 @@ describe('BlinkingGroveZone', () => {
 
       const caretStone = config.npcs[0];
       expect(caretStone.id).toBe('caret_stone');
-      expect(caretStone.position).toEqual([81, 8]); // Updated for new position
+      expect(caretStone.position).toEqual([6, 10]); // Updated for new position
       expect(caretStone.appearsWhen.collectedVimKeys).toEqual(['h', 'j', 'k', 'l']);
       expect(caretStone.dialogue).toHaveLength(4);
       expect(caretStone.dialogue[0]).toContain('Yes... the foundation');
