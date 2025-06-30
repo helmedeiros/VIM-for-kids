@@ -619,7 +619,7 @@ export class DOMGameRenderer extends GameRenderer {
   }
 
   /**
-   * Show clean white balloon above NPC
+   * Show clean white balloon above NPC with RPG-style positioning
    * @param {Object} npc - The NPC speaking
    * @param {string} message - The message to display
    * @param {Object} options - Display options
@@ -637,12 +637,14 @@ export class DOMGameRenderer extends GameRenderer {
     // Fade out any existing balloons before showing new one
     this.fadeOutExistingBalloons();
 
-    // Create balloon element - CSS handles styling and text containment
+    // Create balloon element with RPG-style theming based on NPC type
     const balloon = document.createElement('div');
-    balloon.className = 'npc-balloon';
+    const balloonTheme = this._getBalloonTheme(npc);
+    const importanceClass = this._getMessageImportance(message);
+    balloon.className = `npc-balloon ${balloonTheme} ${importanceClass}`.trim();
     balloon.textContent = message;
 
-    // Simple positioning: place above NPC using getBoundingClientRect
+    // RPG-style positioning: place above NPC with smart edge detection
     const npcRect = npcTile.getBoundingClientRect();
     const gameContainer = document.getElementById('game-container') || document.body;
     const containerRect = gameContainer.getBoundingClientRect();
@@ -650,17 +652,41 @@ export class DOMGameRenderer extends GameRenderer {
     // Add to container first to get proper measurements
     gameContainer.appendChild(balloon);
 
-        // Position balloon centered above NPC with proper spacing
-    const npcCenterX = npcRect.left - containerRect.left + (npcRect.width / 2);
-    balloon.style.left = npcCenterX + 'px';
-
-    // Position balloon so the arrow tip appears just above the NPC
-    // We need: balloon height + arrow extension (8px from CSS) + small gap (10px)
-    // The arrow extends 8px below the balloon, so we need balloon height + 8px + 10px gap
+    // Calculate positioning with RPG-style offset
     const balloonRect = balloon.getBoundingClientRect();
-    const balloonHeight = balloonRect.height || 50; // Fallback height
-    balloon.style.top = (npcRect.top - containerRect.top - balloonHeight - 18) + 'px'; // 8px arrow + 10px gap
-    balloon.style.transform = 'translateX(-50%)'; // Center horizontally
+    const balloonWidth = balloonRect.width || 150; // Fallback width
+    const balloonHeight = balloonRect.height || 60; // Fallback height
+
+    // NPC center position relative to container
+    const npcCenterX = npcRect.left - containerRect.left + (npcRect.width / 2);
+    const npcTopY = npcRect.top - containerRect.top;
+
+    // RPG-style positioning: slightly offset to create natural appearance
+    let balloonLeft = npcCenterX;
+
+    // Smart edge detection to keep balloon on screen
+    const containerWidth = containerRect.width;
+    const minEdgeDistance = 20; // Minimum distance from screen edges
+
+    // Adjust horizontal position to prevent overflow
+    if (balloonLeft - (balloonWidth / 2) < minEdgeDistance) {
+      // Too close to left edge, move right
+      balloonLeft = (balloonWidth / 2) + minEdgeDistance;
+    } else if (balloonLeft + (balloonWidth / 2) > containerWidth - minEdgeDistance) {
+      // Too close to right edge, move left
+      balloonLeft = containerWidth - (balloonWidth / 2) - minEdgeDistance;
+    }
+
+    // Position balloon with enhanced spacing
+    balloon.style.left = balloonLeft + 'px';
+
+    // Enhanced vertical positioning with better spacing
+    // Arrow extends 15px below balloon (from CSS), add 8px gap for natural look
+    const balloonTop = npcTopY - balloonHeight - 23; // 15px arrow + 8px gap
+    balloon.style.top = Math.max(balloonTop, 10) + 'px'; // Ensure minimum top margin
+
+    // Center the balloon horizontally on its left position
+    balloon.style.transform = 'translateX(-50%)';
 
     // Auto-hide after duration
     if (duration > 0) {
@@ -723,5 +749,52 @@ export class DOMGameRenderer extends GameRenderer {
     }
 
     return null;
+  }
+
+  /**
+   * Get thematic balloon styling based on NPC type
+   * @param {Object} npc - The NPC object
+   * @returns {string} CSS class for balloon theme
+   * @private
+   */
+  _getBalloonTheme(npc) {
+    if (!npc || !npc.type) return '';
+
+    const themeMap = {
+      'caret-spirit': 'wise',
+      'syntax-wisp': 'mystical',
+      'bug-king': 'ancient',
+      'caret-stone': 'ancient',
+      'maze-scribe': 'wise',
+      'deletion-echo': 'mystical',
+      'insert-scribe': 'friendly',
+      'mirror-sprite': 'mystical',
+      'practice-buddy': 'friendly'
+    };
+
+    return themeMap[npc.type] || '';
+  }
+
+  /**
+   * Determine message importance for special effects
+   * @param {string} message - The message text
+   * @returns {string} CSS class for message importance
+   * @private
+   */
+  _getMessageImportance(message) {
+    if (!message) return '';
+
+    // Check for exclamation marks, urgency, or important keywords
+    const importantKeywords = [
+      'prophecy', 'destiny', 'quest', 'danger', 'warning',
+      'congratulations', 'victory', 'defeated', 'accomplished'
+    ];
+
+    const hasExclamation = message.includes('!');
+    const hasImportantKeyword = importantKeywords.some(keyword =>
+      message.toLowerCase().includes(keyword)
+    );
+
+    return (hasExclamation || hasImportantKeyword) ? 'important' : '';
   }
 }

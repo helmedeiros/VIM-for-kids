@@ -104,7 +104,8 @@ describe('DOMGameRenderer', () => {
       const balloon = renderer.showNPCBalloon(mockNPC, message);
 
       expect(balloon).toBeTruthy();
-      expect(balloon.className).toBe('npc-balloon');
+      expect(balloon.classList.contains('npc-balloon')).toBe(true);
+      expect(balloon.classList.contains('important')).toBe(true); // Message contains !
       expect(balloon.textContent).toBe(message);
 
       // Balloon should be in game container, not NPC tile
@@ -187,7 +188,7 @@ describe('DOMGameRenderer', () => {
       const balloon = renderer.showNPCBalloon(mockNPC, message);
 
       // Verify balloon has CSS class (styling handled by CSS)
-      expect(balloon.className).toBe('npc-balloon');
+      expect(balloon.classList.contains('npc-balloon')).toBe(true);
       expect(balloon.textContent).toBe(message);
 
       // Verify positioning
@@ -206,6 +207,25 @@ describe('DOMGameRenderer', () => {
       // Balloon should be in game container
       const gameContainer = document.getElementById('game-container');
       expect(gameContainer.contains(balloon)).toBe(true);
+    });
+
+    it('should apply theming based on NPC type', () => {
+      const mysticalNPC = { id: 'test-npc', name: 'Test NPC', type: 'syntax-wisp' };
+      const message = 'A mystical message';
+
+      const balloon = renderer.showNPCBalloon(mysticalNPC, message);
+
+      expect(balloon.classList.contains('npc-balloon')).toBe(true);
+      expect(balloon.classList.contains('mystical')).toBe(true);
+    });
+
+    it('should detect important messages', () => {
+      const message = 'Congratulations on your victory!';
+
+      const balloon = renderer.showNPCBalloon(mockNPC, message);
+
+      expect(balloon.classList.contains('npc-balloon')).toBe(true);
+      expect(balloon.classList.contains('important')).toBe(true);
     });
   });
 
