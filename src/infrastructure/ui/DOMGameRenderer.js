@@ -556,22 +556,140 @@ export class DOMGameRenderer extends GameRenderer {
     }
   }
 
-  /**
+    /**
    * Show NPC dialogue with proper formatting
    * @param {Object} npc - The NPC speaking
    * @param {Array<string>|string} dialogue - The dialogue lines
    * @param {Object} options - Display options
    */
   showNPCDialogue(npc, dialogue, options = {}) {
-    const dialogueText = Array.isArray(dialogue) ? dialogue.join('\n\n') : dialogue;
-    const speakerName = npc.name || npc.id || 'Unknown';
+    // Use small balloon above NPC for short dialogue, fallback to center for long dialogue
+    const dialogueText = Array.isArray(dialogue) ? dialogue.join(' ') : dialogue.toString();
 
-    return this.showMessage(dialogueText, {
+    // If dialogue is short enough for balloon, show it above NPC
+    if (dialogueText.length <= 120) {
+      return this.showNPCBalloon(npc, dialogueText, options);
+    }
+
+    // For longer dialogue, use the traditional center message but without close button
+    const speakerName = npc.name || npc.id || 'Unknown';
+    return this.showNPCMessage(Array.isArray(dialogue) ? dialogue.join('\n\n') : dialogue, {
       ...options,
       speaker: speakerName,
       type: 'dialogue',
       position: 'center',
       duration: options.duration || 6000, // Longer duration for dialogue
     });
+  }
+
+  /**
+   * Show NPC message without close button (auto-closes only)
+   * @param {string} message - The message to display
+   * @param {Object} options - Display options
+   */
+  showNPCMessage(message, options = {}) {
+    const { duration = 4000, position = 'center', type = 'info', speaker = null } = options;
+
+    // Remove any existing message
+    this.hideMessage();
+
+    // Create message bubble
+    const messageElement = document.createElement('div');
+    messageElement.className = `message-bubble ${type}`;
+    messageElement.setAttribute('data-position', position);
+
+    // Add speaker name if provided
+    if (speaker) {
+      const speakerElement = document.createElement('div');
+      speakerElement.className = 'message-speaker';
+      speakerElement.textContent = speaker;
+      messageElement.appendChild(speakerElement);
+    }
+
+    // Add message text
+    const textElement = document.createElement('div');
+    textElement.className = 'message-text';
+    textElement.textContent = message;
+    messageElement.appendChild(textElement);
+
+    // NO CLOSE BUTTON for NPC messages - they auto-close only
+
+    // Add to game container
+    const gameContainer = document.getElementById('game-container') || document.body;
+    gameContainer.appendChild(messageElement);
+
+    // Store reference for cleanup
+    this.currentMessage = messageElement;
+
+    // Auto-hide after duration (must auto-close since no close button)
+    if (duration > 0) {
+      this.messageTimeout = setTimeout(() => {
+        this.hideMessage();
+      }, duration);
+    }
+
+    return messageElement;
+  }
+
+  /**
+   * Show small balloon above NPC
+   * @param {Object} npc - The NPC speaking
+   * @param {string} message - The message to display
+   * @param {Object} options - Display options
+   */
+  showNPCBalloon(npc, message, options = {}) {
+    const { duration = 4000 } = options; // Slightly longer duration since no close button
+
+    // Find the NPC tile in the DOM
+    const npcTile = this._findNPCTile(npc);
+    if (!npcTile) {
+      // Fallback to regular message if NPC tile not found
+      return this.showMessage(message, { type: 'dialogue', duration });
+    }
+
+    // Remove any existing balloon from this NPC
+    const existingBalloon = npcTile.querySelector('.npc-balloon');
+    if (existingBalloon) {
+      existingBalloon.remove();
+    }
+
+    // Create balloon element
+    const balloon = document.createElement('div');
+    balloon.className = 'npc-balloon';
+    balloon.textContent = message;
+
+    // Add balloon to NPC tile
+    npcTile.appendChild(balloon);
+
+    // Auto-hide after duration (no close button, so it must auto-close)
+    if (duration > 0) {
+      setTimeout(() => {
+        if (balloon.parentNode) {
+          balloon.remove();
+        }
+      }, duration);
+    }
+
+    return balloon;
+  }
+
+  /**
+   * Find the DOM element for a specific NPC
+   * @param {Object} npc - The NPC to find
+   * @returns {Element|null} - The NPC tile element or null
+   * @private
+   */
+  _findNPCTile(npc) {
+    const npcName = npc.name || npc.id || 'Unknown NPC';
+
+    // Find tile with matching title
+    const tiles = this.gameBoard.querySelectorAll('.tile.npc');
+    for (const tile of tiles) {
+      if (tile.title === npcName) {
+        return tile;
+      }
+    }
+
+    return null;
   }
 }
