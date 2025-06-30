@@ -112,18 +112,27 @@ describe('DOMGameRenderer', () => {
       expect(gameContainer.contains(balloon)).toBe(true);
     });
 
-    it('should remove existing balloon before creating new one', () => {
+    it('should fade out existing balloon and create new one', () => {
       const message1 = 'First message';
       const message2 = 'Second message';
 
       renderer.showNPCBalloon(mockNPC, message1);
       renderer.showNPCBalloon(mockNPC, message2);
 
-      // Balloons are now in game container
+      // After calling showNPCBalloon again, we should have:
+      // 1. The old balloon with fade-out class
+      // 2. The new balloon without fade-out class
       const gameContainer = document.getElementById('game-container');
       const balloons = gameContainer.querySelectorAll('.npc-balloon');
-      expect(balloons).toHaveLength(1);
-      expect(balloons[0].textContent).toBe(message2);
+      expect(balloons).toHaveLength(2);
+
+      // First balloon should be fading out
+      expect(balloons[0].classList.contains('fade-out')).toBe(true);
+      expect(balloons[0].textContent).toBe(message1);
+
+      // Second balloon should be the new one
+      expect(balloons[1].classList.contains('fade-out')).toBe(false);
+      expect(balloons[1].textContent).toBe(message2);
     });
 
     it('should auto-hide balloon after duration', (done) => {
@@ -197,6 +206,95 @@ describe('DOMGameRenderer', () => {
       // Balloon should be in game container
       const gameContainer = document.getElementById('game-container');
       expect(gameContainer.contains(balloon)).toBe(true);
+    });
+  });
+
+  describe('fadeOutExistingBalloons', () => {
+    const mockNPC = {
+      id: 'test-npc',
+      name: 'Test NPC',
+    };
+
+    beforeEach(() => {
+      // Set up game board with NPC tile
+      const gameBoard = document.createElement('div');
+      gameBoard.className = 'game-board';
+      gameBoard.style.display = 'grid';
+      gameContainer.appendChild(gameBoard);
+      renderer.gameBoard = gameBoard;
+
+      const npcTile = document.createElement('div');
+      npcTile.className = 'tile npc';
+      npcTile.title = 'Test NPC';
+      gameBoard.appendChild(npcTile);
+    });
+
+    it('should add fade-out class to existing balloons', () => {
+      // Create a balloon first
+      const balloon = renderer.showNPCBalloon(mockNPC, 'Test message');
+      expect(balloon.classList.contains('fade-out')).toBe(false);
+
+      // Trigger fade-out
+      renderer.fadeOutExistingBalloons();
+
+      expect(balloon.classList.contains('fade-out')).toBe(true);
+    });
+
+    it('should remove balloons after fade-out animation', (done) => {
+      // Create a balloon first
+      const balloon = renderer.showNPCBalloon(mockNPC, 'Test message');
+      expect(balloon.parentNode).toBeTruthy();
+
+      // Trigger fade-out
+      renderer.fadeOutExistingBalloons();
+
+      // Check that balloon is removed after animation duration (300ms)
+      setTimeout(() => {
+        expect(balloon.parentNode).toBeFalsy();
+        done();
+      }, 350); // Wait a bit longer than the 300ms animation
+    });
+
+    it('should handle multiple balloons', () => {
+      // Create multiple balloons by adding them to different containers
+      const balloon1 = document.createElement('div');
+      balloon1.className = 'npc-balloon';
+      balloon1.textContent = 'Message 1';
+      gameContainer.appendChild(balloon1);
+
+      const balloon2 = document.createElement('div');
+      balloon2.className = 'npc-balloon';
+      balloon2.textContent = 'Message 2';
+      gameContainer.appendChild(balloon2);
+
+      // Trigger fade-out
+      renderer.fadeOutExistingBalloons();
+
+      expect(balloon1.classList.contains('fade-out')).toBe(true);
+      expect(balloon2.classList.contains('fade-out')).toBe(true);
+    });
+
+    it('should skip balloons already fading out', () => {
+      // Create a balloon and manually add fade-out class
+      const balloon = document.createElement('div');
+      balloon.className = 'npc-balloon fade-out';
+      balloon.textContent = 'Already fading';
+      gameContainer.appendChild(balloon);
+
+      // Should not throw error or modify already fading balloons
+      expect(() => {
+        renderer.fadeOutExistingBalloons();
+      }).not.toThrow();
+
+      // Balloon should still have fade-out class (no additional modifications)
+      expect(balloon.classList.contains('fade-out')).toBe(true);
+    });
+
+    it('should handle case when no balloons exist', () => {
+      // Should not throw error when no balloons exist
+      expect(() => {
+        renderer.fadeOutExistingBalloons();
+      }).not.toThrow();
     });
   });
 

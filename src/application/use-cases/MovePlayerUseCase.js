@@ -23,6 +23,9 @@ export class MovePlayerUseCase {
       return { success: false, reason: 'invalid_position' }; // Invalid move, do nothing
     }
 
+    // Check if we're leaving an NPC position (fade out balloons)
+    this._checkNPCExit(currentPosition, newPosition);
+
     // Update cursor position
     this._gameState.cursor = this._gameState.cursor.moveTo(newPosition);
 
@@ -59,6 +62,9 @@ export class MovePlayerUseCase {
     if (!this._isPositionWalkable(newPosition)) {
       return { success: false, reason: 'invalid_position' }; // Invalid move, do nothing
     }
+
+    // Check if we're leaving an NPC position (fade out balloons)
+    this._checkNPCExit(currentPosition, newPosition);
 
     // Update cursor position
     this._gameState.cursor = this._gameState.cursor.moveTo(newPosition);
@@ -143,5 +149,52 @@ export class MovePlayerUseCase {
 
     // Fallback: no interaction occurred
     return { interactionOccurred: false, npc: null };
+  }
+
+  _checkNPCExit(currentPosition, newPosition) {
+    // Only trigger fade-out if we have both the NPC interaction use case and game renderer
+    if (!this._npcInteractionUseCase || !this._gameRenderer) {
+      return;
+    }
+
+    // Check if we're moving away from an NPC position
+    const gameState = this._gameState.getCurrentState();
+    const hadNPCAtOldPosition = this._hasNPCAtPosition(currentPosition, gameState);
+    const hasNPCAtNewPosition = this._hasNPCAtPosition(newPosition, gameState);
+
+    // If we're leaving an NPC position and not moving to another NPC, fade out balloons
+    if (hadNPCAtOldPosition && !hasNPCAtNewPosition) {
+      // Trigger fade-out if the renderer supports it
+      if (typeof this._gameRenderer.fadeOutExistingBalloons === 'function') {
+        this._gameRenderer.fadeOutExistingBalloons();
+      }
+    }
+  }
+
+  _hasNPCAtPosition(position, gameState) {
+    // Check if there's an NPC at the given position
+    const npcs = gameState.npcs || [];
+    return npcs.some(npc => {
+      if (!npc.position) {
+        return false;
+      }
+
+      // Handle Position objects with equals method
+      if (typeof npc.position.equals === 'function') {
+        return npc.position.equals(position);
+      }
+
+      // Handle plain objects with x,y properties
+      if (typeof npc.position === 'object' && npc.position.x !== undefined && npc.position.y !== undefined) {
+        return npc.position.x === position.x && npc.position.y === position.y;
+      }
+
+      // Handle arrays [x, y]
+      if (Array.isArray(npc.position) && npc.position.length >= 2) {
+        return npc.position[0] === position.x && npc.position[1] === position.y;
+      }
+
+      return false;
+    });
   }
 }
