@@ -67,7 +67,7 @@ describe('Blinking Grove Game Integration', () => {
     it('should place cursor in starting position', () => {
       const startPos = game.gameState.cursor.position;
       const tile = game.gameState.map.getTileAt(startPos);
-      expect(tile.name).toBe('grass'); // Cursor now starts on grass area
+      expect(tile.name).toBe('dirt'); // Cursor now starts on dirt area
     });
 
     it('should have 4 movement keys available', () => {
@@ -82,7 +82,7 @@ describe('Blinking Grove Game Integration', () => {
 
     it('should display text labels on the ground', () => {
       const textLabels = game.gameState.getTextLabels();
-      expect(textLabels).toHaveLength(34); // Updated for new layout: "Remember words are not WORD" + "Hello world!"
+      expect(textLabels).toHaveLength(36); // Updated for new layout: "Remember: words are not WORDS" + "Hello world!"
 
       // Check that the individual characters for "Hello world!" are present
       const textContents = textLabels.map((label) => label.text);

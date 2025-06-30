@@ -65,7 +65,7 @@ describe('VIM for Kids Game Integration', () => {
     it('should have cursor at correct starting position', () => {
       game = new VimForKidsGame({ level: 'default' });
 
-      expect(game.gameState.cursor.position).toHavePosition(44, 16); // Updated for new layout
+      expect(game.gameState.cursor.position).toHavePosition(8, 14); // Updated for new layout
     });
 
     it('should have all VIM keys available initially', () => {
@@ -277,14 +277,14 @@ describe('VIM for Kids Game Integration', () => {
     });
 
         it('should prevent movement into stone barriers within maze area', () => {
-      // Find a walkable position in the grass area (we know grass is walkable)
-      const grassArea = new Position(50, 16); // In the grass area
-      game.gameState.cursor = game.gameState.cursor.moveTo(grassArea);
+      // Find a walkable position in the dirt area (we know dirt is walkable)
+      const dirtArea = new Position(8, 14); // Use current starting position which is known to be dirt
+      game.gameState.cursor = game.gameState.cursor.moveTo(dirtArea);
 
       // Verify we're on walkable terrain to start
-      expect(game.gameState.map.isWalkable(grassArea)).toBe(true);
+      expect(game.gameState.map.isWalkable(dirtArea)).toBe(true);
 
-      // Try to move (movement should work in grass area)
+      // Try to move (movement should work in dirt area)
       game.movePlayerUseCase.executeSync('up');
 
       // Verify cursor remains on walkable terrain
@@ -294,11 +294,11 @@ describe('VIM for Kids Game Integration', () => {
 
     it('should connect grass area to rest of map seamlessly', () => {
       // Reset cursor to actual starting position
-      game.gameState.cursor = game.gameState.cursor.moveTo(new Position(44, 16));
+      game.gameState.cursor = game.gameState.cursor.moveTo(new Position(8, 14));
 
       // Test that player can move around the grass area
       const startPos = game.gameState.cursor.position;
-      expect(startPos).toHavePosition(44, 16); // Starting position in grass
+      expect(startPos).toHavePosition(8, 14); // Starting position in dirt
 
       game.movePlayerUseCase.executeSync('left'); // Move left in grass
       const leftPos = game.gameState.cursor.position;
