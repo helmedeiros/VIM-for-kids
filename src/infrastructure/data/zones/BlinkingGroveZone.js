@@ -34,8 +34,8 @@ export class BlinkingGroveZone {
     return {
       ...this._getSharedConfig(),
 
-      // Custom cursor start position - on the green grassy area (avoiding key positions)
-      cursorStartPosition: new Position(33, 8),
+      // Custom cursor start position - on the green grassy area (avoiding key and text positions)
+      cursorStartPosition: new Position(38, 9),
       tiles: {
         tileType: 'mixed_terrain',
         // Large layout matching the image: water left, grass center-left, stone maze right

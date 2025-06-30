@@ -75,7 +75,7 @@ describe('ZoneRegistryAdapter', () => {
       expect(zoneInfo[0]).toEqual({
         zoneId: 'zone_1',
         name: '1. Blinking Grove',
-        biome: 'Forest clearing (bottom left)',
+        biome: 'Forest clearing with water and stone maze',
         skillFocus: ['h', 'j', 'k', 'l'],
         puzzleTheme: 'Basic movement, bump-to-talk',
       });

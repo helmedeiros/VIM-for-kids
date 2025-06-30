@@ -140,8 +140,8 @@ describe('BlinkingGroveZone', () => {
 
     test('should have correct cursor start position', () => {
       const startPosition = zone.getCursorStartPosition();
-      // Updated for new cursor start position (33, 8) with zone offset
-      expect(startPosition).toEqual(new Position(39, 15)); // Actual calculated position based on zone offset
+      // Updated for new cursor start position (38, 9) with zone offset
+      expect(startPosition).toEqual(new Position(44, 16)); // Actual calculated position based on zone offset
     });
 
     test('should have gate initially closed', () => {
