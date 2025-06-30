@@ -1247,13 +1247,12 @@ h1 {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(52, 73, 94, 0.95);
-  color: #ecf0f1;
+  background: #ffffff;
+  color: #2c3e50;
   padding: 20px 25px;
-  border-radius: 15px;
-  border: 2px solid #34495e;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 2px solid #bdc3c7;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   max-width: 400px;
   min-width: 250px;
   z-index: 10000;
@@ -1264,34 +1263,37 @@ h1 {
 }
 
 .message-bubble.dialogue {
-  background: linear-gradient(135deg, rgba(52, 73, 94, 0.95), rgba(44, 62, 80, 0.95));
+  background: #ffffff;
   border: 2px solid #3498db;
-  box-shadow: 0 0 30px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 4px 20px rgba(52, 152, 219, 0.2);
 }
 
 .message-bubble.info {
+  background: #ffffff;
   border-color: #2ecc71;
-  box-shadow: 0 0 20px rgba(46, 204, 113, 0.2);
+  box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
 }
 
 .message-bubble.warning {
+  background: #ffffff;
   border-color: #f39c12;
-  box-shadow: 0 0 20px rgba(243, 156, 18, 0.2);
+  box-shadow: 0 4px 20px rgba(243, 156, 18, 0.15);
 }
 
 .message-bubble.error {
+  background: #ffffff;
   border-color: #e74c3c;
-  box-shadow: 0 0 20px rgba(231, 76, 60, 0.2);
+  box-shadow: 0 4px 20px rgba(231, 76, 60, 0.15);
 }
 
 .message-speaker {
   font-weight: bold;
-  color: #3498db;
+  color: #2980b9;
   margin-bottom: 8px;
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  border-bottom: 1px solid rgba(52, 152, 219, 0.3);
+  border-bottom: 1px solid rgba(41, 128, 185, 0.3);
   padding-bottom: 5px;
 }
 
@@ -1307,7 +1309,7 @@ h1 {
   right: 12px;
   background: none;
   border: none;
-  color: #95a5a6;
+  color: #7f8c8d;
   font-size: 20px;
   cursor: pointer;
   width: 24px;
@@ -1335,11 +1337,23 @@ h1 {
   height: 0;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-top: 8px solid #34495e;
+  border-top: 8px solid #bdc3c7;
 }
 
 .message-bubble.dialogue::before {
   border-top-color: #3498db;
+}
+
+.message-bubble.info::before {
+  border-top-color: #2ecc71;
+}
+
+.message-bubble.warning::before {
+  border-top-color: #f39c12;
+}
+
+.message-bubble.error::before {
+  border-top-color: #e74c3c;
 }
 
 /* Position variants */
