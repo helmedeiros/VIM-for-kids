@@ -49,18 +49,13 @@ describe('DOMGameRenderer', () => {
       expect(spy).toHaveBeenCalledWith(mockNPC, shortDialogue, {});
     });
 
-    it('should use regular message for long dialogue', () => {
-      const longDialogue = 'This is a very long dialogue that exceeds the character limit for balloons and should use the regular message system instead.';
-      const spy = jest.spyOn(renderer, 'showNPCMessage');
+    it('should use balloon with pagination for long dialogue', () => {
+      const longDialogue = 'This is a very long dialogue that exceeds the character limit for balloons and should use the pagination system instead.';
+      const spy = jest.spyOn(renderer, 'showNPCBalloon');
 
       renderer.showNPCDialogue(mockNPC, longDialogue);
 
-      expect(spy).toHaveBeenCalledWith(longDialogue, {
-        speaker: 'Test NPC',
-        type: 'dialogue',
-        position: 'center',
-        duration: 6000,
-      });
+      expect(spy).toHaveBeenCalledWith(mockNPC, longDialogue, {});
     });
 
     it('should handle array dialogue', () => {
@@ -72,19 +67,14 @@ describe('DOMGameRenderer', () => {
       expect(spy).toHaveBeenCalledWith(mockNPC, 'Hello How are you?', {});
     });
 
-    it('should use NPC ID as fallback when name is unavailable', () => {
+    it('should always use balloon even with NPC ID fallback', () => {
       const npcWithoutName = { id: 'test-id' };
-      const longDialogue = 'This is a very long dialogue that exceeds the character limit for balloons and should use the regular message system instead.';
-      const spy = jest.spyOn(renderer, 'showNPCMessage');
+      const longDialogue = 'This is a very long dialogue that exceeds the character limit for balloons and should use the pagination system instead.';
+      const spy = jest.spyOn(renderer, 'showNPCBalloon');
 
       renderer.showNPCDialogue(npcWithoutName, longDialogue);
 
-      expect(spy).toHaveBeenCalledWith(longDialogue, {
-        speaker: 'test-id',
-        type: 'dialogue',
-        position: 'center',
-        duration: 6000,
-      });
+      expect(spy).toHaveBeenCalledWith(npcWithoutName, longDialogue, {});
     });
   });
 
@@ -117,8 +107,9 @@ describe('DOMGameRenderer', () => {
       expect(balloon.className).toBe('npc-balloon');
       expect(balloon.textContent).toBe(message);
 
-      const npcTile = renderer.gameBoard.querySelector('.tile.npc');
-      expect(npcTile.contains(balloon)).toBe(true);
+      // Balloon should be in game container, not NPC tile
+      const gameContainer = document.getElementById('game-container');
+      expect(gameContainer.contains(balloon)).toBe(true);
     });
 
     it('should remove existing balloon before creating new one', () => {
@@ -128,7 +119,9 @@ describe('DOMGameRenderer', () => {
       renderer.showNPCBalloon(mockNPC, message1);
       renderer.showNPCBalloon(mockNPC, message2);
 
-      const balloons = renderer.gameBoard.querySelectorAll('.npc-balloon');
+      // Balloons are now in game container
+      const gameContainer = document.getElementById('game-container');
+      const balloons = gameContainer.querySelectorAll('.npc-balloon');
       expect(balloons).toHaveLength(1);
       expect(balloons[0].textContent).toBe(message2);
     });
@@ -163,6 +156,47 @@ describe('DOMGameRenderer', () => {
       renderer.showNPCBalloon(mockNPCNotFound, 'Hello!');
 
       expect(spy).toHaveBeenCalledWith('Hello!', { type: 'dialogue', duration: 4000 });
+    });
+
+    it('should display long messages in full (no pagination)', () => {
+      const longMessage = 'This is a very long message that should definitely be split into two separate parts to make it much easier to read for the player in the game and provide a better user experience.';
+
+      const balloon = renderer.showNPCBalloon(mockNPC, longMessage);
+
+      // Balloon should show the full message (no pagination)
+      expect(balloon).toBeTruthy();
+      expect(balloon.textContent).toBe(longMessage);
+
+      // Verify balloon is in the game container
+      const gameContainer = document.getElementById('game-container');
+      expect(gameContainer.contains(balloon)).toBe(true);
+    });
+
+    it('should display messages with proper styling', () => {
+      const message = 'Test message with proper styling';
+
+      const balloon = renderer.showNPCBalloon(mockNPC, message);
+
+      // Verify balloon has CSS class (styling handled by CSS)
+      expect(balloon.className).toBe('npc-balloon');
+      expect(balloon.textContent).toBe(message);
+
+      // Verify positioning
+      expect(balloon.style.transform).toBe('translateX(-50%)');
+      expect(balloon.style.left).toBeDefined();
+      expect(balloon.style.top).toBeDefined();
+    });
+
+    it('should handle short messages correctly', () => {
+      const shortMessage = 'Hello!';
+
+      const balloon = renderer.showNPCBalloon(mockNPC, shortMessage);
+
+      expect(balloon.textContent).toBe(shortMessage);
+
+      // Balloon should be in game container
+      const gameContainer = document.getElementById('game-container');
+      expect(gameContainer.contains(balloon)).toBe(true);
     });
   });
 
@@ -241,7 +275,9 @@ describe('DOMGameRenderer', () => {
       expect(messageElement.querySelector('.message-text').textContent).toBe(message);
     });
 
-    it('should auto-hide after duration', (done) => {
+    it('should auto-hide after duration', () => {
+      jest.useFakeTimers();
+
       const message = 'Test message';
       const duration = 100;
 
@@ -249,10 +285,12 @@ describe('DOMGameRenderer', () => {
 
       expect(messageElement.parentNode).toBeTruthy();
 
-      setTimeout(() => {
-        expect(messageElement.parentNode).toBeFalsy();
-        done();
-      }, duration + 50);
+      // Fast-forward time
+      jest.advanceTimersByTime(duration);
+
+      expect(messageElement.parentNode).toBeFalsy();
+
+      jest.useRealTimers();
     });
 
     it('should set position attribute', () => {

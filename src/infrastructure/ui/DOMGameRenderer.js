@@ -562,24 +562,11 @@ export class DOMGameRenderer extends GameRenderer {
    * @param {Array<string>|string} dialogue - The dialogue lines
    * @param {Object} options - Display options
    */
-  showNPCDialogue(npc, dialogue, options = {}) {
-    // Use small balloon above NPC for short dialogue, fallback to center for long dialogue
+    showNPCDialogue(npc, dialogue, options = {}) {
     const dialogueText = Array.isArray(dialogue) ? dialogue.join(' ') : dialogue.toString();
 
-    // If dialogue is short enough for balloon, show it above NPC
-    if (dialogueText.length <= 120) {
-      return this.showNPCBalloon(npc, dialogueText, options);
-    }
-
-    // For longer dialogue, use the traditional center message but without close button
-    const speakerName = npc.name || npc.id || 'Unknown';
-    return this.showNPCMessage(Array.isArray(dialogue) ? dialogue.join('\n\n') : dialogue, {
-      ...options,
-      speaker: speakerName,
-      type: 'dialogue',
-      position: 'center',
-      duration: options.duration || 6000, // Longer duration for dialogue
-    });
+    // All NPC dialogue uses clean white balloons above NPCs
+    return this.showNPCBalloon(npc, dialogueText, options);
   }
 
   /**
@@ -632,36 +619,51 @@ export class DOMGameRenderer extends GameRenderer {
   }
 
   /**
-   * Show small balloon above NPC
+   * Show clean white balloon above NPC
    * @param {Object} npc - The NPC speaking
    * @param {string} message - The message to display
    * @param {Object} options - Display options
    */
   showNPCBalloon(npc, message, options = {}) {
-    const { duration = 4000 } = options; // Slightly longer duration since no close button
+    const { duration = 4000 } = options;
 
     // Find the NPC tile in the DOM
     const npcTile = this._findNPCTile(npc);
+
     if (!npcTile) {
-      // Fallback to regular message if NPC tile not found
       return this.showMessage(message, { type: 'dialogue', duration });
     }
 
-    // Remove any existing balloon from this NPC
-    const existingBalloon = npcTile.querySelector('.npc-balloon');
-    if (existingBalloon) {
-      existingBalloon.remove();
-    }
+    // Remove any existing balloons
+    const gameContainer = document.getElementById('game-container') || document.body;
+    const existingBalloons = gameContainer.querySelectorAll('.npc-balloon');
+    existingBalloons.forEach(balloon => balloon.remove());
 
-    // Create balloon element
+    // Create balloon element - CSS handles styling and text containment
     const balloon = document.createElement('div');
     balloon.className = 'npc-balloon';
     balloon.textContent = message;
 
-    // Add balloon to NPC tile
-    npcTile.appendChild(balloon);
+    // Simple positioning: place above NPC using getBoundingClientRect
+    const npcRect = npcTile.getBoundingClientRect();
+    const containerRect = gameContainer.getBoundingClientRect();
 
-    // Auto-hide after duration (no close button, so it must auto-close)
+    // Add to container first to get proper measurements
+    gameContainer.appendChild(balloon);
+
+        // Position balloon centered above NPC with proper spacing
+    const npcCenterX = npcRect.left - containerRect.left + (npcRect.width / 2);
+    balloon.style.left = npcCenterX + 'px';
+
+    // Position balloon so the arrow tip appears just above the NPC
+    // We need: balloon height + arrow extension (8px from CSS) + small gap (10px)
+    // The arrow extends 8px below the balloon, so we need balloon height + 8px + 10px gap
+    const balloonRect = balloon.getBoundingClientRect();
+    const balloonHeight = balloonRect.height || 50; // Fallback height
+    balloon.style.top = (npcRect.top - containerRect.top - balloonHeight - 18) + 'px'; // 8px arrow + 10px gap
+    balloon.style.transform = 'translateX(-50%)'; // Center horizontally
+
+    // Auto-hide after duration
     if (duration > 0) {
       setTimeout(() => {
         if (balloon.parentNode) {
@@ -673,6 +675,10 @@ export class DOMGameRenderer extends GameRenderer {
     return balloon;
   }
 
+
+
+
+
   /**
    * Find the DOM element for a specific NPC
    * @param {Object} npc - The NPC to find
@@ -682,9 +688,15 @@ export class DOMGameRenderer extends GameRenderer {
   _findNPCTile(npc) {
     const npcName = npc.name || npc.id || 'Unknown NPC';
 
+    if (!this.gameBoard) {
+      return null;
+    }
+
     // Find tile with matching title
     const tiles = this.gameBoard.querySelectorAll('.tile.npc');
-    for (const tile of tiles) {
+
+    for (let i = 0; i < tiles.length; i++) {
+      const tile = tiles[i];
       if (tile.title === npcName) {
         return tile;
       }
