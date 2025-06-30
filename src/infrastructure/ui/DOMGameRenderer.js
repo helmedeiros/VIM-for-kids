@@ -634,10 +634,8 @@ export class DOMGameRenderer extends GameRenderer {
       return this.showMessage(message, { type: 'dialogue', duration });
     }
 
-    // Remove any existing balloons
-    const gameContainer = document.getElementById('game-container') || document.body;
-    const existingBalloons = gameContainer.querySelectorAll('.npc-balloon');
-    existingBalloons.forEach(balloon => balloon.remove());
+    // Fade out any existing balloons before showing new one
+    this.fadeOutExistingBalloons();
 
     // Create balloon element - CSS handles styling and text containment
     const balloon = document.createElement('div');
@@ -646,6 +644,7 @@ export class DOMGameRenderer extends GameRenderer {
 
     // Simple positioning: place above NPC using getBoundingClientRect
     const npcRect = npcTile.getBoundingClientRect();
+    const gameContainer = document.getElementById('game-container') || document.body;
     const containerRect = gameContainer.getBoundingClientRect();
 
     // Add to container first to get proper measurements
@@ -675,9 +674,30 @@ export class DOMGameRenderer extends GameRenderer {
     return balloon;
   }
 
+  /**
+   * Fade out all existing NPC balloons
+   */
+  fadeOutExistingBalloons() {
+    const gameContainer = document.getElementById('game-container') || document.body;
+    const existingBalloons = gameContainer.querySelectorAll('.npc-balloon');
 
+    existingBalloons.forEach(balloon => {
+      // Skip if already fading out
+      if (balloon.classList.contains('fade-out')) {
+        return;
+      }
 
+      // Add fade-out class to trigger animation
+      balloon.classList.add('fade-out');
 
+      // Remove element after animation completes (300ms)
+      setTimeout(() => {
+        if (balloon.parentNode) {
+          balloon.remove();
+        }
+      }, 300);
+    });
+  }
 
   /**
    * Find the DOM element for a specific NPC

@@ -310,4 +310,131 @@ describe('MovePlayerUseCase', () => {
       expect(result).toBe(true);
     });
   });
+
+  describe('NPC Exit Functionality', () => {
+    beforeEach(() => {
+      mockGameRenderer.fadeOutExistingBalloons = jest.fn();
+    });
+
+    describe('_checkNPCExit', () => {
+      it('should call fadeOutExistingBalloons when leaving NPC position', async () => {
+        // Mock game state with NPC at position (5, 5) and no NPC at (6, 5)
+        const mockNPC = { position: new Position(5, 5) };
+        mockGameState.getCurrentState.mockReturnValue({
+          npcs: [mockNPC],
+        });
+
+        // Move from NPC position (5, 5) to non-NPC position (6, 5)
+        const result = await movePlayerUseCase.execute('right');
+
+        expect(mockGameRenderer.fadeOutExistingBalloons).toHaveBeenCalled();
+        expect(result.success).toBe(true);
+      });
+
+      it('should not call fadeOutExistingBalloons when not leaving NPC position', async () => {
+        // Mock game state with no NPCs
+        mockGameState.getCurrentState.mockReturnValue({
+          npcs: [],
+        });
+
+        const result = await movePlayerUseCase.execute('right');
+
+        expect(mockGameRenderer.fadeOutExistingBalloons).not.toHaveBeenCalled();
+        expect(result.success).toBe(true);
+      });
+
+      it('should not call fadeOutExistingBalloons when moving from NPC to NPC', async () => {
+        // Mock game state with NPCs at both positions
+        const mockNPC1 = { position: new Position(5, 5) };
+        const mockNPC2 = { position: new Position(6, 5) };
+        mockGameState.getCurrentState.mockReturnValue({
+          npcs: [mockNPC1, mockNPC2],
+        });
+
+        const result = await movePlayerUseCase.execute('right');
+
+        expect(mockGameRenderer.fadeOutExistingBalloons).not.toHaveBeenCalled();
+        expect(result.success).toBe(true);
+      });
+
+      it('should handle missing fadeOutExistingBalloons method gracefully', async () => {
+        // Remove the fadeOutExistingBalloons method
+        delete mockGameRenderer.fadeOutExistingBalloons;
+
+        const mockNPC = { position: new Position(5, 5) };
+        mockGameState.getCurrentState.mockReturnValue({
+          npcs: [mockNPC],
+        });
+
+        expect(async () => {
+          await movePlayerUseCase.execute('right');
+        }).not.toThrow();
+      });
+
+      it('should handle missing NPCInteractionUseCase gracefully', async () => {
+        movePlayerUseCase = new MovePlayerUseCase(
+          mockGameState,
+          mockGameRenderer,
+          null,
+          null // No NPC interaction use case
+        );
+
+        const mockNPC = { position: new Position(5, 5) };
+        mockGameState.getCurrentState.mockReturnValue({
+          npcs: [mockNPC],
+        });
+
+        expect(async () => {
+          await movePlayerUseCase.execute('right');
+        }).not.toThrow();
+
+        expect(mockGameRenderer.fadeOutExistingBalloons).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('_hasNPCAtPosition', () => {
+      it('should return true when NPC exists at position', () => {
+        const mockNPC = { position: new Position(5, 5) };
+        const gameState = { npcs: [mockNPC] };
+
+        const result = movePlayerUseCase._hasNPCAtPosition(new Position(5, 5), gameState);
+
+        expect(result).toBe(true);
+      });
+
+      it('should return false when no NPC exists at position', () => {
+        const mockNPC = { position: new Position(10, 10) };
+        const gameState = { npcs: [mockNPC] };
+
+        const result = movePlayerUseCase._hasNPCAtPosition(new Position(5, 5), gameState);
+
+        expect(result).toBe(false);
+      });
+
+      it('should return false when no NPCs exist', () => {
+        const gameState = { npcs: [] };
+
+        const result = movePlayerUseCase._hasNPCAtPosition(new Position(5, 5), gameState);
+
+        expect(result).toBe(false);
+      });
+
+      it('should handle missing npcs array gracefully', () => {
+        const gameState = {};
+
+        const result = movePlayerUseCase._hasNPCAtPosition(new Position(5, 5), gameState);
+
+        expect(result).toBe(false);
+      });
+
+      it('should handle NPCs without position property', () => {
+        const mockNPC = { id: 'npc-without-position' };
+        const gameState = { npcs: [mockNPC] };
+
+        const result = movePlayerUseCase._hasNPCAtPosition(new Position(5, 5), gameState);
+
+        expect(result).toBe(false);
+      });
+    });
+  });
 });
