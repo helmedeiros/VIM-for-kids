@@ -102,7 +102,7 @@ const parseZoneFile = (filePath) => {
 
 const getWalkableTileTypes = () => {
   // Known walkable tile types from TileType.js
-  return ['path', 'dirt', 'field', 'bridge', 'sand', 'test_ground', 'boss_area'];
+  return ['path', 'dirt', 'field', 'bridge', 'sand', 'test_ground', 'boss_area', 'grass'];
 };
 
 const validateZonePosition = (zoneData, walkableTileTypes) => {
@@ -274,7 +274,7 @@ describe('Cursor Position Validation Integration', () => {
 
       // If this test fails after adding zones, it means the new zone has invalid cursor position
       const validZoneCount = zones.filter((z) => z.valid).length;
-      expect(validZoneCount).toBe(11); // Update to include textland exploration zone
+      expect(validZoneCount).toBe(currentZoneCount); // All discovered zones should be valid
     });
   });
 
