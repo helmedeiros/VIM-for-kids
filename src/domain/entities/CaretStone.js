@@ -77,15 +77,86 @@ export class CaretStone {
   }
 
   /**
-   * Get wisdom based on current state
+   * Get ancient wisdom about VIM motion
+   * @returns {string} - Random wisdom about hjkl movement
    */
   getWisdom() {
-    const ancientWisdom = [
-      'Movement... the first truth.',
-      'h j k l... the sacred four.',
-      'Direction... guides the way.',
-      'Ancient paths... remember all.',
+    const wisdoms = [
+      'h... left as the wind blows',
+      "j... down into earth's depth",
+      "k... up toward sky's height",
+      'l... right as rivers flow',
+      'Four directions. Ancient paths.',
+      'Motion... is the first truth',
+      'Cursor moves. World responds.',
+      'hjkl... the foundation stones',
     ];
-    return ancientWisdom[Math.floor(Math.random() * ancientWisdom.length)];
+    return wisdoms[Math.floor(Math.random() * wisdoms.length)];
+  }
+
+  /**
+   * Get contextual dialogue based on the player's progress
+   * @param {Object} gameState - Current game state with collected keys
+   * @returns {Array<string>} - Array of dialogue lines
+   */
+  getDialogue(gameState = {}) {
+    const collectedKeys = gameState.collectedKeys || new Set();
+    const hasBasicMotion = ['h', 'j', 'k', 'l'].every((key) => collectedKeys.has(key));
+
+    if (!this.discovered) {
+      return [
+        '...',
+        'Who... disturbs the stone?',
+        'Show me... the ancient ways.',
+        'Move with hjkl... prove your worth.',
+      ];
+    }
+
+    if (!hasBasicMotion) {
+      return [
+        'Good... you have awakened me.',
+        'But your foundation... incomplete.',
+        'Find all four directions.',
+        'hjkl... the sacred motions.',
+      ];
+    }
+
+    return [
+      'Yes... the foundation is strong.',
+      'h left, j down, k up, l right.',
+      'You understand the ancient ways.',
+      'The paths ahead... await your steps.',
+      this.getWisdom(),
+    ];
+  }
+
+  /**
+   * Get interactive teaching dialogue for specific movements
+   * @param {string} movement - The movement key being learned
+   * @returns {string} - Teaching dialogue for that movement
+   */
+  getMovementTeaching(movement) {
+    const teachings = {
+      h: 'h moves left... like the setting sun.',
+      j: "j moves down... into the earth's embrace.",
+      k: 'k moves up... toward the endless sky.',
+      l: 'l moves right... like the rising dawn.',
+    };
+    return teachings[movement] || 'Practice the four directions...';
+  }
+
+  /**
+   * Get encouraging dialogue when player shows progress
+   * @returns {string} - Encouraging message
+   */
+  getEncouragement() {
+    const encouragements = [
+      'The stone remembers your progress.',
+      'Ancient paths open before you.',
+      'Your cursor grows stronger.',
+      'The foundation solidifies.',
+      'Motion becomes natural.',
+    ];
+    return encouragements[Math.floor(Math.random() * encouragements.length)];
   }
 }

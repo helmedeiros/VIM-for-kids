@@ -11,6 +11,7 @@ This folder contains comprehensive technical documentation for developers, contr
 | **[📖 Documentation Index](README.md)**                      | Complete navigation guide           | All         |
 | **[🚀 Development Guide](DEVELOPMENT.md)**                   | Setup, workflow, and best practices | Developers  |
 | **[🏗️ Architecture Guide](ARCHITECTURE.md)**                 | Hexagonal architecture explanation  | Developers  |
+| **[💬 Dialogue Message System](DIALOGUE_MESSAGE_SYSTEM.md)** | NPC conversations and UI messages   | Developers  |
 | **[🌳 Trunk-Based Development](TRUNK_BASED_DEVELOPMENT.md)** | Modern development workflow guide   | Developers  |
 | **[📝 Conventional Commits](CONVENTIONAL_COMMITS.md)**       | Commit message standards and tools  | All         |
 | **[🔧 Build System](BUILD_SYSTEM_SUMMARY.md)**               | Technical implementation details    | Developers  |

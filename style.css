@@ -1224,3 +1224,168 @@ h1 {
     text-shadow: 1px 1px 8px rgba(155, 89, 182, 0.8);
   }
 }
+
+/* NPC hover effects for visual feedback */
+.tile.npc:not(.caret-spirit):not(.syntax-wisp):not(.bug-king):not(.caret-stone):not(
+    .maze-scribe
+  ):not(.deletion-echo):not(.insert-scribe):not(.mirror-sprite):not(.practice-buddy) {
+  animation: npcGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes npcGlow {
+  from {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+  to {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* Message Bubble Styles */
+.message-bubble {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(52, 73, 94, 0.95);
+  color: #ecf0f1;
+  padding: 20px 25px;
+  border-radius: 15px;
+  border: 2px solid #34495e;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  max-width: 400px;
+  min-width: 250px;
+  z-index: 10000;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+.message-bubble.dialogue {
+  background: linear-gradient(135deg, rgba(52, 73, 94, 0.95), rgba(44, 62, 80, 0.95));
+  border: 2px solid #3498db;
+  box-shadow: 0 0 30px rgba(52, 152, 219, 0.3);
+}
+
+.message-bubble.info {
+  border-color: #2ecc71;
+  box-shadow: 0 0 20px rgba(46, 204, 113, 0.2);
+}
+
+.message-bubble.warning {
+  border-color: #f39c12;
+  box-shadow: 0 0 20px rgba(243, 156, 18, 0.2);
+}
+
+.message-bubble.error {
+  border-color: #e74c3c;
+  box-shadow: 0 0 20px rgba(231, 76, 60, 0.2);
+}
+
+.message-speaker {
+  font-weight: bold;
+  color: #3498db;
+  margin-bottom: 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(52, 152, 219, 0.3);
+  padding-bottom: 5px;
+}
+
+.message-text {
+  margin: 10px 0;
+  white-space: pre-line;
+  word-wrap: break-word;
+}
+
+.message-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #95a5a6;
+  font-size: 20px;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.message-close:hover {
+  background-color: rgba(231, 76, 60, 0.8);
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Message bubble speech bubble effect */
+.message-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 30px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #34495e;
+}
+
+.message-bubble.dialogue::before {
+  border-top-color: #3498db;
+}
+
+/* Position variants */
+.message-bubble[data-position='top'] {
+  top: 20%;
+  transform: translate(-50%, -50%);
+}
+
+.message-bubble[data-position='bottom'] {
+  top: 80%;
+  transform: translate(-50%, -50%);
+}
+
+.message-bubble[data-position='left'] {
+  left: 25%;
+  transform: translate(-50%, -50%);
+}
+
+.message-bubble[data-position='right'] {
+  left: 75%;
+  transform: translate(-50%, -50%);
+}
+
+/* Animation */
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Responsive design for message bubbles */
+@media (max-width: 768px) {
+  .message-bubble {
+    max-width: 90vw;
+    min-width: 80vw;
+    font-size: 13px;
+    padding: 15px 20px;
+  }
+
+  .message-bubble[data-position='left'],
+  .message-bubble[data-position='right'] {
+    left: 50%;
+  }
+}

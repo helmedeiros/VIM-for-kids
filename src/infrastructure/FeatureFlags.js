@@ -94,6 +94,7 @@ class FeatureFlags {
       const remoteFlags = localStorage.getItem('remoteFeatureFlags');
       return remoteFlags ? JSON.parse(remoteFlags) : {};
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.warn('Failed to load remote feature flags:', error);
       return {};
     }

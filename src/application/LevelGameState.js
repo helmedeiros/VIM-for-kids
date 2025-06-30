@@ -116,6 +116,7 @@ export class LevelGameState {
       );
     } catch (error) {
       // Log error but don't prevent zone loading
+      // eslint-disable-next-line no-console
       console.error('Failed to show zone progression cutscene:', error);
     }
   }
@@ -171,6 +172,7 @@ export class LevelGameState {
       );
     } catch (error) {
       // Log error but don't prevent zone loading
+      // eslint-disable-next-line no-console
       console.error('Failed to show zone entry cutscene:', error);
     }
   }

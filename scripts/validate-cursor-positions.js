@@ -105,12 +105,13 @@ async function parseZoneFile(filePath) {
     // Parse legend entries
     const legendContent = legendMatch[1];
     const legend = {};
-    const legendEntries = legendContent.match(/(\w+):\s*['"`]([^'"`]+)['"`]/g);
+    // Handle both quoted and unquoted keys: 'P': 'path' or P: 'path'
+    const legendEntries = legendContent.match(/(['"`]?)([^'"`:\s]+)\1:\s*['"`]([^'"`]+)['"`]/g);
     if (legendEntries) {
       legendEntries.forEach((entry) => {
-        const match = entry.match(/(\w+):\s*['"`]([^'"`]+)['"`]/);
+        const match = entry.match(/(['"`]?)([^'"`:\s]+)\1:\s*['"`]([^'"`]+)['"`]/);
         if (match) {
-          legend[match[1]] = match[2];
+          legend[match[2]] = match[3];
         }
       });
     }

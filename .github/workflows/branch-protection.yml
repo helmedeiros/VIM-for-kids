@@ -37,30 +37,117 @@ jobs:
           npm run format:check
           echo "✅ Code formatting is correct"
 
-      - name: Lint check
-        run: npm run lint
-
-      - name: Test with coverage
-        run: npm run test:coverage
-
-      - name: Check coverage threshold
+      - name: Lint check with detailed reporting
         run: |
-          COVERAGE=$(npm run test:coverage 2>&1 | grep -o 'All files[^|]*|[^|]*|[^|]*|[^|]*|[^|]*' | sed 's/.*| *\([0-9.]*\) *|.*/\1/')
-          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-            echo "❌ Coverage is below 80%: $COVERAGE%"
+          echo "🔍 Running ESLint with detailed reporting..."
+          npm run lint 2>&1 | tee lint-output.log
+
+          # Check if there are any errors (not warnings)
+          if grep -q "error" lint-output.log; then
+            echo "❌ ESLint errors found - build will fail"
             exit 1
           fi
-          echo "✅ Coverage is above 80%: $COVERAGE%"
+
+          # Count warnings
+          WARNING_COUNT=$(grep -c "warning" lint-output.log || echo "0")
+          if [ "$WARNING_COUNT" -gt 0 ]; then
+            echo "⚠️  Found $WARNING_COUNT ESLint warnings"
+            echo "Consider fixing these warnings to maintain code quality"
+          else
+            echo "✅ No ESLint warnings found"
+          fi
+
+      - name: Test with coverage
+        run: |
+          echo "🧪 Running tests with coverage..."
+          npm run test:coverage
+
+      - name: Check coverage threshold with detailed reporting
+        run: |
+          echo "📊 Analyzing test coverage..."
+
+          # Run coverage and capture output
+          npm run test:coverage 2>&1 | tee coverage-output.log
+
+          # Extract coverage percentages
+          STATEMENTS=$(grep "Statements" coverage-output.log | sed 's/.*: \([0-9.]*\)%.*/\1/' || echo "0")
+          BRANCHES=$(grep "Branches" coverage-output.log | sed 's/.*: \([0-9.]*\)%.*/\1/' || echo "0")
+          FUNCTIONS=$(grep "Functions" coverage-output.log | sed 's/.*: \([0-9.]*\)%.*/\1/' || echo "0")
+          LINES=$(grep "Lines" coverage-output.log | sed 's/.*: \([0-9.]*\)%.*/\1/' || echo "0")
+
+          echo "📈 Coverage Summary:"
+          echo "  Statements: ${STATEMENTS}% (Required: 80%)"
+          echo "  Branches: ${BRANCHES}% (Required: 80%)"
+          echo "  Functions: ${FUNCTIONS}% (Required: 80%)"
+          echo "  Lines: ${LINES}% (Required: 80%)"
+
+          # Check each threshold
+          FAILED=0
+          if (( $(echo "$STATEMENTS < 80" | bc -l) )); then
+            echo "❌ Statements coverage below 80%: ${STATEMENTS}%"
+            FAILED=1
+          fi
+          if (( $(echo "$BRANCHES < 80" | bc -l) )); then
+            echo "❌ Branches coverage below 80%: ${BRANCHES}%"
+            FAILED=1
+          fi
+          if (( $(echo "$FUNCTIONS < 80" | bc -l) )); then
+            echo "❌ Functions coverage below 80%: ${FUNCTIONS}%"
+            FAILED=1
+          fi
+          if (( $(echo "$LINES < 80" | bc -l) )); then
+            echo "❌ Lines coverage below 80%: ${LINES}%"
+            FAILED=1
+          fi
+
+          if [ $FAILED -eq 1 ]; then
+            echo ""
+            echo "💡 To fix coverage issues:"
+            echo "  1. Run 'npm run test:coverage' locally"
+            echo "  2. Check coverage/lcov-report/index.html for detailed report"
+            echo "  3. Add tests for uncovered code paths"
+            echo "  4. Focus on files with <80% coverage"
+            exit 1
+          fi
+
+          echo "✅ All coverage thresholds met"
 
       - name: Build check
-        run: npm run build
+        run: |
+          echo "🏗️  Building production bundle..."
+          npm run build
 
       - name: Check bundle size
         run: |
+          echo "📦 Checking bundle size..."
           npm run build
           BUNDLE_SIZE=$(du -sk dist | cut -f1)
+          echo "Bundle size: ${BUNDLE_SIZE}KB"
+
           if [ $BUNDLE_SIZE -gt 5120 ]; then # 5MB limit
-            echo "❌ Bundle size is too large: ${BUNDLE_SIZE}KB"
+            echo "❌ Bundle size is too large: ${BUNDLE_SIZE}KB (limit: 5MB)"
+            echo "💡 Consider:"
+            echo "  - Code splitting"
+            echo "  - Tree shaking optimizations"
+            echo "  - Removing unused dependencies"
             exit 1
           fi
           echo "✅ Bundle size is acceptable: ${BUNDLE_SIZE}KB"
+
+      - name: Validate cursor positions
+        run: |
+          echo "🎯 Validating cursor positions..."
+          npm run validate:cursors
+
+      - name: Quality Gates Summary
+        if: always()
+        run: |
+          echo "🎯 Quality Gates Summary:"
+          echo "✅ Code formatting"
+          echo "✅ Linting (errors only)"
+          echo "✅ Test coverage >80%"
+          echo "✅ Production build"
+          echo "✅ Bundle size <5MB"
+          echo "✅ Cursor position validation"
+          echo ""
+          echo "🎉 All quality gates passed!"

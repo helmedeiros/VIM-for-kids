@@ -85,29 +85,147 @@ export class InsertScribe {
   }
 
   /**
-   * Get poetic wisdom about insertion
+   * Get poetic verses about text creation
+   * @returns {string} - Random poetic wisdom about insertion
    */
   getPoetry() {
     const poems = [
-      'i before the cursor, gentle and true,\na after the cursor, adding anew.',
-      'o opens below with graceful line,\nO opens above, structure divine.',
-      'Insert mode flows like rivers of ink,\nText appears wherever you think.',
-      "Four ways to enter creation's door,\ni, a, o, O - the sacred four.",
+      'Where cursor rests, let words take flight,\n    With "i" before and "a" behind so bright.',
+      'Above with "O", below with "o",\n    Four gates through which new verses flow.',
+      'Insert before, append behind,\n    Open lines where thoughts unwind.',
+      'The quill remembers every stroke,\n    From silence into words we spoke.',
+      'Creation starts with single key,\n    "i" unlocks what\'s meant to be.',
+      "In insertion's gentle art,\n    Every keystroke plays its part.",
     ];
     return poems[Math.floor(Math.random() * poems.length)];
   }
 
   /**
-   * Get helpful guidance about insertion commands
+   * Get contextual dialogue based on player's insertion mastery
+   * @param {Object} gameState - Current game state with collected keys
+   * @returns {Array<string>} - Array of dialogue lines
    */
-  getGuidance() {
-    const guidance = [
-      'i - Insert before cursor, where text flows in',
-      'a - Append after cursor, where thoughts extend',
-      'o - Open new line below, creating space to grow',
-      'O - Open new line above, lifting ideas thereof',
-      'Master these four, and text will flow like poetry',
+  getDialogue(gameState = {}) {
+    const collectedKeys = gameState.collectedKeys || new Set();
+    const hasI = collectedKeys.has('i');
+    const hasA = collectedKeys.has('a');
+    const hasO = collectedKeys.has('o');
+    const hasCapitalO = collectedKeys.has('O');
+    const hasInsertions = hasI && hasA && hasO && hasCapitalO;
+
+    if (!this.writing) {
+      return [
+        '*A figure in bright robes looks up from writing*',
+        'Ah, a fellow seeker of the written word!',
+        "I am the Insert Scribe, keeper of creation's keys.",
+        '*Dips quill in shimmering ink*',
+        'Tell me, do you know the Four Sacred Insertions?',
+      ];
+    }
+
+    if (!hasI) {
+      return [
+        '*Begins writing with flowing script*',
+        'First, learn the gentlest entry: "i"',
+        'Insert before the cursor rests,\n    Like morning dew on printed text.',
+        '*Points quill toward glowing letter* Seek it there.',
+        this.getPoetry(),
+      ];
+    }
+
+    if (!hasA) {
+      return [
+        '*Nods approvingly as ink flows*',
+        'Excellent! But creation has more forms...',
+        '"a" appends, it follows through,\n    Behind the cursor, words renew.',
+        '*Demonstrates with graceful strokes*',
+        'Find append, and double your power.',
+      ];
+    }
+
+    if (!hasO) {
+      return [
+        '*Smiles as parchment fills with text*',
+        'Your foundation grows stronger!',
+        'But what of breathing room? New space?',
+        '"o" opens lines below with grace,\n    Creating space for thoughts to grow.',
+        '*Gestures toward the field* It blooms nearby.',
+      ];
+    }
+
+    if (!hasCapitalO) {
+      return [
+        '*Quill dances with inspired energy*',
+        'One final mystery remains above...',
+        '"O" opens lines where none existed,\n    Above the cursor, dreams assisted.',
+        '*Points upward with golden ink*',
+        'Seek the capital, complete the dance.',
+      ];
+    }
+
+    if (hasInsertions) {
+      return [
+        '*Sets down quill with satisfied flourish*',
+        'Magnificent! The Four Insertions sing in harmony!',
+        '"i" before, "a" after, "o" below, "O" above,\n    Like cardinal directions, but for love of words.',
+        '*Scrolls glow with completed verses*',
+        'You have mastered the art of creation!',
+        'Text flows like poetry through your fingers.',
+        this.getPoetry(),
+      ];
+    }
+
+    return [
+      '*Continues writing beautiful script*',
+      'The words await your guidance...',
+      this.getPoetry(),
     ];
-    return guidance[Math.floor(Math.random() * guidance.length)];
+  }
+
+  /**
+   * Get insertion-specific teaching when player demonstrates understanding
+   * @param {string} insertion - The insertion command being learned
+   * @returns {string} - Poetic teaching for that command
+   */
+  getInsertionTeaching(insertion) {
+    const teachings = {
+      i: '*Quill glows* INSERT awakens! Before the cursor, creation flows.',
+      a: '*Ink shimmers* APPEND embraces! After cursor, text grows.',
+      o: '*Parchment rustles* OPEN below! New lines bloom like flowers.',
+      O: '*Script illuminates* OPEN above! Space for thoughts like towers.',
+    };
+    return teachings[insertion] || '*Writes gracefully* Practice the sacred insertions...';
+  }
+
+  /**
+   * Get encouraging verses when player shows creativity
+   * @returns {string} - Encouraging poetic message
+   */
+  getEncouragement() {
+    const encouragements = [
+      'Your creativity flows like a river!',
+      'Each insertion is a work of art.',
+      'Text dances beneath your guidance.',
+      'The field responds to your inspiration.',
+      'Words bloom where you plant them.',
+      'Creation is the highest calling.',
+    ];
+    return encouragements[Math.floor(Math.random() * encouragements.length)];
+  }
+
+  /**
+   * Get advice about thoughtful text creation
+   * @returns {string} - Wisdom about writing and editing
+   */
+  getCreativeWisdom() {
+    const wisdom = [
+      'Good writing starts with good insertion.',
+      'Know where to place each word, each thought.',
+      'Before, after, above, below - position matters.',
+      'The cursor is your compass in the text.',
+      'Insertion is intention made manifest.',
+      'Every great text began with a single "i".',
+    ];
+    return wisdom[Math.floor(Math.random() * wisdom.length)];
   }
 }

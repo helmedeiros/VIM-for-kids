@@ -129,4 +129,169 @@ export class MirrorSprite {
     ];
     return reflections[Math.floor(Math.random() * reflections.length)];
   }
+
+  /**
+   * Get mystical hints about search patterns
+   * @returns {string} - Cryptic wisdom about searching
+   */
+  getSearchWisdom() {
+    const wisdom = [
+      '~ Patterns flow like water currents ~',
+      '~ Forward and backward, the search flows ~',
+      '~ / seeks ahead, ? seeks behind ~',
+      '~ n continues, N reverses the find ~',
+      '~ What you seek, seeks you in return ~',
+      '~ Reflection reveals hidden truth ~',
+      '~ The answer ripples through the text ~',
+    ];
+    return wisdom[Math.floor(Math.random() * wisdom.length)];
+  }
+
+  /**
+   * Get shimmering riddles about navigation
+   * @returns {string} - Mystical riddles about search
+   */
+  getSearchRiddle() {
+    const riddles = [
+      '~ What moves forward but can go back? ~',
+      '~ What finds without being found? ~',
+      '~ What question seeks its own answer? ~',
+      '~ Which symbol looks ahead in time? ~',
+      '~ Which symbol peers into the past? ~',
+      '~ What continues without beginning? ~',
+    ];
+    return riddles[Math.floor(Math.random() * riddles.length)];
+  }
+
+  /**
+   * Get contextual dialogue based on player's search mastery
+   * @param {Object} gameState - Current game state with collected keys
+   * @returns {Array<string>} - Array of dialogue lines
+   */
+  getDialogue(gameState = {}) {
+    const collectedKeys = gameState.collectedKeys || new Set();
+    const hasForward = collectedKeys.has('/');
+    const hasBackward = collectedKeys.has('?');
+    const hasNext = collectedKeys.has('n');
+    const hasPrevious = collectedKeys.has('N');
+    const hasSearches = hasForward && hasBackward && hasNext && hasPrevious;
+
+    if (!this.reflecting) {
+      return [
+        "*A shimmering figure appears at the water's edge*",
+        '~ I am reflection, I am search ~',
+        '~ You seek what lies hidden in text? ~',
+        '*Ripples spread across the surface*',
+        '~ First, learn to look forward... ~',
+      ];
+    }
+
+    if (!hasForward) {
+      return [
+        '*Gestures gracefully toward the flowing water*',
+        '~ The slash "/" carries you forward ~',
+        '~ Like a river flowing toward tomorrow ~',
+        '*Water sparkles with anticipation*',
+        '~ Find the forward search, seeker... ~',
+        this.getSearchWisdom(),
+      ];
+    }
+
+    if (!hasBackward) {
+      return [
+        '*Shimmers with pleased radiance*',
+        '~ Forward you have learned, but what of the past? ~',
+        '~ The question mark "?" looks behind ~',
+        "~ Like moonlight on water's memory ~",
+        '*Reflection shows glimpses of yesterday*',
+        '~ Seek the backward search... ~',
+      ];
+    }
+
+    if (!hasNext) {
+      return [
+        '*Ripples dance with growing excitement*',
+        '~ Two directions mastered! But searching finds once... ~',
+        '~ "n" continues the pattern forward ~',
+        '~ Next, next, always next ~',
+        '*Shows multiple reflections of the same pattern*',
+        '~ Find continuation, young seeker... ~',
+      ];
+    }
+
+    if (!hasPrevious) {
+      return [
+        '*Water surface glows with ethereal light*',
+        '~ So close to mastery! One mystery remains... ~',
+        '~ Capital "N" reverses the journey ~',
+        '~ Previous, previous, always previous ~',
+        '*Reflections flow backward through time*',
+        '~ Complete the circle of search... ~',
+      ];
+    }
+
+    if (hasSearches) {
+      return [
+        '*The water becomes crystal clear, revealing all truths*',
+        '~ Perfect harmony! The Four Searches flow as one! ~',
+        '~ "/" forward, "?" backward, "n" next, "N" previous ~',
+        '*All reflections align in perfect symmetry*',
+        '~ You have mastered the dance of pattern and text ~',
+        '~ The springs sing your victory! ~',
+        '*Begins to fade with satisfied smile*',
+        this.getSearchWisdom(),
+      ];
+    }
+
+    return [
+      "*Continues shimmering at the water's edge*",
+      '~ The patterns call to you... ~',
+      this.getSearchRiddle(),
+    ];
+  }
+
+  /**
+   * Get search-specific teaching when player demonstrates understanding
+   * @param {string} search - The search command being learned
+   * @returns {string} - Mystical teaching for that command
+   */
+  getSearchTeaching(search) {
+    const teachings = {
+      '/': "~ *Shimmers forward* The slash opens tomorrow's door... ~",
+      '?': "~ *Reflects backward* The question peers into yesterday's secrets... ~",
+      n: '~ *Ripples continue* Next carries the pattern forward in time... ~',
+      N: '~ *Current reverses* Previous flows the pattern backward through space... ~',
+    };
+    return teachings[search] || '~ *Whispers* Practice the flow of search... ~';
+  }
+
+  /**
+   * Get ethereal wisdom about finding and seeking
+   * @returns {string} - Philosophical insights about search
+   */
+  getPhilosophyOfSearch() {
+    const philosophy = [
+      'To search is to hope for discovery.',
+      'What you seek often seeks you.',
+      'Patterns exist before we find them.',
+      'The journey of search is the destination.',
+      'In reflection, all answers become clear.',
+      'True search requires both question and direction.',
+    ];
+    return philosophy[Math.floor(Math.random() * philosophy.length)];
+  }
+
+  /**
+   * Get warning about vanishing (Mirror Sprite\'s mysterious nature)
+   * @returns {string} - Fleeting goodbye message
+   */
+  getVanishingMessage() {
+    const messages = [
+      '~ *Fading* Like ripples, I must fade... ~',
+      '~ *Shimmering away* Search well, remember me in reflections... ~',
+      '~ *Becoming transparent* The water calls me home... ~',
+      '~ *Dissolving* Find me in every search you make... ~',
+    ];
+    return messages[Math.floor(Math.random() * messages.length)];
+  }
 }

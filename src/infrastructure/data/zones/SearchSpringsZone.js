@@ -104,13 +104,16 @@ export class SearchSpringsZone {
       },
       npcs: [
         {
-          id: 'reflection_spirit',
+          id: 'mirror_sprite',
+          type: 'mirror_sprite',
           appearsWhen: { collectedVimKeys: ['/', '?', 'n', 'N'] },
           dialogue: [
-            'The reflections clear, revealing truth...',
-            '/ searches forward, ? searches backward.',
-            'n finds the next, N finds the previous.',
-            'You have learned to trace patterns through reflection. The cavern awaits.',
+            '*The water becomes crystal clear, revealing all truths*',
+            '~ Perfect harmony! The Four Searches flow as one! ~',
+            '~ "/" forward, "?" backward, "n" next, "N" previous ~',
+            '*All reflections align in perfect symmetry*',
+            '~ You have mastered the dance of pattern and text ~',
+            '~ The springs sing your victory! ~',
           ],
           position: [25, 1],
         },

@@ -33,4 +33,21 @@ export class GameRenderer {
     // eslint-disable-line no-unused-vars
     throw new Error('GameRenderer.showKeyInfo() must be implemented');
   }
+
+  /**
+   * Show a message bubble on screen
+   * @param {string} message - The message to display
+   * @param {Object} options - Display options (duration, position, type, speaker)
+   */
+  showMessage(message, options = {}) {
+    // eslint-disable-line no-unused-vars
+    throw new Error('GameRenderer.showMessage() must be implemented');
+  }
+
+  /**
+   * Hide any currently displayed message
+   */
+  hideMessage() {
+    throw new Error('GameRenderer.hideMessage() must be implemented');
+  }
 }
