@@ -64,16 +64,16 @@ describe('BlinkingGroveZone', () => {
       expect(keys).toEqual(['h', 'j', 'k', 'l']);
 
       const positions = config.tiles.specialTiles.map((tile) => tile.position);
-      expect(positions).toContainEqual([31, 5]); // h key
-      expect(positions).toContainEqual([34, 5]); // j key
-      expect(positions).toContainEqual([31, 8]); // k key
-      expect(positions).toContainEqual([37, 5]); // l key
+      expect(positions).toContainEqual([1, 10]); // h key
+      expect(positions).toContainEqual([2, 11]); // j key
+      expect(positions).toContainEqual([2, 9]); // k key
+      expect(positions).toContainEqual([3, 10]); // l key
     });
 
     test('should have correct text labels configuration', () => {
       const config = BlinkingGroveZone.getConfig();
 
-      expect(config.tiles.textLabels).toHaveLength(34); // Updated for new text layout
+      expect(config.tiles.textLabels).toHaveLength(36); // Updated for new text layout with additional characters
 
       // Check that we have the expected text elements
       const textContent = config.tiles.textLabels.map(l => l.text).join('');
@@ -132,7 +132,7 @@ describe('BlinkingGroveZone', () => {
 
     test('should create functional zone with all components', () => {
       expect(zone.vimKeys).toHaveLength(4);
-      expect(zone.textLabels).toHaveLength(34); // Updated for new text layout
+      expect(zone.textLabels).toHaveLength(36); // Updated for new text layout with additional characters
       expect(zone.gate).toBeDefined();
       expect(zone.npcs).toHaveLength(1);
       expect(zone.events).toHaveLength(2);
@@ -140,8 +140,8 @@ describe('BlinkingGroveZone', () => {
 
     test('should have correct cursor start position', () => {
       const startPosition = zone.getCursorStartPosition();
-      // Updated for new cursor start position (38, 9) with zone offset
-      expect(startPosition).toEqual(new Position(44, 16)); // Actual calculated position based on zone offset
+      // Updated for new cursor start position (2, 10) with zone offset
+      expect(startPosition).toEqual(new Position(8, 14)); // Actual calculated position based on zone offset
     });
 
     test('should have gate initially closed', () => {

@@ -35,111 +35,91 @@ export class BlinkingGroveZone {
       ...this._getSharedConfig(),
 
       // Custom cursor start position - on the green grassy area (avoiding key and text positions)
-      cursorStartPosition: new Position(38, 9),
+      cursorStartPosition: new Position(2, 10),
       tiles: {
         tileType: 'mixed_terrain',
         // Large layout matching the image: water left, grass center-left, stone maze right
         layout: [
-          // Row 0: Top border with "Remember words are not WORD" text area
-          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
-          // Row 1: Water and stone with text labels
-          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWSREMEMRERWOSSSSARESSSSNOTSSSSWORDSSSSSSSSSSSSSSSS',
-          // Row 2: Transition to grass and stone maze
-          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
-          // Row 3: Water, grass patch with keys and stone maze with openings
-          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGGGGGGGGGGGGGGGGGGGGGGSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
-          // Row 4: Water, grass with dirt patches, and stone maze
-          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGGDDGDDDGGGGDDGDDGGGGSSSSSSSSSSSSSsssSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
-          // Row 5: Water, grass with keys h,j,l and dirt, stone maze
-          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGhGDjGDDDGGGGGDlDGGGGSSSSSSSSSSSSSsssSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
-          // Row 6: Water, grass area, stone maze
-          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGGGGGDDDGGGGGGGGGGGGGSSSSSSSSSSSSSsssSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSsSS',
-          // Row 7: Water, grass with "Hello" text area, stone maze
-          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGGGGGGGGGGGGGGGGGGGGGSSSSSsssSSSSSsssSSSSSSSSSSSSsssSSSSSSSSSSSSSSSssSS',
-          // Row 8: Water, grass with "world!" text, stone maze with NPC
-          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGkGGGGGGGGGGGGGGGGGGGGSSSSSsssSSSSSSSSSSSSSSSSSSsssSSSSSSSSSSSSSSSSsNSS',
-          // Row 9: Water, grass area continues, stone maze
-          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGGGGGGGGGGGGGGGGGGGGGGSSSSSSSSSSSSsssSSSSSSSSSSSSsssSSSSSSSSSSSSSSSSssSS',
-          // Row 10: Water, grass area, stone maze
-          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGGGGGGGGGGGGGGGGGGGGGGSSSSSSSSSSSSSsssSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
-          // Row 11: Water and stone base
-          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
+          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGGGGGGGGD',
+          'WWWWWWWWWWWWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSGGGGGGWWWGWWWWWGDD',
+          'WWWWWWWWWWWWWWWWSDDDDDDDDDSSDDDDDDDDSDDDDDSDDDDDDDDSDDDGGGGGGGWWWWGGGGGWDDD',
+          'WWWWWWWWWWWWWWWWSDDDDDDDDDSSDSSSSSSDSDSSSDSDSSSDSSDSDSSSSGGGGWWWWWWWGGWWWWW',
+          'WWWWWWWWWWWWWWWWSDDDDDDDDDSDDSDDDDDDSDSDSDSDSDSDSSDSDSDSWGGGWWWWGGGGGGWWWWW',
+          'WWWWWWWWWWWWWWWWSSSSSSSSSSSDSSSSSSSDSDSDSDSDSDSDSSDSDDDSWGGGGGWWGWWWWWWWWWW',
+          'WWWWWWWWWWWWWWWWSDDDDDDDDDSDSDDDDDSDDDSDSDSDSDDDDDDSDSDSWGGWWWWWGGGWWWWWWWW',
+          'GGGGGGGGGGGGWWWWSSSSSSSSSDSDSDSSSSSDSSSDSDSDSSSSSSSSDSDSWGGGWWWWGGGGGWWWWWW',
+          'GGGGGGGGGGGGWWWWSDDDDDDDDDDDSDSDDDSDDSSDSDDDDDDDDDDDDSDSWGGWWWWWGWWWWWWWWWW',
+          'GDDDGGGGGGGGWWWWSDSSSSSSSSSSSDSDSSSDSSSSSSSSSSSSSSSSDSSSWGGGGGGGGWWWWWWWWWW',
+          'GDDDDDDDDDGGWWWWSDDDDDSDSDDDDDSDSDDDSSSSSSSSSSSSDSSSDDDSWWWWWWWWWWWWWWWWWWW',
+          'GDDDGGGGGDGGWWWWSSSSSDSDSDSSSSSDSDSSSSSSSSSSSSSSDSSSDSDSWWWWWWWWWWWWWWWWWWW',
+          'GGGGGGGGGDGGWWWWSDDDDDSDSDDDDDDDSDSDDDDDDDDDDDDSDSSSDSDSWWWWWWWWWWWWWWWWWWW',
+          'GGGGGGGGGDGGSSSSSDSSSSSDSSSSSSSSSDSDSSSSSSSSSSDSDSSSDSDSWWWWWWWWWWWWWWWWWWW',
+          'GTGGGGGGGDDDDDDDDDSDDDSDSDDDDDDDSDSDSDDDDDDDDDDSDDDDDSDSWWWWWWWWWWWWWWWWWWW',
+          'GGGGGGGGGGGGSSSSSDSSSDSDSDSSSSSSSDSDSSSSSSSSSSSSDSSSSSDSWWWWWWWWWWWWWWWWWWW',
+          'WWWWWWWWWWWWWWWWSDDDDDDDDDDDDDDDDDSDDDDDDDDDDDDDDDDDDDDSWWWWWWWWWWWWWWWWWWW',
+          'WWWWWWWWWWWWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSWWWWWWWWWWWWWWWWWWW',
+          'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW',
         ],
         legend: {
           W: 'water',
           G: 'grass',
           D: 'dirt',
           S: 'stone',
-          s: 'stone', // path stone
-          N: 'stone', // NPC position
-          // Text positions will be handled by textLabels
-          R: 'stone', // Remember
-          e: 'stone', // letters
-          m: 'stone',
-          b: 'stone',
-          r: 'stone',
-          w: 'stone', // words
-          o: 'stone',
-          d: 'stone',
-          a: 'stone', // are
-          n: 'stone', // not
-          t: 'stone',
-          // Keys will be handled by specialTiles
-          h: 'grass',
-          j: 'grass',
-          k: 'grass',
-          l: 'grass',
+          T: 'tree',
+          N: 'stone',
         },
         specialTiles: [
-          { type: 'vim_key', value: 'h', position: [31, 5] }, // Left movement key - on grass
-          { type: 'vim_key', value: 'j', position: [34, 5] }, // Down movement key - on grass
-          { type: 'vim_key', value: 'k', position: [31, 8] }, // Up movement key - on grass
-          { type: 'vim_key', value: 'l', position: [37, 5] }, // Right movement key - on grass
+          { type: 'vim_key', value: 'h', position: [1, 10] }, // Left movement key - on grass
+          { type: 'vim_key', value: 'j', position: [2, 11] }, // Down movement key - on grass
+          { type: 'vim_key', value: 'k', position: [2, 9] }, // Up movement key - on grass
+          { type: 'vim_key', value: 'l', position: [3, 10] }, // Right movement key - on grass
         ],
         textLabels: [
           // "Remember words are not WORD" text at the top
-          { text: 'R', position: [52, 1], color: '#000', fontSize: '14px' },
-          { text: 'e', position: [53, 1], color: '#000', fontSize: '14px' },
-          { text: 'm', position: [54, 1], color: '#000', fontSize: '14px' },
-          { text: 'e', position: [55, 1], color: '#000', fontSize: '14px' },
-          { text: 'm', position: [56, 1], color: '#000', fontSize: '14px' },
-          { text: 'b', position: [57, 1], color: '#000', fontSize: '14px' },
-          { text: 'e', position: [58, 1], color: '#000', fontSize: '14px' },
-          { text: 'r', position: [59, 1], color: '#000', fontSize: '14px' },
+          { text: 'R', position: [17, 2], color: '#000', fontSize: '14px' },
+          { text: 'e', position: [18, 2], color: '#000', fontSize: '14px' },
+          { text: 'm', position: [19, 2], color: '#000', fontSize: '14px' },
+          { text: 'e', position: [20, 2], color: '#000', fontSize: '14px' },
+          { text: 'm', position: [21, 2], color: '#000', fontSize: '14px' },
+          { text: 'b', position: [22, 2], color: '#000', fontSize: '14px' },
+          { text: 'e', position: [23, 2], color: '#000', fontSize: '14px' },
+          { text: 'r', position: [24, 2], color: '#000', fontSize: '14px' },
+          { text: ':', position: [25, 2], color: '#000', fontSize: '14px' },
 
-          { text: 'w', position: [62, 1], color: '#000', fontSize: '14px' },
-          { text: 'o', position: [63, 1], color: '#000', fontSize: '14px' },
-          { text: 'r', position: [64, 1], color: '#000', fontSize: '14px' },
-          { text: 'd', position: [65, 1], color: '#000', fontSize: '14px' },
-          { text: 's', position: [66, 1], color: '#000', fontSize: '14px' },
+          { text: 'w', position: [17, 3], color: '#000', fontSize: '14px' },
+          { text: 'o', position: [18, 3], color: '#000', fontSize: '14px' },
+          { text: 'r', position: [19, 3], color: '#000', fontSize: '14px' },
+          { text: 'd', position: [20, 3], color: '#000', fontSize: '14px' },
+          { text: 's', position: [21, 3], color: '#000', fontSize: '14px' },
 
-          { text: 'a', position: [69, 1], color: '#000', fontSize: '14px' },
-          { text: 'r', position: [70, 1], color: '#000', fontSize: '14px' },
-          { text: 'e', position: [71, 1], color: '#000', fontSize: '14px' },
+          { text: 'a', position: [23, 3], color: '#000', fontSize: '14px' },
+          { text: 'r', position: [24, 3], color: '#000', fontSize: '14px' },
+          { text: 'e', position: [25, 3], color: '#000', fontSize: '14px' },
 
-          { text: 'n', position: [74, 1], color: '#000', fontSize: '14px' },
-          { text: 'o', position: [75, 1], color: '#000', fontSize: '14px' },
-          { text: 't', position: [76, 1], color: '#000', fontSize: '14px' },
+          { text: 'n', position: [17, 4], color: '#000', fontSize: '14px' },
+          { text: 'o', position: [18, 4], color: '#000', fontSize: '14px' },
+          { text: 't', position: [19, 4], color: '#000', fontSize: '14px' },
 
-          { text: 'W', position: [79, 1], color: '#000', fontSize: '14px' },
-          { text: 'O', position: [80, 1], color: '#000', fontSize: '14px' },
-          { text: 'R', position: [81, 1], color: '#000', fontSize: '14px' },
-          { text: 'D', position: [82, 1], color: '#000', fontSize: '14px' },
+          { text: 'W', position: [21, 4], color: '#000', fontSize: '14px' },
+          { text: 'O', position: [22, 4], color: '#000', fontSize: '14px' },
+          { text: 'R', position: [23, 4], color: '#000', fontSize: '14px' },
+          { text: 'D', position: [24, 4], color: '#000', fontSize: '14px' },
+          { text: 'S', position: [25, 4], color: '#000', fontSize: '14px' },
 
           // "Hello" text on the grass area
-          { text: 'H', position: [32, 7], color: '#22c55e', fontSize: '16px' },
-          { text: 'e', position: [33, 7], color: '#22c55e', fontSize: '16px' },
-          { text: 'l', position: [34, 7], color: '#22c55e', fontSize: '16px' },
-          { text: 'l', position: [35, 7], color: '#22c55e', fontSize: '16px' },
-          { text: 'o', position: [36, 7], color: '#22c55e', fontSize: '16px' },
+          { text: 'H', position: [2, 13], color: '#22c55e', fontSize: '16px' },
+          { text: 'e', position: [3, 13], color: '#22c55e', fontSize: '16px' },
+          { text: 'l', position: [4, 13], color: '#22c55e', fontSize: '16px' },
+          { text: 'l', position: [5, 13], color: '#22c55e', fontSize: '16px' },
+          { text: 'o', position: [6, 13], color: '#22c55e', fontSize: '16px' },
 
           // "world!" text on the grass area
-          { text: 'w', position: [32, 8], color: '#22c55e', fontSize: '16px' },
-          { text: 'o', position: [33, 8], color: '#22c55e', fontSize: '16px' },
-          { text: 'r', position: [34, 8], color: '#22c55e', fontSize: '16px' },
-          { text: 'l', position: [35, 8], color: '#22c55e', fontSize: '16px' },
-          { text: 'd', position: [36, 8], color: '#22c55e', fontSize: '16px' },
-          { text: '!', position: [37, 8], color: '#22c55e', fontSize: '16px' },
+          { text: 'w', position: [2, 14], color: '#22c55e', fontSize: '16px' },
+          { text: 'o', position: [3, 14], color: '#22c55e', fontSize: '16px' },
+          { text: 'r', position: [4, 14], color: '#22c55e', fontSize: '16px' },
+          { text: 'l', position: [5, 14], color: '#22c55e', fontSize: '16px' },
+          { text: 'd', position: [6,14], color: '#22c55e', fontSize: '16px' },
+          { text: '!', position: [7,14], color: '#22c55e', fontSize: '16px' },
         ],
         gate: {
           locked: true,
