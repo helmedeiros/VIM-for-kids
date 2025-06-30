@@ -115,8 +115,7 @@ export class NPCInteractionUseCase {
    * @param {Object} gameState - Current game state
    * @returns {string|null} - Teaching message or null
    */
-  handleTeachingMoment(npc, skill, gameState) {
-    // eslint-disable-line no-unused-vars
+  handleTeachingMoment(npc, skill, gameState) { // eslint-disable-line no-unused-vars
     if (this._dialogueService && typeof this._dialogueService.getTeachingMoment === 'function') {
       return this._dialogueService.getTeachingMoment(npc, skill);
     }
@@ -130,8 +129,7 @@ export class NPCInteractionUseCase {
    * @param {Object} gameState - Current game state
    * @returns {Object|null} - Celebration data or null
    */
-  handleMilestoneCelebration(milestone, npcs, gameState) {
-    // eslint-disable-line no-unused-vars
+  handleMilestoneCelebration(milestone, npcs, gameState) { // eslint-disable-line no-unused-vars
     if (this._dialogueService && typeof this._dialogueService.celebrateMilestone === 'function') {
       return this._dialogueService.celebrateMilestone(milestone, npcs);
     }
