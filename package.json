@@ -115,6 +115,11 @@
       "ecmaVersion": 2021,
       "sourceType": "module"
     },
+    "globals": {
+      "__DEV__": "readonly",
+      "__BUILD_DATE__": "readonly",
+      "__GIT_HASH__": "readonly"
+    },
     "rules": {
       "no-console": [
         "warn",

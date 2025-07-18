@@ -1,6 +1,21 @@
 /* eslint-env node */
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { execSync } from 'child_process';
+
+// Get git commit hash for version tracking
+const getGitHash = () => {
+  try {
+    return execSync('git rev-parse --short HEAD').toString().trim();
+  } catch (error) {
+    return 'unknown';
+  }
+};
+
+// Get build timestamp
+const getBuildTimestamp = () => {
+  return new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+};
 
 export default defineConfig({
   // Development server configuration
@@ -64,5 +79,7 @@ export default defineConfig({
   // Environment variables
   define: {
     __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
+    __BUILD_DATE__: JSON.stringify(getBuildTimestamp()),
+    __GIT_HASH__: JSON.stringify(getGitHash()),
   },
 });

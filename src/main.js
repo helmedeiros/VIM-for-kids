@@ -1,3 +1,18 @@
+// Development build information for deployment verification
+console.info(`🎮 VIM for Kids - Version 1.0.0`);
+console.info(`📅 Build Date: ${__BUILD_DATE__}`);
+console.info(`🔗 Git Commit: ${__GIT_HASH__}`);
+console.info(`🌐 Environment: ${__DEV__ ? 'Development' : 'Production'}`);
+
+// Update meta tags with build information
+if (typeof document !== 'undefined') {
+  const buildDateMeta = document.querySelector('meta[name="build-date"]');
+  const gitCommitMeta = document.querySelector('meta[name="git-commit"]');
+
+  if (buildDateMeta) buildDateMeta.setAttribute('content', __BUILD_DATE__);
+  if (gitCommitMeta) gitCommitMeta.setAttribute('content', __GIT_HASH__);
+}
+
 import { GameInitializationService } from './application/services/GameInitializationService.js';
 import { PersistenceService } from './application/services/PersistenceService.js';
 import { CutsceneService } from './application/services/CutsceneService.js';
@@ -8,6 +23,7 @@ import { CutsceneProviderAdapter } from './infrastructure/data/CutsceneProviderA
 import { CutsceneRenderer } from './infrastructure/ui/CutsceneRenderer.js';
 import { LevelSelectorUI } from './infrastructure/ui/LevelSelectorUI.js';
 import { FeatureFlags } from './infrastructure/FeatureFlags.js';
+
 
 /**
  * Application entry point
