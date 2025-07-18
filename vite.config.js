@@ -18,6 +18,9 @@ const getBuildTimestamp = () => {
 };
 
 export default defineConfig({
+  // GitHub Pages base path configuration
+  base: process.env.NODE_ENV === 'production' ? '/VIM-for-kids/' : '/',
+
   // Development server configuration
   server: {
     port: 3000,
