@@ -288,6 +288,16 @@ export class DOMGameRenderer extends GameRenderer {
             tile.textContent = key.key;
           }
 
+          // Add CollectibleKeys
+          if (gameState.availableCollectibleKeys) {
+            const collectibleKey = gameState.availableCollectibleKeys.find((k) => k.position.equals(position));
+            if (collectibleKey) {
+              tile.classList.add('collectible-key');
+              tile.style.color = collectibleKey.color;
+              tile.textContent = '🔑'; // Key emoji for collectible keys
+            }
+          }
+
           // Add text labels for Welcome Meadow
           if (gameState.textLabels) {
             const textLabel = gameState.textLabels.find((label) => label.position.equals(position));
@@ -310,6 +320,16 @@ export class DOMGameRenderer extends GameRenderer {
             tile.classList.add('gate');
             tile.classList.add(gameState.gate.isOpen ? 'open' : 'closed');
             tile.textContent = gameState.gate.isOpen ? '🚪' : '🚧';
+          }
+
+          // Add secondary gates
+          if (gameState.secondaryGates) {
+            const secondaryGate = gameState.secondaryGates.find((g) => g.position.equals(position));
+            if (secondaryGate) {
+              tile.classList.add('secondary-gate');
+              tile.classList.add(secondaryGate.isOpen ? 'open' : 'closed');
+              tile.textContent = secondaryGate.isOpen ? '⛩️' : '⚓'; // Different emoji for secondary gates
+            }
           }
 
           // Add NPCs

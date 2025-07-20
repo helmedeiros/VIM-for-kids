@@ -882,6 +882,67 @@ h1 {
   }
 }
 
+/* Collectible Keys */
+.tile.collectible-key {
+  background-color: #f39c12;
+  border: 2px solid #d68910;
+  box-shadow: 0 0 8px rgba(243, 156, 18, 0.6);
+  font-size: 18px;
+  animation: keyGlow 2s ease-in-out infinite;
+}
+
+@keyframes keyGlow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(243, 156, 18, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(243, 156, 18, 0.9);
+  }
+}
+
+/* Secondary Gates */
+.tile.secondary-gate {
+  border: 2px solid #8e44ad;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+  font-size: 16px;
+  position: relative;
+}
+
+.tile.secondary-gate.closed {
+  background-color: #9b59b6;
+  color: #fff;
+  animation: secondaryGateBlock 2s infinite;
+}
+
+.tile.secondary-gate.open {
+  background-color: #16a085;
+  color: #fff;
+  animation: secondaryGateOpen 1s ease-in-out;
+}
+
+@keyframes secondaryGateBlock {
+  0%, 100% {
+    background-color: #9b59b6;
+  }
+  50% {
+    background-color: #8e44ad;
+  }
+}
+
+@keyframes secondaryGateOpen {
+  0% {
+    background-color: #9b59b6;
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    background-color: #16a085;
+    transform: scale(1);
+  }
+}
+
 /* NPCs */
 .tile.npc {
   font-size: 16px;

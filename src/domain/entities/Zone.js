@@ -1,6 +1,7 @@
 import { Position } from '../value-objects/Position.js';
 import { DynamicZoneMap } from './DynamicZoneMap.js';
 import { VimKey } from './VimKey.js';
+import { CollectibleKey } from './CollectibleKey.js';
 import { Gate } from './Gate.js';
 import { TextLabel } from './TextLabel.js';
 import { TileType } from '../value-objects/TileType.js';
@@ -13,7 +14,8 @@ export class Zone {
     this._skillFocus = zoneConfig.skillFocus;
     this._puzzleTheme = zoneConfig.puzzleTheme;
     this._narration = zoneConfig.narration;
-    this._collectedKeys = new Set();
+    this._collectedKeys = new Set(); // For VIM keys
+    this._collectedCollectibleKeys = new Set(); // For CollectibleKeys
 
     // Store custom cursor start position if provided
     this._customCursorStartPosition = zoneConfig.cursorStartPosition || null;
@@ -54,12 +56,20 @@ export class Zone {
     return [...this._vimKeys];
   }
 
+  get collectibleKeys() {
+    return [...this._collectibleKeys];
+  }
+
   get textLabels() {
     return [...this._textLabels];
   }
 
   get gate() {
     return this._gate;
+  }
+
+  get secondaryGates() {
+    return [...(this._secondaryGates || [])];
   }
 
   get npcs() {
@@ -90,11 +100,17 @@ export class Zone {
     // Create VIM keys from special tiles (converting to absolute coordinates)
     this._buildVimKeys(config.tiles.specialTiles);
 
+    // Create CollectibleKeys from special tiles (converting to absolute coordinates)
+    this._buildCollectibleKeys(config.tiles.specialTiles);
+
     // Create text labels (converting to absolute coordinates)
     this._buildTextLabels(config.tiles.textLabels);
 
     // Create gate (converting to absolute coordinates)
     this._buildGate(config.tiles.gate);
+
+    // Create secondary gates (converting to absolute coordinates)
+    this._buildSecondaryGates(config.tiles.secondaryGates);
 
     // Store NPCs configuration (for dynamic appearance)
     this._npcs = config.npcs || [];
@@ -218,6 +234,23 @@ export class Zone {
     }
   }
 
+  _buildCollectibleKeys(specialTiles) {
+    this._collectibleKeys = [];
+
+    if (specialTiles) {
+      specialTiles.forEach((tile) => {
+        if (tile.type === 'collectible_key') {
+          // Convert zone-relative coordinates to absolute coordinates
+          const absolutePosition = this._gameMap.zoneToAbsolute(tile.position[0], tile.position[1]);
+          const keyId = tile.keyId;
+          const name = tile.name || 'Key';
+          const color = tile.color || '#FFD700';
+          this._collectibleKeys.push(new CollectibleKey(absolutePosition, keyId, name, color));
+        }
+      });
+    }
+  }
+
   _buildTextLabels(textLabels) {
     this._textLabels = [];
 
@@ -230,25 +263,50 @@ export class Zone {
     }
   }
 
-  _buildGate(gateConfig) {
+    _buildGate(gateConfig) {
     if (gateConfig && gateConfig.position) {
       // Convert zone-relative coordinates to absolute coordinates
       const absolutePosition = this._gameMap.zoneToAbsolute(
         gateConfig.position[0],
         gateConfig.position[1]
       );
-      this._gate = new Gate(absolutePosition);
+
+      // Pass unlock conditions to the Gate constructor
+      const unlockConditions = gateConfig.unlocksWhen || {};
+      this._gate = new Gate(absolutePosition, unlockConditions);
 
       // Gate starts locked as per configuration
       this._gate.close();
-
-      // Store unlock conditions
-      this._gateUnlockConditions = gateConfig.unlocksWhen;
     } else if (gateConfig && gateConfig.position === null) {
       // Final zone with no exit gate - create a dummy gate for consistency
       const centerPosition = this._gameMap.zoneToAbsolute(6, 6);
       this._gate = new Gate(centerPosition);
       this._gate.open(); // Final zone gate is always "open" (completed)
+    }
+  }
+
+  _buildSecondaryGates(secondaryGatesConfig) {
+    this._secondaryGates = [];
+
+    if (secondaryGatesConfig && Array.isArray(secondaryGatesConfig)) {
+      secondaryGatesConfig.forEach((gateConfig) => {
+        if (gateConfig && gateConfig.position) {
+          // Convert zone-relative coordinates to absolute coordinates
+          const absolutePosition = this._gameMap.zoneToAbsolute(
+            gateConfig.position[0],
+            gateConfig.position[1]
+          );
+
+          // Pass unlock conditions to the Gate constructor
+          const unlockConditions = gateConfig.unlocksWhen || {};
+          const secondaryGate = new Gate(absolutePosition, unlockConditions);
+
+          // Gate starts locked as per configuration
+          secondaryGate.close();
+
+          this._secondaryGates.push(secondaryGate);
+        }
+      });
     }
   }
 
@@ -309,12 +367,37 @@ export class Zone {
 
   // Game logic methods
   collectKey(key) {
-    this._collectedKeys.add(key.key);
+    if (key.type === 'collectible_key') {
+      // Handle CollectibleKey
+      this._collectedCollectibleKeys.add(key.keyId);
 
-    // Remove key from available keys
-    const index = this._vimKeys.findIndex((k) => k.key === key.key);
+      // Remove key from available collectible keys
+      const index = this._collectibleKeys.findIndex((k) => k.keyId === key.keyId);
+      if (index !== -1) {
+        this._collectibleKeys.splice(index, 1);
+      }
+    } else {
+      // Handle VimKey (backward compatibility)
+      this._collectedKeys.add(key.key);
+
+      // Remove key from available VIM keys
+      const index = this._vimKeys.findIndex((k) => k.key === key.key);
+      if (index !== -1) {
+        this._vimKeys.splice(index, 1);
+      }
+    }
+
+    // Check gate unlock conditions
+    this._checkGateUnlock();
+  }
+
+  collectCollectibleKey(collectibleKey) {
+    this._collectedCollectibleKeys.add(collectibleKey.keyId);
+
+    // Remove key from available collectible keys
+    const index = this._collectibleKeys.findIndex((k) => k.keyId === collectibleKey.keyId);
     if (index !== -1) {
-      this._vimKeys.splice(index, 1);
+      this._collectibleKeys.splice(index, 1);
     }
 
     // Check gate unlock conditions
@@ -322,15 +405,28 @@ export class Zone {
   }
 
   _checkGateUnlock() {
-    if (this._gateUnlockConditions && this._gate) {
-      const requiredKeys = this._gateUnlockConditions.collectedVimKeys;
+    let anyGateUnlocked = false;
 
-      if (requiredKeys && requiredKeys.every((key) => this._collectedKeys.has(key))) {
+    // Check main gate
+    if (this._gate) {
+      // Use the gate's canUnlock method with both VIM keys and CollectibleKeys
+      if (this._gate.canUnlock(this._collectedKeys, this._collectedCollectibleKeys)) {
         this._gate.open();
-        return true;
+        anyGateUnlocked = true;
       }
     }
-    return false;
+
+    // Check secondary gates
+    if (this._secondaryGates) {
+      this._secondaryGates.forEach(gate => {
+        if (gate.canUnlock(this._collectedKeys, this._collectedCollectibleKeys)) {
+          gate.open();
+          anyGateUnlocked = true;
+        }
+      });
+    }
+
+    return anyGateUnlocked;
   }
 
   getCollectedKeysCount() {
@@ -339,6 +435,14 @@ export class Zone {
 
   getCollectedKeys() {
     return new Set(this._collectedKeys);
+  }
+
+  getCollectedCollectibleKeysCount() {
+    return this._collectedCollectibleKeys.size;
+  }
+
+  getCollectedCollectibleKeys() {
+    return new Set(this._collectedCollectibleKeys);
   }
 
   isComplete() {
