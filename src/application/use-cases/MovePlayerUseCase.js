@@ -18,8 +18,8 @@ export class MovePlayerUseCase {
     const currentPosition = this._gameState.cursor.position;
     const newPosition = this._calculateNewPosition(currentPosition, direction);
 
-    // Check if move is valid (both map and gate walkability)
-    if (!this._isPositionWalkable(newPosition)) {
+    // Check if move is valid (both map and gate walkability, plus directional ramp logic)
+    if (!this._isPositionWalkable(newPosition, direction)) {
       return { success: false, reason: 'invalid_position' }; // Invalid move, do nothing
     }
 
@@ -58,8 +58,8 @@ export class MovePlayerUseCase {
     const currentPosition = this._gameState.cursor.position;
     const newPosition = this._calculateNewPosition(currentPosition, direction);
 
-    // Check if move is valid (both map and gate walkability)
-    if (!this._isPositionWalkable(newPosition)) {
+    // Check if move is valid (both map and gate walkability, plus directional ramp logic)
+    if (!this._isPositionWalkable(newPosition, direction)) {
       return { success: false, reason: 'invalid_position' }; // Invalid move, do nothing
     }
 
@@ -90,9 +90,14 @@ export class MovePlayerUseCase {
     };
   }
 
-  _isPositionWalkable(position) {
+  _isPositionWalkable(position, direction = null) {
     // First check if the map position is walkable
     if (!this._gameState.map.isWalkable(position)) {
+      return false;
+    }
+
+    // Check directional ramp logic if we have direction info
+    if (direction && !this._isRampMovementAllowed(position, direction)) {
       return false;
     }
 
@@ -106,6 +111,27 @@ export class MovePlayerUseCase {
     }
 
     return true;
+  }
+
+  _isRampMovementAllowed(targetPosition, direction) {
+    // Get the tile type at the target position
+    const tileAtTarget = this._gameState.map.getTileAt(targetPosition);
+
+    // If it's not a ramp tile, allow movement (regular walkability rules apply)
+    if (!tileAtTarget || (tileAtTarget.name !== 'ramp_right' && tileAtTarget.name !== 'ramp_left')) {
+      return true;
+    }
+
+    // For ramp tiles, check if we're approaching from the correct direction
+    if (tileAtTarget.name === 'ramp_right') {
+      // Ramp right (<) allows movement only when coming from the right (moving left)
+      return direction === 'right';
+    } else if (tileAtTarget.name === 'ramp_left') {
+      // Ramp left (>) allows movement only when coming from the left (moving right)
+      return direction === 'left';
+    }
+
+    return false;
   }
 
   _calculateNewPosition(currentPosition, direction) {

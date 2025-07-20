@@ -31,6 +31,18 @@ describe('TileType', () => {
       expect(TileType.STONE.name).toBe('stone');
       expect(TileType.STONE.walkable).toBe(false);
     });
+
+    it('should have RAMP_RIGHT tile type', () => {
+      expect(TileType.RAMP_RIGHT).toBeInstanceOf(TileType);
+      expect(TileType.RAMP_RIGHT.name).toBe('ramp_right');
+      expect(TileType.RAMP_RIGHT.walkable).toBe(true);
+    });
+
+    it('should have RAMP_LEFT tile type', () => {
+      expect(TileType.RAMP_LEFT).toBeInstanceOf(TileType);
+      expect(TileType.RAMP_LEFT.name).toBe('ramp_left');
+      expect(TileType.RAMP_LEFT.walkable).toBe(true);
+    });
   });
 
   describe('properties', () => {

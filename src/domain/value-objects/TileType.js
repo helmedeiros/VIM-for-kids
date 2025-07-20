@@ -37,3 +37,7 @@ TileType.RUINS = new TileType('ruins', false);
 TileType.FIELD = new TileType('field', true);
 TileType.TEST_GROUND = new TileType('test_ground', true);
 TileType.BOSS_AREA = new TileType('boss_area', true);
+
+// Directional ramp tiles - walkable but with movement restrictions based on approach direction
+TileType.RAMP_RIGHT = new TileType('ramp_right', true);
+TileType.RAMP_LEFT = new TileType('ramp_left', true);
