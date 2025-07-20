@@ -84,6 +84,17 @@ export class Gate {
     return vimKeysMatch && collectibleKeysMatch;
   }
 
+  /**
+   * Get the required CollectibleKeys for unlocking this gate
+   * @returns {Array} - Array of CollectibleKey IDs required to unlock this gate
+   */
+  getRequiredCollectibleKeys() {
+    if (!this._unlockConditions || !this._unlockConditions.requiredCollectibleKeys) {
+      return [];
+    }
+    return [...this._unlockConditions.requiredCollectibleKeys];
+  }
+
   equals(other) {
     return (
       other instanceof Gate &&

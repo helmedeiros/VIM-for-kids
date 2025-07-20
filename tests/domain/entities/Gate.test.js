@@ -228,6 +228,64 @@ describe('Gate', () => {
     });
   });
 
+  describe('getRequiredCollectibleKeys method', () => {
+    it('should return empty array when no unlock conditions are defined', () => {
+      const result = gate.getRequiredCollectibleKeys();
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty array when no CollectibleKey requirements are specified', () => {
+      const unlockConditions = { collectedVimKeys: ['h', 'j'] };
+      const gateWithVimKeysOnly = new Gate(testPosition, unlockConditions);
+
+      const result = gateWithVimKeysOnly.getRequiredCollectibleKeys();
+      expect(result).toEqual([]);
+    });
+
+    it('should return array of required CollectibleKey IDs', () => {
+      const unlockConditions = { requiredCollectibleKeys: ['red_key', 'blue_key'] };
+      const gateWithCollectibleKeys = new Gate(testPosition, unlockConditions);
+
+      const result = gateWithCollectibleKeys.getRequiredCollectibleKeys();
+      expect(result).toEqual(['red_key', 'blue_key']);
+    });
+
+    it('should return array when both VIM keys and CollectibleKeys are required', () => {
+      const unlockConditions = {
+        collectedVimKeys: ['h', 'j'],
+        requiredCollectibleKeys: ['maze_key']
+      };
+      const gateWithMixedReqs = new Gate(testPosition, unlockConditions);
+
+      const result = gateWithMixedReqs.getRequiredCollectibleKeys();
+      expect(result).toEqual(['maze_key']);
+    });
+
+    it('should return empty array when requiredCollectibleKeys is empty', () => {
+      const unlockConditions = { requiredCollectibleKeys: [] };
+      const gateWithEmptyKeys = new Gate(testPosition, unlockConditions);
+
+      const result = gateWithEmptyKeys.getRequiredCollectibleKeys();
+      expect(result).toEqual([]);
+    });
+
+    it('should return a copy of the keys array (not reference)', () => {
+      const unlockConditions = { requiredCollectibleKeys: ['test_key'] };
+      const gateWithKey = new Gate(testPosition, unlockConditions);
+
+      const result1 = gateWithKey.getRequiredCollectibleKeys();
+      const result2 = gateWithKey.getRequiredCollectibleKeys();
+
+      // Should be equal but not the same reference
+      expect(result1).toEqual(result2);
+      expect(result1).not.toBe(result2);
+
+      // Modifying result should not affect the gate's internal state
+      result1.push('additional_key');
+      expect(gateWithKey.getRequiredCollectibleKeys()).toEqual(['test_key']);
+    });
+  });
+
   describe('toString method', () => {
     it('should return correct string representation when closed', () => {
       const expectedString = `Gate at (${testPosition.x}, ${testPosition.y}) - Closed`;

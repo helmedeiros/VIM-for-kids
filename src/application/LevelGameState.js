@@ -314,7 +314,14 @@ export class LevelGameState {
   }
 
   tryUnlockSecondaryGate(position) {
-    return this.zone.tryUnlockSecondaryGate(position);
+    const unlocked = this.zone.tryUnlockSecondaryGate(position);
+
+    // If gate was unlocked, sync the CollectibleKeys from zone (keys may have been consumed)
+    if (unlocked) {
+      this.collectedCollectibleKeys = new Set(this.zone.collectedCollectibleKeys);
+    }
+
+    return unlocked;
   }
 
   getNPCs() {

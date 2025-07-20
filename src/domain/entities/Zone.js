@@ -414,8 +414,14 @@ export class Zone {
     const gate = this._secondaryGates.find(g => g.position.equals(position));
     if (!gate) return false;
 
-    // If gate can be unlocked, open it (visual will be handled by renderer)
+    // If gate can be unlocked, open it and consume the required keys
     if (gate.canUnlock(this._collectedKeys, this._collectedCollectibleKeys)) {
+      // Consume the required CollectibleKeys when unlocking
+      const requiredCollectibleKeys = gate.getRequiredCollectibleKeys();
+      requiredCollectibleKeys.forEach(keyId => {
+        this._collectedCollectibleKeys.delete(keyId);
+      });
+
       // Mark the gate as unlocked - when open, it becomes invisible and walkable
       gate.open();
       return true;
