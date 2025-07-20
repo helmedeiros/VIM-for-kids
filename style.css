@@ -547,111 +547,63 @@ h1 {
   box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
 }
 
-/* Directional Ramp Tiles - Same texture as walls with directional indicators */
-.tile.ramp_right {
-  position: relative;
-  background-color: #566573;
-  background-image:
-    linear-gradient(90deg, #5d6d7e 1px, transparent 1px),
-    linear-gradient(180deg, #5d6d7e 1px, transparent 1px),
-    radial-gradient(circle at 25% 25%, #85929e 2px, transparent 2px),
-    radial-gradient(circle at 75% 75%, #4a5568 1.5px, transparent 1.5px);
-  background-size: 8px 8px, 8px 8px, 16px 16px, 12px 12px;
-  border: none;
-  box-shadow:
-    4px 4px 8px rgba(0, 0, 0, 0.4),
-    inset 1px 1px 2px rgba(255, 255, 255, 0.2);
-  overflow: hidden;
-  z-index: 3;
-}
-
-/* Right wall face - same as wall */
-.tile.ramp_right::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 8px;
-  height: 32px;
-  background: linear-gradient(180deg,
-    #4a5568 0%,
-    #2d3748 40%,
-    #1a202c 70%,
-    #171923 100%);
-  background-image:
-    linear-gradient(180deg, #5d6d7e 1px, transparent 1px),
-    radial-gradient(circle at 40% 30%, #4a5568 1px, transparent 1px);
-  background-size: 8px 8px, 6px 6px;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: inset -2px 0 4px rgba(0, 0, 0, 0.6);
-  z-index: 1;
-}
-
-/* Directional arrow indicator */
-.tile.ramp_right::after {
-  content: '◀';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #f1c40f;
-  font-size: 14px;
-  font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  z-index: 2;
-}
-
+/* Directional Ramp Tiles - Smooth incline from bottom-left to top-right */
+.tile.ramp_right,
 .tile.ramp_left {
   position: relative;
-  background-color: #566573;
-  background-image:
-    linear-gradient(90deg, #5d6d7e 1px, transparent 1px),
-    linear-gradient(180deg, #5d6d7e 1px, transparent 1px),
-    radial-gradient(circle at 25% 25%, #85929e 2px, transparent 2px),
-    radial-gradient(circle at 75% 75%, #4a5568 1.5px, transparent 1.5px);
-  background-size: 8px 8px, 8px 8px, 16px 16px, 12px 12px;
-  border: none;
+  background:
+    /* Diagonal depth gradient (bottom-left darker to top-right brighter) */
+    linear-gradient(45deg,
+      #2d3748 0%,
+      #4a5568 30%,
+      #566573 60%,
+      #85929e 100%
+    ),
+    /* Diagonal step lines for elevation effect */
+    repeating-linear-gradient(45deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(255, 255, 255, 0.1) 2px,
+      rgba(255, 255, 255, 0.1) 3px,
+      transparent 3px,
+      transparent 8px
+    ),
+    /* Stone texture overlay */
+    radial-gradient(circle at 25% 25%, #85929e 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, #4a5568 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 12px 12px, 8px 8px;
+  border: 1px solid #34495e;
   box-shadow:
-    4px 4px 8px rgba(0, 0, 0, 0.4),
-    inset 1px 1px 2px rgba(255, 255, 255, 0.2);
+    /* Main depth shadow */
+    inset -2px -2px 4px rgba(0, 0, 0, 0.3),
+    /* Highlight on top-right (elevated part) */
+    inset 2px 2px 4px rgba(255, 255, 255, 0.1),
+    /* External shadow */
+    2px 2px 6px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   z-index: 3;
 }
 
-/* Left wall face - same as wall */
+/* Enhanced step effect with pseudo-element overlay */
+.tile.ramp_right::before,
 .tile.ramp_left::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
-  width: 8px;
-  height: 32px;
-  background: linear-gradient(180deg,
-    #4a5568 0%,
-    #2d3748 40%,
-    #1a202c 70%,
-    #171923 100%);
-  background-image:
-    linear-gradient(180deg, #5d6d7e 1px, transparent 1px),
-    radial-gradient(circle at 40% 30%, #4a5568 1px, transparent 1px);
-  background-size: 8px 8px, 6px 6px;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: inset 2px 0 4px rgba(0, 0, 0, 0.6);
+  width: 100%;
+  height: 100%;
+  background:
+    /* Additional diagonal lines for more pronounced steps */
+    repeating-linear-gradient(45deg,
+      transparent 0px,
+      transparent 4px,
+      rgba(0, 0, 0, 0.1) 4px,
+      rgba(0, 0, 0, 0.1) 5px,
+      transparent 5px,
+      transparent 12px
+    );
   z-index: 1;
-}
-
-/* Directional arrow indicator */
-.tile.ramp_left::after {
-  content: '▶';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #f1c40f;
-  font-size: 14px;
-  font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  z-index: 2;
 }
 
 /* Cursor */
