@@ -16,6 +16,7 @@ describe('MovePlayerUseCase', () => {
 
     mockMap = {
       isWalkable: jest.fn().mockReturnValue(true),
+      getTileAt: jest.fn().mockReturnValue({ name: 'grass' }),
     };
 
     mockGameState = {
@@ -434,6 +435,119 @@ describe('MovePlayerUseCase', () => {
         const result = movePlayerUseCase._hasNPCAtPosition(new Position(5, 5), gameState);
 
         expect(result).toBe(false);
+      });
+    });
+
+    describe('Ramp Movement Logic', () => {
+      describe('_isRampMovementAllowed', () => {
+        it('should allow movement for non-ramp tiles', () => {
+          mockMap.getTileAt.mockReturnValue({ name: 'grass' });
+
+          const result = movePlayerUseCase._isRampMovementAllowed(new Position(6, 5), 'left');
+
+          expect(result).toBe(true);
+        });
+
+        it('should allow movement to ramp_right when moving left', () => {
+          mockMap.getTileAt.mockReturnValue({ name: 'ramp_right' });
+
+          const result = movePlayerUseCase._isRampMovementAllowed(new Position(4, 5), 'right');
+
+          expect(result).toBe(true);
+        });
+
+        it('should block movement to ramp_right when moving right', () => {
+          mockMap.getTileAt.mockReturnValue({ name: 'ramp_right' });
+
+          const result = movePlayerUseCase._isRampMovementAllowed(new Position(6, 5), 'left');
+
+          expect(result).toBe(false);
+        });
+
+        it('should block movement to ramp_right when moving up', () => {
+          mockMap.getTileAt.mockReturnValue({ name: 'ramp_right' });
+
+          const result = movePlayerUseCase._isRampMovementAllowed(new Position(5, 4), 'up');
+
+          expect(result).toBe(false);
+        });
+
+        it('should block movement to ramp_right when moving down', () => {
+          mockMap.getTileAt.mockReturnValue({ name: 'ramp_right' });
+
+          const result = movePlayerUseCase._isRampMovementAllowed(new Position(5, 6), 'down');
+
+          expect(result).toBe(false);
+        });
+
+        it('should allow movement to ramp_left when moving right', () => {
+          mockMap.getTileAt.mockReturnValue({ name: 'ramp_left' });
+
+          const result = movePlayerUseCase._isRampMovementAllowed(new Position(6, 5), 'left');
+
+          expect(result).toBe(true);
+        });
+
+        it('should block movement to ramp_left when moving left', () => {
+          mockMap.getTileAt.mockReturnValue({ name: 'ramp_left' });
+
+          const result = movePlayerUseCase._isRampMovementAllowed(new Position(4, 5), 'right');
+
+          expect(result).toBe(false);
+        });
+
+        it('should block movement to ramp_left when moving up', () => {
+          mockMap.getTileAt.mockReturnValue({ name: 'ramp_left' });
+
+          const result = movePlayerUseCase._isRampMovementAllowed(new Position(5, 4), 'up');
+
+          expect(result).toBe(false);
+        });
+
+        it('should block movement to ramp_left when moving down', () => {
+          mockMap.getTileAt.mockReturnValue({ name: 'ramp_left' });
+
+          const result = movePlayerUseCase._isRampMovementAllowed(new Position(5, 6), 'down');
+
+          expect(result).toBe(false);
+        });
+
+        it('should handle null tile gracefully', () => {
+          mockMap.getTileAt.mockReturnValue(null);
+
+          const result = movePlayerUseCase._isRampMovementAllowed(new Position(5, 5), 'left');
+
+          expect(result).toBe(true);
+        });
+      });
+
+      describe('Integration with _isPositionWalkable', () => {
+        it('should block movement when ramp direction check fails', () => {
+          mockMap.isWalkable.mockReturnValue(true);
+          mockMap.getTileAt.mockReturnValue({ name: 'ramp_right' });
+
+          const result = movePlayerUseCase._isPositionWalkable(new Position(6, 5), 'left');
+
+          expect(result).toBe(false);
+        });
+
+        it('should allow movement when ramp direction check passes', () => {
+          mockMap.isWalkable.mockReturnValue(true);
+          mockMap.getTileAt.mockReturnValue({ name: 'ramp_right' });
+
+          const result = movePlayerUseCase._isPositionWalkable(new Position(6, 5), 'right');
+
+          expect(result).toBe(true);
+        });
+
+        it('should work without direction parameter (backward compatibility)', () => {
+          mockMap.isWalkable.mockReturnValue(true);
+          mockMap.getTileAt.mockReturnValue({ name: 'ramp_right' });
+
+          const result = movePlayerUseCase._isPositionWalkable(new Position(6, 5));
+
+          expect(result).toBe(true);
+        });
       });
     });
   });

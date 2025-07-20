@@ -153,6 +153,9 @@ export class Zone {
       field: TileType.FIELD,
       test_ground: TileType.TEST_GROUND,
       boss_area: TileType.BOSS_AREA,
+      // Directional ramp tiles
+      ramp_right: TileType.RAMP_RIGHT,
+      ramp_left: TileType.RAMP_LEFT,
       // Special tiles that should be walkable paths
       vim_key_spot: TileType.PATH,
       gate: TileType.PATH,
