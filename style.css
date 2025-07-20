@@ -846,9 +846,10 @@ h1 {
 }
 
 .collected-collectible-key::before {
-  content: '🔑 ';
+  content: '🔑';
   font-size: 12px;
   filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.8));
+  margin-right: 6px;
 }
 
 .collectible-key-name {
