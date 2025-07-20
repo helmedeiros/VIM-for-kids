@@ -115,7 +115,19 @@ export class MovePlayerUseCase {
       const secondaryGates = this._gameState.getSecondaryGates();
       for (const gate of secondaryGates) {
         if (gate && gate.position.equals(position)) {
-          return gate.isWalkable();
+          // If gate is already open, it's walkable
+          if (gate.isWalkable()) {
+            return true;
+          }
+
+          // If gate is closed, try to unlock it with collectible keys
+          if (typeof this._gameState.tryUnlockSecondaryGate === 'function') {
+            const unlocked = this._gameState.tryUnlockSecondaryGate(position);
+            return unlocked; // Return true if unlocked, false if player doesn't have key
+          }
+
+          // Fallback: gate is not walkable
+          return false;
         }
       }
     }

@@ -322,14 +322,16 @@ export class DOMGameRenderer extends GameRenderer {
             tile.textContent = gameState.gate.isOpen ? '🚪' : '🚧';
           }
 
-          // Add secondary gates
+          // Add secondary gates (only render if closed)
           if (gameState.secondaryGates) {
             const secondaryGate = gameState.secondaryGates.find((g) => g.position.equals(position));
-            if (secondaryGate) {
+            if (secondaryGate && !secondaryGate.isOpen) {
+              // Only render the gate if it's still closed
               tile.classList.add('secondary-gate');
-              tile.classList.add(secondaryGate.isOpen ? 'open' : 'closed');
-              tile.textContent = secondaryGate.isOpen ? '⛩️' : '⚓'; // Different emoji for secondary gates
+              tile.classList.add('closed');
+              tile.textContent = '⚓'; // Gate emoji for closed secondary gates
             }
+            // When open, the gate disappears and shows the underlying dirt tile
           }
 
           // Add NPCs
