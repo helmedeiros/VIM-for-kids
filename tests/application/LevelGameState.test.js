@@ -278,4 +278,115 @@ describe('LevelGameState', () => {
       expect(levelState.hasNextZone()).toBe(false);
     });
   });
+
+  describe('tryUnlockSecondaryGate with key consumption', () => {
+    let levelGameState;
+    let mockZone;
+
+    beforeEach(() => {
+      // Create mock objects
+      const mockGate = {
+        position: new Position(5, 5),
+        isOpen: false,
+        isWalkable: jest.fn().mockReturnValue(false),
+      };
+
+      const mockKey = {
+        key: 'h',
+        position: new Position(2, 2),
+      };
+
+      const mockMap = {
+        isWalkable: jest.fn().mockReturnValue(true),
+      };
+
+      // Create mock zone with secondary gates
+      mockZone = {
+        tryUnlockSecondaryGate: jest.fn(),
+        collectedCollectibleKeys: new Set(['maze_key', 'extra_key']),
+        gate: mockGate,
+        secondaryGates: [mockGate],
+        vimKeys: [mockKey],
+        collectibleKeys: [],
+        textLabels: [],
+        map: mockMap,
+        gameMap: mockMap,
+        getCursorStartPosition: jest.fn().mockReturnValue(new Position(0, 0)),
+        getActiveNPCs: jest.fn().mockReturnValue([]),
+        isComplete: jest.fn().mockReturnValue(false),
+        _checkGateUnlock: jest.fn(),
+        collectKey: jest.fn(),
+      };
+
+            const levelConfig = {
+        id: 'test_level',
+        name: 'Test Level',
+        zones: ['test_zone_1'],
+      };
+
+            // Create mock zone provider
+      const mockZoneProvider = {
+        createZone: jest.fn().mockImplementation((zoneId) => {
+          if (zoneId === 'test_zone_1') {
+            return mockZone;
+          }
+          throw new Error(`Mock zone provider: Zone '${zoneId}' not found`);
+        })
+      };
+
+      levelGameState = new LevelGameState(mockZoneProvider, levelConfig);
+      levelGameState.collectedCollectibleKeys = new Set(['maze_key', 'extra_key']);
+    });
+
+    it('should sync CollectibleKeys from zone when gate is unlocked', () => {
+      // Mock zone's tryUnlockSecondaryGate to return true and simulate key consumption
+      mockZone.tryUnlockSecondaryGate.mockImplementation(() => {
+        // Simulate consuming 'maze_key' during unlock
+        mockZone.collectedCollectibleKeys.delete('maze_key');
+        return true;
+      });
+
+      const testPosition = new Position(5, 5);
+      const result = levelGameState.tryUnlockSecondaryGate(testPosition);
+
+      expect(result).toBe(true);
+      expect(mockZone.tryUnlockSecondaryGate).toHaveBeenCalledWith(testPosition);
+
+      // LevelGameState should sync keys from zone after unlock
+      expect(levelGameState.collectedCollectibleKeys.has('maze_key')).toBe(false); // Key consumed
+      expect(levelGameState.collectedCollectibleKeys.has('extra_key')).toBe(true); // Other key preserved
+    });
+
+    it('should not sync CollectibleKeys when gate unlock fails', () => {
+      // Mock zone's tryUnlockSecondaryGate to return false (unlock failed)
+      mockZone.tryUnlockSecondaryGate.mockReturnValue(false);
+
+      const testPosition = new Position(5, 5);
+      const originalKeys = new Set(levelGameState.collectedCollectibleKeys);
+
+      const result = levelGameState.tryUnlockSecondaryGate(testPosition);
+
+      expect(result).toBe(false);
+      expect(mockZone.tryUnlockSecondaryGate).toHaveBeenCalledWith(testPosition);
+
+      // LevelGameState should NOT sync keys when unlock fails
+      expect(levelGameState.collectedCollectibleKeys).toEqual(originalKeys);
+    });
+
+    it('should handle empty CollectibleKeys after all are consumed', () => {
+      // Mock zone's tryUnlockSecondaryGate to consume all keys
+      mockZone.tryUnlockSecondaryGate.mockImplementation(() => {
+        mockZone.collectedCollectibleKeys.clear(); // All keys consumed
+        return true;
+      });
+
+      const testPosition = new Position(5, 5);
+      const result = levelGameState.tryUnlockSecondaryGate(testPosition);
+
+      expect(result).toBe(true);
+
+      // LevelGameState should have no CollectibleKeys after all are consumed
+      expect(levelGameState.collectedCollectibleKeys.size).toBe(0);
+    });
+  });
 });

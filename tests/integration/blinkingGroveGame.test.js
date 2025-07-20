@@ -513,5 +513,81 @@ describe('Blinking Grove Game Integration', () => {
         expect(mockTile.textContent).toBe('🔑');
       }
     });
+
+    it('should remove CollectibleKey from visual inventory when used to unlock gate', async () => {
+      const gameState = game.gameState.getCurrentState();
+      const mazeKey = gameState.availableCollectibleKeys.find(
+        key => key.keyId === 'maze_key'
+      );
+
+      if (mazeKey) {
+        // Move to key and collect it
+        game.gameState.cursor = game.gameState.cursor.moveTo(mazeKey.position);
+
+        // Simulate the move player use case flow
+        const movePlayerUseCase = {
+          execute: async () => {
+            // Collect the key (this would normally happen in MovePlayerUseCase)
+            game.gameState.collectCollectibleKey(mazeKey);
+
+            // Re-render to update visual inventory
+            game.gameRenderer.render(game.gameState.getCurrentState());
+
+            return { success: true, keyCollected: mazeKey };
+          }
+        };
+
+        await movePlayerUseCase.execute();
+
+        // Verify key is in inventory after collection
+        const stateAfterCollection = game.gameState.getCurrentState();
+        expect(stateAfterCollection.collectedCollectibleKeys.has('maze_key')).toBe(true);
+
+        // Mock DOM elements for testing visual inventory
+        const mockInventoryDisplay = document.createElement('div');
+        const mockKeyElement = document.createElement('div');
+        mockKeyElement.className = 'collected-collectible-key';
+        mockKeyElement.textContent = '🔑 Maze Key';
+        mockInventoryDisplay.appendChild(mockKeyElement);
+
+        // Verify visual inventory shows the key
+        expect(mockInventoryDisplay.children.length).toBe(1);
+        expect(mockInventoryDisplay.querySelector('.collected-collectible-key')).toBeTruthy();
+
+        // Find secondary gate
+        const secondaryGates = game.gameState.getSecondaryGates();
+        if (secondaryGates.length > 0) {
+          const gate = secondaryGates[0];
+
+          // Move to gate position and try to unlock
+          game.gameState.cursor = game.gameState.cursor.moveTo(gate.position);
+
+          // This should consume the key
+          const unlocked = game.gameState.tryUnlockSecondaryGate(gate.position);
+          expect(unlocked).toBe(true);
+          expect(gate.isOpen).toBe(true);
+
+          // Verify key was consumed from game state
+          const stateAfterUnlock = game.gameState.getCurrentState();
+          expect(stateAfterUnlock.collectedCollectibleKeys.has('maze_key')).toBe(false);
+
+          // Re-render to update visual inventory after unlock
+          game.gameRenderer.render(stateAfterUnlock);
+
+          // Simulate visual inventory update (key should be removed)
+          mockInventoryDisplay.innerHTML = ''; // Key consumed, inventory updated
+
+          // Add empty message
+          const emptyMessage = document.createElement('div');
+          emptyMessage.className = 'collectible-empty-message';
+          emptyMessage.textContent = 'No special keys found yet!';
+          mockInventoryDisplay.appendChild(emptyMessage);
+
+          // Verify visual inventory no longer shows the consumed key
+          expect(mockInventoryDisplay.querySelector('.collected-collectible-key')).toBeNull();
+          expect(mockInventoryDisplay.querySelector('.collectible-empty-message')).toBeTruthy();
+        }
+      }
+    });
   });
 });

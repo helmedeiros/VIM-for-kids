@@ -2,7 +2,6 @@ import { Zone } from '../../../src/domain/entities/Zone.js';
 import { Gate } from '../../../src/domain/entities/Gate.js';
 import { DynamicZoneMap } from '../../../src/domain/entities/DynamicZoneMap.js';
 import { Position } from '../../../src/domain/value-objects/Position.js';
-import { CollectibleKey } from '../../../src/domain/entities/CollectibleKey.js';
 
 /**
  * Test fixture for Zone testing - independent of any real zone implementation
@@ -618,6 +617,173 @@ describe('Zone', () => {
 
       // Original zone state should be unchanged
       expect(testZone.getCollectedKeys().size).toBe(originalSize);
+    });
+  });
+
+  describe('CollectibleKey Consumption', () => {
+    test('should consume CollectibleKey when unlocking secondary gate', () => {
+      const gateConfig = {
+        ...createTestZoneConfig(),
+        tiles: {
+          ...createTestZoneConfig().tiles,
+          specialTiles: [
+            { type: 'collectible_key', keyId: 'maze_key', name: 'Maze Key', color: '#FFD700', position: [1, 1] },
+          ],
+          secondaryGates: [
+            {
+              position: [5, 5],
+              unlocksWhen: {
+                requiredCollectibleKeys: ['maze_key']
+              }
+            }
+          ]
+        }
+      };
+      const zone = new Zone(gateConfig);
+
+      // Collect the required key first
+      const mazeKey = zone.collectibleKeys.find(k => k.keyId === 'maze_key');
+      zone.collectKey(mazeKey);
+
+      // Verify key is in inventory before unlocking
+      expect(zone.getCollectedCollectibleKeys().has('maze_key')).toBe(true);
+
+      // Try to unlock the secondary gate by interacting with it
+      const gatePosition = zone.secondaryGates[0].position;
+      const unlocked = zone.tryUnlockSecondaryGate(gatePosition);
+
+      expect(unlocked).toBe(true);
+
+      // Gate should be open
+      expect(zone.secondaryGates[0].isOpen).toBe(true);
+
+      // Key should be consumed (removed from inventory)
+      expect(zone.getCollectedCollectibleKeys().has('maze_key')).toBe(false);
+    });
+
+    test('should consume multiple CollectibleKeys when required for gate unlock', () => {
+      const gateConfig = {
+        ...createTestZoneConfig(),
+        tiles: {
+          ...createTestZoneConfig().tiles,
+          specialTiles: [
+            { type: 'collectible_key', keyId: 'red_key', name: 'Red Key', color: '#FF0000', position: [1, 1] },
+            { type: 'collectible_key', keyId: 'blue_key', name: 'Blue Key', color: '#0000FF', position: [2, 2] },
+          ],
+          secondaryGates: [
+            {
+              position: [5, 5],
+              unlocksWhen: {
+                requiredCollectibleKeys: ['red_key', 'blue_key']
+              }
+            }
+          ]
+        }
+      };
+      const zone = new Zone(gateConfig);
+
+      // Collect both required keys
+      const redKey = zone.collectibleKeys.find(k => k.keyId === 'red_key');
+      const blueKey = zone.collectibleKeys.find(k => k.keyId === 'blue_key');
+      zone.collectKey(redKey);
+      zone.collectKey(blueKey);
+
+      // Verify both keys are in inventory before unlocking
+      expect(zone.getCollectedCollectibleKeys().has('red_key')).toBe(true);
+      expect(zone.getCollectedCollectibleKeys().has('blue_key')).toBe(true);
+
+      // Try to unlock the secondary gate
+      const gatePosition = zone.secondaryGates[0].position;
+      const unlocked = zone.tryUnlockSecondaryGate(gatePosition);
+
+      expect(unlocked).toBe(true);
+      expect(zone.secondaryGates[0].isOpen).toBe(true);
+
+      // Both keys should be consumed
+      expect(zone.getCollectedCollectibleKeys().has('red_key')).toBe(false);
+      expect(zone.getCollectedCollectibleKeys().has('blue_key')).toBe(false);
+    });
+
+    test('should not consume keys when gate unlock fails', () => {
+      const gateConfig = {
+        ...createTestZoneConfig(),
+        tiles: {
+          ...createTestZoneConfig().tiles,
+          specialTiles: [
+            { type: 'collectible_key', keyId: 'wrong_key', name: 'Wrong Key', color: '#FFD700', position: [1, 1] },
+          ],
+          secondaryGates: [
+            {
+              position: [5, 5],
+              unlocksWhen: {
+                requiredCollectibleKeys: ['maze_key'] // requires different key
+              }
+            }
+          ]
+        }
+      };
+      const zone = new Zone(gateConfig);
+
+      // Collect wrong key
+      const wrongKey = zone.collectibleKeys.find(k => k.keyId === 'wrong_key');
+      zone.collectKey(wrongKey);
+
+      // Verify key is in inventory before attempting unlock
+      expect(zone.getCollectedCollectibleKeys().has('wrong_key')).toBe(true);
+
+      // Try to unlock the secondary gate (should fail)
+      const gatePosition = zone.secondaryGates[0].position;
+      const unlocked = zone.tryUnlockSecondaryGate(gatePosition);
+
+      expect(unlocked).toBe(false);
+      expect(zone.secondaryGates[0].isOpen).toBe(false);
+
+      // Key should NOT be consumed since unlock failed
+      expect(zone.getCollectedCollectibleKeys().has('wrong_key')).toBe(true);
+    });
+
+    test('should not consume VIM keys when unlocking gates with mixed requirements', () => {
+      const gateConfig = {
+        ...createTestZoneConfig(),
+        tiles: {
+          ...createTestZoneConfig().tiles,
+          specialTiles: [
+            { type: 'vim_key', value: 'h', position: [2, 2] },
+            { type: 'collectible_key', keyId: 'special_key', name: 'Special Key', color: '#FF00FF', position: [1, 1] },
+          ],
+          secondaryGates: [
+            {
+              position: [5, 5],
+              unlocksWhen: {
+                collectedVimKeys: ['h'],
+                requiredCollectibleKeys: ['special_key']
+              }
+            }
+          ]
+        }
+      };
+      const zone = new Zone(gateConfig);
+
+      // Collect both VIM key and CollectibleKey
+      const hKey = zone.vimKeys.find(k => k.key === 'h');
+      const specialKey = zone.collectibleKeys.find(k => k.keyId === 'special_key');
+      zone.collectKey(hKey);
+      zone.collectKey(specialKey);
+
+      // Verify both keys are collected
+      expect(zone.getCollectedKeys().has('h')).toBe(true);
+      expect(zone.getCollectedCollectibleKeys().has('special_key')).toBe(true);
+
+      // Try to unlock the secondary gate
+      const gatePosition = zone.secondaryGates[0].position;
+      const unlocked = zone.tryUnlockSecondaryGate(gatePosition);
+
+      expect(unlocked).toBe(true);
+      expect(zone.secondaryGates[0].isOpen).toBe(true);
+
+      // Only CollectibleKey should be consumed, VIM key should remain
+      expect(zone.getCollectedKeys().has('h')).toBe(true); // VIM key NOT consumed
+      expect(zone.getCollectedCollectibleKeys().has('special_key')).toBe(false); // CollectibleKey consumed
     });
   });
 });
