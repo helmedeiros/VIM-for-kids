@@ -365,67 +365,18 @@ h1 {
 }
 
 .tile.stone {
-  position: relative;
   background-color: #b8b8aa;
   background-image:
-    radial-gradient(circle at 30% 20%, #9a9a88 2px, transparent 2px),
-    radial-gradient(circle at 70% 70%, #d0d0c4 1.5px, transparent 1.5px),
-    radial-gradient(circle at 20% 80%, #8a8a78 1px, transparent 1px),
-    radial-gradient(circle at 80% 30%, #c2c2b6 1.5px, transparent 1.5px),
-    linear-gradient(135deg, #c2c2b6 25%, transparent 25%),
-    linear-gradient(45deg, #a8a89c 25%, transparent 25%);
-  background-size:
-    12px 12px,
-    16px 16px,
-    8px 8px,
-    14px 14px,
-    6px 6px,
-    6px 6px;
-  border: none;
+    linear-gradient(45deg, #c2c2b6 25%, transparent 25%),
+    linear-gradient(-45deg, #c2c2b6 25%, transparent 25%);
+  background-size: 8px 8px;
+  border-top: 1px solid #d0d0c4;
+  border-left: 1px solid #d0d0c4;
+  border-bottom: 2px solid #787870;
+  border-right: 2px solid #787870;
   box-shadow:
-    2px 3px 6px rgba(0, 0, 0, 0.2),
-    inset 1px 1px 3px rgba(255, 255, 255, 0.3),
-    inset -1px -1px 2px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  z-index: 2;
-}
-
-/* Right side face of the stone - contained within tile */
-.tile.stone::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 6px;
-  height: 32px;
-  background: linear-gradient(180deg,
-    #8a8a78 0%,
-    #787870 50%,
-    #6e6e66 100%);
-  background-image:
-    radial-gradient(circle at 20% 30%, #787870 1px, transparent 1px);
-  background-size: 4px 4px;
-  z-index: 1;
-  box-shadow: inset -1px 0 2px rgba(0, 0, 0, 0.4);
-}
-
-/* Bottom side face of the stone - contained within tile */
-.tile.stone::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 32px;
-  height: 6px;
-  background: linear-gradient(90deg,
-    #9a9a88 0%,
-    #8a8a78 50%,
-    #787870 100%);
-  background-image:
-    radial-gradient(circle at 30% 20%, #8a8a78 1px, transparent 1px);
-  background-size: 4px 4px;
-  z-index: 1;
-  box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.4);
+    1px 2px 3px rgba(0, 0, 0, 0.25),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 
@@ -445,7 +396,13 @@ h1 {
     linear-gradient(90deg, #5d6d7e 1px, transparent 1px),
     linear-gradient(180deg, #5d6d7e 1px, transparent 1px);
   background-size: 8px 8px;
-  border: 1px solid #2c3e50;
+  border-top: 1px solid #85929e;
+  border-left: 1px solid #85929e;
+  border-bottom: 2px solid #2d3748;
+  border-right: 2px solid #2d3748;
+  box-shadow:
+    2px 2px 4px rgba(0, 0, 0, 0.3),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .tile.bridge {
@@ -454,8 +411,13 @@ h1 {
     linear-gradient(90deg, #a0522d 2px, transparent 2px),
     linear-gradient(0deg, #cd853f 1px, transparent 1px);
   background-size: 8px 4px;
-  border-top: 2px solid #654321;
+  border-top: 1px solid #cd853f;
+  border-left: 1px solid #cd853f;
   border-bottom: 2px solid #654321;
+  border-right: 2px solid #654321;
+  box-shadow:
+    1px 1px 2px rgba(0, 0, 0, 0.3),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .tile.sand {
@@ -480,7 +442,13 @@ h1 {
     16px 16px,
     16px 16px,
     20px 20px;
-  border: 1px solid #34495e;
+  border-top: 1px solid #aab7b8;
+  border-left: 1px solid #aab7b8;
+  border-bottom: 2px solid #34495e;
+  border-right: 2px solid #34495e;
+  box-shadow:
+    1px 1px 3px rgba(0, 0, 0, 0.4),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .tile.field {
