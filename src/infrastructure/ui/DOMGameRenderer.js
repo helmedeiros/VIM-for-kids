@@ -1,6 +1,5 @@
 import { GameRenderer } from '../../ports/output/GameRenderer.js';
 import { Position } from '../../domain/value-objects/Position.js';
-import { FeatureFlags } from '../FeatureFlags.js';
 
 export class DOMGameRenderer extends GameRenderer {
   constructor() {
@@ -329,7 +328,7 @@ export class DOMGameRenderer extends GameRenderer {
               // Only render the gate if it's still closed
               tile.classList.add('secondary-gate');
               tile.classList.add('closed');
-              tile.textContent = '🚪'; // Door emoji for gates within walls
+              // No text content - styling handles the visual appearance
             }
             // When open, the gate disappears and shows the underlying dirt tile
           }
