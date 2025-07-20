@@ -27,6 +27,7 @@ class FeatureFlags {
       NEW_UI_THEME: false,
       TUTORIAL_MODE: true,
       ACHIEVEMENT_SYSTEM: false,
+      ENHANCED_3D_EFFECTS: true, // Toggle for pseudo-3D tile enhancements
 
       // Load flags from environment or remote config
       ...this.loadFromEnvironment(),

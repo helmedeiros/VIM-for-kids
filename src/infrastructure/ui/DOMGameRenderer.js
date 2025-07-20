@@ -1,5 +1,6 @@
 import { GameRenderer } from '../../ports/output/GameRenderer.js';
 import { Position } from '../../domain/value-objects/Position.js';
+import { FeatureFlags } from '../FeatureFlags.js';
 
 export class DOMGameRenderer extends GameRenderer {
   constructor() {
