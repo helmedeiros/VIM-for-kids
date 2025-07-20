@@ -780,6 +780,139 @@ h1 {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+/* CollectibleKey Inventory */
+.collectible-inventory {
+  margin: 0;
+  padding: 10px;
+  background-color: rgba(44, 62, 80, 0.9);
+  border-radius: 5px;
+  border-left: 4px solid #f39c12;
+  position: absolute;
+  bottom: 180px;
+  right: 20px;
+  z-index: 1000;
+  max-width: 300px;
+  font-size: 12px;
+  min-height: 60px;
+}
+
+.collectible-inventory h3 {
+  margin-bottom: 10px;
+  color: #f39c12;
+  font-size: 14px;
+}
+
+.collectible-display {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-height: 30px;
+}
+
+.collected-collectible-key {
+  background: linear-gradient(145deg, #f39c12, #e67e22);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 12px;
+  box-shadow:
+    0 3px 6px rgba(243, 156, 18, 0.3),
+    0 0 10px rgba(243, 156, 18, 0.2);
+  border: 2px solid #d68910;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  animation: collectibleKeyShine 3s ease-in-out infinite;
+}
+
+.collected-collectible-key::before {
+  content: '🔑';
+  font-size: 14px;
+  filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.8));
+}
+
+.collectible-key-name {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: capitalize;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.collectible-empty-message {
+  color: #95a5a6;
+  font-style: italic;
+  font-size: 11px;
+  text-align: center;
+  padding: 10px;
+}
+
+@keyframes collectibleKeyShine {
+  0%, 100% {
+    box-shadow:
+      0 3px 6px rgba(243, 156, 18, 0.3),
+      0 0 10px rgba(243, 156, 18, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 3px 6px rgba(243, 156, 18, 0.5),
+      0 0 15px rgba(243, 156, 18, 0.4),
+      0 0 25px rgba(255, 215, 0, 0.3);
+  }
+}
+
+/* Collection Feedback Animation */
+.key-collection-feedback {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(145deg, #f39c12, #e67e22);
+  color: white;
+  padding: 15px 25px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow:
+    0 5px 15px rgba(243, 156, 18, 0.4),
+    0 0 30px rgba(243, 156, 18, 0.3);
+  border: 3px solid #d68910;
+  z-index: 2000;
+  animation: keyCollectionPopup 2s ease-out forwards;
+  pointer-events: none;
+}
+
+.key-collection-feedback::before {
+  content: '🔑';
+  font-size: 20px;
+  margin-right: 10px;
+  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.8));
+}
+
+@keyframes keyCollectionPopup {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  40% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+}
+
 /* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
   .game-container {
@@ -798,9 +931,14 @@ h1 {
   }
 
   .instructions,
-  .collected-keys {
+  .collected-keys,
+  .collectible-inventory {
     padding: 10px;
     font-size: 12px;
+  }
+
+  .collectible-inventory {
+    bottom: 140px;
   }
 }
 
@@ -821,9 +959,14 @@ h1 {
   }
 
   .instructions,
-  .collected-keys {
+  .collected-keys,
+  .collectible-inventory {
     padding: 8px;
     font-size: 11px;
+  }
+
+  .collectible-inventory {
+    bottom: 120px;
   }
 }
 

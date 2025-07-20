@@ -6,6 +6,7 @@ export class DOMGameRenderer extends GameRenderer {
     super();
     this.gameBoard = document.getElementById('gameBoard');
     this.collectedKeysDisplay = document.querySelector('.key-display');
+    this.collectibleInventoryDisplay = document.querySelector('.collectible-display');
 
     // Make the game board focusable
     this.gameBoard.setAttribute('tabindex', '0');
@@ -377,6 +378,7 @@ export class DOMGameRenderer extends GameRenderer {
     }
 
     this.updateCollectedKeysDisplay(gameState.collectedKeys);
+    this.updateCollectibleInventoryDisplay(gameState.collectedCollectibleKeys || new Set());
   }
 
   updateCollectedKeysDisplay(collectedKeys) {
@@ -398,9 +400,67 @@ export class DOMGameRenderer extends GameRenderer {
     }
   }
 
-  showKeyInfo() {
-    // Key collection feedback is now handled by the visual UI only
-    // No popup needed - the key appears in the collected keys display
+    updateCollectibleInventoryDisplay(collectedCollectibleKeys) {
+    // Gracefully handle missing DOM element (in tests or if HTML structure changes)
+    if (!this.collectibleInventoryDisplay) {
+      console.warn('CollectibleKey inventory display element not found - skipping update');
+      return;
+    }
+
+    this.collectibleInventoryDisplay.innerHTML = '';
+
+    if (collectedCollectibleKeys.size === 0) {
+      const emptyMessage = document.createElement('div');
+      emptyMessage.className = 'collectible-empty-message';
+      emptyMessage.textContent = 'No special keys found yet!';
+      this.collectibleInventoryDisplay.appendChild(emptyMessage);
+    } else {
+      collectedCollectibleKeys.forEach((keyId) => {
+        const keyElement = document.createElement('div');
+        keyElement.className = 'collected-collectible-key';
+
+        const keyNameSpan = document.createElement('span');
+        keyNameSpan.className = 'collectible-key-name';
+        // Convert key ID to display name (e.g., 'maze_key' -> 'Maze Key')
+        keyNameSpan.textContent = this._formatKeyName(keyId);
+
+        keyElement.appendChild(keyNameSpan);
+        keyElement.title = `Collected: ${this._formatKeyName(keyId)}`;
+        this.collectibleInventoryDisplay.appendChild(keyElement);
+      });
+    }
+  }
+
+  _formatKeyName(keyId) {
+    return keyId
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  showKeyInfo(key) {
+    // Enhanced key collection feedback with visual animation
+    if (key && key.type === 'collectible_key') {
+      this._showCollectibleKeyFeedback(key);
+    }
+    // VIM keys still use the existing simple feedback (no popup)
+  }
+
+  _showCollectibleKeyFeedback(collectibleKey) {
+    // Create animated feedback element
+    const feedbackElement = document.createElement('div');
+    feedbackElement.className = 'key-collection-feedback';
+    feedbackElement.textContent = `Found ${this._formatKeyName(collectibleKey.keyId)}!`;
+
+    // Add to DOM
+    document.body.appendChild(feedbackElement);
+
+    // Remove after animation completes
+    setTimeout(() => {
+      if (document.body.contains(feedbackElement)) {
+        document.body.removeChild(feedbackElement);
+      }
+    }, 2000);
   }
 
   focus() {

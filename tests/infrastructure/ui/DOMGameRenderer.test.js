@@ -445,3 +445,248 @@ describe('DOMGameRenderer', () => {
     });
   });
 });
+
+describe('updateCollectibleInventoryDisplay', () => {
+  let gameRenderer;
+  let mockCollectibleDisplay;
+
+  beforeEach(() => {
+    // Mock DOM elements
+    document.getElementById = jest.fn().mockReturnValue(document.createElement('div'));
+    document.querySelector = jest.fn();
+
+    mockCollectibleDisplay = document.createElement('div');
+    document.querySelector.mockImplementation((selector) => {
+      if (selector === '.key-display') return document.createElement('div');
+      if (selector === '.collectible-display') return mockCollectibleDisplay;
+      return null;
+    });
+
+    gameRenderer = new DOMGameRenderer();
+  });
+
+  it('should display empty message when no collectible keys are collected', () => {
+    const emptySet = new Set();
+
+    gameRenderer.updateCollectibleInventoryDisplay(emptySet);
+
+    const emptyMessage = mockCollectibleDisplay.querySelector('.collectible-empty-message');
+    expect(emptyMessage).toBeTruthy();
+    expect(emptyMessage.textContent).toBe('No special keys found yet!');
+  });
+
+  it('should display collected collectible keys with proper formatting', () => {
+    const collectedKeys = new Set(['maze_key', 'master_key']);
+
+    gameRenderer.updateCollectibleInventoryDisplay(collectedKeys);
+
+    const keyElements = mockCollectibleDisplay.querySelectorAll('.collected-collectible-key');
+    expect(keyElements).toHaveLength(2);
+
+    const keyNames = Array.from(keyElements).map(el =>
+      el.querySelector('.collectible-key-name').textContent
+    );
+    expect(keyNames).toContain('Maze Key');
+    expect(keyNames).toContain('Master Key');
+  });
+
+  it('should format key names correctly', () => {
+    expect(gameRenderer._formatKeyName('maze_key')).toBe('Maze Key');
+    expect(gameRenderer._formatKeyName('secret_door_key')).toBe('Secret Door Key');
+    expect(gameRenderer._formatKeyName('master_key')).toBe('Master Key');
+    expect(gameRenderer._formatKeyName('simple')).toBe('Simple');
+  });
+
+  it('should add proper CSS classes and attributes to key elements', () => {
+    const collectedKeys = new Set(['test_key']);
+
+    gameRenderer.updateCollectibleInventoryDisplay(collectedKeys);
+
+    const keyElement = mockCollectibleDisplay.querySelector('.collected-collectible-key');
+    expect(keyElement).toBeTruthy();
+    expect(keyElement.className).toBe('collected-collectible-key');
+    expect(keyElement.title).toBe('Collected: Test Key');
+  });
+});
+
+describe('showKeyInfo with CollectibleKey support', () => {
+  let gameRenderer;
+  let originalAppendChild, originalRemoveChild, originalContains;
+
+  beforeEach(() => {
+    document.getElementById = jest.fn().mockReturnValue(document.createElement('div'));
+    document.querySelector = jest.fn().mockReturnValue(document.createElement('div'));
+
+    // Mock document.body methods
+    originalAppendChild = document.body.appendChild;
+    originalRemoveChild = document.body.removeChild;
+    originalContains = document.body.contains;
+
+    document.body.appendChild = jest.fn();
+    document.body.removeChild = jest.fn();
+    document.body.contains = jest.fn().mockReturnValue(true);
+
+    gameRenderer = new DOMGameRenderer();
+  });
+
+  afterEach(() => {
+    // Restore original methods
+    document.body.appendChild = originalAppendChild;
+    document.body.removeChild = originalRemoveChild;
+    document.body.contains = originalContains;
+  });
+
+  it('should show visual feedback for CollectibleKey collection', () => {
+    const collectibleKey = {
+      type: 'collectible_key',
+      keyId: 'maze_key',
+      name: 'Maze Key'
+    };
+
+    gameRenderer.showKeyInfo(collectibleKey);
+
+    expect(document.body.appendChild).toHaveBeenCalled();
+
+    const feedbackCall = document.body.appendChild.mock.calls[0][0];
+    expect(feedbackCall.className).toBe('key-collection-feedback');
+    expect(feedbackCall.textContent).toBe('Found Maze Key!');
+  });
+
+  it('should not show popup feedback for VIM keys', () => {
+    const vimKey = {
+      type: 'vim_key',
+      key: 'h',
+      description: 'Move left'
+    };
+
+    gameRenderer.showKeyInfo(vimKey);
+
+    expect(document.body.appendChild).not.toHaveBeenCalled();
+  });
+
+  it('should handle null or undefined key gracefully', () => {
+    expect(() => {
+      gameRenderer.showKeyInfo(null);
+    }).not.toThrow();
+
+    expect(() => {
+      gameRenderer.showKeyInfo(undefined);
+    }).not.toThrow();
+  });
+});
+
+describe('_showCollectibleKeyFeedback', () => {
+  let gameRenderer;
+  let originalAppendChild, originalRemoveChild, originalContains;
+
+  beforeEach(() => {
+    document.getElementById = jest.fn().mockReturnValue(document.createElement('div'));
+    document.querySelector = jest.fn().mockReturnValue(document.createElement('div'));
+
+    // Mock document.body methods
+    originalAppendChild = document.body.appendChild;
+    originalRemoveChild = document.body.removeChild;
+    originalContains = document.body.contains;
+
+    document.body.appendChild = jest.fn();
+    document.body.removeChild = jest.fn();
+    document.body.contains = jest.fn().mockReturnValue(true);
+
+    // Mock setTimeout for testing
+    jest.useFakeTimers();
+
+    gameRenderer = new DOMGameRenderer();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+
+    // Restore original methods
+    document.body.appendChild = originalAppendChild;
+    document.body.removeChild = originalRemoveChild;
+    document.body.contains = originalContains;
+  });
+
+  it('should create and remove feedback element with proper timing', () => {
+    const collectibleKey = {
+      keyId: 'secret_key',
+      name: 'Secret Key'
+    };
+
+    gameRenderer._showCollectibleKeyFeedback(collectibleKey);
+
+    expect(document.body.appendChild).toHaveBeenCalled();
+
+    // Fast-forward time to trigger cleanup
+    jest.advanceTimersByTime(2000);
+
+    expect(document.body.removeChild).toHaveBeenCalled();
+  });
+
+  it('should handle element already removed from DOM', () => {
+    document.body.contains = jest.fn().mockReturnValue(false);
+
+    const collectibleKey = {
+      keyId: 'test_key',
+      name: 'Test Key'
+    };
+
+    gameRenderer._showCollectibleKeyFeedback(collectibleKey);
+
+    jest.advanceTimersByTime(2000);
+
+    expect(document.body.removeChild).not.toHaveBeenCalled();
+  });
+});
+
+describe('render method CollectibleKey integration', () => {
+  let gameRenderer;
+  let mockGameState;
+
+  beforeEach(() => {
+    document.getElementById = jest.fn().mockReturnValue(document.createElement('div'));
+    document.querySelector = jest.fn().mockReturnValue(document.createElement('div'));
+
+    gameRenderer = new DOMGameRenderer();
+
+    // Mock the update methods
+    gameRenderer.updateCollectedKeysDisplay = jest.fn();
+    gameRenderer.updateCollectibleInventoryDisplay = jest.fn();
+    gameRenderer._updateCamera = jest.fn();
+
+    mockGameState = {
+      map: {
+        width: 10,
+        height: 10,
+        getTileAt: jest.fn().mockReturnValue({ name: 'grass' }),
+        isWalkable: jest.fn().mockReturnValue(true)
+      },
+      cursor: {
+        position: { x: 5, y: 5, equals: jest.fn().mockReturnValue(false) }
+      },
+      availableKeys: [],
+      availableCollectibleKeys: [],
+      textLabels: [],
+      npcs: [],
+      collectedKeys: new Set(['h', 'j']),
+      collectedCollectibleKeys: new Set(['maze_key'])
+    };
+  });
+
+  it('should call both key display update methods during render', () => {
+    gameRenderer.render(mockGameState);
+
+    expect(gameRenderer.updateCollectedKeysDisplay).toHaveBeenCalledWith(mockGameState.collectedKeys);
+    expect(gameRenderer.updateCollectibleInventoryDisplay).toHaveBeenCalledWith(mockGameState.collectedCollectibleKeys);
+  });
+
+  it('should handle missing collectedCollectibleKeys gracefully', () => {
+    delete mockGameState.collectedCollectibleKeys;
+
+    expect(() => {
+      gameRenderer.render(mockGameState);
+    }).not.toThrow();
+
+    expect(gameRenderer.updateCollectibleInventoryDisplay).toHaveBeenCalledWith(new Set());
+  });
+});
