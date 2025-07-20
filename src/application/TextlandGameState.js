@@ -84,6 +84,11 @@ export class TextlandGameState {
     return []; // No secondary gates in textland
   }
 
+  // eslint-disable-next-line no-unused-vars
+  tryUnlockSecondaryGate(position) {
+    return false; // No secondary gates in textland
+  }
+
   getNPCs() {
     return []; // No NPCs in textland
   }

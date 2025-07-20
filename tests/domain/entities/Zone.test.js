@@ -354,6 +354,111 @@ describe('Zone', () => {
       expect(zoneWithMixedGate.gate.isOpen).toBe(true);
       expect(zoneWithMixedGate.isComplete()).toBe(true);
     });
+
+    test('should not auto-unlock secondary gates when collecting keys', () => {
+      const gateConfig = {
+        ...createTestZoneConfig(),
+        tiles: {
+          ...createTestZoneConfig().tiles,
+          specialTiles: [
+            { type: 'collectible_key', keyId: 'maze_key', name: 'Maze Key', color: '#FFD700', position: [1, 1] },
+          ],
+          secondaryGates: [
+            {
+              position: [5, 5],
+              unlocksWhen: {
+                requiredCollectibleKeys: ['maze_key']
+              }
+            }
+          ]
+        }
+      };
+      const zone = new Zone(gateConfig);
+
+      // Collect the required key
+      const mazeKey = zone.collectibleKeys.find(k => k.keyId === 'maze_key');
+      zone.collectKey(mazeKey);
+
+      // Secondary gate should still be closed (no auto-unlock)
+      const secondaryGates = zone.secondaryGates;
+      expect(secondaryGates).toHaveLength(1);
+      expect(secondaryGates[0].isOpen).toBe(false);
+    });
+
+    test('should unlock secondary gate on interaction when player has key', () => {
+      const gateConfig = {
+        ...createTestZoneConfig(),
+        tiles: {
+          ...createTestZoneConfig().tiles,
+          specialTiles: [
+            { type: 'collectible_key', keyId: 'maze_key', name: 'Maze Key', color: '#FFD700', position: [1, 1] },
+          ],
+          secondaryGates: [
+            {
+              position: [5, 5],
+              unlocksWhen: {
+                requiredCollectibleKeys: ['maze_key']
+              }
+            }
+          ]
+        }
+      };
+      const zone = new Zone(gateConfig);
+
+      // Collect the required key first
+      const mazeKey = zone.collectibleKeys.find(k => k.keyId === 'maze_key');
+      zone.collectKey(mazeKey);
+
+      // Try to unlock the secondary gate by interacting with it
+      const gatePosition = zone.secondaryGates[0].position;
+      const unlocked = zone.tryUnlockSecondaryGate(gatePosition);
+
+      expect(unlocked).toBe(true);
+
+      // Gate should now be open
+      const secondaryGates = zone.secondaryGates;
+      expect(secondaryGates[0].isOpen).toBe(true);
+    });
+
+    test('should not unlock secondary gate on interaction when player lacks key', () => {
+      const gateConfig = {
+        ...createTestZoneConfig(),
+        tiles: {
+          ...createTestZoneConfig().tiles,
+          secondaryGates: [
+            {
+              position: [5, 5],
+              unlocksWhen: {
+                requiredCollectibleKeys: ['maze_key']
+              }
+            }
+          ]
+        }
+      };
+      const zone = new Zone(gateConfig);
+
+      // Don't collect the required key
+
+      // Try to unlock the secondary gate by interacting with it
+      const gatePosition = zone.secondaryGates[0].position;
+      const unlocked = zone.tryUnlockSecondaryGate(gatePosition);
+
+      expect(unlocked).toBe(false);
+
+      // Gate should still be closed
+      const secondaryGates = zone.secondaryGates;
+      expect(secondaryGates[0].isOpen).toBe(false);
+    });
+
+    test('should return false when trying to unlock non-existent secondary gate', () => {
+      const zone = new Zone(createTestZoneConfig());
+
+      // Try to unlock at a position where there's no gate
+      const nonGatePosition = new Position(99, 99);
+      const unlocked = zone.tryUnlockSecondaryGate(nonGatePosition);
+
+      expect(unlocked).toBe(false);
+    });
   });
 
   describe('NPCs', () => {

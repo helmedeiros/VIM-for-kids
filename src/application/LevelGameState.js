@@ -313,6 +313,10 @@ export class LevelGameState {
     return this.zone.secondaryGates;
   }
 
+  tryUnlockSecondaryGate(position) {
+    return this.zone.tryUnlockSecondaryGate(position);
+  }
+
   getNPCs() {
     return this.zone.getActiveNPCs();
   }

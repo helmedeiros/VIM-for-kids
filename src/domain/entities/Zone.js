@@ -404,10 +404,30 @@ export class Zone {
     this._checkGateUnlock();
   }
 
+  /**
+   * Try to unlock a secondary gate when player interacts with it
+   * Returns true if the gate was unlocked, false otherwise
+   */
+    tryUnlockSecondaryGate(position) {
+    if (!this._secondaryGates) return false;
+
+    const gate = this._secondaryGates.find(g => g.position.equals(position));
+    if (!gate) return false;
+
+    // If gate can be unlocked, open it (visual will be handled by renderer)
+    if (gate.canUnlock(this._collectedKeys, this._collectedCollectibleKeys)) {
+      // Mark the gate as unlocked - when open, it becomes invisible and walkable
+      gate.open();
+      return true;
+    }
+
+    return false;
+  }
+
   _checkGateUnlock() {
     let anyGateUnlocked = false;
 
-    // Check main gate
+    // Check main gate (auto-unlock behavior)
     if (this._gate) {
       // Use the gate's canUnlock method with both VIM keys and CollectibleKeys
       if (this._gate.canUnlock(this._collectedKeys, this._collectedCollectibleKeys)) {
@@ -416,15 +436,8 @@ export class Zone {
       }
     }
 
-    // Check secondary gates
-    if (this._secondaryGates) {
-      this._secondaryGates.forEach(gate => {
-        if (gate.canUnlock(this._collectedKeys, this._collectedCollectibleKeys)) {
-          gate.open();
-          anyGateUnlocked = true;
-        }
-      });
-    }
+    // Secondary gates don't auto-unlock, they unlock on interaction
+    // No auto-unlocking for secondary gates here
 
     return anyGateUnlocked;
   }
