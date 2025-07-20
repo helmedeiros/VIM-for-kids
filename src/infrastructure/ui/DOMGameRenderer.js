@@ -329,7 +329,7 @@ export class DOMGameRenderer extends GameRenderer {
               // Only render the gate if it's still closed
               tile.classList.add('secondary-gate');
               tile.classList.add('closed');
-              tile.textContent = '⚓'; // Gate emoji for closed secondary gates
+              tile.textContent = '🚪'; // Door emoji for gates within walls
             }
             // When open, the gate disappears and shows the underlying dirt tile
           }
