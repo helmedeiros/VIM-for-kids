@@ -347,15 +347,16 @@ h1 {
 }
 
 .tile.dirt {
-  background-color: #8b4513;
+  background-color: #d2b48c;
   background-image:
-    radial-gradient(circle at 20% 30%, #a0522d 1px, transparent 1px),
-    radial-gradient(circle at 70% 80%, #cd853f 1px, transparent 1px),
-    radial-gradient(circle at 40% 70%, #deb887 0.5px, transparent 0.5px);
+    radial-gradient(circle at 20% 30%, #c19a6b 1px, transparent 1px),
+    radial-gradient(circle at 70% 80%, #ddbf94 1px, transparent 1px),
+    radial-gradient(circle at 40% 70%, #f5deb3 0.5px, transparent 0.5px);
   background-size:
     16px 16px,
     12px 12px,
     8px 8px;
+  border: none;
 }
 
 .tile.tree {
