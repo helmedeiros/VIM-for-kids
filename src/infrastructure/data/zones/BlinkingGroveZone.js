@@ -76,6 +76,7 @@ export class BlinkingGroveZone {
           { type: 'vim_key', value: 'j', position: [2, 11] }, // Down movement key - on grass
           { type: 'vim_key', value: 'k', position: [2, 9] }, // Up movement key - on grass
           { type: 'vim_key', value: 'l', position: [3, 10] }, // Right movement key - on grass
+          { type: 'collectible_key', keyId: 'maze_key', name: 'Maze Key', color: '#FFD700', position: [37, 14] }, // Golden key in the maze
         ],
         textLabels: [
           // "Remember words are not WORD" text at the top
@@ -130,6 +131,13 @@ export class BlinkingGroveZone {
           position: [74, 1], // Gate position in the stone maze
           leadsTo: 'zone_2',
         },
+        secondaryGates: [
+          {
+            locked: true,
+            unlocksWhen: { requiredCollectibleKeys: ['maze_key'] },
+            position: [52, 3], // Gate position at end of dirt path in maze
+          },
+        ],
       },
       npcs: [
         {

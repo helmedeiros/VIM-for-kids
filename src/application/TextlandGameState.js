@@ -22,7 +22,9 @@ export class TextlandGameState {
       this.map = this.zone.gameMap;
       this.cursor = new Cursor(this.zone.getCursorStartPosition());
       this.availableKeys = this.zone.vimKeys;
+      this.availableCollectibleKeys = this.zone.collectibleKeys;
       this.collectedKeys = new Set();
+      this.collectedCollectibleKeys = new Set();
     } catch (error) {
       throw new Error('Failed to load textland exploration zone');
     }
@@ -39,6 +41,18 @@ export class TextlandGameState {
     }
   }
 
+  collectCollectibleKey(collectibleKey) {
+    if (this.availableCollectibleKeys.includes(collectibleKey)) {
+      this.collectedCollectibleKeys.add(collectibleKey.keyId);
+      this.availableCollectibleKeys = this.availableCollectibleKeys.filter(
+        (key) => key !== collectibleKey
+      );
+
+      // Notify zone about key collection
+      this.zone.collectKey(collectibleKey);
+    }
+  }
+
   // Get current state for rendering
   getCurrentState() {
     return {
@@ -46,9 +60,12 @@ export class TextlandGameState {
       map: this.map,
       cursor: this.cursor,
       availableKeys: this.availableKeys,
+      availableCollectibleKeys: this.availableCollectibleKeys,
       collectedKeys: this.collectedKeys,
+      collectedCollectibleKeys: this.collectedCollectibleKeys,
       textLabels: this.zone.textLabels,
       gate: null, // No gate in textland exploration
+      secondaryGates: [], // No secondary gates in textland exploration
       npcs: [], // No NPCs in simple exploration
       // No level progress for textland
     };
@@ -61,6 +78,10 @@ export class TextlandGameState {
 
   getGate() {
     return null; // No gate in textland
+  }
+
+  getSecondaryGates() {
+    return []; // No secondary gates in textland
   }
 
   getNPCs() {

@@ -2,6 +2,7 @@ import { Zone } from '../../../src/domain/entities/Zone.js';
 import { Gate } from '../../../src/domain/entities/Gate.js';
 import { DynamicZoneMap } from '../../../src/domain/entities/DynamicZoneMap.js';
 import { Position } from '../../../src/domain/value-objects/Position.js';
+import { CollectibleKey } from '../../../src/domain/entities/CollectibleKey.js';
 
 /**
  * Test fixture for Zone testing - independent of any real zone implementation
@@ -174,6 +175,72 @@ describe('Zone', () => {
     });
   });
 
+  describe('CollectibleKeys', () => {
+    let zoneWithCollectibleKeys;
+
+    beforeEach(() => {
+      const configWithCollectibleKeys = {
+        ...createTestZoneConfig(),
+        tiles: {
+          ...createTestZoneConfig().tiles,
+          specialTiles: [
+            ...createTestZoneConfig().tiles.specialTiles,
+            { type: 'collectible_key', keyId: 'red_key', name: 'Red Key', color: '#FF0000', position: [1, 1] },
+            { type: 'collectible_key', keyId: 'blue_key', name: 'Blue Key', color: '#0000FF', position: [3, 3] },
+          ]
+        }
+      };
+      zoneWithCollectibleKeys = new Zone(configWithCollectibleKeys);
+    });
+
+    test('should create CollectibleKeys from configuration', () => {
+      expect(zoneWithCollectibleKeys.collectibleKeys).toHaveLength(2);
+
+      const keyIds = zoneWithCollectibleKeys.collectibleKeys.map((k) => k.keyId).sort();
+      expect(keyIds).toEqual(['blue_key', 'red_key']);
+    });
+
+    test('should place CollectibleKeys at correct positions', () => {
+      const redKey = zoneWithCollectibleKeys.collectibleKeys.find((k) => k.keyId === 'red_key');
+      const blueKey = zoneWithCollectibleKeys.collectibleKeys.find((k) => k.keyId === 'blue_key');
+
+      expect(redKey.position).toEqual(getAbsolutePosition(1, 1));
+      expect(blueKey.position).toEqual(getAbsolutePosition(3, 3));
+    });
+
+    test('should have correct key properties', () => {
+      const redKey = zoneWithCollectibleKeys.collectibleKeys.find((k) => k.keyId === 'red_key');
+      expect(redKey.name).toBe('Red Key');
+      expect(redKey.color).toBe('#FF0000');
+      expect(redKey.type).toBe('collectible_key');
+    });
+
+    test('should collect CollectibleKeys and remove them from available keys', () => {
+      const redKey = zoneWithCollectibleKeys.collectibleKeys.find((k) => k.keyId === 'red_key');
+      const initialCount = zoneWithCollectibleKeys.collectibleKeys.length;
+
+      zoneWithCollectibleKeys.collectKey(redKey);
+
+      expect(zoneWithCollectibleKeys.collectibleKeys).toHaveLength(initialCount - 1);
+      expect(zoneWithCollectibleKeys.getCollectedCollectibleKeysCount()).toBe(1);
+      expect(zoneWithCollectibleKeys.getCollectedCollectibleKeys().has('red_key')).toBe(true);
+    });
+
+    test('should handle mixed VIM keys and CollectibleKeys', () => {
+      const redKey = zoneWithCollectibleKeys.collectibleKeys.find((k) => k.keyId === 'red_key');
+      const vimKey = zoneWithCollectibleKeys.vimKeys.find((k) => k.key === 'h');
+
+      // Collect both types
+      zoneWithCollectibleKeys.collectKey(redKey);
+      zoneWithCollectibleKeys.collectKey(vimKey);
+
+      expect(zoneWithCollectibleKeys.getCollectedCollectibleKeysCount()).toBe(1);
+      expect(zoneWithCollectibleKeys.getCollectedKeysCount()).toBe(1);
+      expect(zoneWithCollectibleKeys.getCollectedCollectibleKeys().has('red_key')).toBe(true);
+      expect(zoneWithCollectibleKeys.getCollectedKeys().has('h')).toBe(true);
+    });
+  });
+
   describe('Text Labels', () => {
     test('should create text labels from configuration', () => {
       expect(testZone.textLabels).toHaveLength(6);
@@ -227,6 +294,65 @@ describe('Zone', () => {
 
       expect(testZone.gate.isOpen).toBe(false);
       expect(testZone.isComplete()).toBe(false);
+    });
+
+    test('should open gate when CollectibleKey requirements are met', () => {
+      const gateConfig = {
+        ...createTestZoneConfig(),
+        tiles: {
+          ...createTestZoneConfig().tiles,
+          specialTiles: [
+            { type: 'collectible_key', keyId: 'master_key', name: 'Master Key', color: '#FFD700', position: [1, 1] },
+          ],
+          gate: {
+            position: [8, 4],
+            unlocksWhen: { requiredCollectibleKeys: ['master_key'] }
+          }
+        }
+      };
+      const zoneWithCollectibleGate = new Zone(gateConfig);
+
+      expect(zoneWithCollectibleGate.gate.isOpen).toBe(false);
+
+      const masterKey = zoneWithCollectibleGate.collectibleKeys.find(k => k.keyId === 'master_key');
+      zoneWithCollectibleGate.collectKey(masterKey);
+
+      expect(zoneWithCollectibleGate.gate.isOpen).toBe(true);
+      expect(zoneWithCollectibleGate.isComplete()).toBe(true);
+    });
+
+    test('should open gate when both VIM key and CollectibleKey requirements are met', () => {
+      const gateConfig = {
+        ...createTestZoneConfig(),
+        tiles: {
+          ...createTestZoneConfig().tiles,
+          specialTiles: [
+            { type: 'vim_key', value: 'h', position: [2, 2] },
+            { type: 'collectible_key', keyId: 'special_key', name: 'Special Key', color: '#FF00FF', position: [1, 1] },
+          ],
+          gate: {
+            position: [8, 4],
+            unlocksWhen: {
+              collectedVimKeys: ['h'],
+              requiredCollectibleKeys: ['special_key']
+            }
+          }
+        }
+      };
+      const zoneWithMixedGate = new Zone(gateConfig);
+
+      expect(zoneWithMixedGate.gate.isOpen).toBe(false);
+
+      // Collect only VIM key - gate should remain closed
+      const hKey = zoneWithMixedGate.vimKeys.find(k => k.key === 'h');
+      zoneWithMixedGate.collectKey(hKey);
+      expect(zoneWithMixedGate.gate.isOpen).toBe(false);
+
+      // Collect CollectibleKey - gate should now open
+      const specialKey = zoneWithMixedGate.collectibleKeys.find(k => k.keyId === 'special_key');
+      zoneWithMixedGate.collectKey(specialKey);
+      expect(zoneWithMixedGate.gate.isOpen).toBe(true);
+      expect(zoneWithMixedGate.isComplete()).toBe(true);
     });
   });
 

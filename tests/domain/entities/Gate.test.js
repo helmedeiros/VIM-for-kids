@@ -22,6 +22,20 @@ describe('Gate', () => {
       expect(gate.type).toBe('gate');
     });
 
+    it('should create gate with unlock conditions', () => {
+      const unlockConditions = {
+        collectedVimKeys: ['h', 'j'],
+        requiredCollectibleKeys: ['red_key', 'blue_key']
+      };
+      const gateWithConditions = new Gate(testPosition, unlockConditions);
+
+      expect(gateWithConditions.unlockConditions).toEqual(unlockConditions);
+    });
+
+    it('should create gate with empty unlock conditions by default', () => {
+      expect(gate.unlockConditions).toEqual({});
+    });
+
     it('should throw error if position is not a Position object', () => {
       expect(() => {
         new Gate('invalid position');
@@ -91,6 +105,13 @@ describe('Gate', () => {
       expect(gate.equals(otherGate)).toBe(true);
     });
 
+    it('should return true for gates with same position, open state, and unlock conditions', () => {
+      const unlockConditions = { collectedVimKeys: ['h'], requiredCollectibleKeys: ['red_key'] };
+      const gate1 = new Gate(testPosition, unlockConditions);
+      const gate2 = new Gate(testPosition, unlockConditions);
+      expect(gate1.equals(gate2)).toBe(true);
+    });
+
     it('should return false for gates with different positions', () => {
       const otherPosition = new Position(10, 10);
       const otherGate = new Gate(otherPosition);
@@ -103,12 +124,107 @@ describe('Gate', () => {
       expect(gate.equals(otherGate)).toBe(false);
     });
 
+    it('should return false for gates with different unlock conditions', () => {
+      const unlockConditions1 = { collectedVimKeys: ['h'] };
+      const unlockConditions2 = { collectedVimKeys: ['j'] };
+      const gate1 = new Gate(testPosition, unlockConditions1);
+      const gate2 = new Gate(testPosition, unlockConditions2);
+      expect(gate1.equals(gate2)).toBe(false);
+    });
+
     it('should return false when comparing with non-Gate object', () => {
       expect(gate.equals('not a gate')).toBe(false);
     });
 
     it('should return false when comparing with null', () => {
       expect(gate.equals(null)).toBe(false);
+    });
+  });
+
+  describe('canUnlock method', () => {
+    it('should return false for gate with no unlock conditions', () => {
+      const result = gate.canUnlock(new Set(['h', 'j']), new Set(['red_key']));
+      expect(result).toBe(false);
+    });
+
+    it('should return true when all VIM key requirements are met', () => {
+      const unlockConditions = { collectedVimKeys: ['h', 'j'] };
+      const gateWithConditions = new Gate(testPosition, unlockConditions);
+
+      const collectedVimKeys = new Set(['h', 'j', 'k']);
+      const result = gateWithConditions.canUnlock(collectedVimKeys, new Set());
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when VIM key requirements are not met', () => {
+      const unlockConditions = { collectedVimKeys: ['h', 'j', 'k'] };
+      const gateWithConditions = new Gate(testPosition, unlockConditions);
+
+      const collectedVimKeys = new Set(['h', 'j']); // missing 'k'
+      const result = gateWithConditions.canUnlock(collectedVimKeys, new Set());
+
+      expect(result).toBe(false);
+    });
+
+    it('should return true when all CollectibleKey requirements are met', () => {
+      const unlockConditions = { requiredCollectibleKeys: ['red_key', 'blue_key'] };
+      const gateWithConditions = new Gate(testPosition, unlockConditions);
+
+      const collectedCollectibleKeys = new Set(['red_key', 'blue_key', 'green_key']);
+      const result = gateWithConditions.canUnlock(new Set(), collectedCollectibleKeys);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when CollectibleKey requirements are not met', () => {
+      const unlockConditions = { requiredCollectibleKeys: ['red_key', 'blue_key'] };
+      const gateWithConditions = new Gate(testPosition, unlockConditions);
+
+      const collectedCollectibleKeys = new Set(['red_key']); // missing 'blue_key'
+      const result = gateWithConditions.canUnlock(new Set(), collectedCollectibleKeys);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return true when both VIM key and CollectibleKey requirements are met', () => {
+      const unlockConditions = {
+        collectedVimKeys: ['h'],
+        requiredCollectibleKeys: ['red_key']
+      };
+      const gateWithConditions = new Gate(testPosition, unlockConditions);
+
+      const collectedVimKeys = new Set(['h', 'j']);
+      const collectedCollectibleKeys = new Set(['red_key', 'blue_key']);
+      const result = gateWithConditions.canUnlock(collectedVimKeys, collectedCollectibleKeys);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when only VIM key requirements are met but CollectibleKey requirements are not', () => {
+      const unlockConditions = {
+        collectedVimKeys: ['h'],
+        requiredCollectibleKeys: ['red_key']
+      };
+      const gateWithConditions = new Gate(testPosition, unlockConditions);
+
+      const collectedVimKeys = new Set(['h', 'j']);
+      const collectedCollectibleKeys = new Set(['blue_key']); // missing 'red_key'
+      const result = gateWithConditions.canUnlock(collectedVimKeys, collectedCollectibleKeys);
+
+      expect(result).toBe(false);
+    });
+
+    it('should handle empty requirements gracefully', () => {
+      const unlockConditions = {
+        collectedVimKeys: [],
+        requiredCollectibleKeys: []
+      };
+      const gateWithConditions = new Gate(testPosition, unlockConditions);
+
+      const result = gateWithConditions.canUnlock(new Set(), new Set());
+
+      expect(result).toBe(true);
     });
   });
 

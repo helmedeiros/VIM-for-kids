@@ -110,6 +110,16 @@ export class MovePlayerUseCase {
       }
     }
 
+    // Check secondary gates if they exist
+    if (typeof this._gameState.getSecondaryGates === 'function') {
+      const secondaryGates = this._gameState.getSecondaryGates();
+      for (const gate of secondaryGates) {
+        if (gate && gate.position.equals(position)) {
+          return gate.isWalkable();
+        }
+      }
+    }
+
     return true;
   }
 
@@ -152,14 +162,34 @@ export class MovePlayerUseCase {
 
   _checkKeyCollection() {
     const cursorPosition = this._gameState.cursor.position;
-    const keyAtPosition = this._gameState.availableKeys.find((key) =>
+
+    // Check for VIM keys
+    const vimKeyAtPosition = this._gameState.availableKeys.find((key) =>
       key.position.equals(cursorPosition)
     );
 
-    if (keyAtPosition) {
-      this._gameState.collectKey(keyAtPosition);
-      this._gameRenderer.showKeyInfo(keyAtPosition);
-      return keyAtPosition;
+    if (vimKeyAtPosition) {
+      this._gameState.collectKey(vimKeyAtPosition);
+      this._gameRenderer.showKeyInfo(vimKeyAtPosition);
+      return vimKeyAtPosition;
+    }
+
+    // Check for CollectibleKeys
+    if (this._gameState.availableCollectibleKeys) {
+      const collectibleKeyAtPosition = this._gameState.availableCollectibleKeys.find((key) =>
+        key.position.equals(cursorPosition)
+      );
+
+      if (collectibleKeyAtPosition) {
+        if (typeof this._gameState.collectCollectibleKey === 'function') {
+          this._gameState.collectCollectibleKey(collectibleKeyAtPosition);
+        } else {
+          // Fallback for compatibility
+          this._gameState.collectKey(collectibleKeyAtPosition);
+        }
+        this._gameRenderer.showKeyInfo(collectibleKeyAtPosition);
+        return collectibleKeyAtPosition;
+      }
     }
 
     return null;

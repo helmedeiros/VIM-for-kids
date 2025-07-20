@@ -58,16 +58,32 @@ describe('BlinkingGroveZone', () => {
     test('should have correct VIM keys configuration', () => {
       const config = BlinkingGroveZone.getConfig();
 
-      expect(config.tiles.specialTiles).toHaveLength(4);
+      // Filter only VIM keys
+      const vimKeys = config.tiles.specialTiles.filter(tile => tile.type === 'vim_key');
+      expect(vimKeys).toHaveLength(4);
 
-      const keys = config.tiles.specialTiles.map((tile) => tile.value).sort();
+      const keys = vimKeys.map((tile) => tile.value).sort();
       expect(keys).toEqual(['h', 'j', 'k', 'l']);
 
-      const positions = config.tiles.specialTiles.map((tile) => tile.position);
+      const positions = vimKeys.map((tile) => tile.position);
       expect(positions).toContainEqual([1, 10]); // h key
       expect(positions).toContainEqual([2, 11]); // j key
       expect(positions).toContainEqual([2, 9]); // k key
       expect(positions).toContainEqual([3, 10]); // l key
+    });
+
+    test('should have correct CollectibleKey configuration', () => {
+      const config = BlinkingGroveZone.getConfig();
+
+      // Filter only CollectibleKeys
+      const collectibleKeys = config.tiles.specialTiles.filter(tile => tile.type === 'collectible_key');
+      expect(collectibleKeys).toHaveLength(1);
+
+      const mazeKey = collectibleKeys[0];
+      expect(mazeKey.keyId).toBe('maze_key');
+      expect(mazeKey.name).toBe('Maze Key');
+      expect(mazeKey.color).toBe('#FFD700');
+      expect(mazeKey.position).toEqual([37, 14]);
     });
 
     test('should have correct text labels configuration', () => {
@@ -90,6 +106,18 @@ describe('BlinkingGroveZone', () => {
       expect(config.tiles.gate.position).toEqual([74, 1]); // Updated gate position
       expect(config.tiles.gate.leadsTo).toBe('zone_2');
       expect(config.tiles.gate.unlocksWhen.collectedVimKeys).toEqual(['h', 'j', 'k', 'l']);
+    });
+
+    test('should have correct secondary gate configuration', () => {
+      const config = BlinkingGroveZone.getConfig();
+
+      expect(config.tiles.secondaryGates).toBeDefined();
+      expect(config.tiles.secondaryGates).toHaveLength(1);
+
+      const secondaryGate = config.tiles.secondaryGates[0];
+      expect(secondaryGate.locked).toBe(true);
+      expect(secondaryGate.position).toEqual([52, 3]);
+      expect(secondaryGate.unlocksWhen.requiredCollectibleKeys).toEqual(['maze_key']);
     });
 
     test('should have correct NPC configuration', () => {

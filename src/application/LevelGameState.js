@@ -49,7 +49,9 @@ export class LevelGameState {
       this.map = this.zone.gameMap;
       this.cursor = new Cursor(this.zone.getCursorStartPosition());
       this.availableKeys = this.zone.vimKeys;
+      this.availableCollectibleKeys = this.zone.collectibleKeys;
       this.collectedKeys = new Set();
+      this.collectedCollectibleKeys = new Set();
     } catch (error) {
       throw new Error(`Zone '${zoneId}' not found in registry`);
     }
@@ -263,15 +265,30 @@ export class LevelGameState {
     }
   }
 
+  collectCollectibleKey(collectibleKey) {
+    if (this.availableCollectibleKeys.includes(collectibleKey)) {
+      this.collectedCollectibleKeys.add(collectibleKey.keyId);
+      this.availableCollectibleKeys = this.availableCollectibleKeys.filter(
+        (key) => key !== collectibleKey
+      );
+
+      // Notify zone about key collection
+      this.zone.collectKey(collectibleKey);
+    }
+  }
+
   getCurrentState() {
     return {
       currentZone: this.zone,
       map: this.map,
       cursor: this.cursor,
       availableKeys: this.availableKeys,
+      availableCollectibleKeys: this.availableCollectibleKeys,
       collectedKeys: this.collectedKeys,
+      collectedCollectibleKeys: this.collectedCollectibleKeys,
       textLabels: this.zone.textLabels,
       gate: this.zone.gate,
+      secondaryGates: this.zone.secondaryGates,
       npcs: this.zone.getActiveNPCs(),
       levelProgress: {
         levelId: this._levelConfig.id,
@@ -290,6 +307,10 @@ export class LevelGameState {
 
   getGate() {
     return this.zone.gate;
+  }
+
+  getSecondaryGates() {
+    return this.zone.secondaryGates;
   }
 
   getNPCs() {
