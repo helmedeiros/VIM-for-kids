@@ -547,63 +547,142 @@ h1 {
   box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
 }
 
-/* Directional Ramp Tiles - Smooth incline from bottom-left to top-right */
-.tile.ramp_right,
-.tile.ramp_left {
+/* Directional Ramp Tiles - 3D ramps with clear height differences and slopes */
+
+/* Ramp Right (<) - slopes down from left to right, allows movement from right to left */
+.tile.ramp_right {
   position: relative;
-  background:
-    /* Diagonal depth gradient (bottom-left darker to top-right brighter) */
-    linear-gradient(45deg,
-      #2d3748 0%,
-      #4a5568 30%,
-      #566573 60%,
-      #85929e 100%
-    ),
-    /* Diagonal step lines for elevation effect */
-    repeating-linear-gradient(45deg,
-      transparent 0px,
-      transparent 2px,
-      rgba(255, 255, 255, 0.1) 2px,
-      rgba(255, 255, 255, 0.1) 3px,
-      transparent 3px,
-      transparent 8px
-    ),
-    /* Stone texture overlay */
-    radial-gradient(circle at 25% 25%, #85929e 1px, transparent 1px),
-    radial-gradient(circle at 75% 75%, #4a5568 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 12px 12px, 8px 8px;
-  border: 1px solid #34495e;
-  box-shadow:
-    /* Main depth shadow */
-    inset -2px -2px 4px rgba(0, 0, 0, 0.3),
-    /* Highlight on top-right (elevated part) */
-    inset 2px 2px 4px rgba(255, 255, 255, 0.1),
-    /* External shadow */
-    2px 2px 6px rgba(0, 0, 0, 0.2);
+  /* Ground level base */
+  background-color: #8b9dc3;
+  background-image:
+    linear-gradient(90deg, #9fb5d3 1px, transparent 1px),
+    linear-gradient(180deg, #9fb5d3 1px, transparent 1px),
+    radial-gradient(circle at 30% 30%, #7b8ba3 1px, transparent 1px);
+  background-size: 6px 6px, 6px 6px, 10px 10px;
+  border: 1px solid #6b7ba3;
   overflow: hidden;
-  z-index: 3;
+  z-index: 1;
 }
 
-/* Enhanced step effect with pseudo-element overlay */
-.tile.ramp_right::before,
-.tile.ramp_left::before {
+/* Elevated platform/wall on left side (high side) */
+.tile.ramp_right::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background:
-    /* Additional diagonal lines for more pronounced steps */
-    repeating-linear-gradient(45deg,
-      transparent 0px,
-      transparent 4px,
-      rgba(0, 0, 0, 0.1) 4px,
-      rgba(0, 0, 0, 0.1) 5px,
-      transparent 5px,
-      transparent 12px
-    );
+  width: 16px;
+  height: 32px;
+  /* Wall texture and coloring */
+  background-color: #566573;
+  background-image:
+    linear-gradient(90deg, #5d6d7e 1px, transparent 1px),
+    linear-gradient(180deg, #5d6d7e 1px, transparent 1px),
+    radial-gradient(circle at 25% 25%, #85929e 2px, transparent 2px);
+  background-size: 8px 8px, 8px 8px, 16px 16px;
+  /* Strong shadows to show this is elevated */
+  box-shadow:
+    /* Right edge shadow (the slope face) */
+    2px 0 6px rgba(0, 0, 0, 0.6),
+    /* Bottom shadow */
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    /* Inset highlights on top/left */
+    inset 1px 1px 2px rgba(255, 255, 255, 0.3);
+  z-index: 3;
+}
+
+/* Right wall face of elevated section - creates the slope */
+.tile.ramp_right::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 16px;
+  width: 6px;
+  height: 32px;
+  /* Darker slope face */
+  background: linear-gradient(180deg,
+    #4a5568 0%,
+    #2d3748 40%,
+    #1a202c 70%,
+    #171923 100%);
+  background-image:
+    /* Vertical texture lines showing the wall face */
+    linear-gradient(180deg, #5d6d7e 1px, transparent 1px),
+    radial-gradient(circle at 40% 30%, #4a5568 1px, transparent 1px);
+  background-size: 6px 6px, 4px 4px;
+  /* Heavy shadow to show depth */
+  box-shadow:
+    inset -2px 0 4px rgba(0, 0, 0, 0.8),
+    2px 0 4px rgba(0, 0, 0, 0.5);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+/* Ramp Left (>) - slopes down from right to left, allows movement from left to right */
+.tile.ramp_left {
+  position: relative;
+  /* Ground level base */
+  background-color: #8b9dc3;
+  background-image:
+    linear-gradient(90deg, #9fb5d3 1px, transparent 1px),
+    linear-gradient(180deg, #9fb5d3 1px, transparent 1px),
+    radial-gradient(circle at 30% 30%, #7b8ba3 1px, transparent 1px);
+  background-size: 6px 6px, 6px 6px, 10px 10px;
+  border: 1px solid #6b7ba3;
+  overflow: hidden;
   z-index: 1;
+}
+
+/* Elevated platform/wall on right side (high side) */
+.tile.ramp_left::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 16px;
+  height: 32px;
+  /* Wall texture and coloring */
+  background-color: #566573;
+  background-image:
+    linear-gradient(90deg, #5d6d7e 1px, transparent 1px),
+    linear-gradient(180deg, #5d6d7e 1px, transparent 1px),
+    radial-gradient(circle at 25% 25%, #85929e 2px, transparent 2px);
+  background-size: 8px 8px, 8px 8px, 16px 16px;
+  /* Strong shadows to show this is elevated */
+  box-shadow:
+    /* Left edge shadow (the slope face) */
+    -2px 0 6px rgba(0, 0, 0, 0.6),
+    /* Bottom shadow */
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    /* Inset highlights on top/right */
+    inset -1px 1px 2px rgba(255, 255, 255, 0.3);
+  z-index: 3;
+}
+
+/* Left wall face of elevated section - creates the slope */
+.tile.ramp_left::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 16px;
+  width: 6px;
+  height: 32px;
+  /* Darker slope face */
+  background: linear-gradient(180deg,
+    #4a5568 0%,
+    #2d3748 40%,
+    #1a202c 70%,
+    #171923 100%);
+  background-image:
+    /* Vertical texture lines showing the wall face */
+    linear-gradient(180deg, #5d6d7e 1px, transparent 1px),
+    radial-gradient(circle at 40% 30%, #4a5568 1px, transparent 1px);
+  background-size: 6px 6px, 4px 4px;
+  /* Heavy shadow to show depth */
+  box-shadow:
+    inset 2px 0 4px rgba(0, 0, 0, 0.8),
+    -2px 0 4px rgba(0, 0, 0, 0.5);
+  border-left: 1px solid rgba(0, 0, 0, 0.3);
+  z-index: 2;
 }
 
 /* Cursor */
