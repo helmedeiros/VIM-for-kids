@@ -47,6 +47,51 @@ describe('Cursor', () => {
       const cursor = new Cursor();
       expect(() => cursor.moveTo('invalid')).toThrow('New position must be a Position instance');
     });
+
+    it('should update remembered column by default', () => {
+      const cursor = new Cursor(new Position(5, 5));
+      const newPosition = new Position(10, 5);
+      const newCursor = cursor.moveTo(newPosition);
+
+      expect(newCursor.rememberedColumn).toBe(10);
+    });
+
+    it('should preserve remembered column when updateRememberedColumn is false', () => {
+      const cursor = new Cursor(new Position(5, 5));
+      const newPosition = new Position(10, 5);
+      const newCursor = cursor.moveTo(newPosition, false);
+
+      expect(newCursor.rememberedColumn).toBe(5);
+    });
+  });
+
+  describe('moveToWithColumnMemory', () => {
+    it('should preserve remembered column', () => {
+      const cursor = new Cursor(new Position(5, 5));
+      const newPosition = new Position(10, 7);
+      const newCursor = cursor.moveToWithColumnMemory(newPosition);
+
+      expect(newCursor.position).toEqual(newPosition);
+      expect(newCursor.rememberedColumn).toBe(5); // Should preserve original column
+    });
+  });
+
+  describe('rememberedColumn', () => {
+    it('should initialize remembered column to current x position', () => {
+      const cursor = new Cursor(new Position(8, 3));
+      expect(cursor.rememberedColumn).toBe(8);
+    });
+
+    it('should allow setting custom remembered column', () => {
+      const cursor = new Cursor(new Position(5, 5), true, 10);
+      expect(cursor.rememberedColumn).toBe(10);
+    });
+
+    it('should throw error for invalid remembered column', () => {
+      expect(() => new Cursor(new Position(1, 1), true, 'invalid')).toThrow(
+        'rememberedColumn must be a number or null'
+      );
+    });
   });
 
   describe('toggleBlinking', () => {
@@ -112,6 +157,14 @@ describe('Cursor', () => {
       const position = new Position(3, 4);
       const cursor1 = new Cursor(position, true);
       const cursor2 = new Cursor(position, false);
+
+      expect(cursor1.equals(cursor2)).toBe(false);
+    });
+
+    it('should return false for cursors with different remembered columns', () => {
+      const position = new Position(3, 4);
+      const cursor1 = new Cursor(position, true, 5);
+      const cursor2 = new Cursor(position, true, 8);
 
       expect(cursor1.equals(cursor2)).toBe(false);
     });
