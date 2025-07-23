@@ -464,20 +464,22 @@ describe('MovePlayerUseCase', () => {
           expect(result).toBe(false);
         });
 
-        it('should block movement to ramp_right when moving up', () => {
+        it('should allow movement to ramp_right when moving up', () => {
+          // Vertical movement onto ramps should now be allowed
           mockMap.getTileAt.mockReturnValue({ name: 'ramp_right' });
 
           const result = movePlayerUseCase._isRampMovementAllowed(new Position(5, 4), 'up');
 
-          expect(result).toBe(false);
+          expect(result).toBe(true);
         });
 
-        it('should block movement to ramp_right when moving down', () => {
+        it('should allow movement to ramp_right when moving down', () => {
+          // Vertical movement onto ramps should now be allowed
           mockMap.getTileAt.mockReturnValue({ name: 'ramp_right' });
 
           const result = movePlayerUseCase._isRampMovementAllowed(new Position(5, 6), 'down');
 
-          expect(result).toBe(false);
+          expect(result).toBe(true);
         });
 
         it('should allow movement to ramp_left when moving right', () => {
@@ -496,20 +498,22 @@ describe('MovePlayerUseCase', () => {
           expect(result).toBe(false);
         });
 
-        it('should block movement to ramp_left when moving up', () => {
+        it('should allow movement to ramp_left when moving up', () => {
+          // Vertical movement onto ramps should now be allowed
           mockMap.getTileAt.mockReturnValue({ name: 'ramp_left' });
 
           const result = movePlayerUseCase._isRampMovementAllowed(new Position(5, 4), 'up');
 
-          expect(result).toBe(false);
+          expect(result).toBe(true);
         });
 
-        it('should block movement to ramp_left when moving down', () => {
+        it('should allow movement to ramp_left when moving down', () => {
+          // Vertical movement onto ramps should now be allowed
           mockMap.getTileAt.mockReturnValue({ name: 'ramp_left' });
 
           const result = movePlayerUseCase._isRampMovementAllowed(new Position(5, 6), 'down');
 
-          expect(result).toBe(false);
+          expect(result).toBe(true);
         });
 
         it('should handle null tile gracefully', () => {
@@ -545,6 +549,27 @@ describe('MovePlayerUseCase', () => {
           mockMap.getTileAt.mockReturnValue({ name: 'ramp_right' });
 
           const result = movePlayerUseCase._isPositionWalkable(new Position(6, 5));
+
+          expect(result).toBe(true);
+        });
+
+        it('should allow vertical movement DOWN onto ramp tiles', () => {
+          // This test reproduces the user's scenario: moving down from grass to ramp
+          mockMap.isWalkable.mockReturnValue(true);
+          mockMap.getTileAt.mockReturnValue({ name: 'ramp_left' });
+
+          // Should allow moving down onto a ramp tile
+          const result = movePlayerUseCase._isPositionWalkable(new Position(5, 6), 'down');
+
+          expect(result).toBe(true);
+        });
+
+        it('should allow vertical movement UP onto ramp tiles', () => {
+          // Should also allow moving up onto a ramp tile
+          mockMap.isWalkable.mockReturnValue(true);
+          mockMap.getTileAt.mockReturnValue({ name: 'ramp_right' });
+
+          const result = movePlayerUseCase._isPositionWalkable(new Position(5, 4), 'up');
 
           expect(result).toBe(true);
         });
