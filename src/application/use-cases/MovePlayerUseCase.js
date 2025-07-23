@@ -26,8 +26,14 @@ export class MovePlayerUseCase {
     // Check if we're leaving an NPC position (fade out balloons)
     this._checkNPCExit(currentPosition, newPosition);
 
-    // Update cursor position
-    this._gameState.cursor = this._gameState.cursor.moveTo(newPosition);
+    // Update cursor position with column memory logic
+    if (direction === 'up' || direction === 'down') {
+      // For vertical movement, preserve column memory
+      this._gameState.cursor = this._gameState.cursor.moveToWithColumnMemory(newPosition);
+    } else {
+      // For horizontal movement, update remembered column
+      this._gameState.cursor = this._gameState.cursor.moveTo(newPosition);
+    }
 
     // Check for key collection
     const keyCollected = this._checkKeyCollection();
@@ -66,8 +72,14 @@ export class MovePlayerUseCase {
     // Check if we're leaving an NPC position (fade out balloons)
     this._checkNPCExit(currentPosition, newPosition);
 
-    // Update cursor position
-    this._gameState.cursor = this._gameState.cursor.moveTo(newPosition);
+    // Update cursor position with column memory logic
+    if (direction === 'up' || direction === 'down') {
+      // For vertical movement, preserve column memory
+      this._gameState.cursor = this._gameState.cursor.moveToWithColumnMemory(newPosition);
+    } else {
+      // For horizontal movement, update remembered column
+      this._gameState.cursor = this._gameState.cursor.moveTo(newPosition);
+    }
 
     // Check for key collection
     const keyCollected = this._checkKeyCollection();
@@ -169,7 +181,223 @@ export class MovePlayerUseCase {
       throw new Error(`Invalid direction: ${direction}`);
     }
 
+    // For vertical movement, implement Vim-like column memory
+    if (direction === 'up' || direction === 'down') {
+      return this._calculateVerticalMovementWithColumnMemory(currentPosition, direction);
+    }
+
+    // For horizontal movement, standard calculation
     return currentPosition.move(movement.x, movement.y);
+  }
+
+      /**
+   * Calculate vertical movement with Vim-like column memory behavior
+   * Column memory only applies to water tiles, not other obstacles
+   * @private
+   */
+  _calculateVerticalMovementWithColumnMemory(currentPosition, direction) {
+    const yMovement = direction === 'up' ? -1 : 1;
+    const targetY = currentPosition.y + yMovement;
+    const rememberedColumn = this._gameState.cursor.rememberedColumn;
+
+    // First, try to move to the remembered column
+    let targetPosition = new Position(rememberedColumn, targetY);
+
+    // If the remembered column position is walkable, use it
+    if (this._isPositionWalkable(targetPosition)) {
+      return targetPosition;
+    }
+
+    // If not walkable, check if the blocking tile is water
+    // Column memory only applies to water tiles (representing "shorter lines" like in Vim)
+    // For other obstacles (walls, stone, etc.), use normal movement
+    const blockingTile = this._gameState.map.getTileAt(targetPosition);
+    const isWaterBlocked = blockingTile && blockingTile.name === 'water';
+
+    if (isWaterBlocked) {
+      // Use column memory behavior for water tiles
+      targetPosition = this._findNearestWalkableInRow(targetY, rememberedColumn);
+
+      if (targetPosition) {
+        return targetPosition;
+      }
+    } else {
+      // For non-water obstacles, try normal movement (direct target position)
+      const directTarget = new Position(currentPosition.x, targetY);
+      if (this._isPositionWalkable(directTarget)) {
+        return directTarget;
+      }
+    }
+
+    // If no walkable position found, return current position (no movement)
+    return currentPosition;
+  }
+
+  /**
+   * Find the rightmost walkable position on the left side of water, like Vim's "end of line" behavior
+   * Limited to 5 spaces away from the preferred column to prevent unexpected long jumps
+   * Only returns positions that are walkably connected to the current position
+   * @private
+   */
+  _findNearestWalkableInRow(targetY, preferredX) {
+    // Check bounds first
+    if (targetY < 0 || targetY >= this._gameState.map.height) {
+      return null;
+    }
+
+    const mapWidth = this._gameState.map.width;
+    const maxSearchDistance = 5; // Limit search to 5 spaces away
+
+    // First check the preferred column
+    if (preferredX >= 0 && preferredX < mapWidth) {
+      const preferredPosition = new Position(preferredX, targetY);
+      if (this._isPositionWalkable(preferredPosition)) {
+        return preferredPosition;
+      }
+    }
+
+    // Find the end of the leftmost contiguous walkable area within 5 spaces
+    // This simulates Vim's behavior of going to the "end of line" when moving to a shorter line
+    // BUT only if the areas are walkably connected
+    const leftBoundary = Math.max(0, preferredX - maxSearchDistance);
+
+    // Find the leftmost contiguous walkable area and return its rightmost position
+    let leftmostWalkableStart = null;
+    let endOfLeftmostArea = null;
+
+    // First, find the start of the leftmost walkable area
+    for (let x = leftBoundary; x < preferredX; x++) {
+      const position = new Position(x, targetY);
+      if (this._isPositionWalkable(position)) {
+        leftmostWalkableStart = x;
+        break;
+      }
+    }
+
+    // If we found a leftmost walkable area, find its end
+    if (leftmostWalkableStart !== null) {
+      for (let x = leftmostWalkableStart; x < preferredX; x++) {
+        const position = new Position(x, targetY);
+        if (this._isPositionWalkable(position)) {
+          endOfLeftmostArea = new Position(x, targetY);
+        } else {
+          // Hit a non-walkable tile, so we've found the end of the contiguous area
+          break;
+        }
+      }
+
+      // Check if this area is walkably connected to current position
+      if (endOfLeftmostArea && this._isWalkablyConnected(this._gameState.cursor.position, endOfLeftmostArea, maxSearchDistance)) {
+        return endOfLeftmostArea;
+      }
+    }
+
+    // If no walkable position found on the left, check right side as fallback
+    // but still prefer left over right when equidistant, and only if connected
+    const rightBoundary = Math.min(mapWidth - 1, preferredX + maxSearchDistance);
+
+    for (let x = preferredX + 1; x <= rightBoundary; x++) {
+      const position = new Position(x, targetY);
+      if (this._isPositionWalkable(position)) {
+        // Check if this position is walkably connected
+        if (this._isWalkablyConnected(this._gameState.cursor.position, position, maxSearchDistance)) {
+          return position;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Check if two positions are walkably connected within a maximum distance
+   * This ensures column memory only works between truly connected areas
+   * @private
+   */
+  _isWalkablyConnected(fromPosition, toPosition, maxDistance) {
+    // If positions are in the same row, check horizontal connectivity
+    if (fromPosition.y === toPosition.y) {
+      return this._areHorizontallyConnected(fromPosition, toPosition, maxDistance);
+    }
+
+    // Special case: if the starting position is isolated (only walkable tile in its row),
+    // allow movement as any jump would be valid from an isolated position
+    if (this._isPositionIsolated(fromPosition)) {
+      return Math.abs(fromPosition.x - toPosition.x) <= maxDistance;
+    }
+
+    // For vertical movement, check if there's a walkable bridge between the rows
+    // We need to find a column that's walkable in both rows within the maxDistance
+    const minX = Math.max(0, Math.min(fromPosition.x, toPosition.x) - maxDistance);
+    const maxX = Math.min(this._gameState.map.width - 1, Math.max(fromPosition.x, toPosition.x) + maxDistance);
+
+    for (let x = minX; x <= maxX; x++) {
+      const fromRowPosition = new Position(x, fromPosition.y);
+      const toRowPosition = new Position(x, toPosition.y);
+
+      // Check if this column provides a walkable bridge
+      if (this._isPositionWalkable(fromRowPosition) && this._isPositionWalkable(toRowPosition)) {
+        // Check if we can reach this bridge from both positions horizontally
+        if (this._areHorizontallyConnected(fromPosition, fromRowPosition, maxDistance) &&
+            this._areHorizontallyConnected(toPosition, toRowPosition, maxDistance)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if a position is isolated (only walkable tile in its row within search distance)
+   * @private
+   */
+  _isPositionIsolated(position) {
+    const maxSearchDistance = 5;
+    const minX = Math.max(0, position.x - maxSearchDistance);
+    const maxX = Math.min(this._gameState.map.width - 1, position.x + maxSearchDistance);
+
+    // Count walkable positions in the row within search distance
+    let walkableCount = 0;
+    for (let x = minX; x <= maxX; x++) {
+      const checkPosition = new Position(x, position.y);
+      if (this._isPositionWalkable(checkPosition)) {
+        walkableCount++;
+        if (walkableCount > 1) {
+          return false; // Not isolated
+        }
+      }
+    }
+
+    return walkableCount === 1; // Only the starting position is walkable
+  }
+
+  /**
+   * Check if two positions in the same row are horizontally connected by walkable tiles
+   * @private
+   */
+  _areHorizontallyConnected(fromPosition, toPosition, maxDistance) {
+    if (fromPosition.y !== toPosition.y) {
+      return false;
+    }
+
+    const startX = Math.min(fromPosition.x, toPosition.x);
+    const endX = Math.max(fromPosition.x, toPosition.x);
+
+    // Check if distance exceeds limit
+    if (endX - startX > maxDistance) {
+      return false;
+    }
+
+    // Check if all positions between start and end are walkable
+    for (let x = startX; x <= endX; x++) {
+      const position = new Position(x, fromPosition.y);
+      if (!this._isPositionWalkable(position)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   _checkKeyCollection() {
