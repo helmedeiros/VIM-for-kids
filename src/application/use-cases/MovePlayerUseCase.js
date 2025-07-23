@@ -156,7 +156,13 @@ export class MovePlayerUseCase {
       return true;
     }
 
-    // For ramp tiles, check if we're approaching from the correct direction
+    // Allow vertical movement (up/down) onto any ramp tile
+    // Players should be able to step down onto ramps from above or climb up onto them
+    if (direction === 'up' || direction === 'down') {
+      return true;
+    }
+
+    // For horizontal movement, check directional constraints
     if (tileAtTarget.name === 'ramp_right') {
       // Ramp right (<) allows movement only when coming from the right (moving left)
       return direction === 'right';
