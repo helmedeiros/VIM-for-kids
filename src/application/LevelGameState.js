@@ -25,6 +25,9 @@ export class LevelGameState {
     this._currentZoneIndex = 0;
     this._completedZones = new Set();
 
+    // Track ESC progression for special zones
+    this._escProgressionPressed = new Set();
+
     // Initialize first zone synchronously for backward compatibility
     this._loadZoneSync(this._getCurrentZoneId());
   }
@@ -345,11 +348,38 @@ export class LevelGameState {
     // 1. Current level is complete (all zones done)
     // 2. Cursor is at the gate position
     // 3. There is a next level available
+    // 4. For special zones, ESC key has been pressed (zone_1 requires ESC)
     const gate = this.getGate();
     const isAtGate = gate && this.cursor.position.equals(gate.position);
     const hasNextLevel = this._getNextLevel() !== null;
+    const escProgression = this._checkEscProgressionRequirement();
 
-    return this.isLevelComplete() && isAtGate && hasNextLevel;
+    return this.isLevelComplete() && isAtGate && hasNextLevel && escProgression;
+  }
+
+  /**
+   * Check if ESC progression requirement is met for the current zone
+   * @returns {boolean} True if progression is allowed
+   * @private
+   */
+  _checkEscProgressionRequirement() {
+    const currentZoneId = this._getCurrentZoneId();
+
+    // Zone 1 (Blinking Grove) requires ESC progression
+    if (currentZoneId === 'zone_1') {
+      return this._escProgressionPressed.has(currentZoneId);
+    }
+
+    // Other zones don't require ESC progression
+    return true;
+  }
+
+  /**
+   * Mark ESC as pressed for the current zone
+   */
+  markEscProgressionPressed() {
+    const currentZoneId = this._getCurrentZoneId();
+    this._escProgressionPressed.add(currentZoneId);
   }
 
   isGameComplete() {

@@ -5,12 +5,24 @@ export class KeyboardInputHandler extends InputHandler {
         super();
         this.gameBoard = gameBoard;
         this.handleMovement = null;
+        this.onEscKeyPressed = null;
     }
 
-    setupInputHandling(onMovement) {
+    setupInputHandling(onMovement, onEscPressed = null) {
+        this.onEscKeyPressed = onEscPressed;
+        
         this.handleMovement = (e) => {
-            const direction = this._mapKeyToDirection(e.key.toLowerCase());
-
+            const key = e.key.toLowerCase();
+            
+            // Handle ESC key
+            if (key === 'escape' && this.onEscKeyPressed) {
+                e.preventDefault();
+                this.onEscKeyPressed();
+                return;
+            }
+            
+            // Handle movement keys
+            const direction = this._mapKeyToDirection(key);
             if (direction) {
                 e.preventDefault();
                 onMovement(direction);

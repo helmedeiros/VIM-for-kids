@@ -94,6 +94,9 @@ describe('Zone and Level Progression Integration', () => {
       // Move through gate should trigger level progression
       game.gameState.cursor = game.gameState.cursor.moveTo(gate.position);
 
+      // For zone_1, ESC progression must be marked as pressed
+      game.gameState.markEscProgressionPressed();
+
       // Should trigger progression to next level
       expect(game.gameState.shouldProgressToNextLevel()).toBe(true);
     });

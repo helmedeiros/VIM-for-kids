@@ -155,9 +155,14 @@ export class VimForKidsGame {
     this.gameRenderer.render(this.gameState.getCurrentState());
 
     // Setup input handling
-    this.inputHandler.setupInputHandling(async (direction) => {
-      await this.movePlayerUseCase.execute(direction);
-    });
+    this.inputHandler.setupInputHandling(
+      async (direction) => {
+        await this.movePlayerUseCase.execute(direction);
+      },
+      async () => {
+        await this._handleEscKeyPressed();
+      }
+    );
 
     // Update level selection visibility based on current game
     this._updateLevelSelectionForCurrentGame();
@@ -359,6 +364,40 @@ export class VimForKidsGame {
 
     // Ensure game board has focus for keyboard input
     this.gameRenderer.focus();
+  }
+
+  /**
+   * Handle ESC key pressed for special progression mechanics
+   * @private
+   */
+  async _handleEscKeyPressed() {
+    if (!this.gameState) return;
+
+    const currentState = this.gameState.getCurrentState();
+    if (!currentState) return;
+    
+    const currentZone = currentState.currentZone;
+    const cursor = currentState.cursor;
+    if (!currentZone) return;
+    
+    const gate = currentZone.gate;
+    
+    // Check if we should handle ESC progression for BlinkingGrove zone
+    if (currentZone.zoneId === 'zone_1') {
+      const collectedKeys = currentZone.getCollectedKeys();
+      const hasAllMovementKeys = ['h', 'j', 'k', 'l'].every(key => collectedKeys.has(key));
+      const isAtGate = gate && cursor.position.equals(gate.position);
+      
+      if (hasAllMovementKeys && isAtGate) {
+        // Mark ESC progression as pressed for this zone
+        this.gameState.markEscProgressionPressed();
+        
+        // Trigger progression to next level
+        if (this.handleProgressionUseCase && this.handleProgressionUseCase.shouldExecuteProgression()) {
+          await this.handleProgressionUseCase.execute();
+        }
+      }
+    }
   }
 
   /**

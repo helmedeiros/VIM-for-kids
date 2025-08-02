@@ -56,7 +56,7 @@ export class BlinkingGroveZone {
           'GGGGGGGGGDGGSSSSSDSSSSSDSSSSSSSSSDSDSSSSSSSSSSDSDSSSDSDSWWWWWWWWWWWWWWWWWWW',
           'GTGGGGGGGDDDDDDDDDSDDDSDSDDDDDDDSDSDSDDDDDDDDDDSD<DDDSDSWWWWWWWWWWWWWWWWWWW',
           'GGGGGGGGGGGGSSSSSDSSSDSDSDSSSSSSSDSDSSSSSSSSSSSSDSSSSSDSWWWWWWWWWWWWWWWWWWW',
-          'WWWWWWWWWWWWWWWWSD>DDDDDDDDDDDDDDDSDDDDDDDDDDDDDD>DDDDDSWWWWWWWWWWWWWWWWWWW',
+          'WWWWWWWWWWWWWWWWSD<DDDDDDDDDDDDDDDSDDDDDDDDDDDDDD>DDDDDSWWWWWWWWWWWWWWWWWWW',
           'WWWWWWWWWWWWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSWWWWWWWWWWWWWWWWWWW',
           'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW',
         ],
@@ -127,7 +127,7 @@ export class BlinkingGroveZone {
         ],
         gate: {
           locked: true,
-          unlocksWhen: { collectedVimKeys: ['h', 'j', 'k', 'l'] },
+          unlocksWhen: { collectedVimKeys: ['h', 'j', 'k', 'l'] }, // Gate auto-unlocks when keys collected
           position: [74, 1], // Gate position in the stone maze
           leadsTo: 'zone_2',
         },
@@ -152,6 +152,18 @@ export class BlinkingGroveZone {
           ],
           position: [6, 10], // NPC position in the stone maze
         },
+        {
+          id: 'gate_completion_spirit',
+          type: 'caret_spirit',
+          appearsWhen: { collectedVimKeys: ['h', 'j', 'k', 'l'] },
+          dialogue: [
+            'Very good oh Shadowy One! You learned the hjkl skill.',
+            'Go on!',
+            'Press Esc to continue...',
+          ],
+          position: [74, 1], // NPC position at the gate
+          requiresEscToProgress: true, // Custom flag for ESC progression
+        },
       ],
       events: [
         {
@@ -163,13 +175,27 @@ export class BlinkingGroveZone {
           ],
         },
         {
-          id: 'zone1_unlock_gate',
+          id: 'zone1_keys_collected',
           trigger: 'onVimKeysCollected',
           conditions: { collectedKeys: ['h', 'j', 'k', 'l'] },
           actions: [
-            { type: 'showNPC', npcId: 'caret_spirit' },
+            { type: 'showNPC', npcId: 'caret_stone' },
+            { type: 'showNPC', npcId: 'gate_completion_spirit' },
+            { type: 'playMusic', track: 'zone1_keys_complete' },
+          ],
+        },
+        {
+          id: 'zone1_esc_progression',
+          trigger: 'onEscKeyPressed',
+          conditions: {
+            collectedKeys: ['h', 'j', 'k', 'l'],
+            npcVisible: 'gate_completion_spirit',
+            atGatePosition: true
+          },
+          actions: [
             { type: 'unlockGate', targetZone: 'zone_2' },
-            { type: 'playMusic', track: 'zone1_complete' },
+            { type: 'hideNPC', npcId: 'gate_completion_spirit' },
+            { type: 'progressToNextLevel' },
             { type: 'showNarration', text: 'And so begins your journey...' },
           ],
         },

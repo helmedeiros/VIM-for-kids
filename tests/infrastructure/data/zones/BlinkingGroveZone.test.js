@@ -123,7 +123,7 @@ describe('BlinkingGroveZone', () => {
     test('should have correct NPC configuration', () => {
       const config = BlinkingGroveZone.getConfig();
 
-      expect(config.npcs).toHaveLength(1);
+      expect(config.npcs).toHaveLength(2);
 
       const caretStone = config.npcs[0];
       expect(caretStone.id).toBe('caret_stone');
@@ -131,23 +131,38 @@ describe('BlinkingGroveZone', () => {
       expect(caretStone.appearsWhen.collectedVimKeys).toEqual(['h', 'j', 'k', 'l']);
       expect(caretStone.dialogue).toHaveLength(4);
       expect(caretStone.dialogue[0]).toContain('Yes... the foundation');
+
+      const gateSpirit = config.npcs[1];
+      expect(gateSpirit.id).toBe('gate_completion_spirit');
+      expect(gateSpirit.position).toEqual([74, 1]); // At the gate position
+      expect(gateSpirit.appearsWhen.collectedVimKeys).toEqual(['h', 'j', 'k', 'l']);
+      expect(gateSpirit.dialogue).toHaveLength(3);
+      expect(gateSpirit.dialogue[0]).toContain('Very good oh Shadowy One!');
+      expect(gateSpirit.requiresEscToProgress).toBe(true);
     });
 
     test('should have correct events configuration', () => {
       const config = BlinkingGroveZone.getConfig();
 
-      expect(config.events).toHaveLength(2);
+      expect(config.events).toHaveLength(3);
 
       const introEvent = config.events.find((e) => e.id === 'zone1_intro_lock');
-      const unlockEvent = config.events.find((e) => e.id === 'zone1_unlock_gate');
+      const keysCollectedEvent = config.events.find((e) => e.id === 'zone1_keys_collected');
+      const escProgressionEvent = config.events.find((e) => e.id === 'zone1_esc_progression');
 
       expect(introEvent).toBeDefined();
       expect(introEvent.trigger).toBe('onZoneEnter');
+
+      expect(keysCollectedEvent).toBeDefined();
+      expect(keysCollectedEvent.trigger).toBe('onVimKeysCollected');
+
+      expect(escProgressionEvent).toBeDefined();
+      expect(escProgressionEvent.trigger).toBe('onEscKeyPressed');
       expect(introEvent.actions).toHaveLength(2);
 
-      expect(unlockEvent).toBeDefined();
-      expect(unlockEvent.trigger).toBe('onVimKeysCollected');
-      expect(unlockEvent.conditions.collectedKeys).toEqual(['h', 'j', 'k', 'l']);
+      expect(keysCollectedEvent.conditions.collectedKeys).toEqual(['h', 'j', 'k', 'l']);
+      expect(escProgressionEvent.conditions.collectedKeys).toEqual(['h', 'j', 'k', 'l']);
+      expect(escProgressionEvent.conditions.atGatePosition).toBe(true);
     });
   });
 
@@ -162,8 +177,8 @@ describe('BlinkingGroveZone', () => {
       expect(zone.vimKeys).toHaveLength(4);
       expect(zone.textLabels).toHaveLength(36); // Updated for new text layout with additional characters
       expect(zone.gate).toBeDefined();
-      expect(zone.npcs).toHaveLength(1);
-      expect(zone.events).toHaveLength(2);
+      expect(zone.npcs).toHaveLength(2);
+      expect(zone.events).toHaveLength(3);
     });
 
     test('should have correct cursor start position', () => {
@@ -194,8 +209,10 @@ describe('BlinkingGroveZone', () => {
       expect(zone.isComplete()).toBe(true);
 
       const activeNPCs = zone.getActiveNPCs();
-      expect(activeNPCs).toHaveLength(1);
-      expect(activeNPCs[0].id).toBe('caret_stone');
+      expect(activeNPCs).toHaveLength(2);
+      const npcIds = activeNPCs.map(npc => npc.id);
+      expect(npcIds).toContain('caret_stone');
+      expect(npcIds).toContain('gate_completion_spirit');
     });
 
     test('should have correct key descriptions', () => {
@@ -237,12 +254,16 @@ describe('BlinkingGroveZone', () => {
       const config = BlinkingGroveZone.getConfig();
       const zone = BlinkingGroveZone.create();
 
-      const npcCondition = config.npcs[0].appearsWhen.collectedVimKeys.sort();
       const gateCondition = config.tiles.gate.unlocksWhen.collectedVimKeys.sort();
       const zoneNPCs = zone.npcs;
 
-      expect(npcCondition).toEqual(gateCondition);
-      expect(zoneNPCs).toHaveLength(1); // Use the zone variable
+      // Both NPCs should have the same appearance conditions as the gate unlock conditions
+      config.npcs.forEach(npc => {
+        const npcCondition = npc.appearsWhen.collectedVimKeys.sort();
+        expect(npcCondition).toEqual(gateCondition);
+      });
+
+      expect(zoneNPCs).toHaveLength(2); // Updated for 2 NPCs
     });
   });
 });

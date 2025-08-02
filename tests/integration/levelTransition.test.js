@@ -111,6 +111,9 @@ describe('Level Transition Integration', () => {
       const gate = game.gameState.getGate();
       game.gameState.cursor = game.gameState.cursor.moveTo(gate.position);
 
+      // For zone_1, ESC progression must be marked as pressed
+      game.gameState.markEscProgressionPressed();
+
       // Should be ready for level progression
       expect(game.gameState.shouldProgressToNextLevel()).toBe(true);
 
