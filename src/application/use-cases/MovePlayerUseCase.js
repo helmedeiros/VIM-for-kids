@@ -152,7 +152,10 @@ export class MovePlayerUseCase {
     const tileAtTarget = this._gameState.map.getTileAt(targetPosition);
 
     // If it's not a ramp tile, allow movement (regular walkability rules apply)
-    if (!tileAtTarget || (tileAtTarget.name !== 'ramp_right' && tileAtTarget.name !== 'ramp_left')) {
+    if (
+      !tileAtTarget ||
+      (tileAtTarget.name !== 'ramp_right' && tileAtTarget.name !== 'ramp_left')
+    ) {
       return true;
     }
 
@@ -196,7 +199,7 @@ export class MovePlayerUseCase {
     return currentPosition.move(movement.x, movement.y);
   }
 
-      /**
+  /**
    * Calculate vertical movement with Vim-like column memory behavior
    * Column memory only applies to water tiles, not other obstacles
    * @private
@@ -293,7 +296,14 @@ export class MovePlayerUseCase {
       }
 
       // Check if this area is walkably connected to current position
-      if (endOfLeftmostArea && this._isWalkablyConnected(this._gameState.cursor.position, endOfLeftmostArea, maxSearchDistance)) {
+      if (
+        endOfLeftmostArea &&
+        this._isWalkablyConnected(
+          this._gameState.cursor.position,
+          endOfLeftmostArea,
+          maxSearchDistance
+        )
+      ) {
         return endOfLeftmostArea;
       }
     }
@@ -306,7 +316,9 @@ export class MovePlayerUseCase {
       const position = new Position(x, targetY);
       if (this._isPositionWalkable(position)) {
         // Check if this position is walkably connected
-        if (this._isWalkablyConnected(this._gameState.cursor.position, position, maxSearchDistance)) {
+        if (
+          this._isWalkablyConnected(this._gameState.cursor.position, position, maxSearchDistance)
+        ) {
           return position;
         }
       }
@@ -335,7 +347,10 @@ export class MovePlayerUseCase {
     // For vertical movement, check if there's a walkable bridge between the rows
     // We need to find a column that's walkable in both rows within the maxDistance
     const minX = Math.max(0, Math.min(fromPosition.x, toPosition.x) - maxDistance);
-    const maxX = Math.min(this._gameState.map.width - 1, Math.max(fromPosition.x, toPosition.x) + maxDistance);
+    const maxX = Math.min(
+      this._gameState.map.width - 1,
+      Math.max(fromPosition.x, toPosition.x) + maxDistance
+    );
 
     for (let x = minX; x <= maxX; x++) {
       const fromRowPosition = new Position(x, fromPosition.y);
@@ -344,8 +359,10 @@ export class MovePlayerUseCase {
       // Check if this column provides a walkable bridge
       if (this._isPositionWalkable(fromRowPosition) && this._isPositionWalkable(toRowPosition)) {
         // Check if we can reach this bridge from both positions horizontally
-        if (this._areHorizontallyConnected(fromPosition, fromRowPosition, maxDistance) &&
-            this._areHorizontallyConnected(toPosition, toRowPosition, maxDistance)) {
+        if (
+          this._areHorizontallyConnected(fromPosition, fromRowPosition, maxDistance) &&
+          this._areHorizontallyConnected(toPosition, toRowPosition, maxDistance)
+        ) {
           return true;
         }
       }
@@ -409,15 +426,7 @@ export class MovePlayerUseCase {
   _checkKeyCollection() {
     const cursorPosition = this._gameState.cursor.position;
 
-    // Debug logging for key collection
-    console.log(`🎯 CHECKING KEY COLLECTION AT [${cursorPosition.x}, ${cursorPosition.y}]`);
-    if (this._gameState.availableCollectibleKeys?.length > 0) {
-      console.log('🔍 AVAILABLE COLLECTIBLE KEYS:', this._gameState.availableCollectibleKeys.map(k => ({
-        keyId: k.keyId,
-        position: `[${k.position.x}, ${k.position.y}]`,
-        matches: k.position.equals(cursorPosition)
-      })));
-    }
+
 
     // Check for VIM keys
     const vimKeyAtPosition = this._gameState.availableKeys.find((key) =>
@@ -432,13 +441,15 @@ export class MovePlayerUseCase {
     }
 
     // Check for CollectibleKeys
-    if (this._gameState.availableCollectibleKeys) {
-      const collectibleKeyAtPosition = this._gameState.availableCollectibleKeys.find((key) =>
+    // Get fresh keys from getCurrentState() instead of stale property
+    const currentState = this._gameState.getCurrentState();
+
+    if (currentState.availableCollectibleKeys) {
+      const collectibleKeyAtPosition = currentState.availableCollectibleKeys.find((key) =>
         key.position.equals(cursorPosition)
       );
 
       if (collectibleKeyAtPosition) {
-        console.log('✅ COLLECTING COLLECTIBLE KEY:', collectibleKeyAtPosition.keyId);
         if (typeof this._gameState.collectCollectibleKey === 'function') {
           this._gameState.collectCollectibleKey(collectibleKeyAtPosition);
         } else {
@@ -488,7 +499,7 @@ export class MovePlayerUseCase {
   _hasNPCAtPosition(position, gameState) {
     // Check if there's an NPC at the given position
     const npcs = gameState.npcs || [];
-    return npcs.some(npc => {
+    return npcs.some((npc) => {
       if (!npc.position) {
         return false;
       }
@@ -499,7 +510,11 @@ export class MovePlayerUseCase {
       }
 
       // Handle plain objects with x,y properties
-      if (typeof npc.position === 'object' && npc.position.x !== undefined && npc.position.y !== undefined) {
+      if (
+        typeof npc.position === 'object' &&
+        npc.position.x !== undefined &&
+        npc.position.y !== undefined
+      ) {
         return npc.position.x === position.x && npc.position.y === position.y;
       }
 
