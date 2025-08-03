@@ -256,6 +256,15 @@ export class DOMGameRenderer extends GameRenderer {
   }
 
   render(gameState) {
+    // Debug logging for hidden area keys
+    if (gameState.availableCollectibleKeys && gameState.availableCollectibleKeys.length > 0) {
+      console.log('🔑 AVAILABLE COLLECTIBLE KEYS:', gameState.availableCollectibleKeys.map(k => ({ 
+        keyId: k.keyId, 
+        position: `[${k.position.x}, ${k.position.y}]`,
+        name: k.name 
+      })));
+    }
+    
     this._updateCamera(gameState);
     this.gameBoard.innerHTML = '';
 

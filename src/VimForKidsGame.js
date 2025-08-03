@@ -394,18 +394,30 @@ export class VimForKidsGame {
 
         if (gateDestination && gateDestination.startsWith('vim_') && currentZone.getHiddenAreas().some(area => area.id === gateDestination)) {
           // Gate leads to a hidden area - reveal and enter it
+          console.log('🔄 REVEALING HIDDEN AREA:', gateDestination);
           const areasRevealed = currentZone.revealHiddenArea('escProgression');
+          console.log('🔄 AREAS REVEALED:', areasRevealed);
 
           if (areasRevealed) {
             // Enter the hidden area
+            console.log('🚪 ENTERING HIDDEN AREA:', gateDestination);
             const hiddenArea = currentZone.enterHiddenArea(gateDestination);
+            console.log('🚪 HIDDEN AREA ENTERED:', hiddenArea ? hiddenArea.id : 'FAILED');
 
             if (hiddenArea) {
               // Move player to hidden area start position
               const startPos = currentZone.getHiddenAreaStartPosition(gateDestination);
+              console.log('📍 MOVING TO START POSITION:', startPos ? `[${startPos.x}, ${startPos.y}]` : 'NONE');
               if (startPos) {
                 this.gameState.cursor = this.gameState.cursor.moveTo(startPos);
               }
+
+              // Debug: Check available keys after revealing
+              const currentState = this.gameState.getCurrentState();
+              console.log('🔑 COLLECTIBLE KEYS AFTER REVEAL:', currentState.availableCollectibleKeys?.map(k => ({ 
+                keyId: k.keyId, 
+                position: `[${k.position.x}, ${k.position.y}]` 
+              })));
 
               // Re-render to show the newly revealed areas and player position
               this.gameRenderer.render(this.gameState.getCurrentState());

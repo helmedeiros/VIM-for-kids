@@ -610,13 +610,23 @@ describe('Blinking Grove Game Integration', () => {
           }
         }
 
-                // Interact with gate to reveal hidden area (simulate 'x' key press)
+                // Interact with gate to reveal hidden area (simulate ESC key press exactly like real game)
         if (mainGate.leadsTo === 'vim_secret_area') {
-          // This should trigger hidden area reveal using the correct trigger
+          // Step 1: Reveal the hidden area (exactly like real game)
           const revealed = game.gameState.zone.revealHiddenArea('escProgression');
           expect(revealed).toBe(true);
+          
+          // Step 2: Enter the hidden area (exactly like real game)
+          const hiddenArea = game.gameState.zone.enterHiddenArea('vim_secret_area');
+          expect(hiddenArea).toBeTruthy();
+          expect(hiddenArea.id).toBe('vim_secret_area');
+          
+          // Step 3: Move player to hidden area start position (exactly like real game)
+          const startPos = game.gameState.zone.getHiddenAreaStartPosition('vim_secret_area');
+          expect(startPos).toBeTruthy();
+          game.gameState.cursor = game.gameState.cursor.moveTo(startPos);
         }
-        
+
         // Get updated state after hidden area reveal
         const updatedState = game.gameState.getCurrentState();
 
@@ -631,27 +641,27 @@ describe('Blinking Grove Game Integration', () => {
         for (const testKey of hiddenAreaKeys) {
           // Move cursor to key position
           game.gameState.cursor = game.gameState.cursor.moveTo(testKey.position);
-          
+
           // Check if cursor position exactly matches key position
           expect(game.gameState.cursor.position.equals(testKey.position)).toBe(true);
-          
+
           // Try to collect the key using the same logic as MovePlayerUseCase
           const currentState = game.gameState.getCurrentState();
           const collectibleKeyAtPosition = currentState.availableCollectibleKeys.find((key) =>
             key.position.equals(game.gameState.cursor.position)
           );
-          
+
           // Key should be found at cursor position
           expect(collectibleKeyAtPosition).toBeTruthy();
           expect(collectibleKeyAtPosition.keyId).toBe(testKey.keyId);
-          
+
           // Collect the key
           game.gameState.collectCollectibleKey(collectibleKeyAtPosition);
-          
+
           // Verify collection worked
           const stateAfterCollection = game.gameState.getCurrentState();
           expect(stateAfterCollection.collectedCollectibleKeys.has(testKey.keyId)).toBe(true);
-          
+
           // Verify key is removed from available keys
           const remainingKeys = stateAfterCollection.availableCollectibleKeys.find(
             k => k.keyId === testKey.keyId
