@@ -414,9 +414,9 @@ export class VimForKidsGame {
 
               // Debug: Check available keys after revealing
               const currentState = this.gameState.getCurrentState();
-              console.log('🔑 COLLECTIBLE KEYS AFTER REVEAL:', currentState.availableCollectibleKeys?.map(k => ({ 
-                keyId: k.keyId, 
-                position: `[${k.position.x}, ${k.position.y}]` 
+              console.log('🔑 COLLECTIBLE KEYS AFTER REVEAL:', currentState.availableCollectibleKeys?.map(k => ({
+                keyId: k.keyId,
+                position: `[${k.position.x}, ${k.position.y}]`
               })));
 
               // Re-render to show the newly revealed areas and player position

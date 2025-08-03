@@ -412,8 +412,8 @@ export class MovePlayerUseCase {
     // Debug logging for key collection
     console.log(`🎯 CHECKING KEY COLLECTION AT [${cursorPosition.x}, ${cursorPosition.y}]`);
     if (this._gameState.availableCollectibleKeys?.length > 0) {
-      console.log('🔍 AVAILABLE COLLECTIBLE KEYS:', this._gameState.availableCollectibleKeys.map(k => ({ 
-        keyId: k.keyId, 
+      console.log('🔍 AVAILABLE COLLECTIBLE KEYS:', this._gameState.availableCollectibleKeys.map(k => ({
+        keyId: k.keyId,
         position: `[${k.position.x}, ${k.position.y}]`,
         matches: k.position.equals(cursorPosition)
       })));

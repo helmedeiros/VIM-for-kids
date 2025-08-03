@@ -57,6 +57,10 @@ export class Zone {
   }
 
   get collectibleKeys() {
+    console.log('🔑 ZONE.COLLECTIBLEKEYS GETTER CALLED:', this._collectibleKeys?.length || 0, 'keys available');
+    if (this._collectibleKeys?.length > 0) {
+      console.log('🔑 KEYS DETAILS:', this._collectibleKeys.map(k => ({ keyId: k.keyId, position: `[${k.position.x}, ${k.position.y}]` })));
+    }
     return [...this._collectibleKeys];
   }
 
@@ -265,8 +269,12 @@ export class Zone {
   }
 
     _buildCollectibleKeys(specialTiles) {
+    console.log('🏗️ _buildCollectibleKeys CALLED with', specialTiles?.length || 0, 'tiles');
+    console.log('🏗️ Current _collectibleKeys array length:', this._collectibleKeys?.length || 0);
+    
     // Initialize the array only if it doesn't exist (first time)
     if (!this._collectibleKeys) {
+      console.log('🏗️ Initializing new _collectibleKeys array');
       this._collectibleKeys = [];
     }
 
@@ -284,7 +292,11 @@ export class Zone {
           // Check if this key already exists (avoid duplicates)
           const existingKey = this._collectibleKeys.find(k => k.keyId === keyId);
           if (!existingKey) {
+            console.log('🔑 ADDING NEW COLLECTIBLE KEY:', keyId, `at [${absolutePosition.x}, ${absolutePosition.y}]`);
             this._collectibleKeys.push(new CollectibleKey(absolutePosition, keyId, name, color));
+            console.log('🔑 Total keys after addition:', this._collectibleKeys.length);
+          } else {
+            console.log('🔑 SKIPPING DUPLICATE KEY:', keyId);
           }
         }
       });
