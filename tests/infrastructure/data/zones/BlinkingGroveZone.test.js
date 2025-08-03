@@ -90,12 +90,10 @@ describe('BlinkingGroveZone', () => {
       expect(config.tiles.hiddenAreas).toHaveLength(1);
       const hiddenArea = config.tiles.hiddenAreas[0];
       const hiddenCollectibleKeys = hiddenArea.specialTiles.filter(tile => tile.type === 'collectible_key');
-      expect(hiddenCollectibleKeys).toHaveLength(5);
+      expect(hiddenCollectibleKeys).toHaveLength(3);
 
-      // Verify the new keys exist in hidden area
+      // Verify the three keys for the gates exist in hidden area
       const keyIds = hiddenCollectibleKeys.map(key => key.keyId);
-      expect(keyIds).toContain('secret_vim_key');
-      expect(keyIds).toContain('master_key');
       expect(keyIds).toContain('golden_key');
       expect(keyIds).toContain('silver_key');
       expect(keyIds).toContain('bronze_key');

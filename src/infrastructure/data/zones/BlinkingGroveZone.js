@@ -429,11 +429,7 @@ export class BlinkingGroveZone {
               { text: ')', position: [31, 9], color: '#ffa726', fontSize: '14px' },
             ],
             specialTiles: [
-              // Add some special vim keys as rewards in the hidden area (positioned on the path)
-              { type: 'collectible_key', keyId: 'secret_vim_key', name: 'Secret Vim Key', color: '#FFD700', position: [15, 10] },
-              { type: 'collectible_key', keyId: 'master_key', name: 'Master Key', color: '#FF6B6B', position: [50, 10] },
-
-              // Three new keys positioned near the letters (not on top to avoid text overlap)
+              // Three keys positioned near the letters for the three gates
               { type: 'collectible_key', keyId: 'golden_key', name: 'Golden Key', color: '#FFD700', position: [19, 0] }, // Next to 'm' in 'vim'
               { type: 'collectible_key', keyId: 'silver_key', name: 'Silver Key', color: '#C0C0C0', position: [25, 0] }, // Next to 'l' in 'Total'
               { type: 'collectible_key', keyId: 'bronze_key', name: 'Bronze Key', color: '#CD7F32', position: [31, 0] }, // Next to 'z' in 'Rulez'
