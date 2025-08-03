@@ -264,7 +264,7 @@ export class Zone {
     }
   }
 
-  _buildCollectibleKeys(specialTiles) {
+    _buildCollectibleKeys(specialTiles) {
     // Initialize the array only if it doesn't exist (first time)
     if (!this._collectibleKeys) {
       this._collectibleKeys = [];
@@ -585,7 +585,7 @@ export class Zone {
    * Internal method to reveal a specific hidden area
    * @private
    */
-  _revealHiddenArea(area) {
+    _revealHiddenArea(area) {
     // Calculate required map dimensions for this hidden area
     if (area.layout && area.layout.length > 0) {
       const hiddenAreaWidth = area.layout[0] ? area.layout[0].length : 0;
@@ -676,7 +676,7 @@ export class Zone {
         // Convert to absolute coordinates: zoneStart + hiddenAreaPosition + offset
         const absoluteX = this._gameMap.zoneStartX + gate.position[0] + (area.offsetX || 0);
         const absoluteY = this._gameMap.zoneStartY + gate.position[1] + (area.offsetY || 0);
-        
+
         return {
           ...gate,
           position: [absoluteX, absoluteY],
