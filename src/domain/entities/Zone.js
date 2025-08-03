@@ -653,12 +653,13 @@ export class Zone {
     // Add special tiles from the hidden area
     if (area.specialTiles) {
       area.specialTiles.forEach(tile => {
+        // Convert to absolute coordinates: zoneStart + hiddenAreaPosition + offset
+        const absoluteX = this._gameMap.zoneStartX + tile.position[0] + (area.offsetX || 0);
+        const absoluteY = this._gameMap.zoneStartY + tile.position[1] + (area.offsetY || 0);
+        
         const adjustedTile = {
           ...tile,
-          position: [
-            tile.position[0] + (area.offsetX || 0),
-            tile.position[1] + (area.offsetY || 0)
-          ],
+          position: [absoluteX, absoluteY],
           isFromHiddenArea: true // Mark as already having absolute coordinates
         };
 
@@ -672,13 +673,16 @@ export class Zone {
 
     // Add secondary gates from the hidden area
     if (area.secondaryGates) {
-      const adjustedGates = area.secondaryGates.map(gate => ({
-        ...gate,
-        position: [
-          gate.position[0] + (area.offsetX || 0),
-          gate.position[1] + (area.offsetY || 0)
-        ]
-      }));
+      const adjustedGates = area.secondaryGates.map(gate => {
+        // Convert to absolute coordinates: zoneStart + hiddenAreaPosition + offset
+        const absoluteX = this._gameMap.zoneStartX + gate.position[0] + (area.offsetX || 0);
+        const absoluteY = this._gameMap.zoneStartY + gate.position[1] + (area.offsetY || 0);
+        
+        return {
+          ...gate,
+          position: [absoluteX, absoluteY]
+        };
+      });
       this._buildSecondaryGates(adjustedGates);
     }
   }
