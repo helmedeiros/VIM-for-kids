@@ -590,4 +590,75 @@ describe('Blinking Grove Game Integration', () => {
       }
     });
   });
+
+  describe('Hidden Area Key Collection', () => {
+    it('should collect hidden area keys when cursor moves over them', async () => {
+      // First, reveal the hidden area by moving to main gate and pressing 'x'
+      const gameState = game.gameState.getCurrentState();
+      const mainGate = gameState.gate;
+
+      if (mainGate) {
+        // Move cursor to gate position
+        game.gameState.cursor = game.gameState.cursor.moveTo(mainGate.position);
+
+        // Collect all required keys first to open the gate
+        const requiredKeys = ['h_key', 'j_key', 'k_key', 'l_key'];
+        for (const keyName of requiredKeys) {
+          const key = gameState.availableKeys.find(k => k.key === keyName);
+          if (key) {
+            game.gameState.collectKey(key);
+          }
+        }
+
+                // Interact with gate to reveal hidden area (simulate 'x' key press)
+        if (mainGate.leadsTo === 'vim_secret_area') {
+          // This should trigger hidden area reveal using the correct trigger
+          const revealed = game.gameState.zone.revealHiddenArea('escProgression');
+          expect(revealed).toBe(true);
+        }
+        
+        // Get updated state after hidden area reveal
+        const updatedState = game.gameState.getCurrentState();
+
+        // Try to find and collect hidden area keys
+        const hiddenAreaKeys = updatedState.availableCollectibleKeys.filter(
+          key => ['golden_key', 'silver_key', 'bronze_key'].includes(key.keyId)
+        );
+
+        expect(hiddenAreaKeys.length).toBe(3);
+
+                // Test collection for each hidden area key
+        for (const testKey of hiddenAreaKeys) {
+          // Move cursor to key position
+          game.gameState.cursor = game.gameState.cursor.moveTo(testKey.position);
+          
+          // Check if cursor position exactly matches key position
+          expect(game.gameState.cursor.position.equals(testKey.position)).toBe(true);
+          
+          // Try to collect the key using the same logic as MovePlayerUseCase
+          const currentState = game.gameState.getCurrentState();
+          const collectibleKeyAtPosition = currentState.availableCollectibleKeys.find((key) =>
+            key.position.equals(game.gameState.cursor.position)
+          );
+          
+          // Key should be found at cursor position
+          expect(collectibleKeyAtPosition).toBeTruthy();
+          expect(collectibleKeyAtPosition.keyId).toBe(testKey.keyId);
+          
+          // Collect the key
+          game.gameState.collectCollectibleKey(collectibleKeyAtPosition);
+          
+          // Verify collection worked
+          const stateAfterCollection = game.gameState.getCurrentState();
+          expect(stateAfterCollection.collectedCollectibleKeys.has(testKey.keyId)).toBe(true);
+          
+          // Verify key is removed from available keys
+          const remainingKeys = stateAfterCollection.availableCollectibleKeys.find(
+            k => k.keyId === testKey.keyId
+          );
+          expect(remainingKeys).toBeUndefined();
+        }
+      }
+    });
+  });
 });
