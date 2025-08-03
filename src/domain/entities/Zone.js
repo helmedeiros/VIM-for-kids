@@ -335,11 +335,10 @@ export class Zone {
     if (secondaryGatesConfig && Array.isArray(secondaryGatesConfig)) {
       secondaryGatesConfig.forEach((gateConfig) => {
         if (gateConfig && gateConfig.position) {
-          // Convert zone-relative coordinates to absolute coordinates
-          const absolutePosition = this._gameMap.zoneToAbsolute(
-            gateConfig.position[0],
-            gateConfig.position[1]
-          );
+          // Convert coordinates to absolute - skip conversion for hidden area gates as they're already absolute
+          const absolutePosition = gateConfig.isFromHiddenArea
+            ? new Position(gateConfig.position[0], gateConfig.position[1])
+            : this._gameMap.zoneToAbsolute(gateConfig.position[0], gateConfig.position[1]);
 
           // Check if this gate already exists (avoid duplicates)
           const existingGate = this._secondaryGates.find(g => g.position.equals(absolutePosition));
@@ -656,7 +655,7 @@ export class Zone {
         // Convert to absolute coordinates: zoneStart + hiddenAreaPosition + offset
         const absoluteX = this._gameMap.zoneStartX + tile.position[0] + (area.offsetX || 0);
         const absoluteY = this._gameMap.zoneStartY + tile.position[1] + (area.offsetY || 0);
-        
+
         const adjustedTile = {
           ...tile,
           position: [absoluteX, absoluteY],
@@ -671,7 +670,7 @@ export class Zone {
       });
     }
 
-    // Add secondary gates from the hidden area
+        // Add secondary gates from the hidden area
     if (area.secondaryGates) {
       const adjustedGates = area.secondaryGates.map(gate => {
         // Convert to absolute coordinates: zoneStart + hiddenAreaPosition + offset
@@ -680,7 +679,8 @@ export class Zone {
         
         return {
           ...gate,
-          position: [absoluteX, absoluteY]
+          position: [absoluteX, absoluteY],
+          isFromHiddenArea: true // Mark as already having absolute coordinates
         };
       });
       this._buildSecondaryGates(adjustedGates);
