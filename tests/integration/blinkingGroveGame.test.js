@@ -615,12 +615,12 @@ describe('Blinking Grove Game Integration', () => {
           // Step 1: Reveal the hidden area (exactly like real game)
           const revealed = game.gameState.zone.revealHiddenArea('escProgression');
           expect(revealed).toBe(true);
-          
+
           // Step 2: Enter the hidden area (exactly like real game)
           const hiddenArea = game.gameState.zone.enterHiddenArea('vim_secret_area');
           expect(hiddenArea).toBeTruthy();
           expect(hiddenArea.id).toBe('vim_secret_area');
-          
+
           // Step 3: Move player to hidden area start position (exactly like real game)
           const startPos = game.gameState.zone.getHiddenAreaStartPosition('vim_secret_area');
           expect(startPos).toBeTruthy();
