@@ -1,7 +1,7 @@
 import { Position } from '../value-objects/Position.js';
 
 export class Gate {
-  constructor(position, unlockConditions = null) {
+  constructor(position, unlockConditions = null, leadsTo = null) {
     if (!(position instanceof Position)) {
       throw new Error('Position must be a valid Position object');
     }
@@ -10,6 +10,7 @@ export class Gate {
     this._isOpen = false;
     this._type = 'gate';
     this._unlockConditions = unlockConditions || {};
+    this._leadsTo = leadsTo;
 
     // Make properties immutable
     Object.defineProperty(this, 'position', {
@@ -20,6 +21,12 @@ export class Gate {
 
     Object.defineProperty(this, 'type', {
       value: this._type,
+      writable: false,
+      configurable: false,
+    });
+
+    Object.defineProperty(this, 'leadsTo', {
+      value: this._leadsTo,
       writable: false,
       configurable: false,
     });

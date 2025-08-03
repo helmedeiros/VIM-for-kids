@@ -42,11 +42,9 @@ export class TextlandGameState {
   }
 
   collectCollectibleKey(collectibleKey) {
-    if (this.availableCollectibleKeys.includes(collectibleKey)) {
+    if (this.zone.collectibleKeys.includes(collectibleKey)) {
       this.collectedCollectibleKeys.add(collectibleKey.keyId);
-      this.availableCollectibleKeys = this.availableCollectibleKeys.filter(
-        (key) => key !== collectibleKey
-      );
+      // No need to filter cached array since we're using live zone data
 
       // Notify zone about key collection
       this.zone.collectKey(collectibleKey);
@@ -60,7 +58,7 @@ export class TextlandGameState {
       map: this.map,
       cursor: this.cursor,
       availableKeys: this.availableKeys,
-      availableCollectibleKeys: this.availableCollectibleKeys,
+      availableCollectibleKeys: this.zone.collectibleKeys, // Always get fresh keys from zone
       collectedKeys: this.collectedKeys,
       collectedCollectibleKeys: this.collectedCollectibleKeys,
       textLabels: this.zone.textLabels,

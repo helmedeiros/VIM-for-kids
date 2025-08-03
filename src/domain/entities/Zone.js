@@ -65,6 +65,18 @@ export class Zone {
   }
 
   get gate() {
+    const currentArea = this.getCurrentArea();
+    if (currentArea && currentArea.gate) {
+      // Return hidden area gate with absolute position
+      const absolutePos = this._gameMap.zoneToAbsolute(
+        currentArea.gate.position[0] + (currentArea.offsetX || 0),
+        currentArea.gate.position[1] + (currentArea.offsetY || 0)
+      );
+      const unlockConditions = currentArea.gate.unlocksWhen || {};
+      const leadsTo = currentArea.gate.leadsTo || null;
+      return new Gate(absolutePos, unlockConditions, leadsTo);
+    }
+    // Return main zone gate
     return this._gate;
   }
 
@@ -94,6 +106,11 @@ export class Zone {
     // Create dynamic zone map with full-screen water and centered zone area
     this._gameMap = new DynamicZoneMap(zoneWidth, zoneHeight);
 
+    // Store the original zone start position before any map expansions
+    // This ensures NPCs maintain consistent positions when hidden areas are revealed
+    this._originalZoneStartX = this._gameMap.zoneStartX;
+    this._originalZoneStartY = this._gameMap.zoneStartY;
+
     // Build zone-specific tiles
     this._buildTiles(config.tiles);
 
@@ -117,6 +134,11 @@ export class Zone {
 
     // Store events configuration
     this._events = config.events || [];
+
+    // Store hidden areas configuration
+    this._hiddenAreas = config.tiles.hiddenAreas || [];
+    this._revealedHiddenAreas = new Set();
+    this._currentHiddenArea = null; // Track which hidden area player is currently in
   }
 
   _buildTiles(tilesConfig) {
@@ -219,7 +241,10 @@ export class Zone {
   }
 
   _buildVimKeys(specialTiles) {
-    this._vimKeys = [];
+    // Initialize the array only if it doesn't exist (first time)
+    if (!this._vimKeys) {
+      this._vimKeys = [];
+    }
 
     if (specialTiles) {
       specialTiles.forEach((tile) => {
@@ -228,24 +253,39 @@ export class Zone {
           const absolutePosition = this._gameMap.zoneToAbsolute(tile.position[0], tile.position[1]);
           const key = tile.value;
           const description = this._getKeyDescription(key);
-          this._vimKeys.push(new VimKey(absolutePosition, key, description));
+
+          // Check if this key already exists (avoid duplicates)
+          const existingKey = this._vimKeys.find(k => k.key === key && k.position.equals(absolutePosition));
+          if (!existingKey) {
+            this._vimKeys.push(new VimKey(absolutePosition, key, description));
+          }
         }
       });
     }
   }
 
   _buildCollectibleKeys(specialTiles) {
-    this._collectibleKeys = [];
+    // Initialize the array only if it doesn't exist (first time)
+    if (!this._collectibleKeys) {
+      this._collectibleKeys = [];
+    }
 
     if (specialTiles) {
       specialTiles.forEach((tile) => {
         if (tile.type === 'collectible_key') {
-          // Convert zone-relative coordinates to absolute coordinates
-          const absolutePosition = this._gameMap.zoneToAbsolute(tile.position[0], tile.position[1]);
+          // Convert coordinates to absolute - skip conversion for hidden area tiles as they're already absolute
+          const absolutePosition = tile.isFromHiddenArea
+            ? new Position(tile.position[0], tile.position[1])
+            : this._gameMap.zoneToAbsolute(tile.position[0], tile.position[1]);
           const keyId = tile.keyId;
           const name = tile.name || 'Key';
           const color = tile.color || '#FFD700';
-          this._collectibleKeys.push(new CollectibleKey(absolutePosition, keyId, name, color));
+
+          // Check if this key already exists (avoid duplicates)
+          const existingKey = this._collectibleKeys.find(k => k.keyId === keyId);
+          if (!existingKey) {
+            this._collectibleKeys.push(new CollectibleKey(absolutePosition, keyId, name, color));
+          }
         }
       });
     }
@@ -271,9 +311,10 @@ export class Zone {
         gateConfig.position[1]
       );
 
-      // Pass unlock conditions to the Gate constructor
+      // Pass unlock conditions and leadsTo to the Gate constructor
       const unlockConditions = gateConfig.unlocksWhen || {};
-      this._gate = new Gate(absolutePosition, unlockConditions);
+      const leadsTo = gateConfig.leadsTo || null;
+      this._gate = new Gate(absolutePosition, unlockConditions, leadsTo);
 
       // Gate starts locked as per configuration
       this._gate.close();
@@ -286,7 +327,10 @@ export class Zone {
   }
 
   _buildSecondaryGates(secondaryGatesConfig) {
-    this._secondaryGates = [];
+    // Initialize the array only if it doesn't exist (first time)
+    if (!this._secondaryGates) {
+      this._secondaryGates = [];
+    }
 
     if (secondaryGatesConfig && Array.isArray(secondaryGatesConfig)) {
       secondaryGatesConfig.forEach((gateConfig) => {
@@ -297,14 +341,19 @@ export class Zone {
             gateConfig.position[1]
           );
 
-          // Pass unlock conditions to the Gate constructor
-          const unlockConditions = gateConfig.unlocksWhen || {};
-          const secondaryGate = new Gate(absolutePosition, unlockConditions);
+          // Check if this gate already exists (avoid duplicates)
+          const existingGate = this._secondaryGates.find(g => g.position.equals(absolutePosition));
+          if (!existingGate) {
+            // Pass unlock conditions and leadsTo to the Gate constructor
+            const unlockConditions = gateConfig.unlocksWhen || {};
+            const leadsTo = gateConfig.leadsTo || null;
+            const secondaryGate = new Gate(absolutePosition, unlockConditions, leadsTo);
 
-          // Gate starts locked as per configuration
-          secondaryGate.close();
+            // Gate starts locked as per configuration
+            secondaryGate.close();
 
-          this._secondaryGates.push(secondaryGate);
+            this._secondaryGates.push(secondaryGate);
+          }
         }
       });
     }
@@ -471,14 +520,15 @@ export class Zone {
   getCursorStartPosition() {
     // Use custom cursor start position if provided, otherwise default to center of dirt area
     if (this._customCursorStartPosition) {
-      // Convert zone-relative coordinates to absolute coordinates
-      return this._gameMap.zoneToAbsolute(
-        this._customCursorStartPosition.x,
-        this._customCursorStartPosition.y
-      );
+      // Convert zone-relative coordinates to absolute coordinates using original zone start position
+      const absoluteX = this._originalZoneStartX + this._customCursorStartPosition.x;
+      const absoluteY = this._originalZoneStartY + this._customCursorStartPosition.y;
+      return new Position(absoluteX, absoluteY);
     }
-    // Start position in the center of the dirt area
-    return this._gameMap.zoneToAbsolute(2, 2);
+    // Start position in the center of the dirt area using original zone start position
+    const absoluteX = this._originalZoneStartX + 2;
+    const absoluteY = this._originalZoneStartY + 2;
+    return new Position(absoluteX, absoluteY);
   }
 
   getActiveNPCs() {
@@ -491,11 +541,13 @@ export class Zone {
         return true; // NPC is always visible if no conditions
       })
       .map((npc) => {
-        // Convert NPC positions to absolute coordinates for rendering
-        const absolutePos = this._gameMap.zoneToAbsolute(npc.position[0], npc.position[1]);
+        // Convert NPC positions to absolute coordinates using original zone start position
+        // This prevents NPCs from moving when hidden areas are revealed and map expands
+        const absoluteX = this._originalZoneStartX + npc.position[0];
+        const absoluteY = this._originalZoneStartY + npc.position[1];
         return {
           ...npc,
-          position: [absolutePos.x, absolutePos.y],
+          position: [absoluteX, absoluteY],
         };
       });
   }
@@ -509,6 +561,202 @@ export class Zone {
     const npc = this._npcs.find((n) => n.id === npcId);
     if (npc && npc.position) {
       return this._gameMap.zoneToAbsolute(npc.position[0], npc.position[1]);
+    }
+    return null;
+  }
+
+  /**
+   * Reveal a hidden area based on trigger condition
+   * @param {string} trigger - The trigger condition (e.g., 'escProgression')
+   */
+  revealHiddenArea(trigger) {
+    const areasToReveal = this._hiddenAreas.filter(
+      area => area.revealWhen === trigger && !this._revealedHiddenAreas.has(area.id)
+    );
+
+    areasToReveal.forEach(area => {
+      this._revealHiddenArea(area);
+      this._revealedHiddenAreas.add(area.id);
+    });
+
+    return areasToReveal.length > 0; // Return true if any areas were revealed
+  }
+
+  /**
+   * Internal method to reveal a specific hidden area
+   * @private
+   */
+  _revealHiddenArea(area) {
+    // Calculate required map dimensions for this hidden area
+    if (area.layout && area.layout.length > 0) {
+      const hiddenAreaWidth = area.layout[0] ? area.layout[0].length : 0;
+      const hiddenAreaHeight = area.layout.length;
+      const offsetX = area.offsetX || 0;
+      const offsetY = area.offsetY || 0;
+
+      // Calculate required dimensions based on current zone size plus hidden area
+      const currentZoneWidth = this._gameMap.zoneEndX - this._gameMap.zoneStartX;
+      const currentZoneHeight = this._gameMap.zoneEndY - this._gameMap.zoneStartY;
+
+      // Calculate the maximum extent of the hidden area relative to current zone
+      const maxZoneX = Math.max(currentZoneWidth, offsetX + hiddenAreaWidth);
+      const maxZoneY = Math.max(currentZoneHeight, offsetY + hiddenAreaHeight);
+
+      // Convert to absolute dimensions (add zone start position and padding)
+      const requiredWidth = this._gameMap.zoneStartX + maxZoneX + 10;
+      const requiredHeight = this._gameMap.zoneStartY + maxZoneY + 10;
+
+      this._gameMap.expandDimensions(requiredWidth, requiredHeight);
+    }
+
+    // Process the hidden area layout
+    if (area.layout && area.layout.length > 0) {
+      area.layout.forEach((row, rowIndex) => {
+        for (let colIndex = 0; colIndex < row.length; colIndex++) {
+          const char = row[colIndex];
+          const tileTypeName = this._gameMap._tiles && this._gameMap._tiles[0] ?
+            this._getHiddenAreaTileType(char) : 'grass';
+
+          if (tileTypeName) {
+            // Calculate absolute position with offset
+            const zoneX = colIndex + (area.offsetX || 0);
+            const zoneY = rowIndex + (area.offsetY || 0);
+            const absolutePosition = this._gameMap.zoneToAbsolute(zoneX, zoneY);
+
+            // Map legend tile type names to TileType instances
+            const tileType = this._getTileTypeFromName(tileTypeName);
+
+            if (tileType && this._gameMap.isValidPosition(absolutePosition)) {
+              this._gameMap.setTileAt(absolutePosition, tileType);
+            }
+          }
+        }
+      });
+    }
+
+    // Add text labels from the hidden area
+    if (area.textLabels) {
+      area.textLabels.forEach(label => {
+        const absolutePos = this._gameMap.zoneToAbsolute(
+          label.position[0] + (area.offsetX || 0),
+          label.position[1] + (area.offsetY || 0)
+        );
+        const options = {
+          color: label.color,
+          fontSize: label.fontSize,
+          fontWeight: label.fontWeight
+        };
+        this._textLabels.push(new TextLabel(absolutePos, label.text, options));
+      });
+    }
+
+    // Add special tiles from the hidden area
+    if (area.specialTiles) {
+      area.specialTiles.forEach(tile => {
+        const adjustedTile = {
+          ...tile,
+          position: [
+            tile.position[0] + (area.offsetX || 0),
+            tile.position[1] + (area.offsetY || 0)
+          ],
+          isFromHiddenArea: true // Mark as already having absolute coordinates
+        };
+
+        if (tile.type === 'collectible_key') {
+          this._buildCollectibleKeys([adjustedTile]);
+        } else if (tile.type === 'vim_key') {
+          this._buildVimKeys([adjustedTile]);
+        }
+      });
+    }
+
+    // Add secondary gates from the hidden area
+    if (area.secondaryGates) {
+      const adjustedGates = area.secondaryGates.map(gate => ({
+        ...gate,
+        position: [
+          gate.position[0] + (area.offsetX || 0),
+          gate.position[1] + (area.offsetY || 0)
+        ]
+      }));
+      this._buildSecondaryGates(adjustedGates);
+    }
+  }
+
+  /**
+   * Get tile type for hidden area characters
+   * @private
+   */
+  _getHiddenAreaTileType(char) {
+    const hiddenAreaLegend = {
+      'W': 'water',
+      'G': 'gate',
+      'D': 'dirt',
+      'S': 'stone',
+      'T': 'tree',
+      'P': 'path',
+      'N': 'wall',
+      '>': 'ramp_left',
+      '<': 'ramp_right',
+    };
+    return hiddenAreaLegend[char] || 'grass';
+  }
+
+  /**
+   * Check if a hidden area has been revealed
+   */
+  isHiddenAreaRevealed(areaId) {
+    return this._revealedHiddenAreas.has(areaId);
+  }
+
+  /**
+   * Get all hidden areas configurations
+   */
+  getHiddenAreas() {
+    return [...this._hiddenAreas];
+  }
+
+  /**
+   * Enter a hidden area by ID
+   */
+  enterHiddenArea(areaId) {
+    const area = this._hiddenAreas.find(a => a.id === areaId);
+    if (area && this._revealedHiddenAreas.has(areaId)) {
+      this._currentHiddenArea = areaId;
+      return area;
+    }
+    return null;
+  }
+
+  /**
+   * Exit the current hidden area (return to main zone)
+   */
+  exitHiddenArea() {
+    this._currentHiddenArea = null;
+  }
+
+  /**
+   * Get the current area (main zone or hidden area)
+   */
+  getCurrentArea() {
+    if (this._currentHiddenArea) {
+      return this._hiddenAreas.find(a => a.id === this._currentHiddenArea);
+    }
+    return null; // Main zone
+  }
+
+
+
+  /**
+   * Get player start position for hidden areas
+   */
+  getHiddenAreaStartPosition(areaId) {
+    const area = this._hiddenAreas.find(a => a.id === areaId);
+    if (area && area.playerStartPosition) {
+      return this._gameMap.zoneToAbsolute(
+        area.playerStartPosition[0] + (area.offsetX || 0),
+        area.playerStartPosition[1] + (area.offsetY || 0)
+      );
     }
     return null;
   }

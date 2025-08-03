@@ -786,4 +786,177 @@ describe('Zone', () => {
       expect(zone.getCollectedCollectibleKeys().has('special_key')).toBe(false); // CollectibleKey consumed
     });
   });
+
+  describe('Hidden Areas', () => {
+    const createZoneWithHiddenAreaAndGate = () => {
+      const baseConfig = createTestZoneConfig();
+      const zoneConfigWithHiddenArea = {
+        ...baseConfig,
+        tiles: {
+          ...baseConfig.tiles,
+          hiddenAreas: [
+            {
+              id: 'secret_area',
+              tiles: {
+                layout: [
+                  '#####',
+                  '#...#',
+                  '#.G.#',
+                  '#...#',
+                  '#####',
+                ],
+                legend: {
+                  '#': 'wall',
+                  '.': 'path',
+                  'G': 'gate',
+                },
+              },
+              gate: {
+                position: [2, 2],
+                unlocksWhen: { collectibleKeys: ['secret_key'] },
+                leadsTo: 'next_zone'
+              },
+              offsetX: 10,
+              offsetY: 0,
+              playerStartPosition: [1, 1]
+            }
+          ]
+        }
+      };
+      return new Zone(zoneConfigWithHiddenArea);
+    };
+
+    it('should return hidden area gate when hidden area is current', () => {
+      const zone = createZoneWithHiddenAreaAndGate();
+
+      // Set the hidden area as current
+      zone._currentHiddenArea = 'secret_area';
+
+      // Get the gate - should return the hidden area gate, not the main gate
+      const gate = zone.gate;
+      expect(gate).toBeInstanceOf(Gate);
+      expect(gate.leadsTo).toBe('next_zone');
+      expect(gate.unlockConditions).toEqual({ collectibleKeys: ['secret_key'] });
+    });
+
+    it('should return main zone gate when no hidden area is current', () => {
+      const zone = createZoneWithHiddenAreaAndGate();
+
+      // Don't set any hidden area as current
+      zone._currentHiddenArea = null;
+
+      // Get the gate - should return the main zone gate
+      const gate = zone.gate;
+      expect(gate).toBeInstanceOf(Gate);
+      expect(gate.leadsTo).toBe('test_zone_2');
+    });
+
+    it('should get hidden area start position', () => {
+      const zone = createZoneWithHiddenAreaAndGate();
+
+      // Debug: check if hidden areas are stored correctly
+      expect(zone._hiddenAreas).toBeDefined();
+      expect(zone._hiddenAreas.length).toBe(1);
+      expect(zone._hiddenAreas[0].id).toBe('secret_area');
+
+      const startPos = zone.getHiddenAreaStartPosition('secret_area');
+      expect(startPos).toBeInstanceOf(Position);
+      // Position should be absolute: zoneStartX + playerStartPosition + offsetX
+      // zoneStartX is 12 for the test zone layout (calculated from DynamicZoneMap)
+      expect(startPos.x).toBe(23); // 12 (zoneStartX) + 1 + 10 (offsetX)
+      expect(startPos.y).toBe(11);  // Actual calculated value
+    });
+
+    it('should return null for non-existent hidden area start position', () => {
+      const zone = createZoneWithHiddenAreaAndGate();
+
+      const startPos = zone.getHiddenAreaStartPosition('non_existent');
+      expect(startPos).toBeNull();
+    });
+
+    it('should get current area when hidden area is active', () => {
+      const zone = createZoneWithHiddenAreaAndGate();
+
+      // Debug: check hidden areas are properly stored
+      expect(zone._hiddenAreas).toBeDefined();
+      expect(zone._hiddenAreas.length).toBe(1);
+
+      // Set hidden area as current
+      zone._currentHiddenArea = 'secret_area';
+
+      const currentArea = zone.getCurrentArea();
+      expect(currentArea).not.toBeNull();
+      expect(currentArea.id).toBe('secret_area');
+    });
+
+    it('should return null as current area when no hidden area is active', () => {
+      const zone = createZoneWithHiddenAreaAndGate();
+
+      // Don't set any hidden area
+      zone._currentHiddenArea = null;
+
+      const currentArea = zone.getCurrentArea();
+      expect(currentArea).toBeNull();
+    });
+  });
+
+  describe('Legacy Tile Configuration', () => {
+    it('should handle legacy tileType configuration', () => {
+      const legacyZoneConfig = {
+        zoneId: 'legacy_zone',
+        name: 'Legacy Zone',
+        biome: 'Legacy biome',
+        skillFocus: ['h'],
+        puzzleTheme: 'Legacy puzzle theme',
+        narration: ['Legacy narration'],
+
+        // Legacy configuration without layout/legend
+        tiles: {
+          tileType: 'path'  // This should trigger the fallback branch
+        },
+
+        gate: {
+          position: [5, 5],
+          unlocksWhen: {},
+          leadsTo: 'test_destination'
+        },
+
+        cursorStartPosition: [1, 1]
+      };
+
+      // This should use the fallback _createZoneSpecificTiles method
+      const zone = new Zone(legacyZoneConfig);
+
+      expect(zone).toBeInstanceOf(Zone);
+      expect(zone.name).toBe('Legacy Zone');
+    });
+
+    it('should handle empty tiles configuration gracefully', () => {
+      const emptyTilesConfig = {
+        zoneId: 'empty_zone',
+        name: 'Empty Zone',
+        biome: 'Empty biome',
+        skillFocus: ['h'],
+        puzzleTheme: 'Empty puzzle theme',
+        narration: ['Empty narration'],
+
+        // Empty tiles configuration
+        tiles: {},
+
+        gate: {
+          position: [5, 5],
+          unlocksWhen: {},
+          leadsTo: 'test_destination'
+        },
+
+        cursorStartPosition: [1, 1]
+      };
+
+      // This should handle the case where tiles config is empty
+      const zone = new Zone(emptyTilesConfig);
+
+      expect(zone).toBeInstanceOf(Zone);
+      expect(zone.name).toBe('Empty Zone');
+    });
+  });
 });

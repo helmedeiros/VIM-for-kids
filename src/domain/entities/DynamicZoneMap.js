@@ -105,6 +105,49 @@ export class DynamicZoneMap {
     return this.zoneStartY + this._zoneHeight;
   }
 
+  /**
+   * Expand map dimensions to accommodate hidden areas
+   * @param {number} requiredWidth - Minimum required width
+   * @param {number} requiredHeight - Minimum required height
+   */
+  expandDimensions(requiredWidth, requiredHeight) {
+    const oldWidth = this._width;
+    const oldHeight = this._height;
+
+    // Expand dimensions if needed
+    this._width = Math.max(this._width, requiredWidth);
+    this._height = Math.max(this._height, requiredHeight);
+
+    // If dimensions changed, we need to expand the tile grid
+    if (this._width > oldWidth || this._height > oldHeight) {
+      this._expandTileGrid(oldWidth, oldHeight);
+    }
+  }
+
+  /**
+   * Expand the tile grid to accommodate new dimensions
+   * @private
+   */
+  _expandTileGrid(oldWidth, oldHeight) {
+    const newTiles = [];
+
+    // Create new expanded grid
+    for (let y = 0; y < this._height; y++) {
+      newTiles[y] = [];
+      for (let x = 0; x < this._width; x++) {
+        if (y < oldHeight && x < oldWidth && this._tiles[y] && this._tiles[y][x]) {
+          // Copy existing tile
+          newTiles[y][x] = this._tiles[y][x];
+        } else {
+          // Fill new areas with water
+          newTiles[y][x] = TileType.WATER;
+        }
+      }
+    }
+
+    this._tiles = newTiles;
+  }
+
   _initializeMap() {
     // Create large grid with water filling entire screen
     this._tiles = [];
