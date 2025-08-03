@@ -409,12 +409,23 @@ export class MovePlayerUseCase {
   _checkKeyCollection() {
     const cursorPosition = this._gameState.cursor.position;
 
+    // Debug logging for key collection
+    console.log(`🎯 CHECKING KEY COLLECTION AT [${cursorPosition.x}, ${cursorPosition.y}]`);
+    if (this._gameState.availableCollectibleKeys?.length > 0) {
+      console.log('🔍 AVAILABLE COLLECTIBLE KEYS:', this._gameState.availableCollectibleKeys.map(k => ({ 
+        keyId: k.keyId, 
+        position: `[${k.position.x}, ${k.position.y}]`,
+        matches: k.position.equals(cursorPosition)
+      })));
+    }
+
     // Check for VIM keys
     const vimKeyAtPosition = this._gameState.availableKeys.find((key) =>
       key.position.equals(cursorPosition)
     );
 
     if (vimKeyAtPosition) {
+      console.log('✅ COLLECTING VIM KEY:', vimKeyAtPosition.key);
       this._gameState.collectKey(vimKeyAtPosition);
       this._gameRenderer.showKeyInfo(vimKeyAtPosition);
       return vimKeyAtPosition;
@@ -427,6 +438,7 @@ export class MovePlayerUseCase {
       );
 
       if (collectibleKeyAtPosition) {
+        console.log('✅ COLLECTING COLLECTIBLE KEY:', collectibleKeyAtPosition.keyId);
         if (typeof this._gameState.collectCollectibleKey === 'function') {
           this._gameState.collectCollectibleKey(collectibleKeyAtPosition);
         } else {
