@@ -370,29 +370,57 @@ export class VimForKidsGame {
    * Handle ESC key pressed for special progression mechanics
    * @private
    */
-  async _handleEscKeyPressed() {
+      async _handleEscKeyPressed() {
     if (!this.gameState) return;
 
     const currentState = this.gameState.getCurrentState();
     if (!currentState) return;
-    
+
     const currentZone = currentState.currentZone;
     const cursor = currentState.cursor;
     if (!currentZone) return;
-    
+
     const gate = currentZone.gate;
-    
+
     // Check if we should handle ESC progression for BlinkingGrove zone
     if (currentZone.zoneId === 'zone_1') {
       const collectedKeys = currentZone.getCollectedKeys();
       const hasAllMovementKeys = ['h', 'j', 'k', 'l'].every(key => collectedKeys.has(key));
       const isAtGate = gate && cursor.position.equals(gate.position);
-      
+
       if (hasAllMovementKeys && isAtGate) {
+        // Check if the gate leads to a hidden area
+        const gateDestination = gate.leadsTo;
+
+        if (gateDestination && gateDestination.startsWith('vim_') && currentZone.getHiddenAreas().some(area => area.id === gateDestination)) {
+          // Gate leads to a hidden area - reveal and enter it
+          const areasRevealed = currentZone.revealHiddenArea('escProgression');
+
+          if (areasRevealed) {
+            // Enter the hidden area
+            const hiddenArea = currentZone.enterHiddenArea(gateDestination);
+
+            if (hiddenArea) {
+              // Move player to hidden area start position
+              const startPos = currentZone.getHiddenAreaStartPosition(gateDestination);
+              if (startPos) {
+                this.gameState.cursor = this.gameState.cursor.moveTo(startPos);
+              }
+
+              // Re-render to show the newly revealed areas and player position
+              this.gameRenderer.render(this.gameState.getCurrentState());
+
+              // Don't mark ESC progression yet - save it for when they exit the hidden area
+              return; // Exit early to prevent normal progression
+            }
+          }
+        }
+
+        // If we get here, either no hidden area or failed to enter - do normal progression
         // Mark ESC progression as pressed for this zone
         this.gameState.markEscProgressionPressed();
-        
-        // Trigger progression to next level
+
+        // Gate leads to next level - trigger normal progression
         if (this.handleProgressionUseCase && this.handleProgressionUseCase.shouldExecuteProgression()) {
           await this.handleProgressionUseCase.execute();
         }

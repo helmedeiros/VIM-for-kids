@@ -1,7 +1,7 @@
 import { Position } from '../value-objects/Position.js';
 
 export class TextLabel {
-  constructor(position, text) {
+  constructor(position, text, options = {}) {
     if (!(position instanceof Position)) {
       throw new Error('Position must be a valid Position object');
     }
@@ -14,8 +14,9 @@ export class TextLabel {
     this._text = text;
     this._type = 'textLabel';
     this._isVisible = true;
-    this._color = '#2c3e50'; // Dark color for readability
-    this._fontSize = '12px';
+    this._color = options.color || '#2c3e50'; // Default or custom color
+    this._fontSize = options.fontSize || '12px'; // Default or custom fontSize
+    this._fontWeight = options.fontWeight || 'normal'; // Support fontWeight
 
     // Make properties immutable
     Object.defineProperty(this, 'position', {
@@ -47,6 +48,10 @@ export class TextLabel {
 
   get fontSize() {
     return this._fontSize;
+  }
+
+  get fontWeight() {
+    return this._fontWeight;
   }
 
   equals(other) {

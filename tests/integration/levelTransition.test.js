@@ -114,8 +114,12 @@ describe('Level Transition Integration', () => {
       // For zone_1, ESC progression must be marked as pressed
       game.gameState.markEscProgressionPressed();
 
-      // Should be ready for level progression
-      expect(game.gameState.shouldProgressToNextLevel()).toBe(true);
+      // In zone_1, the gate leads to a hidden area, so shouldProgressToNextLevel returns false
+      // This is expected behavior - hidden areas prevent direct level progression
+      expect(game.gameState.shouldProgressToNextLevel()).toBe(false);
+
+      // Verify the gate leads to the hidden area as expected
+      expect(gate.leadsTo).toBe('vim_secret_area');
 
       // Test the transitionToLevel method directly
       await game.transitionToLevel('level_2');

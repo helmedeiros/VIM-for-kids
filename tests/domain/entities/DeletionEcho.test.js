@@ -142,4 +142,80 @@ describe('DeletionEcho', () => {
       expect(murmurs.size).toBeGreaterThan(1); // Should get different murmurs
     });
   });
+
+  describe('Dialogue System', () => {
+    test('should provide initial dialogue when not haunting', () => {
+      deletionEcho.haunting = false;
+      const dialogue = deletionEcho.getDialogue();
+
+      expect(dialogue).toContain('*A ghostly figure materializes from the canyon mist*');
+      expect(dialogue).toContain('I am the Echo... of all that was erased...');
+      expect(dialogue).toContain('*whispers* You seek the power of deletion?');
+    });
+
+    test('should guide player to learn x key when missing', () => {
+      deletionEcho.startHaunting();
+      const gameState = { collectedKeys: new Set() };
+      const dialogue = deletionEcho.getDialogue(gameState);
+
+      expect(dialogue).toContain('Begin with precision... single character death.');
+      expect(dialogue).toContain('x marks the spot... where text shall fall.');
+    });
+
+    test('should guide player to learn dd key when x is learned but dd is missing', () => {
+      deletionEcho.startHaunting();
+      const gameState = { collectedKeys: new Set(['x']) };
+      const dialogue = deletionEcho.getDialogue(gameState);
+
+      expect(dialogue).toContain('dd... the line destroyer... entire rows vanish.');
+      expect(dialogue).toContain('Find the power... to erase complete thoughts.');
+    });
+
+    test('should guide player to learn D key when x and dd are learned but D is missing', () => {
+      deletionEcho.startHaunting();
+      const gameState = { collectedKeys: new Set(['x', 'dd']) };
+      const dialogue = deletionEcho.getDialogue(gameState);
+
+      expect(dialogue).toContain('But what of... partial destruction?');
+      expect(dialogue).toContain("D takes all... from cursor to line's end.");
+      expect(dialogue).toContain('Seek the capital... in the deepest shadows.');
+    });
+
+    test('should guide player to learn dw key when x, dd, and D are learned but dw is missing', () => {
+      deletionEcho.startHaunting();
+      const gameState = { collectedKeys: new Set(['x', 'dd', 'D']) };
+      const dialogue = deletionEcho.getDialogue(gameState);
+
+      expect(dialogue).toContain('One power remains... word by word.');
+      expect(dialogue).toContain('dw... deletes entire words... thoughts disappear.');
+      expect(dialogue).toContain('Find this final piece... complete the destruction.');
+    });
+
+    test('should provide mastery dialogue when all deletion keys are learned', () => {
+      deletionEcho.startHaunting();
+      const gameState = { collectedKeys: new Set(['x', 'dd', 'D', 'dw']) };
+      const dialogue = deletionEcho.getDialogue(gameState);
+
+      expect(dialogue).toContain('You have mastered... the Four Deletions.');
+      expect(dialogue).toContain('x for precision, dd for lines, D for ends, dw for words.');
+      expect(dialogue).toContain('*nods approvingly* The canyon recognizes your power.');
+      expect(dialogue).toContain('But remember... *fading* ...with deletion comes responsibility.');
+    });
+
+    test('should handle missing gameState gracefully', () => {
+      deletionEcho.startHaunting();
+      const dialogue = deletionEcho.getDialogue();
+
+      // Should default to the !hasX branch
+      expect(dialogue).toContain('Begin with precision... single character death.');
+    });
+
+    test('should handle empty gameState gracefully', () => {
+      deletionEcho.startHaunting();
+      const dialogue = deletionEcho.getDialogue({});
+
+      // Should default to the !hasX branch
+      expect(dialogue).toContain('Begin with precision... single character death.');
+    });
+  });
 });

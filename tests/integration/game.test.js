@@ -363,4 +363,60 @@ describe('VIM for Kids Game Integration', () => {
       }).toThrow();
     });
   });
+
+  describe('ESC Key Handling', () => {
+    it('should handle ESC key when game state is null', async () => {
+      game = new VimForKidsGame();
+      game.gameState = null;
+
+      // Should not throw when gameState is null
+      await expect(game._handleEscKeyPressed()).resolves.toBeUndefined();
+    });
+
+    it('should handle ESC key when current state is null', async () => {
+      game = new VimForKidsGame();
+      jest.spyOn(game.gameState, 'getCurrentState').mockReturnValue(null);
+
+      // Should not throw when current state is null
+      await expect(game._handleEscKeyPressed()).resolves.toBeUndefined();
+    });
+
+    it('should handle ESC key when current zone is null', async () => {
+      game = new VimForKidsGame();
+      const mockState = { currentZone: null, cursor: { position: new Position(1, 1) } };
+      jest.spyOn(game.gameState, 'getCurrentState').mockReturnValue(mockState);
+
+      // Should not throw when current zone is null
+      await expect(game._handleEscKeyPressed()).resolves.toBeUndefined();
+    });
+  });
+
+  describe('Level Cutscene Handling', () => {
+    it('should handle missing levelId gracefully', async () => {
+      game = new VimForKidsGame();
+
+      // Should return early when no levelId provided
+      await expect(game._showLevelCutsceneIfNeeded('gameId', null)).resolves.toBeUndefined();
+    });
+
+    it('should handle cutscene service being null gracefully', async () => {
+      game = new VimForKidsGame();
+
+      // Cutscene service might be null in some configurations
+      expect(game.cutsceneService).toBeNull();
+
+      // Should not throw when cutscene service is null
+      await expect(game._showLevelCutsceneIfNeeded('gameId', 'levelId')).resolves.toBeUndefined();
+    });
+
+    it('should handle method calls when dependencies are null', async () => {
+      game = new VimForKidsGame();
+
+      // Should handle null services gracefully
+      expect(() => {
+        // These methods should handle null dependencies without throwing
+        game._handleEscKeyPressed();
+      }).not.toThrow();
+    });
+  });
 });

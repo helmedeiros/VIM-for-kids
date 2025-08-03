@@ -269,11 +269,9 @@ export class LevelGameState {
   }
 
   collectCollectibleKey(collectibleKey) {
-    if (this.availableCollectibleKeys.includes(collectibleKey)) {
+    if (this.zone.collectibleKeys.includes(collectibleKey)) {
       this.collectedCollectibleKeys.add(collectibleKey.keyId);
-      this.availableCollectibleKeys = this.availableCollectibleKeys.filter(
-        (key) => key !== collectibleKey
-      );
+      // No need to filter cached array since we're using live zone data
 
       // Notify zone about key collection
       this.zone.collectKey(collectibleKey);
@@ -286,7 +284,7 @@ export class LevelGameState {
       map: this.map,
       cursor: this.cursor,
       availableKeys: this.availableKeys,
-      availableCollectibleKeys: this.availableCollectibleKeys,
+      availableCollectibleKeys: this.zone.collectibleKeys, // Always get fresh keys from zone
       collectedKeys: this.collectedKeys,
       collectedCollectibleKeys: this.collectedCollectibleKeys,
       textLabels: this.zone.textLabels,
@@ -349,12 +347,16 @@ export class LevelGameState {
     // 2. Cursor is at the gate position
     // 3. There is a next level available
     // 4. For special zones, ESC key has been pressed (zone_1 requires ESC)
+    // 5. Gate doesn't lead to a hidden area (hidden areas handle their own progression)
     const gate = this.getGate();
     const isAtGate = gate && this.cursor.position.equals(gate.position);
     const hasNextLevel = this._getNextLevel() !== null;
     const escProgression = this._checkEscProgressionRequirement();
+    const gateToHiddenArea = this._checkIfGateLeadsToHiddenArea();
 
-    return this.isLevelComplete() && isAtGate && hasNextLevel && escProgression;
+    return (
+      this.isLevelComplete() && isAtGate && hasNextLevel && escProgression && !gateToHiddenArea
+    );
   }
 
   /**
@@ -372,6 +374,33 @@ export class LevelGameState {
 
     // Other zones don't require ESC progression
     return true;
+  }
+
+  /**
+   * Check if the current gate leads to a hidden area
+   * @returns {boolean} True if gate leads to hidden area
+   * @private
+   */
+  _checkIfGateLeadsToHiddenArea() {
+    const gate = this.getGate();
+    if (!gate || !gate.leadsTo) {
+      return false;
+    }
+
+    // Check if the gate destination starts with a hidden area prefix
+    const destination = gate.leadsTo;
+    const currentZone = this.zone;
+
+    if (
+      destination.startsWith('vim_') &&
+      currentZone &&
+      typeof currentZone.getHiddenAreas === 'function'
+    ) {
+      const hiddenAreas = currentZone.getHiddenAreas();
+      return hiddenAreas.some((area) => area.id === destination);
+    }
+
+    return false;
   }
 
   /**

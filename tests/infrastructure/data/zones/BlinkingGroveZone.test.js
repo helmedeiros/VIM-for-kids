@@ -75,15 +75,30 @@ describe('BlinkingGroveZone', () => {
     test('should have correct CollectibleKey configuration', () => {
       const config = BlinkingGroveZone.getConfig();
 
-      // Filter only CollectibleKeys
+      // Filter only CollectibleKeys from main area
       const collectibleKeys = config.tiles.specialTiles.filter(tile => tile.type === 'collectible_key');
-      expect(collectibleKeys).toHaveLength(1);
+      expect(collectibleKeys).toHaveLength(1); // Only main area maze key
 
+      // Check main area maze key
       const mazeKey = collectibleKeys[0];
       expect(mazeKey.keyId).toBe('maze_key');
       expect(mazeKey.name).toBe('Maze Key');
       expect(mazeKey.color).toBe('#FFD700');
       expect(mazeKey.position).toEqual([37, 14]);
+
+      // Check hidden area has the expected collectible keys
+      expect(config.tiles.hiddenAreas).toHaveLength(1);
+      const hiddenArea = config.tiles.hiddenAreas[0];
+      const hiddenCollectibleKeys = hiddenArea.specialTiles.filter(tile => tile.type === 'collectible_key');
+      expect(hiddenCollectibleKeys).toHaveLength(5);
+
+      // Verify the new keys exist in hidden area
+      const keyIds = hiddenCollectibleKeys.map(key => key.keyId);
+      expect(keyIds).toContain('secret_vim_key');
+      expect(keyIds).toContain('master_key');
+      expect(keyIds).toContain('golden_key');
+      expect(keyIds).toContain('silver_key');
+      expect(keyIds).toContain('bronze_key');
     });
 
     test('should have correct text labels configuration', () => {
@@ -103,21 +118,50 @@ describe('BlinkingGroveZone', () => {
       const config = BlinkingGroveZone.getConfig();
 
       expect(config.tiles.gate.locked).toBe(true);
-      expect(config.tiles.gate.position).toEqual([74, 1]); // Updated gate position
-      expect(config.tiles.gate.leadsTo).toBe('zone_2');
+      expect(config.tiles.gate.position).toEqual([74, 1]); // Gate position to connect with hidden area
+      expect(config.tiles.gate.leadsTo).toBe('vim_secret_area');
       expect(config.tiles.gate.unlocksWhen.collectedVimKeys).toEqual(['h', 'j', 'k', 'l']);
     });
 
     test('should have correct secondary gate configuration', () => {
       const config = BlinkingGroveZone.getConfig();
 
+      // Main area should only have the maze gate
       expect(config.tiles.secondaryGates).toBeDefined();
       expect(config.tiles.secondaryGates).toHaveLength(1);
 
-      const secondaryGate = config.tiles.secondaryGates[0];
-      expect(secondaryGate.locked).toBe(true);
-      expect(secondaryGate.position).toEqual([52, 3]);
-      expect(secondaryGate.unlocksWhen.requiredCollectibleKeys).toEqual(['maze_key']);
+      // Original maze gate
+      const mazeGate = config.tiles.secondaryGates[0];
+      expect(mazeGate.locked).toBe(true);
+      expect(mazeGate.position).toEqual([52, 3]);
+      expect(mazeGate.unlocksWhen.requiredCollectibleKeys).toEqual(['maze_key']);
+
+      // Check hidden area has the three new gates
+      expect(config.tiles.hiddenAreas).toHaveLength(1);
+      const hiddenArea = config.tiles.hiddenAreas[0];
+      expect(hiddenArea.secondaryGates).toBeDefined();
+      expect(hiddenArea.secondaryGates).toHaveLength(3);
+
+      // Golden gate
+      const goldenGate = hiddenArea.secondaryGates[0];
+      expect(goldenGate.locked).toBe(true);
+      expect(goldenGate.position).toEqual([34, 13]);
+      expect(goldenGate.unlocksWhen.requiredCollectibleKeys).toEqual(['golden_key']);
+      expect(goldenGate.leadsTo).toBe('golden_chamber');
+
+      // Silver gate
+      const silverGate = hiddenArea.secondaryGates[1];
+      expect(silverGate.locked).toBe(true);
+      expect(silverGate.position).toEqual([34, 14]);
+      expect(silverGate.unlocksWhen.requiredCollectibleKeys).toEqual(['silver_key']);
+      expect(silverGate.leadsTo).toBe('silver_chamber');
+
+      // Bronze gate
+      const bronzeGate = hiddenArea.secondaryGates[2];
+      expect(bronzeGate.locked).toBe(true);
+      expect(bronzeGate.position).toEqual([34, 15]);
+      expect(bronzeGate.unlocksWhen.requiredCollectibleKeys).toEqual(['bronze_key']);
+      expect(bronzeGate.leadsTo).toBe('bronze_chamber');
     });
 
     test('should have correct NPC configuration', () => {

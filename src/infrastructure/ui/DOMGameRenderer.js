@@ -123,12 +123,25 @@ export class DOMGameRenderer extends GameRenderer {
   }
 
   _findZoneContentBounds(gameState) {
-    const mapBounds = this._getMapBounds(gameState);
-    const contentBounds = { minX: mapBounds.width, minY: mapBounds.height, maxX: 0, maxY: 0 };
+    // Use original zone boundaries to prevent hidden areas from affecting camera positioning
+    const originalZoneBounds = {
+      startX: gameState.map.zoneStartX,
+      startY: gameState.map.zoneStartY,
+      endX: gameState.map.zoneEndX,
+      endY: gameState.map.zoneEndY
+    };
+
+    const contentBounds = {
+      minX: originalZoneBounds.endX,
+      minY: originalZoneBounds.endY,
+      maxX: originalZoneBounds.startX,
+      maxY: originalZoneBounds.startY
+    };
     let hasContent = false;
 
-    for (let y = 0; y < mapBounds.height; y++) {
-      for (let x = 0; x < mapBounds.width; x++) {
+    // Only scan within the original zone boundaries, not the expanded map with hidden areas
+    for (let y = originalZoneBounds.startY; y < originalZoneBounds.endY; y++) {
+      for (let x = originalZoneBounds.startX; x < originalZoneBounds.endX; x++) {
         const tile = gameState.map.getTileAt(new Position(x, y));
 
         if (tile.name !== 'water') {
@@ -142,7 +155,10 @@ export class DOMGameRenderer extends GameRenderer {
     }
 
     if (!hasContent) {
-      return new Position(Math.floor(mapBounds.width / 2), Math.floor(mapBounds.height / 2));
+      // Fallback to original zone center
+      const zoneCenterX = originalZoneBounds.startX + Math.floor((originalZoneBounds.endX - originalZoneBounds.startX) / 2);
+      const zoneCenterY = originalZoneBounds.startY + Math.floor((originalZoneBounds.endY - originalZoneBounds.startY) / 2);
+      return new Position(zoneCenterX, zoneCenterY);
     }
 
     const contentHeight = contentBounds.maxY - contentBounds.minY + 1;

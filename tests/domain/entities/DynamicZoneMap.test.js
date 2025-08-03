@@ -241,4 +241,191 @@ describe('DynamicZoneMap', () => {
       expect(dynamicMap.height).toBeGreaterThanOrEqual(8); // 0 + 8 minimum
     });
   });
+
+  describe('Dynamic Map Expansion', () => {
+    beforeEach(() => {
+      dynamicMap = new DynamicZoneMap(12, 8);
+    });
+
+    test('should expand dimensions when required size is larger', () => {
+      const originalWidth = dynamicMap.width;
+      const originalHeight = dynamicMap.height;
+      const requiredWidth = originalWidth + 10;
+      const requiredHeight = originalHeight + 10;
+
+      dynamicMap.expandDimensions(requiredWidth, requiredHeight);
+
+      expect(dynamicMap.width).toBe(requiredWidth);
+      expect(dynamicMap.height).toBe(requiredHeight);
+    });
+
+    test('should not change dimensions when required size is smaller', () => {
+      const originalWidth = dynamicMap.width;
+      const originalHeight = dynamicMap.height;
+      const requiredWidth = originalWidth - 5;
+      const requiredHeight = originalHeight - 5;
+
+      dynamicMap.expandDimensions(requiredWidth, requiredHeight);
+
+      expect(dynamicMap.width).toBe(originalWidth);
+      expect(dynamicMap.height).toBe(originalHeight);
+    });
+
+    test('should expand tile grid with water tiles when dimensions increase', () => {
+      const originalWidth = dynamicMap.width;
+      const originalHeight = dynamicMap.height;
+
+      // Store an existing tile to verify it's preserved
+      const centerX = Math.floor(originalWidth / 2);
+      const centerY = Math.floor(originalHeight / 2);
+      const originalTile = dynamicMap.getTileAt(centerX, centerY);
+
+      // Expand dimensions
+      const requiredWidth = originalWidth + 5;
+      const requiredHeight = originalHeight + 5;
+      dynamicMap.expandDimensions(requiredWidth, requiredHeight);
+
+      // Verify existing tile is preserved
+      expect(dynamicMap.getTileAt(centerX, centerY)).toBe(originalTile);
+
+      // Verify new areas are filled with water
+      expect(dynamicMap.getTileAt(originalWidth, originalHeight)).toBe(TileType.WATER);
+      expect(dynamicMap.getTileAt(requiredWidth - 1, requiredHeight - 1)).toBe(TileType.WATER);
+    });
+
+    test('should handle expansion when only width increases', () => {
+      const originalWidth = dynamicMap.width;
+      const originalHeight = dynamicMap.height;
+      const requiredWidth = originalWidth + 3;
+
+      dynamicMap.expandDimensions(requiredWidth, originalHeight);
+
+      expect(dynamicMap.width).toBe(requiredWidth);
+      expect(dynamicMap.height).toBe(originalHeight);
+
+      // New horizontal areas should be water
+      expect(dynamicMap.getTileAt(originalWidth, 0)).toBe(TileType.WATER);
+    });
+
+    test('should handle expansion when only height increases', () => {
+      const originalWidth = dynamicMap.width;
+      const originalHeight = dynamicMap.height;
+      const requiredHeight = originalHeight + 3;
+
+      dynamicMap.expandDimensions(originalWidth, requiredHeight);
+
+      expect(dynamicMap.width).toBe(originalWidth);
+      expect(dynamicMap.height).toBe(requiredHeight);
+
+      // New vertical areas should be water
+      expect(dynamicMap.getTileAt(0, originalHeight)).toBe(TileType.WATER);
+    });
+  });
+
+  describe('Resize Handling', () => {
+    beforeEach(() => {
+      dynamicMap = new DynamicZoneMap(12, 8);
+    });
+
+    test('should call _calculateDynamicGridSize during resize', () => {
+      // Test that _handleResize calls the calculation method
+      const calcSpy = jest.spyOn(dynamicMap, '_calculateDynamicGridSize');
+
+      dynamicMap._handleResize();
+
+      expect(calcSpy).toHaveBeenCalledTimes(1);
+
+      calcSpy.mockRestore();
+    });
+
+    test('should test different window resize conditions', () => {
+      // Test the resize handler existence
+      expect(dynamicMap._resizeHandler).toBeDefined();
+      expect(typeof dynamicMap._resizeHandler).toBe('function');
+
+      // Test the resize logic with simple call
+      expect(() => {
+        dynamicMap._handleResize();
+      }).not.toThrow();
+    });
+
+    test('should not crash when window.game does not exist during resize', () => {
+      // Ensure no window.game
+      delete global.window?.game;
+
+      // Force a dimension change
+      dynamicMap._setTestDimensions(800, 600);
+
+      expect(() => {
+        dynamicMap._handleResize();
+      }).not.toThrow();
+    });
+  });
+
+  describe('Browser Environment Branches', () => {
+    test('should use window dimensions when available', () => {
+      // Mock window with specific dimensions
+      global.window = {
+        ...global.window,
+        innerWidth: 1024,
+        innerHeight: 768
+      };
+
+      const mapWithWindow = new DynamicZoneMap(12, 8);
+
+      // Should use window dimensions (1024/32 = 32 cols, 768/32 = 24 rows, plus padding)
+      expect(mapWithWindow.width).toBeGreaterThanOrEqual(32 + 2); // minCols + padding
+      expect(mapWithWindow.height).toBeGreaterThanOrEqual(24 + 2); // minRows + padding
+
+      mapWithWindow.cleanup();
+    });
+
+    test('should use default dimensions when window is undefined', () => {
+      const originalWindow = global.window;
+      global.window = undefined;
+
+      const mapWithoutWindow = new DynamicZoneMap(12, 8);
+
+      // Without window, it uses default 1920x1080
+      // But minimum zone requirements override: zoneWidth + 12, zoneHeight + 8
+      const minimumWidth = 12 + 12; // zone width + padding = 24
+      const minimumHeight = 8 + 8; // zone height + padding = 16
+
+      // Default calculation: ceil(1920/32)+2=62, ceil(1080/32)+2=36
+      // But minimum requirements win: max(62, 24)=62, max(36, 16)=36
+      // Actually, since we're in test environment, Jest might have different dimensions
+      // Let's just verify it respects minimum requirements
+      expect(mapWithoutWindow.width).toBeGreaterThanOrEqual(minimumWidth);
+      expect(mapWithoutWindow.height).toBeGreaterThanOrEqual(minimumHeight);
+
+      global.window = originalWindow;
+      mapWithoutWindow.cleanup();
+    });
+  });
+
+  describe('Advanced Cleanup', () => {
+    test('should remove resize listener on cleanup', () => {
+      const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
+
+      dynamicMap = new DynamicZoneMap(12, 8);
+      dynamicMap.cleanup();
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('resize', dynamicMap._resizeHandler);
+
+      removeEventListenerSpy.mockRestore();
+    });
+
+    test('should not crash when window is undefined during cleanup', () => {
+      const originalWindow = global.window;
+
+      dynamicMap = new DynamicZoneMap(12, 8);
+      global.window = undefined;
+
+      expect(() => {
+        dynamicMap.cleanup();
+      }).not.toThrow();
+
+      global.window = originalWindow;
+    });
+  });
 });
