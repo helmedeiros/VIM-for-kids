@@ -23,6 +23,7 @@ import { CutsceneProviderAdapter } from './infrastructure/data/CutsceneProviderA
 import { CutsceneRenderer } from './infrastructure/ui/CutsceneRenderer.js';
 import { LevelSelectorUI } from './infrastructure/ui/LevelSelectorUI.js';
 import { FeatureFlags } from './infrastructure/FeatureFlags.js';
+import { CanvasGameRenderer } from './infrastructure/ui/CanvasGameRenderer.js';
 
 
 /**
@@ -67,11 +68,20 @@ class Application {
       this._cutsceneRenderer = null;
     }
 
+    // Create game renderer based on feature flag
+    const gameRenderer = featureFlags.isEnabled('CANVAS_RENDERER')
+      ? new CanvasGameRenderer()
+      : null; // null falls back to DOMGameRenderer in VimForKidsGame
+
     // Create game factory and initialization service
-    const gameFactory = new GameFactory({
+    const factoryDependencies = {
       cutsceneService: this._cutsceneService,
       cutsceneRenderer: this._cutsceneRenderer,
-    });
+    };
+    if (gameRenderer) {
+      factoryDependencies.gameRenderer = gameRenderer;
+    }
+    const gameFactory = new GameFactory(factoryDependencies);
     this._initializationService = new GameInitializationService(
       gameFactory,
       this._persistenceService,

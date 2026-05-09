@@ -51,7 +51,13 @@ export default defineConfig({
           // Split infrastructure into separate chunk
           infrastructure: [
             './src/infrastructure/ui/DOMGameRenderer.js',
+            './src/infrastructure/ui/CanvasGameRenderer.js',
             './src/infrastructure/input/KeyboardInputHandler.js',
+            './src/infrastructure/rendering/GameLoop.js',
+            './src/infrastructure/rendering/Camera.js',
+            './src/infrastructure/rendering/EntityIndex.js',
+            './src/infrastructure/rendering/SpriteSheet.js',
+            './src/infrastructure/rendering/AssetLoader.js',
           ],
         },
       },

@@ -1,0 +1,522 @@
+import { GameRenderer } from '../../ports/output/GameRenderer.js';
+import { Camera } from '../rendering/Camera.js';
+import { GameLoop } from '../rendering/GameLoop.js';
+import { EntityIndex } from '../rendering/EntityIndex.js';
+
+/**
+ * Canvas-based game renderer implementing the GameRenderer port.
+ * Uses HTML5 Canvas for tile rendering with a rAF game loop.
+ * DOM overlays handle UI chrome (messages, balloons, keys display).
+ */
+export class CanvasGameRenderer extends GameRenderer {
+  constructor() {
+    super();
+
+    this._camera = new Camera(32);
+    this._entityIndex = new EntityIndex();
+    this._currentGameState = null;
+    this._previousCursorKey = null;
+    this._previousCollectedCount = 0;
+
+    // DOM elements
+    this._container = document.getElementById('game-container');
+    this.gameBoard = this._createCanvas();
+    this._collectedKeysDisplay = document.querySelector('.key-display');
+    this._collectibleInventoryDisplay = document.querySelector('.collectible-display');
+
+    // Initialize viewport
+    this._camera.setViewportSize(window.innerWidth, window.innerHeight);
+    this._resizeCanvas();
+
+    window.addEventListener('resize', () => {
+      this._camera.setViewportSize(window.innerWidth, window.innerHeight);
+      this._resizeCanvas();
+      this._gameLoop.requestRedraw();
+    });
+
+    // Canvas 2D context
+    this._ctx = this.gameBoard.getContext('2d');
+
+    // Game loop
+    this._gameLoop = new GameLoop(
+      (dt) => this._update(dt),
+      (dt) => this._draw(dt)
+    );
+    this._gameLoop.start();
+
+    // Message state
+    this._currentMessage = null;
+    this._messageTimeout = null;
+
+    // Tile color map for colored-rectangle rendering (P0 placeholder)
+    this._tileColors = {
+      water: '#2980b9',
+      grass: '#27ae60',
+      dirt: '#d2b48c',
+      tree: '#228b22',
+      stone: '#b8b8aa',
+      path: '#f4d03f',
+      wall: '#566573',
+      bridge: '#8b4513',
+      sand: '#f4d03f',
+      ruins: '#85929e',
+      field: '#58d68d',
+      test_ground: '#bb8fce',
+      void: '#1a1a1a',
+      boss_area: '#e74c3c',
+      ramp_right: '#8b9dc3',
+      ramp_left: '#8b9dc3',
+    };
+  }
+
+  _createCanvas() {
+    const canvas = document.createElement('canvas');
+    canvas.id = 'gameBoardCanvas';
+    canvas.className = 'game-board-canvas';
+    canvas.setAttribute('tabindex', '0');
+
+    // Insert canvas into game container (alongside existing gameBoard div)
+    const existingBoard = document.getElementById('gameBoard');
+    if (existingBoard) {
+      existingBoard.style.display = 'none';
+      existingBoard.parentNode.insertBefore(canvas, existingBoard);
+    } else if (this._container) {
+      this._container.appendChild(canvas);
+    }
+
+    return canvas;
+  }
+
+  _resizeCanvas() {
+    const w = this._camera.viewportWidth * this._camera.tileSize;
+    const h = this._camera.viewportHeight * this._camera.tileSize;
+    this.gameBoard.width = w;
+    this.gameBoard.height = h;
+    this.gameBoard.style.width = `${w}px`;
+    this.gameBoard.style.height = `${h}px`;
+  }
+
+  // --- GameRenderer port methods ---
+
+  render(gameState) {
+    this._currentGameState = gameState;
+    this._entityIndex.rebuild(gameState);
+
+    // Update camera
+    const mapBounds = {
+      width: gameState.map.width || gameState.map.size,
+      height: gameState.map.height || gameState.map.size,
+    };
+    this._camera.update(gameState.cursor.position, mapBounds);
+
+    // Request redraw
+    this._gameLoop.requestRedraw();
+
+    // Update UI overlays
+    this.updateCollectedKeysDisplay(gameState.collectedKeys);
+    this.updateCollectibleInventoryDisplay(gameState.collectedCollectibleKeys || new Set());
+  }
+
+  updateCollectedKeysDisplay(collectedKeys) {
+    if (!this._collectedKeysDisplay) return;
+    this._collectedKeysDisplay.innerHTML = '';
+
+    if (collectedKeys.size === 0) {
+      const empty = document.createElement('div');
+      empty.textContent = 'No keys collected yet!';
+      empty.style.color = '#95a5a6';
+      empty.style.fontStyle = 'italic';
+      this._collectedKeysDisplay.appendChild(empty);
+    } else {
+      collectedKeys.forEach((keyName) => {
+        const el = document.createElement('div');
+        el.className = 'collected-key';
+        el.textContent = keyName;
+        this._collectedKeysDisplay.appendChild(el);
+      });
+    }
+  }
+
+  updateCollectibleInventoryDisplay(collectedCollectibleKeys) {
+    if (!this._collectibleInventoryDisplay) return;
+    this._collectibleInventoryDisplay.innerHTML = '';
+
+    if (collectedCollectibleKeys.size === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'collectible-empty-message';
+      empty.textContent = 'No special keys found yet!';
+      this._collectibleInventoryDisplay.appendChild(empty);
+    } else {
+      collectedCollectibleKeys.forEach((keyId) => {
+        const el = document.createElement('div');
+        el.className = 'collected-collectible-key';
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'collectible-key-name';
+        nameSpan.textContent = this._formatKeyName(keyId);
+        el.appendChild(nameSpan);
+        el.title = `Collected: ${this._formatKeyName(keyId)}`;
+        this._collectibleInventoryDisplay.appendChild(el);
+      });
+    }
+  }
+
+  showKeyInfo(key) {
+    if (key && key.type === 'collectible_key') {
+      this._showCollectibleKeyFeedback(key);
+    }
+  }
+
+  showMessage(message, options = {}) {
+    const { duration = 4000, position = 'center', type = 'info', speaker = null } = options;
+    this.hideMessage();
+
+    const el = document.createElement('div');
+    el.className = `message-bubble ${type}`;
+    el.setAttribute('data-position', position);
+
+    if (speaker) {
+      const speakerEl = document.createElement('div');
+      speakerEl.className = 'message-speaker';
+      speakerEl.textContent = speaker;
+      el.appendChild(speakerEl);
+    }
+
+    const textEl = document.createElement('div');
+    textEl.className = 'message-text';
+    textEl.textContent = message;
+    el.appendChild(textEl);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'message-close';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.onclick = () => this.hideMessage();
+    el.appendChild(closeBtn);
+
+    const container = this._container || document.body;
+    container.appendChild(el);
+    this._currentMessage = el;
+
+    if (duration > 0) {
+      this._messageTimeout = setTimeout(() => this.hideMessage(), duration);
+    }
+
+    return el;
+  }
+
+  hideMessage() {
+    if (this._currentMessage) {
+      this._currentMessage.remove();
+      this._currentMessage = null;
+    }
+    if (this._messageTimeout) {
+      clearTimeout(this._messageTimeout);
+      this._messageTimeout = null;
+    }
+  }
+
+  // --- Additional methods used by application code ---
+
+  focus() {
+    this.gameBoard.focus();
+  }
+
+  resetCamera() {
+    this._camera.reset();
+  }
+
+  showNPCDialogue(npc, dialogue, options = {}) {
+    const text = Array.isArray(dialogue) ? dialogue.join(' ') : String(dialogue);
+    return this.showNPCBalloon(npc, text, options);
+  }
+
+  showNPCBalloon(npc, message, options = {}) {
+    const { duration = 4000 } = options;
+    this.fadeOutExistingBalloons();
+
+    const balloon = document.createElement('div');
+    balloon.className = 'npc-balloon';
+    balloon.textContent = message;
+
+    // Position balloon relative to container
+    const container = this._container || document.body;
+    container.appendChild(balloon);
+
+    // Try to position above the NPC using canvas coordinates
+    if (this._currentGameState && npc) {
+      const npcPos = this._findNPCScreenPosition(npc);
+      if (npcPos) {
+        const canvasRect = this.gameBoard.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const balloonX = canvasRect.left - containerRect.left + npcPos.x + this._camera.tileSize / 2;
+        const balloonY = canvasRect.top - containerRect.top + npcPos.y - 60;
+
+        balloon.style.left = `${balloonX}px`;
+        balloon.style.top = `${Math.max(balloonY, 10)}px`;
+        balloon.style.transform = 'translateX(-50%)';
+        balloon.style.position = 'absolute';
+      }
+    }
+
+    if (duration > 0) {
+      setTimeout(() => {
+        if (balloon.parentNode) balloon.remove();
+      }, duration);
+    }
+
+    return balloon;
+  }
+
+  fadeOutExistingBalloons() {
+    const container = this._container || document.body;
+    const balloons = container.querySelectorAll('.npc-balloon');
+    balloons.forEach((b) => {
+      if (!b.classList.contains('fade-out')) {
+        b.classList.add('fade-out');
+        setTimeout(() => {
+          if (b.parentNode) b.remove();
+        }, 300);
+      }
+    });
+  }
+
+  showNPCMessage(message, options = {}) {
+    const { duration = 4000, position = 'center', type = 'info', speaker = null } = options;
+    this.hideMessage();
+
+    const el = document.createElement('div');
+    el.className = `message-bubble ${type}`;
+    el.setAttribute('data-position', position);
+
+    if (speaker) {
+      const speakerEl = document.createElement('div');
+      speakerEl.className = 'message-speaker';
+      speakerEl.textContent = speaker;
+      el.appendChild(speakerEl);
+    }
+
+    const textEl = document.createElement('div');
+    textEl.className = 'message-text';
+    textEl.textContent = message;
+    el.appendChild(textEl);
+
+    const container = this._container || document.body;
+    container.appendChild(el);
+    this._currentMessage = el;
+
+    if (duration > 0) {
+      this._messageTimeout = setTimeout(() => this.hideMessage(), duration);
+    }
+
+    return el;
+  }
+
+  cleanup() {
+    this._gameLoop.stop();
+    window.removeEventListener('resize', this._resizeHandler);
+    if (this.gameBoard && this.gameBoard.parentNode) {
+      this.gameBoard.parentNode.removeChild(this.gameBoard);
+    }
+  }
+
+  // --- Private: Game loop callbacks ---
+
+  _update(_deltaTime) {
+    // Interpolate camera for smooth scrolling
+    if (this._camera.interpolate()) {
+      this._gameLoop.requestRedraw();
+    }
+  }
+
+  _draw(_deltaTime) {
+    if (!this._currentGameState) return;
+
+    const ctx = this._ctx;
+    const ts = this._camera.tileSize;
+    const bounds = this._camera.getVisibleBounds();
+    const gameState = this._currentGameState;
+    const map = gameState.map;
+    const mapWidth = map.width || map.size;
+    const mapHeight = map.height || map.size;
+
+    // Clear
+    ctx.clearRect(0, 0, this.gameBoard.width, this.gameBoard.height);
+
+    // Draw tiles
+    for (let row = bounds.startY; row < bounds.endY; row++) {
+      for (let col = bounds.startX; col < bounds.endX; col++) {
+        const screenX = (col - bounds.startX) * ts;
+        const screenY = (row - bounds.startY) * ts;
+
+        // Determine tile type
+        let tileName = 'water';
+        if (col >= 0 && col < mapWidth && row >= 0 && row < mapHeight) {
+          const pos = { x: col, y: row, equals: () => false };
+          // Use getTileAt with a minimal position-like object
+          try {
+            const tileType = map.getTileAt(
+              new (Object.getPrototypeOf(gameState.cursor.position).constructor)(col, row)
+            );
+            tileName = tileType.name;
+          } catch {
+            tileName = 'water';
+          }
+        }
+
+        // Draw tile rectangle
+        ctx.fillStyle = this._tileColors[tileName] || '#3498db';
+        ctx.fillRect(screenX, screenY, ts, ts);
+
+        // Draw entities at this position
+        this._drawEntitiesAt(ctx, col, row, screenX, screenY, ts);
+      }
+    }
+
+    // Draw cursor on top
+    this._drawCursor(ctx, gameState.cursor, bounds, ts);
+  }
+
+  _drawEntitiesAt(ctx, worldX, worldY, screenX, screenY, ts) {
+    const half = ts / 2;
+
+    // VIM Key
+    const key = this._entityIndex.getKeyAt(worldX, worldY);
+    if (key) {
+      ctx.fillStyle = '#e74c3c';
+      ctx.font = 'bold 14px "Courier New", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(key.key, screenX + half, screenY + half);
+    }
+
+    // Collectible Key
+    const ck = this._entityIndex.getCollectibleAt(worldX, worldY);
+    if (ck) {
+      ctx.fillStyle = ck.color || '#FFD700';
+      ctx.font = '18px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('\uD83D\uDD11', screenX + half, screenY + half);
+    }
+
+    // Gate
+    const gate = this._entityIndex.getGateAt(worldX, worldY);
+    if (gate) {
+      ctx.fillStyle = gate.isOpen ? '#27ae60' : '#e74c3c';
+      ctx.fillRect(screenX + 4, screenY + 4, ts - 8, ts - 8);
+      ctx.font = '16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(gate.isOpen ? '\uD83D\uDEAA' : '\uD83D\uDEA7', screenX + half, screenY + half);
+    }
+
+    // Secondary Gate
+    const sg = this._entityIndex.getSecondaryGateAt(worldX, worldY);
+    if (sg) {
+      ctx.fillStyle = '#8B4513';
+      ctx.fillRect(screenX + 2, screenY + 2, ts - 4, ts - 4);
+      // Door knob
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      ctx.arc(screenX + ts * 0.75, screenY + half, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Text Label
+    const label = this._entityIndex.getTextLabelAt(worldX, worldY);
+    if (label) {
+      ctx.fillStyle = label.color || '#2c3e50';
+      ctx.font = `${label.fontWeight || 'bold'} ${label.fontSize || '10px'} "Courier New", monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(label.text, screenX + half, screenY + ts - 2);
+    }
+
+    // NPC
+    const npc = this._entityIndex.getNPCAt(worldX, worldY);
+    if (npc) {
+      const symbol =
+        npc.getVisualSymbol && typeof npc.getVisualSymbol === 'function'
+          ? npc.getVisualSymbol()
+          : this._getNpcFallbackSymbol(npc);
+      ctx.font = '16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(symbol, screenX + half, screenY + half);
+    }
+  }
+
+  _drawCursor(ctx, cursor, bounds, ts) {
+    const cx = cursor.position.x;
+    const cy = cursor.position.y;
+
+    if (cx >= bounds.startX && cx < bounds.endX && cy >= bounds.startY && cy < bounds.endY) {
+      const screenX = (cx - bounds.startX) * ts;
+      const screenY = (cy - bounds.startY) * ts;
+
+      // Orange highlight background
+      ctx.fillStyle = 'rgba(243, 156, 18, 0.85)';
+      ctx.fillRect(screenX, screenY, ts, ts);
+
+      // Cursor bullet
+      ctx.fillStyle = '#2c3e50';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('\u25CF', screenX + ts / 2, screenY + ts / 2);
+    }
+  }
+
+  // --- Private: Helpers ---
+
+  _formatKeyName(keyId) {
+    return keyId
+      .split('_')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+  }
+
+  _showCollectibleKeyFeedback(collectibleKey) {
+    const el = document.createElement('div');
+    el.className = 'key-collection-feedback';
+    el.textContent = `Found ${this._formatKeyName(collectibleKey.keyId)}!`;
+    document.body.appendChild(el);
+    setTimeout(() => {
+      if (document.body.contains(el)) document.body.removeChild(el);
+    }, 2000);
+  }
+
+  _getNpcFallbackSymbol(npc) {
+    const symbols = {
+      caret_spirit: '\uD83D\uDD25',
+      syntax_wisp: '~',
+      bug_king: '\u265B',
+      bug_king_boss: '\u265B',
+      caret_stone: '\uD83D\uDDFF',
+      maze_scribe: '\uD83D\uDCDC',
+      mode_guardian: '\uD83D\uDCDC',
+      deletion_echo: '\uD83D\uDC7B',
+      insert_scribe: '\u270F\uFE0F',
+      scribe_poet: '\u270F\uFE0F',
+      the_yanker: '\uD83C\uDF89',
+      mirror_sprite: '\uD83D\uDCA7',
+      reflection_spirit: '\uD83D\uDCA7',
+      practice_buddy: '\uD83C\uDF89',
+      practice_spirit_1: '\uD83C\uDF89',
+      practice_spirit_2: '\uD83C\uDF89',
+      practice_spirit_3: '\uD83C\uDF89',
+      final_encourager: '\uD83C\uDF89',
+      syntax_spirit: '\uD83D\uDCDC',
+      word_witch: '\uD83D\uDC7B',
+    };
+    if (npc.id && symbols[npc.id]) return symbols[npc.id];
+    if (npc.type && symbols[npc.type]) return symbols[npc.type];
+    return '\uD83E\uDDD9\u200D\u2642\uFE0F';
+  }
+
+  _findNPCScreenPosition(npc) {
+    if (!npc || !npc.position) return null;
+    const npcX = Array.isArray(npc.position) ? npc.position[0] : npc.position.x;
+    const npcY = Array.isArray(npc.position) ? npc.position[1] : npc.position.y;
+    return this._camera.worldToScreen(npcX, npcY);
+  }
+}

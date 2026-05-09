@@ -28,6 +28,7 @@ class FeatureFlags {
       TUTORIAL_MODE: true,
       ACHIEVEMENT_SYSTEM: false,
       ENHANCED_3D_EFFECTS: true, // Toggle for pseudo-3D tile enhancements
+      CANVAS_RENDERER: false, // Toggle for Canvas-based game rendering
 
       // Load flags from environment or remote config
       ...this.loadFromEnvironment(),
