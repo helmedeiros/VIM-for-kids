@@ -306,6 +306,22 @@ h1 {
   transform: translate(-50%, -50%);
 }
 
+/* Canvas-based game board */
+.game-board-canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  outline: none;
+  cursor: pointer;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.game-board-canvas:focus {
+  box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+}
+
 /* Welcome Meadow specific grid */
 .game-board.welcome-meadow {
   justify-content: start;
