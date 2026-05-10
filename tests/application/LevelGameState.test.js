@@ -78,6 +78,39 @@ describe('LevelGameState', () => {
       expect(levelState.cursor).toBeDefined();
       expect(levelState.cursor.position).toBeDefined();
     });
+
+    test('seeds collectedKeys from options.initialCollectedKeys (carry-over across levels)', () => {
+      const carry = new Set(['h', 'j', 'k', 'l', 'w']);
+      const levelState = new LevelGameState(
+        zoneProvider,
+        levelConfig,
+        null,
+        null,
+        null,
+        { initialCollectedKeys: carry }
+      );
+
+      expect(levelState.collectedKeys).toEqual(new Set(['h', 'j', 'k', 'l', 'w']));
+    });
+
+    test('starts with an empty collectedKeys set when no initialCollectedKeys provided', () => {
+      const levelState = new LevelGameState(zoneProvider, levelConfig);
+      expect(levelState.collectedKeys.size).toBe(0);
+    });
+
+    test('seeded collectedKeys is a defensive copy (caller mutations do not leak)', () => {
+      const carry = new Set(['h']);
+      const levelState = new LevelGameState(
+        zoneProvider,
+        levelConfig,
+        null,
+        null,
+        null,
+        { initialCollectedKeys: carry }
+      );
+      carry.add('w'); // mutate the caller's set
+      expect(levelState.collectedKeys.has('w')).toBe(false);
+    });
   });
 
   describe('Zone Progression', () => {

@@ -7,7 +7,8 @@ export class LevelGameState {
     levelConfig,
     gameId = null,
     cutsceneService = null,
-    cutsceneRenderer = null
+    cutsceneRenderer = null,
+    options = {}
   ) {
     if (!zoneProvider || !levelConfig) {
       throw new Error('LevelGameState requires zoneProvider and levelConfig');
@@ -27,6 +28,12 @@ export class LevelGameState {
 
     // Track ESC progression for special zones
     this._escProgressionPressed = new Set();
+
+    // Vim keys collected on earlier levels persist into this one. Defensive copy
+    // so callers can't mutate our internal set after construction.
+    this._initialCollectedKeys = options.initialCollectedKeys
+      ? new Set(options.initialCollectedKeys)
+      : null;
 
     // Initialize first zone synchronously for backward compatibility
     this._loadZoneSync(this._getCurrentZoneId());
@@ -52,7 +59,9 @@ export class LevelGameState {
       this.map = this.zone.gameMap;
       this.cursor = new Cursor(this.zone.getCursorStartPosition());
       this.availableCollectibleKeys = this.zone.collectibleKeys;
-      this.collectedKeys = new Set();
+      this.collectedKeys = this._initialCollectedKeys
+        ? new Set(this._initialCollectedKeys)
+        : new Set();
       this.collectedCollectibleKeys = new Set();
     } catch (error) {
       throw new Error(`Zone '${zoneId}' not found in registry`);

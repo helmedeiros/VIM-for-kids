@@ -120,7 +120,8 @@ export class VimForKidsGame {
           levelConfig,
           this.currentGameId,
           this.cutsceneService,
-          this.cutsceneRenderer
+          this.cutsceneRenderer,
+          { initialCollectedKeys: this._carriedCollectedKeys || null }
         );
       } catch (error) {
         // Fallback to textland game state
@@ -335,6 +336,12 @@ export class VimForKidsGame {
 
     // Show level cutscene if applicable
     await this._showLevelCutsceneIfNeeded(this.currentGameId, newLevelId);
+
+    // Capture vim keys collected so far so they persist into the next level.
+    this._carriedCollectedKeys =
+      this.gameState && this.gameState.collectedKeys
+        ? new Set(this.gameState.collectedKeys)
+        : null;
 
     // Clean up current game state
     this.cleanup();
