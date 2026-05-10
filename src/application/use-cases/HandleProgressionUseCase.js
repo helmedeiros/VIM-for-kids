@@ -102,7 +102,11 @@ export class HandleProgressionUseCase {
       alert(`Level Complete! Progressing to ${nextLevelId}...`);
     }
 
-    // Transition handles cutscenes — no need to play them here
+    // Clear any remaining overlays before transition
+    if (typeof this._gameRenderer.clearAllOverlays === 'function') {
+      this._gameRenderer.clearAllOverlays();
+    }
+
     this._triggerLevelTransition(nextLevelId);
   }
 

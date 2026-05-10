@@ -328,6 +328,11 @@ export class VimForKidsGame {
   }
 
   async transitionToLevel(newLevelId) {
+    // Clear any lingering overlays from previous level
+    if (typeof this.gameRenderer.clearAllOverlays === 'function') {
+      this.gameRenderer.clearAllOverlays();
+    }
+
     // Show level cutscene if applicable
     await this._showLevelCutsceneIfNeeded(this.currentGameId, newLevelId);
 
