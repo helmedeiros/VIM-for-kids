@@ -630,13 +630,10 @@ export class CanvasGameRenderer extends GameRenderer {
     // Text Label
     const label = this._entityIndex.getTextLabelAt(worldX, worldY);
     if (label) {
-      ctx.font = '600 13px Arial, Helvetica, sans-serif';
+      ctx.font = 'bold 13px Arial, Helvetica, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      // Subtle drop shadow for readability
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-      ctx.fillText(label.text, screenX + half + 1, screenY + half + 1);
-      ctx.fillStyle = label.color || '#2c3e50';
+      ctx.fillStyle = '#333333';
       ctx.fillText(label.text, screenX + half, screenY + half);
     }
 
