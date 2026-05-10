@@ -114,57 +114,7 @@
           });
         })();
 
-        // Level selector: auto-hide after 60s, toggle by clicking title
-        (function () {
-          var title = document.querySelector('h1');
-          var hideTimer = null;
-          var shown = true;
-
-          function getLevelBar() {
-            return document.querySelector('.level-selection');
-          }
-
-          function hideLevels() {
-            var levelBar = getLevelBar();
-            if (!levelBar || !shown) return;
-            shown = false;
-            clearTimeout(hideTimer);
-            hideTimer = null;
-            levelBar.classList.add('hiding');
-            setTimeout(function () {
-              var bar = getLevelBar();
-              if (bar) {
-                bar.style.display = 'none';
-                bar.classList.remove('hiding');
-              }
-            }, 400);
-          }
-
-          function showLevels() {
-            var levelBar = getLevelBar();
-            if (!levelBar || shown) return;
-            shown = true;
-            clearTimeout(hideTimer);
-            levelBar.style.display = 'flex';
-            levelBar.classList.remove('hiding');
-            void levelBar.offsetWidth;
-            hideTimer = setTimeout(hideLevels, 30000);
-          }
-
-          // Auto-hide after 60s on page load
-          hideTimer = setTimeout(hideLevels, 30000);
-
-          // Toggle on title click
-          if (title) {
-            title.addEventListener('click', function () {
-              if (shown) {
-                hideLevels();
-              } else {
-                showLevels();
-              }
-            });
-          }
-        })();
+        // Level toggle is handled by LevelSelectorUI (auto-hide + title click)
       </script>
       <div class="collected-keys" id="collectedKeys">
         <h3>Collected Keys:</h3>

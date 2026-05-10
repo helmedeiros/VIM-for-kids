@@ -52,16 +52,9 @@ export class GameSelectorUI {
    * @private
    */
   _updateLevelSelectionVisibility(gameType) {
-    const levelSelection = document.querySelector('.level-selection');
-    if (levelSelection) {
-      if (gameType.isLevelBased()) {
-        // Show level selection for level-based games
-        levelSelection.style.display = 'flex';
-      } else {
-        // Hide level selection for free exploration games
-        levelSelection.style.display = 'none';
-      }
-    }
+    document.dispatchEvent(
+      new CustomEvent('levelSelectionVisibility', { detail: { visible: gameType.isLevelBased() } })
+    );
   }
 
   /**

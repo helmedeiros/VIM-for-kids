@@ -115,6 +115,12 @@ class Application {
 
     // Initialize UI
     this._levelSelectorUI.initialize();
+
+    // Title click toggles level selector
+    const title = document.querySelector('h1');
+    if (title) {
+      title.addEventListener('click', () => this._levelSelectorUI.toggle());
+    }
   }
 
   /**

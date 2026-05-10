@@ -181,16 +181,11 @@ export class VimForKidsGame {
    * @private
    */
   _updateLevelSelectionForCurrentGame() {
-    const levelSelection = document.querySelector('.level-selection');
-    if (levelSelection) {
-      if (this.currentGameId === 'cursor-before-clickers') {
-        // Show level selection for level-based games
-        levelSelection.style.display = 'flex';
-      } else {
-        // Hide level selection for free exploration games
-        levelSelection.style.display = 'none';
-      }
-    }
+    const isLevelBased = this.currentGameId === 'cursor-before-clickers';
+    // Dispatch event so LevelSelectorUI handles visibility with auto-hide
+    document.dispatchEvent(
+      new CustomEvent('levelSelectionVisibility', { detail: { visible: isLevelBased } })
+    );
   }
 
   /**
