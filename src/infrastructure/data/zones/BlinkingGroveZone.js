@@ -136,19 +136,19 @@ export class BlinkingGroveZone {
             id: 'vim_secret_area',
             revealWhen: 'escProgression',
             layout: [
-              'DWWWWWWWWWWWWWWWPPPPPPPPPPPPPPPPPPPPWWWWWWWWWWWWWWWW',
+              'DWWWWWWWWWWWWWWWPPPRPPPPRPPRPPPPPPPPWWWWWWWWWWWWWWWW',
               'PWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWDWWWWWWWWWWWWWWWW',
               'PDWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWDWWWWWWWWWWWWWWWW',
               'PPPPPRPPPPPPPPPRPPPPPPPWWWWWWWWWWWWDWWWWWWWWWWWWWWWW',
               'PPPPPPRPPPPPPPPPPPPPRPPPPPPPPPPPWWWDWWWWWWWWWWWWWWWW',
               'PPPPPPPPRPPPPPPPPPPPPPRPPPPPWWWWWWWDWWWWWWWWWWWWWWWW',
-              'PPPRPPPRPPPPPPPPRPPRPPPPPPWWWWWWWWWDWWWWWWWWWWWWWWWW',
-              'PPPPRPRPRPPPPPPPPPWWWWWWWWWWWWPPPPPPWWWWWWWWWWWWWWWW',
-              'PPPRPPPPRPPPRPPPPPPPPPWWWWWWWWPPPPPPWWWWWWWWWWWWWWWW',
-              'PRPPPPPPPRPPPRPPPPPPPPPWWWWWWWPPPPPPWWWWWWWWWWWWWWWW',
-              'PPRPPPPPPPRPPPRPPPRPPPPPPWWWWWWWWWWDWWWWWWWWWWWWWWWW',
-              'PPPPRPPPRPPPRPPWWWWWWWWWWWWWWWWWWWWDWWWWWWWWWWWWWWWW',
-              'PPPRPPPRPPPPPRPPRPPPRPPPPRPPPPPPPPPDWWWWWWWWWWWWWWWW',
+              'PPPPPPPRPPPPPPPPRPPRPPPPPWWWWWWWWWWDWWWWWWWWWWWWWWWW',
+              'PRPPPPPPRRRRPPPPRWWWWWWWWWWWWWPPPPPPWWWWWWWWWWWWWWWW',
+              'PPPRPPPPRPPPRPPPPPPPPWWWWWWWWWPPPPPRWWWWWWWWWWWWWWWW',
+              'PPPPPPPPPRPPPRPPPPPPPPWWWWWWWWPPPPRPWWWWWWWWWWWWWWWW',
+              'PPRPPPPPPPRPPPRPPPPPPPPPWWWWWWWWWWWDWWWWWWWWWWWWWWWW',
+              'PRPPPPPPPPPRRRWWWWWWWWWWWWWWWWWWWWWDWWWWWWWWWWWWWWWW',
+              'PPPPPPPRPPPPPPPPPPPPRPPPPRPPPPPPPPPDWWWWWWWWWWWWWWWW',
               'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGWWWWWWWWWWWWWWWWW',
               'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGWWWWWWWWWWWWWWWWW',
               'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGWWWWWWWWWWWWWWWWW',
@@ -175,17 +175,18 @@ export class BlinkingGroveZone {
               { text: 'o', position: [21, 0], color: '#4ecdc4', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
               { text: 't', position: [22, 0], color: '#4ecdc4', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
               { text: 'a', position: [23, 0], color: '#4ecdc4', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
-              { text: 'l', position: [24, 0], color: '#4ecdc4', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
 
-              { text: 'R', position: [26, 0], color: '#45b7d1', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
-              { text: 'u', position: [27, 0], color: '#45b7d1', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
-              { text: 'l', position: [28, 0], color: '#45b7d1', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
-              { text: 'e', position: [29, 0], color: '#45b7d1', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
-              { text: 'z', position: [30, 0], color: '#45b7d1', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
+              { text: 'l', position: [25, 0], color: '#4ecdc4', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
+              { text: 'y', position: [26, 0], color: '#4ecdc4', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
 
-              { text: '!', position: [32, 0], color: '#f7dc6f', fontSize: '24px', fontWeight: 'bold', group: 'vim_secret_header' },
+              { text: 'R', position: [28, 0], color: '#45b7d1', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
+              { text: 'u', position: [29, 0], color: '#45b7d1', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
+              { text: 'l', position: [30, 0], color: '#45b7d1', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
+              { text: 'e', position: [31, 0], color: '#45b7d1', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
+              { text: 'z', position: [32, 0], color: '#45b7d1', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
               { text: '!', position: [33, 0], color: '#f7dc6f', fontSize: '24px', fontWeight: 'bold', group: 'vim_secret_header' },
               { text: '!', position: [34, 0], color: '#f7dc6f', fontSize: '24px', fontWeight: 'bold', group: 'vim_secret_header' },
+              { text: '!', position: [35, 0], color: '#f7dc6f', fontSize: '24px', fontWeight: 'bold', group: 'vim_secret_header' },
 
               // Additional encouraging text
               { text: 'T', position: [0, 3], color: '#95e1d3', fontSize: '16px', group: 'vim_secret_poem' },
@@ -431,9 +432,9 @@ export class BlinkingGroveZone {
             ],
             specialTiles: [
               // Three keys positioned near the letters for the three gates
-              { type: 'collectible_key', keyId: 'golden_key', name: 'Golden Key', color: '#FFD700', position: [19, 0] }, // Next to 'm' in 'vim'
-              { type: 'collectible_key', keyId: 'silver_key', name: 'Silver Key', color: '#C0C0C0', position: [25, 0] }, // Next to 'l' in 'Total'
-              { type: 'collectible_key', keyId: 'bronze_key', name: 'Bronze Key', color: '#CD7F32', position: [31, 0] }, // Next to 'z' in 'Rulez'
+              { type: 'collectible_key', keyId: 'golden_key', name: 'Golden Key', color: '#FFD700', position: [12, 9] }, // Next to 'm' in 'vim'
+              { type: 'collectible_key', keyId: 'silver_key', name: 'Silver Key', color: '#C0C0C0', position: [33, 9] }, // Next to 'l' in 'Total'
+              { type: 'collectible_key', keyId: 'bronze_key', name: 'Bronze Key', color: '#CD7F32', position: [26, 0] }, // Next to 'z' in 'Rulez'
               { type: 'vim_key', value: 'w', position: [6, 3], description: 'w - jump forward to next word' },
             ],
             // Player starts here when entering the hidden area (just inside from the gate)
