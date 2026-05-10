@@ -72,7 +72,7 @@ export class MovePlayerUseCase {
       return { success: false, reason: 'not_on_text' };
     }
 
-    const isWalkable = (pos) => this._isPositionWalkable(pos);
+    const isWalkable = (pos) => this._isWalkableForWordMotion(pos);
     const target = WordMotion.findNextWordStart(cursorPos, labels, isWalkable);
     if (!target) {
       return { success: false, reason: 'no_next_word' };
@@ -170,11 +170,7 @@ export class MovePlayerUseCase {
     }
 
     if (!this._gameState.map.isWalkable(position)) {
-      const tile = this._gameState.map.getTileAt(position);
-      const isPassableRock = tile && tile.name === 'rock' && this._hasWordKey();
-      if (!isPassableRock) {
-        return { walkable: false };
-      }
+      return { walkable: false };
     }
 
     if (direction && !this._isRampMovementAllowed(position, direction)) {
@@ -190,6 +186,16 @@ export class MovePlayerUseCase {
 
   _isPositionWalkable(position, direction = null) {
     return this._checkWalkability(position, direction).walkable;
+  }
+
+  // Word-motion (vim 'w') can jump OVER rocks once the player has collected the
+  // 'w' key — but step-by-step movement (h/j/k/l) cannot. This predicate is used
+  // by the WordMotion flood-fill to decide whether a target word is in the
+  // cursor's reachable region.
+  _isWalkableForWordMotion(position) {
+    if (this._isPositionWalkable(position)) return true;
+    const tile = this._gameState.map.getTileAt(position);
+    return !!(tile && tile.name === 'rock');
   }
 
   _isRampMovementAllowed(targetPosition, direction) {
