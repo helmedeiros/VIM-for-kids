@@ -107,18 +107,11 @@ export class MovePlayerUseCase {
   }
 
   _checkWalkability(position, direction = null) {
-    if (!this._gameState.map.isWalkable(position)) {
-      return { walkable: false };
-    }
-
-    if (direction && !this._isRampMovementAllowed(position, direction)) {
-      return { walkable: false };
-    }
-
+    // Check gates first (they overlay map tiles and have their own walkability)
     if (typeof this._gameState.getGate === 'function') {
       const gate = this._gameState.getGate();
-      if (gate && gate.position.equals(position) && !gate.isWalkable()) {
-        return { walkable: false, blockedBy: 'main' };
+      if (gate && gate.position.equals(position)) {
+        return gate.isWalkable() ? { walkable: true } : { walkable: false, blockedBy: 'main' };
       }
     }
 
@@ -134,6 +127,15 @@ export class MovePlayerUseCase {
           return { walkable: false, blockedBy: 'secondary' };
         }
       }
+    }
+
+    // Then check map walkability
+    if (!this._gameState.map.isWalkable(position)) {
+      return { walkable: false };
+    }
+
+    if (direction && !this._isRampMovementAllowed(position, direction)) {
+      return { walkable: false };
     }
 
     return { walkable: true };
