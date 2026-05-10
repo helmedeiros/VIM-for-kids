@@ -763,16 +763,21 @@ export class CanvasGameRenderer extends GameRenderer {
     const container = this._container || document.body;
     container.appendChild(overlay);
 
-    // Dismiss on click, ESC, or any key press
+    // Dismiss on click or ESC immediately; other keys after 10s
+    let allowAllKeys = false;
+    const timer = setTimeout(() => { allowAllKeys = true; }, 10000);
     const dismiss = () => {
+      clearTimeout(timer);
       overlay.classList.add('vim-key-dismissing');
       setTimeout(() => overlay.remove(), 300);
       document.removeEventListener('keydown', onKey);
       this.focus();
     };
     const onKey = (e) => {
-      e.preventDefault();
-      dismiss();
+      if (e.key === 'Escape' || allowAllKeys) {
+        e.preventDefault();
+        dismiss();
+      }
     };
     overlay.addEventListener('click', dismiss);
     document.addEventListener('keydown', onKey);
