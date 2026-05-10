@@ -86,42 +86,74 @@ export class VimKeyInfo {
    * @param {Set<string>} collectedKeys
    * @param {Function} onKeyClick - called with a vimKey-like object when a key is clicked
    */
+  static _baseKeys = [
+    { key: 'h', label: 'Left' },
+    { key: 'j', label: 'Down' },
+    { key: 'k', label: 'Up' },
+    { key: 'l', label: 'Right' },
+  ];
+
   static updateHelpKeys(collectedKeys, onKeyClick) {
-    const staticSection = document.getElementById('helpKeysStatic');
-    const dynamicSection = document.getElementById('helpCollectedKeys');
-    const title = document.getElementById('helpKeysTitle');
-    const clickHint = document.getElementById('helpKeysClickHint');
-    if (!dynamicSection) return;
+    const container = document.getElementById('helpCollectedKeys');
+    if (!container) return;
+    container.innerHTML = '';
 
-    if (collectedKeys.size === 0) {
-      // Show static "How to Move" guide
-      if (staticSection) staticSection.style.display = '';
-      dynamicSection.style.display = 'none';
-      if (clickHint) clickHint.style.display = 'none';
-      if (title) title.textContent = 'How to Move';
-      return;
-    }
+    const openKey = (keyName) => {
+      const helpModal = document.getElementById('helpModal');
+      if (helpModal) helpModal.classList.add('hidden');
+      onKeyClick({ key: keyName, description: '' });
+    };
 
-    // Switch to dynamic collected keys
-    if (staticSection) staticSection.style.display = 'none';
-    dynamicSection.style.display = '';
-    if (clickHint) clickHint.style.display = '';
-    if (title) title.textContent = 'Your Keys';
-    dynamicSection.innerHTML = '';
+    // Always show base movement keys
+    VimKeyInfo._baseKeys.forEach(({ key, label }) => {
+      const collected = collectedKeys.has(key);
+      const row = document.createElement('div');
+      row.className = 'help-key-row';
 
-    collectedKeys.forEach((keyName) => {
-      const info = VimKeyInfo.get(keyName);
-      const el = document.createElement('div');
-      el.className = 'collected-key clickable';
-      el.textContent = keyName;
-      el.title = `${info.desc}`;
-      el.addEventListener('click', () => {
-        const helpModal = document.getElementById('helpModal');
-        if (helpModal) helpModal.classList.add('hidden');
-        onKeyClick({ key: keyName, description: '' });
-      });
-      dynamicSection.appendChild(el);
+      const badge = document.createElement('span');
+      badge.className = collected ? 'help-key clickable' : 'help-key help-key-locked';
+      badge.textContent = key;
+      if (collected) {
+        badge.addEventListener('click', () => openKey(key));
+      }
+
+      const desc = document.createElement('span');
+      desc.className = 'help-key-label';
+      desc.textContent = label;
+
+      row.appendChild(badge);
+      row.appendChild(desc);
+      container.appendChild(row);
     });
+
+    // Add any extra collected keys beyond h/j/k/l
+    const baseSet = new Set(VimKeyInfo._baseKeys.map((b) => b.key));
+    const extras = [...collectedKeys].filter((k) => !baseSet.has(k));
+
+    if (extras.length > 0) {
+      const divider = document.createElement('div');
+      divider.className = 'help-keys-divider';
+      container.appendChild(divider);
+
+      extras.forEach((keyName) => {
+        const info = VimKeyInfo.get(keyName);
+        const row = document.createElement('div');
+        row.className = 'help-key-row';
+
+        const badge = document.createElement('span');
+        badge.className = 'help-key clickable';
+        badge.textContent = keyName;
+        badge.addEventListener('click', () => openKey(keyName));
+
+        const desc = document.createElement('span');
+        desc.className = 'help-key-label';
+        desc.textContent = info.desc.split('.')[0]; // First sentence only
+
+        row.appendChild(badge);
+        row.appendChild(desc);
+        container.appendChild(row);
+      });
+    }
   }
 
   static _data = {
