@@ -53,8 +53,15 @@
           var title = document.querySelector('h1');
           var hideTimer = null;
 
+          function isVisible() {
+            return !levelBar.classList.contains('hidden-levels') &&
+                   !levelBar.classList.contains('hiding');
+          }
+
           function hideLevels() {
             if (!levelBar) return;
+            clearTimeout(hideTimer);
+            hideTimer = null;
             levelBar.classList.add('hiding');
             setTimeout(function () {
               levelBar.classList.add('hidden-levels');
@@ -64,11 +71,10 @@
 
           function showLevels() {
             if (!levelBar) return;
+            clearTimeout(hideTimer);
             levelBar.classList.remove('hidden-levels');
-            // Force reflow so the transition plays
             void levelBar.offsetWidth;
             levelBar.classList.remove('hiding');
-            clearTimeout(hideTimer);
             hideTimer = setTimeout(hideLevels, 60000);
           }
 
@@ -78,10 +84,10 @@
           // Toggle on title click
           if (title) {
             title.addEventListener('click', function () {
-              if (levelBar.classList.contains('hidden-levels')) {
-                showLevels();
-              } else {
+              if (isVisible()) {
                 hideLevels();
+              } else {
+                showLevels();
               }
             });
           }
