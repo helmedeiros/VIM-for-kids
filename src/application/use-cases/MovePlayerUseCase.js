@@ -1,4 +1,5 @@
 import { Position } from '../../domain/value-objects/Position.js'; // eslint-disable-line no-unused-vars
+import { WordMotion } from '../../domain/services/WordMotion.js';
 
 /**
  * Use case for handling player movement
@@ -15,10 +16,13 @@ export class MovePlayerUseCase {
   }
 
   async execute(direction) {
+    if (direction === 'word_forward') {
+      return this._executeWordForward();
+    }
+
     const currentPosition = this._gameState.cursor.position;
     const newPosition = this._calculateNewPosition(currentPosition, direction);
 
-    // Check if move is valid (both map and gate walkability, plus directional ramp logic)
     const walkCheck = this._checkWalkability(newPosition, direction);
     if (!walkCheck.walkable) {
       if (walkCheck.blockedBy && typeof this._gameRenderer.showLockedGateHint === 'function') {
@@ -27,7 +31,8 @@ export class MovePlayerUseCase {
       return { success: false, reason: 'invalid_position' };
     }
 
-    // If column memory returned same position, check if direct target has a locked gate
+    // Column memory may map a vertical move back to the start position; surface the
+    // locked-gate hint for the direct target so the player gets feedback either way.
     if (newPosition.equals(currentPosition)) {
       const directTarget = currentPosition.move(
         direction === 'right' ? 1 : direction === 'left' ? -1 : 0,
@@ -40,28 +45,50 @@ export class MovePlayerUseCase {
       return { success: false, reason: 'invalid_position' };
     }
 
-    // Check if we're leaving an NPC position (fade out balloons)
     this._checkNPCExit(currentPosition, newPosition);
 
-    // Update cursor position with column memory logic
     if (direction === 'up' || direction === 'down') {
-      // For vertical movement, preserve column memory
       this._gameState.cursor = this._gameState.cursor.moveToWithColumnMemory(newPosition);
     } else {
-      // For horizontal movement, update remembered column
       this._gameState.cursor = this._gameState.cursor.moveTo(newPosition);
     }
 
-    // Check for key collection
+    return this._finalizeMove(newPosition);
+  }
+
+  async _executeWordForward() {
+    if (!this._hasWordKey()) {
+      return { success: false, reason: 'word_motion_locked' };
+    }
+
+    const labels = this._gameState.getTextLabels();
+    if (labels.length === 0) {
+      return { success: false, reason: 'no_text' };
+    }
+
+    const cursorPos = this._gameState.cursor.position;
+    const onText = labels.some((l) => l.position.equals(cursorPos));
+    if (!onText) {
+      return { success: false, reason: 'not_on_text' };
+    }
+
+    const isWalkable = (pos) => this._isPositionWalkable(pos);
+    const target = WordMotion.findNextWordStart(cursorPos, labels, isWalkable);
+    if (!target) {
+      return { success: false, reason: 'no_next_word' };
+    }
+
+    this._checkNPCExit(cursorPos, target);
+    this._gameState.cursor = this._gameState.cursor.moveTo(target);
+
+    return this._finalizeMove(target);
+  }
+
+  async _finalizeMove(newPosition) {
     const keyCollected = this._checkKeyCollection();
-
-    // Check for NPC interaction
     const npcInteraction = this._checkNPCInteraction();
-
-    // Re-render the game with new state
     this._gameRenderer.render(this._gameState.getCurrentState());
 
-    // Delegate progression check to progression use case if available
     let progressionResult = { type: 'none' };
     if (this._progressionUseCase && this._progressionUseCase.shouldExecuteProgression()) {
       progressionResult = await this._progressionUseCase.execute();
@@ -142,9 +169,12 @@ export class MovePlayerUseCase {
       }
     }
 
-    // Then check map walkability
     if (!this._gameState.map.isWalkable(position)) {
-      return { walkable: false };
+      const tile = this._gameState.map.getTileAt(position);
+      const isPassableRock = tile && tile.name === 'rock' && this._hasWordKey();
+      if (!isPassableRock) {
+        return { walkable: false };
+      }
     }
 
     if (direction && !this._isRampMovementAllowed(position, direction)) {
@@ -152,6 +182,10 @@ export class MovePlayerUseCase {
     }
 
     return { walkable: true };
+  }
+
+  _hasWordKey() {
+    return this._gameState.collectedKeys.has('w');
   }
 
   _isPositionWalkable(position, direction = null) {

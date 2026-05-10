@@ -51,13 +51,17 @@ export class LevelGameState {
       this.zone = this._zoneProvider.createZone(zoneId);
       this.map = this.zone.gameMap;
       this.cursor = new Cursor(this.zone.getCursorStartPosition());
-      this.availableKeys = this.zone.vimKeys;
       this.availableCollectibleKeys = this.zone.collectibleKeys;
       this.collectedKeys = new Set();
       this.collectedCollectibleKeys = new Set();
     } catch (error) {
       throw new Error(`Zone '${zoneId}' not found in registry`);
     }
+  }
+
+  // Always defer to the zone so vim_keys added on hidden-area reveal show up immediately.
+  get availableKeys() {
+    return this.zone.vimKeys;
   }
 
   async _loadZone(zoneId) {
@@ -261,9 +265,6 @@ export class LevelGameState {
   collectKey(vimKey) {
     if (this.availableKeys.includes(vimKey)) {
       this.collectedKeys.add(vimKey.key);
-      this.availableKeys = this.availableKeys.filter((key) => key !== vimKey);
-
-      // Notify zone about key collection
       this.zone.collectKey(vimKey);
     }
   }
@@ -284,7 +285,7 @@ export class LevelGameState {
       map: this.map,
       cursor: this.cursor,
       availableKeys: this.availableKeys,
-      availableCollectibleKeys: this.zone.collectibleKeys, // Always get fresh keys from zone
+      availableCollectibleKeys: this.zone.collectibleKeys,
       collectedKeys: this.collectedKeys,
       collectedCollectibleKeys: this.collectedCollectibleKeys,
       textLabels: this.zone.textLabels,

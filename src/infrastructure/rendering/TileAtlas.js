@@ -21,6 +21,7 @@ export class TileAtlas {
       ramp_right: 13,
       ramp_left: 14,
       void: 15,
+      rock: 16,
     };
   }
 
