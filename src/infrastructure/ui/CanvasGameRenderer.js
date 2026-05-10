@@ -222,9 +222,9 @@ export class CanvasGameRenderer extends GameRenderer {
     } else {
       collectedKeys.forEach((keyName) => {
         const el = document.createElement('div');
-        el.className = 'collected-key';
+        el.className = 'collected-key clickable';
         el.textContent = keyName;
-        el.style.cursor = 'pointer';
+        el.title = `Click to learn about ${keyName}`;
         el.addEventListener('click', () => {
           this._showVimKeyExplanation({ key: keyName, description: '' });
         });

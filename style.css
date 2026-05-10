@@ -1132,6 +1132,17 @@ h1 {
   box-sizing: border-box;
 }
 
+.collected-key.clickable {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.collected-key.clickable:hover {
+  background-color: #3dbdb5;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 #1a1a2e;
+}
+
 /* CollectibleKey Inventory */
 .collectible-inventory {
   margin: 0;

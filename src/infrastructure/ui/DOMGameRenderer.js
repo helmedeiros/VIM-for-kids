@@ -410,9 +410,9 @@ export class DOMGameRenderer extends GameRenderer {
     } else {
       collectedKeys.forEach((keyName) => {
         const keyElement = document.createElement('div');
-        keyElement.className = 'collected-key';
+        keyElement.className = 'collected-key clickable';
         keyElement.textContent = keyName;
-        keyElement.style.cursor = 'pointer';
+        keyElement.title = `Click to learn about ${keyName}`;
         keyElement.addEventListener('click', () => {
           this._showVimKeyExplanation({ key: keyName, description: '' });
         });
