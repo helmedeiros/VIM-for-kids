@@ -493,10 +493,21 @@ export class BlinkingGroveZone {
           dialogue: [
             'Very good oh Shadowy One! You learned the hjkl skill.',
             'Go on!',
-            'Press Esc to continue...',
+            'Press ESC to enter the secret area...',
           ],
           position: [74, 1], // NPC position at the gate
           requiresEscToProgress: true, // Custom flag for ESC progression
+        },
+        {
+          id: 'level_complete_spirit',
+          type: 'practice_buddy',
+          appearsWhen: { collectedVimKeys: ['h', 'j', 'k', 'l'] },
+          dialogue: [
+            'Congratulations! You completed Level 1!',
+            'You mastered h, j, k, l movement!',
+            'Press ESC here to advance to Level 2!',
+          ],
+          position: [90, 17], // Bottom of hidden area vertical path (col 34 + offsetX 56, row 16 + offsetY 1)
         },
       ],
       events: [

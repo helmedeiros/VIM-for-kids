@@ -165,22 +165,28 @@ describe('BlinkingGroveZone', () => {
     test('should have correct NPC configuration', () => {
       const config = BlinkingGroveZone.getConfig();
 
-      expect(config.npcs).toHaveLength(2);
+      expect(config.npcs).toHaveLength(3);
 
       const caretStone = config.npcs[0];
       expect(caretStone.id).toBe('caret_stone');
-      expect(caretStone.position).toEqual([6, 10]); // Updated for new position
+      expect(caretStone.position).toEqual([6, 10]);
       expect(caretStone.appearsWhen.collectedVimKeys).toEqual(['h', 'j', 'k', 'l']);
       expect(caretStone.dialogue).toHaveLength(4);
       expect(caretStone.dialogue[0]).toContain('Yes... the foundation');
 
       const gateSpirit = config.npcs[1];
       expect(gateSpirit.id).toBe('gate_completion_spirit');
-      expect(gateSpirit.position).toEqual([74, 1]); // At the gate position
+      expect(gateSpirit.position).toEqual([74, 1]);
       expect(gateSpirit.appearsWhen.collectedVimKeys).toEqual(['h', 'j', 'k', 'l']);
       expect(gateSpirit.dialogue).toHaveLength(3);
       expect(gateSpirit.dialogue[0]).toContain('Very good oh Shadowy One!');
       expect(gateSpirit.requiresEscToProgress).toBe(true);
+
+      const levelCompleteSpirit = config.npcs[2];
+      expect(levelCompleteSpirit.id).toBe('level_complete_spirit');
+      expect(levelCompleteSpirit.position).toEqual([90, 17]);
+      expect(levelCompleteSpirit.dialogue).toHaveLength(3);
+      expect(levelCompleteSpirit.dialogue[0]).toContain('Congratulations');
     });
 
     test('should have correct events configuration', () => {
@@ -219,7 +225,7 @@ describe('BlinkingGroveZone', () => {
       expect(zone.vimKeys).toHaveLength(4);
       expect(zone.textLabels).toHaveLength(36); // Updated for new text layout with additional characters
       expect(zone.gate).toBeDefined();
-      expect(zone.npcs).toHaveLength(2);
+      expect(zone.npcs).toHaveLength(3);
       expect(zone.events).toHaveLength(3);
     });
 
@@ -251,10 +257,11 @@ describe('BlinkingGroveZone', () => {
       expect(zone.isComplete()).toBe(true);
 
       const activeNPCs = zone.getActiveNPCs();
-      expect(activeNPCs).toHaveLength(2);
+      expect(activeNPCs).toHaveLength(3);
       const npcIds = activeNPCs.map(npc => npc.id);
       expect(npcIds).toContain('caret_stone');
       expect(npcIds).toContain('gate_completion_spirit');
+      expect(npcIds).toContain('level_complete_spirit');
     });
 
     test('should have correct key descriptions', () => {
@@ -305,7 +312,7 @@ describe('BlinkingGroveZone', () => {
         expect(npcCondition).toEqual(gateCondition);
       });
 
-      expect(zoneNPCs).toHaveLength(2); // Updated for 2 NPCs
+      expect(zoneNPCs).toHaveLength(3);
     });
   });
 });
