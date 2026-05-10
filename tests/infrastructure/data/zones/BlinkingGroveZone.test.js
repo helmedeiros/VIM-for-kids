@@ -184,7 +184,8 @@ describe('BlinkingGroveZone', () => {
 
       const levelCompleteSpirit = config.npcs[2];
       expect(levelCompleteSpirit.id).toBe('level_complete_spirit');
-      expect(levelCompleteSpirit.position).toEqual([90, 17]);
+      expect(levelCompleteSpirit.position).toEqual([90, 18]);
+      expect(levelCompleteSpirit.appearsWhen).toBeUndefined();
       expect(levelCompleteSpirit.dialogue).toHaveLength(3);
       expect(levelCompleteSpirit.dialogue[0]).toContain('Congratulations');
     });
@@ -240,9 +241,10 @@ describe('BlinkingGroveZone', () => {
       expect(zone.isComplete()).toBe(false);
     });
 
-    test('should show no active NPCs initially', () => {
+    test('should show only always-visible NPCs initially', () => {
       const activeNPCs = zone.getActiveNPCs();
-      expect(activeNPCs).toHaveLength(0);
+      expect(activeNPCs).toHaveLength(1);
+      expect(activeNPCs[0].id).toBe('level_complete_spirit');
     });
 
     test('should collect all keys and complete zone', () => {
@@ -306,8 +308,8 @@ describe('BlinkingGroveZone', () => {
       const gateCondition = config.tiles.gate.unlocksWhen.collectedVimKeys.sort();
       const zoneNPCs = zone.npcs;
 
-      // Both NPCs should have the same appearance conditions as the gate unlock conditions
-      config.npcs.forEach(npc => {
+      // NPCs with appearsWhen should match gate unlock conditions
+      config.npcs.filter(npc => npc.appearsWhen).forEach(npc => {
         const npcCondition = npc.appearsWhen.collectedVimKeys.sort();
         expect(npcCondition).toEqual(gateCondition);
       });
