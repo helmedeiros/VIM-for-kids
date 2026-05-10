@@ -102,13 +102,7 @@ export class HandleProgressionUseCase {
       alert(`Level Complete! Progressing to ${nextLevelId}...`);
     }
 
-    // Then play cutscene if available
-    const gameId = this._getGameId();
-    if (await this._shouldShowLevelCutscene(gameId, nextLevelId)) {
-      await this._showLevelCutscene(gameId, nextLevelId);
-    }
-
-    // Then transition to next level
+    // Transition handles cutscenes — no need to play them here
     this._triggerLevelTransition(nextLevelId);
   }
 

@@ -412,38 +412,23 @@ describe('HandleProgressionUseCase', () => {
       );
     });
 
-    it('should show level cutscene during level progression', async () => {
+    it('should not trigger cutscenes during level progression (handled by transitionToLevel)', async () => {
       mockGameState.executeProgression.mockReturnValue({
         type: 'level',
         nextLevelId: 'level_3',
       });
 
-      mockCutsceneService.shouldShowCutsceneStory.mockResolvedValue(true);
-      mockCutsceneService.getCutsceneStory.mockResolvedValue({
-        script: ['Welcome to Level 3!', 'Advanced challenges await...'],
-      });
-
       const result = await handleProgressionUseCaseWithCutscenes.execute();
 
       expect(result).toEqual({ type: 'level', nextLevelId: 'level_3' });
-      expect(mockCutsceneService.shouldShowCutsceneStory).toHaveBeenCalledWith(
+      // Cutscenes are handled by transitionToLevel, not by HandleProgressionUseCase
+      expect(mockCutsceneService.shouldShowCutsceneStory).not.toHaveBeenCalledWith(
         'cursor-before-clickers',
         'level',
         'level_3'
       );
-      expect(mockCutsceneService.getCutsceneStory).toHaveBeenCalledWith(
-        'cursor-before-clickers',
-        'level',
-        'level_3'
-      );
-      expect(mockCutsceneRenderer.showCutscene).toHaveBeenCalledWith({
-        script: ['Welcome to Level 3!', 'Advanced challenges await...'],
-      });
-      expect(mockCutsceneService.markCutsceneStoryAsShown).toHaveBeenCalledWith(
-        'cursor-before-clickers',
-        'level',
-        'level_3'
-      );
+      // But showLevelComplete should still be called
+      expect(mockGameRenderer.showLevelComplete).toHaveBeenCalledWith('level_3');
     });
 
     it('should skip cutscene when service says not to show', async () => {
