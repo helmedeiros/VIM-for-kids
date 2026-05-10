@@ -224,6 +224,10 @@ export class CanvasGameRenderer extends GameRenderer {
         const el = document.createElement('div');
         el.className = 'collected-key';
         el.textContent = keyName;
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', () => {
+          this._showVimKeyExplanation({ key: keyName, description: '' });
+        });
         this._collectedKeysDisplay.appendChild(el);
       });
     }

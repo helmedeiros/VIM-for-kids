@@ -412,6 +412,10 @@ export class DOMGameRenderer extends GameRenderer {
         const keyElement = document.createElement('div');
         keyElement.className = 'collected-key';
         keyElement.textContent = keyName;
+        keyElement.style.cursor = 'pointer';
+        keyElement.addEventListener('click', () => {
+          this._showVimKeyExplanation({ key: keyName, description: '' });
+        });
         this.collectedKeysDisplay.appendChild(keyElement);
       });
     }
