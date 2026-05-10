@@ -5,7 +5,7 @@
 export class VimKeyInfo {
   static get(key) {
     const info = VimKeyInfo._data[key];
-    if (!info) return { category: 'VIM', desc: `The ${key} key`, example: null };
+    if (!info) return { category: 'VIM', desc: `The ${key} key`, example: null, before: null, after: null };
     return info;
   }
 
@@ -25,12 +25,29 @@ export class VimKeyInfo {
     const card = document.createElement('div');
     card.className = 'vim-key-card';
 
+    let exampleHtml = '';
+    if (info.before && info.after) {
+      exampleHtml = `<div class="vim-key-example vim-key-example-columns">
+        <div class="vim-key-example-col">
+          <div class="vim-key-example-label">Before</div>
+          <div class="vim-key-example-text">${info.before}</div>
+        </div>
+        <div class="vim-key-example-arrow">\u2192</div>
+        <div class="vim-key-example-col">
+          <div class="vim-key-example-label">After</div>
+          <div class="vim-key-example-text">${info.after}</div>
+        </div>
+      </div>`;
+    } else if (info.example) {
+      exampleHtml = `<div class="vim-key-example"><div class="vim-key-example-label">Example</div><div class="vim-key-example-text">${info.example}</div></div>`;
+    }
+
     card.innerHTML = `
       <div class="vim-key-category">${info.category}</div>
       <div class="vim-key-badge">${vimKey.key}</div>
       <div class="vim-key-title">New Key Unlocked!</div>
       <div class="vim-key-desc">${info.desc}</div>
-      ${info.example ? `<div class="vim-key-example"><div class="vim-key-example-label">Example</div><div class="vim-key-example-text">${info.example}</div></div>` : ''}
+      ${exampleHtml}
       <div class="vim-key-hint">Press ESC to continue</div>
     `;
 
@@ -67,22 +84,26 @@ export class VimKeyInfo {
     h: {
       category: 'Movement',
       desc: 'Moves your character one step to the LEFT.',
-      example: 'You\'re here: [*]ABC \u2192 press h \u2192 now here: [*]ABC',
+      before: 'A B [*] D',
+      after: 'A [*] C D',
     },
     j: {
       category: 'Movement',
       desc: 'Moves your character one step DOWN.',
-      example: 'ABC     ABC\n[*]DE \u2192 press j \u2192  DE\n FGH     [*]FGH',
+      before: 'A [*] C\nD  E  F\nG  H  I',
+      after: 'A  B  C\nD [*] F\nG  H  I',
     },
     k: {
       category: 'Movement',
       desc: 'Moves your character one step UP.',
-      example: ' ABC      [*]ABC\n DE  \u2192 press k \u2192  DE\n[*]FGH     FGH',
+      before: 'A  B  C\nD  E  F\nG [*] I',
+      after: 'A  B  C\nD [*] F\nG  H  I',
     },
     l: {
       category: 'Movement',
       desc: 'Moves your character one step to the RIGHT.',
-      example: 'You\'re here: ABC[*] \u2192 press l \u2192 now here: ABC [*]',
+      before: 'A [*] C D',
+      after: 'A B [*] D',
     },
     w: {
       category: 'Word Jump',

@@ -908,6 +908,25 @@ h1 {
   text-align: left;
 }
 
+.vim-key-example-columns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.vim-key-example-col {
+  flex: 1;
+}
+
+.vim-key-example-arrow {
+  font-size: 1.2em;
+  font-weight: 900;
+  color: #4ecdc4;
+  flex-shrink: 0;
+}
+
 .vim-key-example-label {
   font-size: 0.7em;
   font-weight: 800;
@@ -922,6 +941,8 @@ h1 {
   line-height: 1.5;
   color: #1a1a2e;
   font-weight: 600;
+  white-space: pre;
+  font-family: 'Courier New', monospace;
 }
 
 .vim-key-hint {
