@@ -49,28 +49,37 @@
 
         // Level selector: auto-hide after 60s, toggle by clicking title
         (function () {
-          var levelBar = document.querySelector('.level-selection');
           var title = document.querySelector('h1');
           var hideTimer = null;
           var shown = true;
 
+          function getLevelBar() {
+            return document.querySelector('.level-selection');
+          }
+
           function hideLevels() {
+            var levelBar = getLevelBar();
             if (!levelBar || !shown) return;
             shown = false;
             clearTimeout(hideTimer);
             hideTimer = null;
             levelBar.classList.add('hiding');
             setTimeout(function () {
-              levelBar.classList.add('hidden-levels');
-              levelBar.classList.remove('hiding');
+              var bar = getLevelBar();
+              if (bar) {
+                bar.style.display = 'none';
+                bar.classList.remove('hiding');
+              }
             }, 400);
           }
 
           function showLevels() {
+            var levelBar = getLevelBar();
             if (!levelBar || shown) return;
             shown = true;
             clearTimeout(hideTimer);
-            levelBar.classList.remove('hidden-levels', 'hiding');
+            levelBar.style.display = 'flex';
+            levelBar.classList.remove('hiding');
             void levelBar.offsetWidth;
             hideTimer = setTimeout(hideLevels, 60000);
           }

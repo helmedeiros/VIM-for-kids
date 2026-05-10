@@ -113,9 +113,8 @@ h1 {
   pointer-events: none;
 }
 
-.level-selection.hidden-levels {
-  display: none;
-}
+/* hidden-levels is no longer used — display is set via style.display
+   to stay in sync with LevelSelectorUI and GameSelectorUI inline styles */
 
 .level-btn {
   background-color: #ffffff;
