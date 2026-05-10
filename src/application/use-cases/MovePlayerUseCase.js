@@ -20,7 +20,8 @@ export class MovePlayerUseCase {
 
     // Check if move is valid (both map and gate walkability, plus directional ramp logic)
     if (!this._isPositionWalkable(newPosition, direction)) {
-      return { success: false, reason: 'invalid_position' }; // Invalid move, do nothing
+      this._showBlockedGateHint(newPosition);
+      return { success: false, reason: 'invalid_position' };
     }
 
     // Check if we're leaving an NPC position (fade out balloons)
@@ -434,8 +435,14 @@ export class MovePlayerUseCase {
     );
 
     if (vimKeyAtPosition) {
-      console.log('✅ COLLECTING VIM KEY:', vimKeyAtPosition.key);
+      const isFirstKey = this._gameState.collectedKeys ? this._gameState.collectedKeys.size === 0 : false;
       this._gameState.collectKey(vimKeyAtPosition);
+      if (isFirstKey && typeof this._gameRenderer.showMessage === 'function') {
+        this._gameRenderer.showMessage(
+          'You found your first VIM key! Keys teach you VIM commands. Collect them all to unlock the gate!',
+          { duration: 5000, type: 'info' }
+        );
+      }
       this._gameRenderer.showKeyInfo(vimKeyAtPosition);
       return vimKeyAtPosition;
     }
@@ -525,5 +532,35 @@ export class MovePlayerUseCase {
 
       return false;
     });
+  }
+
+  _showBlockedGateHint(position) {
+    if (typeof this._gameRenderer.showMessage !== 'function') return;
+
+    // Check if the blocked position is a closed main gate
+    if (typeof this._gameState.getGate === 'function') {
+      const gate = this._gameState.getGate();
+      if (gate && gate.position.equals(position) && !gate.isWalkable()) {
+        this._gameRenderer.showMessage(
+          'Hmm, this gate is locked! Can you find all the keys to open it?',
+          { duration: 3000, type: 'warning' }
+        );
+        return;
+      }
+    }
+
+    // Check if the blocked position is a closed secondary gate
+    if (typeof this._gameState.getSecondaryGates === 'function') {
+      const secondaryGates = this._gameState.getSecondaryGates();
+      for (const gate of secondaryGates) {
+        if (gate && gate.position.equals(position) && !gate.isWalkable()) {
+          this._gameRenderer.showMessage(
+            'This door needs a special key! Look around for a golden key to open it.',
+            { duration: 3000, type: 'warning' }
+          );
+          return;
+        }
+      }
+    }
   }
 }
