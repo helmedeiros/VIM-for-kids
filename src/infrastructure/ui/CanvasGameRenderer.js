@@ -644,11 +644,11 @@ export class CanvasGameRenderer extends GameRenderer {
     // NPC
     const npc = this._entityIndex.getNPCAt(worldX, worldY);
     if (npc) {
-      const npcId = npc.id || npc.type || '';
-      if (hasCharSprites && this._characterSprites.hasNPC(npcId)) {
+      const npcSpriteId = this._characterSprites.hasNPC(npc.id) ? npc.id : (npc.type || '');
+      if (hasCharSprites && this._characterSprites.hasNPC(npcSpriteId)) {
         this._drawCharSprite(
           ctx,
-          this._characterSprites.getNPCFrame(npcId),
+          this._characterSprites.getNPCFrame(npcSpriteId),
           screenX,
           screenY,
           ts
