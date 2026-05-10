@@ -438,6 +438,7 @@ export class BlinkingGroveZone {
               { type: 'collectible_key', keyId: 'bronze_key', name: 'Bronze Key', color: '#CD7F32', position: [26, 0] }, // Next to 'z' in 'Rulez'
               { type: 'vim_key', value: 'w', position: [6, 3], description: 'w - jump forward to next word' },
               { type: 'vim_key', value: 'e', position: [11, 8], description: 'e - jump to end of word' },
+              { type: 'vim_key', value: 'b', position: [35, 12], description: 'b - jump backward to start of word' },
             ],
             // Player starts here when entering the hidden area (just inside from the gate)
             playerStartPosition: [0, 0], // Just inside the hidden area, right after the connection
