@@ -86,6 +86,53 @@ export class VimKeyInfo {
    * @param {Set<string>} collectedKeys
    * @param {Function} onKeyClick - called with a vimKey-like object when a key is clicked
    */
+  /**
+   * Create an intro overlay explaining collectible keys (shown on first pickup).
+   * @param {Object} collectibleKey - the collected key with .keyId and .name
+   * @param {Function} onDismiss - called when dismissed
+   * @returns {HTMLElement}
+   */
+  static createCollectibleIntroOverlay(collectibleKey, onDismiss) {
+    const overlay = document.createElement('div');
+    overlay.id = 'vimKeyExplanation';
+    overlay.className = 'vim-key-overlay';
+
+    const name = collectibleKey.name || collectibleKey.keyId || 'Special Key';
+
+    const card = document.createElement('div');
+    card.className = 'vim-key-card';
+    card.innerHTML = `
+      <div class="vim-key-category">Special Item</div>
+      <div class="vim-key-badge vim-key-badge-gold">\uD83D\uDD11</div>
+      <div class="vim-key-title">${name} Found!</div>
+      <div class="vim-key-desc">You found a special key! These keys open locked doors that block your path. Check your <strong>Key Inventory</strong> at the bottom of the screen to see what you&rsquo;ve collected.</div>
+      <div class="vim-key-example">
+        <div class="vim-key-example-label">How it works</div>
+        <div class="vim-key-example-text">Find key \u2192 Walk to locked door \u2192 Door opens!</div>
+      </div>
+      <div class="vim-key-hint">Press ESC to continue</div>
+    `;
+
+    overlay.appendChild(card);
+
+    let allowAllKeys = false;
+    const timer = setTimeout(() => { allowAllKeys = true; }, 10000);
+    const dismiss = () => {
+      clearTimeout(timer);
+      overlay.classList.add('vim-key-dismissing');
+      setTimeout(() => overlay.remove(), 300);
+      document.removeEventListener('keydown', onKey);
+      if (onDismiss) onDismiss();
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape' || allowAllKeys) { e.preventDefault(); dismiss(); }
+    };
+    overlay.addEventListener('click', dismiss);
+    document.addEventListener('keydown', onKey);
+
+    return overlay;
+  }
+
   static _baseKeys = [
     { key: 'h', label: 'Left' },
     { key: 'j', label: 'Down' },

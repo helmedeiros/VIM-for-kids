@@ -883,6 +883,11 @@ h1 {
   margin-bottom: 14px;
 }
 
+.vim-key-badge-gold {
+  background: #ffe156;
+  font-size: 28px;
+}
+
 .vim-key-title {
   font-size: 1.1em;
   font-weight: 900;

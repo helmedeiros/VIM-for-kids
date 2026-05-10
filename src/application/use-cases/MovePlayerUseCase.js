@@ -460,14 +460,12 @@ export class MovePlayerUseCase {
           this._gameState.collectKey(collectibleKeyAtPosition);
         }
 
-        if (isFirstCollectible && typeof this._gameRenderer.showMessage === 'function') {
-          this._gameRenderer.showMessage(
-            'You found a special key! These keys open locked doors. Check your Key Inventory!',
-            { duration: 5000, type: 'info' }
-          );
+        if (isFirstCollectible && typeof this._gameRenderer.showCollectibleKeyIntro === 'function') {
+          this._gameRenderer.showCollectibleKeyIntro(collectibleKeyAtPosition);
+        } else {
+          this._gameRenderer.showKeyInfo(collectibleKeyAtPosition);
         }
 
-        this._gameRenderer.showKeyInfo(collectibleKeyAtPosition);
         return collectibleKeyAtPosition;
       }
     }

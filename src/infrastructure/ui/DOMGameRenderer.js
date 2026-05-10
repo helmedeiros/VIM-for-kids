@@ -470,6 +470,15 @@ export class DOMGameRenderer extends GameRenderer {
     }
   }
 
+  showCollectibleKeyIntro(collectibleKey) {
+    const existing = document.getElementById('vimKeyExplanation');
+    if (existing) existing.remove();
+
+    const overlay = VimKeyInfo.createCollectibleIntroOverlay(collectibleKey, () => this.gameBoard.focus());
+    const container = document.getElementById('game-container') || document.body;
+    container.appendChild(overlay);
+  }
+
   _showVimKeyExplanation(vimKey) {
     const existing = document.getElementById('vimKeyExplanation');
     if (existing) existing.remove();

@@ -731,6 +731,15 @@ export class CanvasGameRenderer extends GameRenderer {
     }, 2000);
   }
 
+  showCollectibleKeyIntro(collectibleKey) {
+    const existing = document.getElementById('vimKeyExplanation');
+    if (existing) existing.remove();
+
+    const overlay = VimKeyInfo.createCollectibleIntroOverlay(collectibleKey, () => this.focus());
+    const container = this._container || document.body;
+    container.appendChild(overlay);
+  }
+
   _showVimKeyExplanation(vimKey) {
     const existing = document.getElementById('vimKeyExplanation');
     if (existing) existing.remove();
