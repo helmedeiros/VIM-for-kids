@@ -23,7 +23,7 @@ import { CutsceneProviderAdapter } from './infrastructure/data/CutsceneProviderA
 import { CutsceneRenderer } from './infrastructure/ui/CutsceneRenderer.js';
 import { LevelSelectorUI } from './infrastructure/ui/LevelSelectorUI.js';
 import { FeatureFlags } from './infrastructure/FeatureFlags.js';
-import { CanvasGameRenderer } from './infrastructure/ui/CanvasGameRenderer.js';
+import { CanvasGameRenderer } from './infrastructure/ui/CanvasGameRenderer.js'; // Default renderer
 
 
 /**
@@ -68,20 +68,15 @@ class Application {
       this._cutsceneRenderer = null;
     }
 
-    // Create game renderer based on feature flag
-    // Check URL param (?renderer=canvas) or localStorage for activation
-    const useCanvas = this._shouldUseCanvasRenderer(featureFlags);
-    const gameRenderer = useCanvas ? new CanvasGameRenderer() : null;
+    // Create game renderer
+    const gameRenderer = new CanvasGameRenderer();
 
     // Create game factory and initialization service
-    const factoryDependencies = {
+    const gameFactory = new GameFactory({
       cutsceneService: this._cutsceneService,
       cutsceneRenderer: this._cutsceneRenderer,
-    };
-    if (gameRenderer) {
-      factoryDependencies.gameRenderer = gameRenderer;
-    }
-    const gameFactory = new GameFactory(factoryDependencies);
+      gameRenderer,
+    });
     this._initializationService = new GameInitializationService(
       gameFactory,
       this._persistenceService,
@@ -166,29 +161,6 @@ class Application {
         this._levelSelectorUI.setActiveLevel(config.level);
       }
     }
-  }
-
-  /**
-   * Check if Canvas renderer should be used via feature flag, URL param, or localStorage
-   * @private
-   */
-  _shouldUseCanvasRenderer(featureFlags) {
-    // 1. Check feature flag (static config)
-    if (featureFlags.isEnabled('CANVAS_RENDERER')) return true;
-
-    // 2. Check URL parameter: ?renderer=canvas
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('renderer') === 'canvas') return true;
-
-    // 3. Check localStorage directly (workaround for async loadFromRemoteConfig)
-    try {
-      const stored = localStorage.getItem('canvasRenderer');
-      if (stored === 'true') return true;
-    } catch {
-      // localStorage unavailable
-    }
-
-    return false;
   }
 
   /**

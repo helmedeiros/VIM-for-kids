@@ -7,7 +7,7 @@ import { NPCInteractionUseCase } from './application/use-cases/NPCInteractionUse
 import { HandleProgressionUseCase } from './application/use-cases/HandleProgressionUseCase.js';
 import { SelectGameUseCase } from './application/use-cases/SelectGameUseCase.js';
 import { DialogueService } from './application/services/DialogueService.js';
-import { DOMGameRenderer } from './infrastructure/ui/DOMGameRenderer.js';
+import { DOMGameRenderer } from './infrastructure/ui/DOMGameRenderer.js'; // Fallback for tests
 import { KeyboardInputHandler } from './infrastructure/input/KeyboardInputHandler.js';
 import { ZoneRegistryAdapter } from './infrastructure/data/zones/ZoneRegistryAdapter.js';
 import { GameProviderAdapter } from './infrastructure/data/games/GameProviderAdapter.js';
