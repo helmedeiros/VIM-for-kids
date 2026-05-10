@@ -537,16 +537,13 @@ export class MovePlayerUseCase {
   }
 
   _showBlockedGateHint(position) {
-    if (typeof this._gameRenderer.showMessage !== 'function') return;
-
     // Check if the blocked position is a closed main gate
     if (typeof this._gameState.getGate === 'function') {
       const gate = this._gameState.getGate();
       if (gate && gate.position.equals(position) && !gate.isWalkable()) {
-        this._gameRenderer.showMessage(
-          'Hmm, this gate is locked! Can you find all the keys to open it?',
-          { duration: 3000, type: 'warning' }
-        );
+        if (typeof this._gameRenderer.showLockedGateHint === 'function') {
+          this._gameRenderer.showLockedGateHint('main');
+        }
         return;
       }
     }
@@ -556,10 +553,9 @@ export class MovePlayerUseCase {
       const secondaryGates = this._gameState.getSecondaryGates();
       for (const gate of secondaryGates) {
         if (gate && gate.position.equals(position) && !gate.isWalkable()) {
-          this._gameRenderer.showMessage(
-            'This door needs a special key! Look around for a golden key to open it.',
-            { duration: 3000, type: 'warning' }
-          );
+          if (typeof this._gameRenderer.showLockedGateHint === 'function') {
+            this._gameRenderer.showLockedGateHint('secondary');
+          }
           return;
         }
       }

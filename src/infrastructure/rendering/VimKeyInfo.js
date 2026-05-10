@@ -133,6 +133,55 @@ export class VimKeyInfo {
     return overlay;
   }
 
+  /**
+   * Create an overlay explaining a locked gate (shown when bumping into one).
+   * @param {string} gateType - 'main' or 'secondary'
+   * @param {Function} onDismiss
+   * @returns {HTMLElement}
+   */
+  static createLockedGateOverlay(gateType, onDismiss) {
+    const overlay = document.createElement('div');
+    overlay.id = 'vimKeyExplanation';
+    overlay.className = 'vim-key-overlay';
+
+    const isMain = gateType === 'main';
+    const card = document.createElement('div');
+    card.className = 'vim-key-card';
+    card.innerHTML = `
+      <div class="vim-key-category">${isMain ? 'Locked Gate' : 'Locked Door'}</div>
+      <div class="vim-key-badge vim-key-badge-locked">\uD83D\uDD12</div>
+      <div class="vim-key-title">${isMain ? 'Gate is Locked!' : 'Door is Locked!'}</div>
+      <div class="vim-key-desc">${isMain
+        ? 'This gate needs <strong>all the VIM letter keys</strong> to open. Look around the map for letters like h, j, k, l!'
+        : 'This door needs a <strong>special key</strong> to open. Explore the area and look for a shiny key item!'
+      }</div>
+      <div class="vim-key-example">
+        <div class="vim-key-example-label">${isMain ? 'What to do' : 'What to do'}</div>
+        <div class="vim-key-example-text">${isMain
+          ? 'Explore the map \u2192 Collect all letter keys \u2192 Gate opens!'
+          : 'Look around \u2192 Find the special key \u2192 Walk to this door \u2192 It opens!'
+        }</div>
+      </div>
+      <div class="vim-key-hint">Press ESC to continue</div>
+    `;
+
+    overlay.appendChild(card);
+
+    const dismiss = () => {
+      overlay.classList.add('vim-key-dismissing');
+      setTimeout(() => overlay.remove(), 300);
+      document.removeEventListener('keydown', onKey);
+      if (onDismiss) onDismiss();
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); dismiss(); }
+    };
+    overlay.addEventListener('click', dismiss);
+    document.addEventListener('keydown', onKey);
+
+    return overlay;
+  }
+
   static _baseKeys = [
     { key: 'h', label: 'Left' },
     { key: 'j', label: 'Down' },

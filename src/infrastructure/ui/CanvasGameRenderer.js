@@ -731,6 +731,15 @@ export class CanvasGameRenderer extends GameRenderer {
     }, 2000);
   }
 
+  showLockedGateHint(gateType) {
+    const existing = document.getElementById('vimKeyExplanation');
+    if (existing) return; // Don't stack hints
+
+    const overlay = VimKeyInfo.createLockedGateOverlay(gateType, () => this.focus());
+    const container = this._container || document.body;
+    container.appendChild(overlay);
+  }
+
   showCollectibleKeyIntro(collectibleKey) {
     const existing = document.getElementById('vimKeyExplanation');
     if (existing) existing.remove();

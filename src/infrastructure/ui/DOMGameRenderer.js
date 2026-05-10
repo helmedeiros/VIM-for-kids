@@ -470,6 +470,15 @@ export class DOMGameRenderer extends GameRenderer {
     }
   }
 
+  showLockedGateHint(gateType) {
+    const existing = document.getElementById('vimKeyExplanation');
+    if (existing) return;
+
+    const overlay = VimKeyInfo.createLockedGateOverlay(gateType, () => this.gameBoard.focus());
+    const container = document.getElementById('game-container') || document.body;
+    container.appendChild(overlay);
+  }
+
   showCollectibleKeyIntro(collectibleKey) {
     const existing = document.getElementById('vimKeyExplanation');
     if (existing) existing.remove();

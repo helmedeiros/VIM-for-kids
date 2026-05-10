@@ -888,6 +888,11 @@ h1 {
   font-size: 28px;
 }
 
+.vim-key-badge-locked {
+  background: #ff6b6b;
+  font-size: 28px;
+}
+
 .vim-key-title {
   font-size: 1.1em;
   font-weight: 900;
