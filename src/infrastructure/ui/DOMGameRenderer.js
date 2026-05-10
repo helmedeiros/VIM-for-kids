@@ -455,11 +455,53 @@ export class DOMGameRenderer extends GameRenderer {
   }
 
   showKeyInfo(key) {
-    // Enhanced key collection feedback with visual animation
     if (key && key.type === 'collectible_key') {
       this._showCollectibleKeyFeedback(key);
+    } else if (key && key.key && key.description) {
+      this._showVimKeyExplanation(key);
     }
-    // VIM keys still use the existing simple feedback (no popup)
+  }
+
+  _showVimKeyExplanation(vimKey) {
+    const existing = document.getElementById('vimKeyExplanation');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'vimKeyExplanation';
+    overlay.className = 'vim-key-overlay';
+
+    const card = document.createElement('div');
+    card.className = 'vim-key-card';
+
+    const badge = document.createElement('div');
+    badge.className = 'vim-key-badge';
+    badge.textContent = vimKey.key;
+    card.appendChild(badge);
+
+    const title = document.createElement('div');
+    title.className = 'vim-key-title';
+    title.textContent = 'New Key Unlocked!';
+    card.appendChild(title);
+
+    const desc = document.createElement('div');
+    desc.className = 'vim-key-desc';
+    desc.textContent = vimKey.description;
+    card.appendChild(desc);
+
+    const hint = document.createElement('div');
+    hint.className = 'vim-key-hint';
+    hint.textContent = 'Click anywhere to continue';
+    card.appendChild(hint);
+
+    overlay.appendChild(card);
+    const container = document.getElementById('game-container') || document.body;
+    container.appendChild(overlay);
+
+    overlay.addEventListener('click', () => {
+      overlay.classList.add('vim-key-dismissing');
+      setTimeout(() => overlay.remove(), 300);
+      this.gameBoard.focus();
+    });
   }
 
   _showCollectibleKeyFeedback(collectibleKey) {

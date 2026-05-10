@@ -821,6 +821,92 @@ h1 {
   box-shadow: 1px 1px 0 #1a1a2e;
 }
 
+/* VIM Key Explanation Overlay */
+.vim-key-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: vimKeyFadeIn 0.25s ease-out;
+}
+
+.vim-key-overlay.vim-key-dismissing {
+  animation: vimKeyFadeOut 0.3s ease-out forwards;
+}
+
+.vim-key-card {
+  background: #fffef5;
+  border: 3px solid #1a1a2e;
+  border-radius: 14px;
+  box-shadow: 8px 8px 0 #1a1a2e;
+  padding: 28px 36px;
+  text-align: center;
+  max-width: 340px;
+  width: 88%;
+  font-family: 'Courier New', monospace;
+  animation: vimKeyPopIn 0.3s ease-out;
+}
+
+.vim-key-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #4ecdc4;
+  color: #1a1a2e;
+  border: 3px solid #1a1a2e;
+  border-radius: 10px;
+  font-size: 32px;
+  font-weight: 900;
+  width: 60px;
+  height: 60px;
+  box-shadow: 4px 4px 0 #1a1a2e;
+  margin-bottom: 14px;
+}
+
+.vim-key-title {
+  font-size: 1.1em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #1a1a2e;
+  margin-bottom: 12px;
+}
+
+.vim-key-desc {
+  font-size: 0.92em;
+  line-height: 1.5;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.vim-key-hint {
+  font-size: 0.75em;
+  color: #999;
+  font-style: italic;
+}
+
+@keyframes vimKeyFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes vimKeyFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes vimKeyPopIn {
+  from { transform: scale(0.7); opacity: 0; }
+  50% { transform: scale(1.05); }
+  to { transform: scale(1); opacity: 1; }
+}
+
 /* Help Modal — content styles (reuses game-modal + game-item cards) */
 .help-hint {
   font-size: 0.82em !important;

@@ -254,6 +254,8 @@ export class CanvasGameRenderer extends GameRenderer {
   showKeyInfo(key) {
     if (key && key.type === 'collectible_key') {
       this._showCollectibleKeyFeedback(key);
+    } else if (key && key.key && key.description) {
+      this._showVimKeyExplanation(key);
     }
   }
 
@@ -719,6 +721,54 @@ export class CanvasGameRenderer extends GameRenderer {
     setTimeout(() => {
       if (document.body.contains(el)) document.body.removeChild(el);
     }, 2000);
+  }
+
+  _showVimKeyExplanation(vimKey) {
+    // Remove any existing explanation
+    const existing = document.getElementById('vimKeyExplanation');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'vimKeyExplanation';
+    overlay.className = 'vim-key-overlay';
+
+    const card = document.createElement('div');
+    card.className = 'vim-key-card';
+
+    // Key badge
+    const badge = document.createElement('div');
+    badge.className = 'vim-key-badge';
+    badge.textContent = vimKey.key;
+    card.appendChild(badge);
+
+    // Title
+    const title = document.createElement('div');
+    title.className = 'vim-key-title';
+    title.textContent = 'New Key Unlocked!';
+    card.appendChild(title);
+
+    // Description
+    const desc = document.createElement('div');
+    desc.className = 'vim-key-desc';
+    desc.textContent = vimKey.description;
+    card.appendChild(desc);
+
+    // Dismiss hint
+    const hint = document.createElement('div');
+    hint.className = 'vim-key-hint';
+    hint.textContent = 'Click anywhere to continue';
+    card.appendChild(hint);
+
+    overlay.appendChild(card);
+    const container = this._container || document.body;
+    container.appendChild(overlay);
+
+    // Dismiss on click
+    overlay.addEventListener('click', () => {
+      overlay.classList.add('vim-key-dismissing');
+      setTimeout(() => overlay.remove(), 300);
+      this.focus();
+    });
   }
 
   _getNpcFallbackSymbol(npc) {
