@@ -27,6 +27,19 @@ export class MovePlayerUseCase {
       return { success: false, reason: 'invalid_position' };
     }
 
+    // If column memory returned same position, check if direct target has a locked gate
+    if (newPosition.equals(currentPosition)) {
+      const directTarget = currentPosition.move(
+        direction === 'right' ? 1 : direction === 'left' ? -1 : 0,
+        direction === 'down' ? 1 : direction === 'up' ? -1 : 0
+      );
+      const directCheck = this._checkWalkability(directTarget, direction);
+      if (directCheck.blockedBy && typeof this._gameRenderer.showLockedGateHint === 'function') {
+        this._gameRenderer.showLockedGateHint(directCheck.blockedBy);
+      }
+      return { success: false, reason: 'invalid_position' };
+    }
+
     // Check if we're leaving an NPC position (fade out balloons)
     this._checkNPCExit(currentPosition, newPosition);
 
