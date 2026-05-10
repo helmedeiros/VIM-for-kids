@@ -80,6 +80,37 @@ export class VimKeyInfo {
     return overlay;
   }
 
+  /**
+   * Update the "Your Keys" section in the help modal with collected keys.
+   * Each key badge is clickable to re-open its explanation.
+   * @param {Set<string>} collectedKeys
+   * @param {Function} onKeyClick - called with a vimKey-like object when a key is clicked
+   */
+  static updateHelpKeys(collectedKeys, onKeyClick) {
+    const card = document.getElementById('helpKeysCard');
+    const container = document.getElementById('helpCollectedKeys');
+    if (!card || !container) return;
+
+    if (collectedKeys.size === 0) {
+      card.style.display = 'none';
+      return;
+    }
+
+    card.style.display = '';
+    container.innerHTML = '';
+
+    collectedKeys.forEach((keyName) => {
+      const el = document.createElement('div');
+      el.className = 'collected-key clickable';
+      el.textContent = keyName;
+      el.title = `Learn about ${keyName}`;
+      el.addEventListener('click', () => {
+        onKeyClick({ key: keyName, description: '' });
+      });
+      container.appendChild(el);
+    });
+  }
+
   static _data = {
     h: {
       category: 'Movement',

@@ -231,6 +231,9 @@ export class CanvasGameRenderer extends GameRenderer {
         this._collectedKeysDisplay.appendChild(el);
       });
     }
+
+    // Also update help modal's "Your Keys" section
+    VimKeyInfo.updateHelpKeys(collectedKeys, (vk) => this._showVimKeyExplanation(vk));
   }
 
   updateCollectibleInventoryDisplay(collectedCollectibleKeys) {

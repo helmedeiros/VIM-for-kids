@@ -419,6 +419,9 @@ export class DOMGameRenderer extends GameRenderer {
         this.collectedKeysDisplay.appendChild(keyElement);
       });
     }
+
+    // Also update help modal's "Your Keys" section
+    VimKeyInfo.updateHelpKeys(collectedKeys, (vk) => this._showVimKeyExplanation(vk));
   }
 
     updateCollectibleInventoryDisplay(collectedCollectibleKeys) {
