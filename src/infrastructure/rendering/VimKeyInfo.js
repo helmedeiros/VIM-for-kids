@@ -66,7 +66,7 @@ export class VimKeyInfo {
   static _data = {
     h: {
       category: 'Movement',
-      desc: 'Moves your character one step to the LEFT. It\'s the leftmost key in the row!',
+      desc: 'Moves your character one step to the LEFT.',
       example: 'You\'re here: [*]ABC \u2192 press h \u2192 now here: [*]ABC',
     },
     j: {
@@ -81,7 +81,7 @@ export class VimKeyInfo {
     },
     l: {
       category: 'Movement',
-      desc: 'Moves your character one step to the RIGHT. It\'s the rightmost key in the row!',
+      desc: 'Moves your character one step to the RIGHT.',
       example: 'You\'re here: ABC[*] \u2192 press l \u2192 now here: ABC [*]',
     },
     w: {
