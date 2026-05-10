@@ -327,6 +327,7 @@ export class CanvasGameRenderer extends GameRenderer {
     this._lastCursorY = null;
     this._prevCollectedCount = 0;
     this._prevGateOpen = null;
+    this.clearAllOverlays();
   }
 
   showNPCDialogue(npc, dialogue, options = {}) {
@@ -729,6 +730,20 @@ export class CanvasGameRenderer extends GameRenderer {
     setTimeout(() => {
       if (document.body.contains(el)) document.body.removeChild(el);
     }, 2000);
+  }
+
+  showLevelComplete(nextLevelId) {
+    this.clearAllOverlays();
+    const overlay = VimKeyInfo.createLevelCompleteOverlay(nextLevelId, () => this.focus());
+    const container = this._container || document.body;
+    container.appendChild(overlay);
+  }
+
+  clearAllOverlays() {
+    const overlay = document.getElementById('vimKeyExplanation');
+    if (overlay) overlay.remove();
+    this.hideMessage();
+    this.fadeOutExistingBalloons();
   }
 
   showLockedGateHint(gateType) {

@@ -470,6 +470,20 @@ export class DOMGameRenderer extends GameRenderer {
     }
   }
 
+  showLevelComplete(nextLevelId) {
+    this.clearAllOverlays();
+    const overlay = VimKeyInfo.createLevelCompleteOverlay(nextLevelId, () => this.gameBoard.focus());
+    const container = document.getElementById('game-container') || document.body;
+    container.appendChild(overlay);
+  }
+
+  clearAllOverlays() {
+    const overlay = document.getElementById('vimKeyExplanation');
+    if (overlay) overlay.remove();
+    this.hideMessage();
+    this.fadeOutExistingBalloons();
+  }
+
   showLockedGateHint(gateType) {
     const existing = document.getElementById('vimKeyExplanation');
     if (existing) return;

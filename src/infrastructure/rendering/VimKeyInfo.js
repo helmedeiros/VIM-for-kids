@@ -113,6 +113,19 @@ export class VimKeyInfo {
     }, { delayAllKeys: 5000, onDismiss });
   }
 
+  static createLevelCompleteOverlay(nextLevelId, onDismiss) {
+    const levelNum = nextLevelId.replace('level_', '');
+    return VimKeyInfo._buildOverlay({
+      category: 'Level Complete',
+      badge: '\u2B50',
+      badgeClass: 'vim-key-badge-gold',
+      title: 'Amazing job!',
+      desc: `You completed this level! Get ready for <strong>Level ${levelNum}</strong> — new challenges await!`,
+      exampleLabel: 'What happens next',
+      exampleText: 'New area \u2192 New keys to find \u2192 New skills to learn!',
+    }, { delayAllKeys: 0, onDismiss });
+  }
+
   // ── Help modal key list ──
 
   static _baseKeys = [

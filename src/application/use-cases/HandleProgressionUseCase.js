@@ -99,11 +99,12 @@ export class HandleProgressionUseCase {
       await this._showLevelCutscene(gameId, nextLevelId);
     }
 
-    // Show level progression message
-    if (this._gameRenderer.showMessage) {
+    // Show level completion as centered overlay card
+    if (typeof this._gameRenderer.showLevelComplete === 'function') {
+      this._gameRenderer.showLevelComplete(nextLevelId);
+    } else if (this._gameRenderer.showMessage) {
       this._gameRenderer.showMessage(`Level Complete! Progressing to ${nextLevelId}...`);
     } else {
-      // Fallback to alert if showMessage is not available
       alert(`Level Complete! Progressing to ${nextLevelId}...`);
     }
 
