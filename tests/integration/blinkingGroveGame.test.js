@@ -408,7 +408,9 @@ describe('Blinking Grove Game Integration', () => {
     });
 
     it('should provide visual feedback when CollectibleKey is collected', async () => {
-      // Mock the renderer's showKeyInfo method to verify it's called
+      // First collectible triggers showCollectibleKeyIntro; subsequent use showKeyInfo
+      const introSpy = jest.fn();
+      game.gameRenderer.showCollectibleKeyIntro = introSpy;
       const showKeyInfoSpy = jest.spyOn(game.gameRenderer, 'showKeyInfo');
 
       const gameState = game.gameState.getCurrentState();
@@ -417,21 +419,19 @@ describe('Blinking Grove Game Integration', () => {
       );
 
       if (mazeKey) {
-        // Move cursor to key position
         game.gameState.cursor = game.gameState.cursor.moveTo(mazeKey.position);
 
-        // Use MovePlayerUseCase to trigger key collection (which calls showKeyInfo)
         const moveUseCase = game.movePlayerUseCase;
         if (moveUseCase && moveUseCase._checkKeyCollection) {
           moveUseCase._checkKeyCollection();
         } else {
-          // Fallback: call showKeyInfo directly and collect key
           game.gameRenderer.showKeyInfo(mazeKey);
           game.gameState.collectCollectibleKey(mazeKey);
         }
 
-        // Verify visual feedback was triggered
-        expect(showKeyInfoSpy).toHaveBeenCalledWith(mazeKey);
+        // Verify visual feedback was triggered (intro or standard)
+        const feedbackCalled = introSpy.mock.calls.length > 0 || showKeyInfoSpy.mock.calls.length > 0;
+        expect(feedbackCalled).toBe(true);
       }
 
       showKeyInfoSpy.mockRestore();

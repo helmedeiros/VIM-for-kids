@@ -1,6 +1,6 @@
 /**
- * Kid-friendly VIM key explanations with category, description, and example.
- * Also builds the shared DOM card used by both Canvas and DOM renderers.
+ * Kid-friendly VIM key explanations and shared overlay card builder.
+ * Single source of truth for all explanation cards used by both renderers.
  */
 export class VimKeyInfo {
   static get(key) {
@@ -9,116 +9,50 @@ export class VimKeyInfo {
     return info;
   }
 
+  // ── Overlay factory (single reusable builder) ──
+
   /**
-   * Create the explanation overlay DOM structure.
-   * @param {Object} vimKey - VimKey entity with .key and .description
-   * @param {Function} onDismiss - called when user dismisses the card
-   * @returns {HTMLElement} the overlay element (caller appends to DOM)
+   * Build a card overlay from a content descriptor.
+   * @param {Object} content - { category, badge, badgeClass, title, desc, exampleLabel, exampleText, before, after }
+   * @param {Object} options - { delayAllKeys: number (ms), onDismiss: Function }
+   * @returns {HTMLElement}
    */
-  static createOverlay(vimKey, onDismiss) {
-    const info = VimKeyInfo.get(vimKey.key);
+  static _buildOverlay(content, options = {}) {
+    const { delayAllKeys = 0, onDismiss = null } = options;
 
     const overlay = document.createElement('div');
     overlay.id = 'vimKeyExplanation';
     overlay.className = 'vim-key-overlay';
 
-    const card = document.createElement('div');
-    card.className = 'vim-key-card';
-
     let exampleHtml = '';
-    if (info.before && info.after) {
+    if (content.before && content.after) {
       exampleHtml = `<div class="vim-key-example vim-key-example-columns">
-        <div class="vim-key-example-col">
-          <div class="vim-key-example-label">Before</div>
-          <div class="vim-key-example-text">${info.before}</div>
-        </div>
+        <div class="vim-key-example-col"><div class="vim-key-example-label">Before</div><div class="vim-key-example-text">${content.before}</div></div>
         <div class="vim-key-example-arrow">\u2192</div>
-        <div class="vim-key-example-col">
-          <div class="vim-key-example-label">After</div>
-          <div class="vim-key-example-text">${info.after}</div>
-        </div>
+        <div class="vim-key-example-col"><div class="vim-key-example-label">After</div><div class="vim-key-example-text">${content.after}</div></div>
       </div>`;
-    } else if (info.example) {
-      exampleHtml = `<div class="vim-key-example"><div class="vim-key-example-label">Example</div><div class="vim-key-example-text">${info.example}</div></div>`;
+    } else if (content.exampleText) {
+      exampleHtml = `<div class="vim-key-example"><div class="vim-key-example-label">${content.exampleLabel || 'Example'}</div><div class="vim-key-example-text">${content.exampleText}</div></div>`;
     }
 
+    const card = document.createElement('div');
+    card.className = 'vim-key-card';
     card.innerHTML = `
-      <div class="vim-key-category">${info.category}</div>
-      <div class="vim-key-badge">${vimKey.key}</div>
-      <div class="vim-key-title">New Key Unlocked!</div>
-      <div class="vim-key-desc">${info.desc}</div>
+      <div class="vim-key-category">${content.category}</div>
+      <div class="vim-key-badge ${content.badgeClass || ''}">${content.badge}</div>
+      <div class="vim-key-title">${content.title}</div>
+      <div class="vim-key-desc">${content.desc}</div>
       ${exampleHtml}
       <div class="vim-key-hint">Press ESC to continue</div>
     `;
-
     overlay.appendChild(card);
 
-    // Dismiss: ESC or click immediately, any key after 10s
-    let allowAllKeys = false;
-    const timer = setTimeout(() => {
-      allowAllKeys = true;
-    }, 10000);
+    // Dismiss logic: ESC/click always, other keys after delay
+    let allowAllKeys = delayAllKeys <= 0;
+    const timer = delayAllKeys > 0 ? setTimeout(() => { allowAllKeys = true; }, delayAllKeys) : null;
 
     const dismiss = () => {
-      clearTimeout(timer);
-      overlay.classList.add('vim-key-dismissing');
-      setTimeout(() => overlay.remove(), 300);
-      document.removeEventListener('keydown', onKey);
-      if (onDismiss) onDismiss();
-    };
-
-    const onKey = (e) => {
-      if (e.key === 'Escape' || allowAllKeys) {
-        e.preventDefault();
-        dismiss();
-      }
-    };
-
-    overlay.addEventListener('click', dismiss);
-    document.addEventListener('keydown', onKey);
-
-    return overlay;
-  }
-
-  /**
-   * Update the "Your Keys" section in the help modal with collected keys.
-   * Each key badge is clickable to re-open its explanation.
-   * @param {Set<string>} collectedKeys
-   * @param {Function} onKeyClick - called with a vimKey-like object when a key is clicked
-   */
-  /**
-   * Create an intro overlay explaining collectible keys (shown on first pickup).
-   * @param {Object} collectibleKey - the collected key with .keyId and .name
-   * @param {Function} onDismiss - called when dismissed
-   * @returns {HTMLElement}
-   */
-  static createCollectibleIntroOverlay(collectibleKey, onDismiss) {
-    const overlay = document.createElement('div');
-    overlay.id = 'vimKeyExplanation';
-    overlay.className = 'vim-key-overlay';
-
-    const name = collectibleKey.name || collectibleKey.keyId || 'Special Key';
-
-    const card = document.createElement('div');
-    card.className = 'vim-key-card';
-    card.innerHTML = `
-      <div class="vim-key-category">Special Item</div>
-      <div class="vim-key-badge vim-key-badge-gold">\uD83D\uDD11</div>
-      <div class="vim-key-title">${name} Found!</div>
-      <div class="vim-key-desc">You found a special key! These keys open locked doors that block your path. Check your <strong>Key Inventory</strong> at the bottom of the screen to see what you&rsquo;ve collected.</div>
-      <div class="vim-key-example">
-        <div class="vim-key-example-label">How it works</div>
-        <div class="vim-key-example-text">Find key \u2192 Walk to locked door \u2192 Door opens!</div>
-      </div>
-      <div class="vim-key-hint">Press ESC to continue</div>
-    `;
-
-    overlay.appendChild(card);
-
-    let allowAllKeys = false;
-    const timer = setTimeout(() => { allowAllKeys = true; }, 10000);
-    const dismiss = () => {
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
       overlay.classList.add('vim-key-dismissing');
       setTimeout(() => overlay.remove(), 300);
       document.removeEventListener('keydown', onKey);
@@ -133,54 +67,53 @@ export class VimKeyInfo {
     return overlay;
   }
 
-  /**
-   * Create an overlay explaining a locked gate (shown when bumping into one).
-   * @param {string} gateType - 'main' or 'secondary'
-   * @param {Function} onDismiss
-   * @returns {HTMLElement}
-   */
-  static createLockedGateOverlay(gateType, onDismiss) {
-    const overlay = document.createElement('div');
-    overlay.id = 'vimKeyExplanation';
-    overlay.className = 'vim-key-overlay';
+  // ── Public overlay creators (thin wrappers over _buildOverlay) ──
 
-    const isMain = gateType === 'main';
-    const card = document.createElement('div');
-    card.className = 'vim-key-card';
-    card.innerHTML = `
-      <div class="vim-key-category">${isMain ? 'Locked Gate' : 'Locked Door'}</div>
-      <div class="vim-key-badge vim-key-badge-locked">\uD83D\uDD12</div>
-      <div class="vim-key-title">${isMain ? 'Gate is Locked!' : 'Door is Locked!'}</div>
-      <div class="vim-key-desc">${isMain
-        ? 'This gate needs <strong>all the VIM letter keys</strong> to open. Look around the map for letters like h, j, k, l!'
-        : 'This door needs a <strong>special key</strong> to open. Explore the area and look for a shiny key item!'
-      }</div>
-      <div class="vim-key-example">
-        <div class="vim-key-example-label">${isMain ? 'What to do' : 'What to do'}</div>
-        <div class="vim-key-example-text">${isMain
-          ? 'Explore the map \u2192 Collect all letter keys \u2192 Gate opens!'
-          : 'Look around \u2192 Find the special key \u2192 Walk to this door \u2192 It opens!'
-        }</div>
-      </div>
-      <div class="vim-key-hint">Press ESC to continue</div>
-    `;
-
-    overlay.appendChild(card);
-
-    const dismiss = () => {
-      overlay.classList.add('vim-key-dismissing');
-      setTimeout(() => overlay.remove(), 300);
-      document.removeEventListener('keydown', onKey);
-      if (onDismiss) onDismiss();
-    };
-    const onKey = (e) => {
-      if (e.key === 'Escape') { e.preventDefault(); dismiss(); }
-    };
-    overlay.addEventListener('click', dismiss);
-    document.addEventListener('keydown', onKey);
-
-    return overlay;
+  static createOverlay(vimKey, onDismiss) {
+    const info = VimKeyInfo.get(vimKey.key);
+    return VimKeyInfo._buildOverlay({
+      category: info.category,
+      badge: vimKey.key,
+      title: 'New Key Unlocked!',
+      desc: info.desc,
+      before: info.before,
+      after: info.after,
+      exampleLabel: 'Example',
+      exampleText: info.example,
+    }, { delayAllKeys: 10000, onDismiss });
   }
+
+  static createCollectibleIntroOverlay(collectibleKey, onDismiss) {
+    const name = collectibleKey.name || collectibleKey.keyId || 'Special Key';
+    return VimKeyInfo._buildOverlay({
+      category: 'Special Item',
+      badge: '\uD83D\uDD11',
+      badgeClass: 'vim-key-badge-gold',
+      title: `${name} Found!`,
+      desc: 'You found a special key! These keys open locked doors that block your path. Check your <strong>Key Inventory</strong> at the bottom of the screen!',
+      exampleLabel: 'How it works',
+      exampleText: 'Find key \u2192 Walk to locked door \u2192 Door opens!',
+    }, { delayAllKeys: 10000, onDismiss });
+  }
+
+  static createLockedGateOverlay(gateType, onDismiss) {
+    const isMain = gateType === 'main';
+    return VimKeyInfo._buildOverlay({
+      category: isMain ? 'Locked Gate' : 'Locked Door',
+      badge: '\uD83D\uDD12',
+      badgeClass: 'vim-key-badge-locked',
+      title: isMain ? 'Gate is Locked!' : 'Door is Locked!',
+      desc: isMain
+        ? 'This gate needs <strong>all the VIM letter keys</strong> to open. Look around the map for letters like h, j, k, l!'
+        : 'This door needs a <strong>special key</strong> to open. Explore the area and look for a shiny key!',
+      exampleLabel: 'What to do',
+      exampleText: isMain
+        ? 'Explore the map \u2192 Collect all letter keys \u2192 Gate opens!'
+        : 'Look around \u2192 Find the special key \u2192 Walk to this door \u2192 It opens!',
+    }, { delayAllKeys: 0, onDismiss });
+  }
+
+  // ── Help modal key list ──
 
   static _baseKeys = [
     { key: 'h', label: 'Left' },
@@ -200,7 +133,6 @@ export class VimKeyInfo {
       onKeyClick({ key: keyName, description: '' });
     };
 
-    // Always show base movement keys
     VimKeyInfo._baseKeys.forEach(({ key, label }) => {
       const collected = collectedKeys.has(key);
       const row = document.createElement('div');
@@ -209,9 +141,7 @@ export class VimKeyInfo {
       const badge = document.createElement('span');
       badge.className = collected ? 'help-key clickable' : 'help-key help-key-locked';
       badge.textContent = key;
-      if (collected) {
-        badge.addEventListener('click', () => openKey(key));
-      }
+      if (collected) badge.addEventListener('click', () => openKey(key));
 
       const desc = document.createElement('span');
       desc.className = 'help-key-label';
@@ -222,7 +152,6 @@ export class VimKeyInfo {
       container.appendChild(row);
     });
 
-    // Add any extra collected keys beyond h/j/k/l
     const baseSet = new Set(VimKeyInfo._baseKeys.map((b) => b.key));
     const extras = [...collectedKeys].filter((k) => !baseSet.has(k));
 
@@ -243,7 +172,7 @@ export class VimKeyInfo {
 
         const desc = document.createElement('span');
         desc.className = 'help-key-label';
-        desc.textContent = info.desc.split('.')[0]; // First sentence only
+        desc.textContent = info.desc.split('.')[0];
 
         row.appendChild(badge);
         row.appendChild(desc);
@@ -251,6 +180,8 @@ export class VimKeyInfo {
       });
     }
   }
+
+  // ── Key data ──
 
   static _data = {
     h: {

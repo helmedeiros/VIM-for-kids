@@ -19,8 +19,11 @@ export class MovePlayerUseCase {
     const newPosition = this._calculateNewPosition(currentPosition, direction);
 
     // Check if move is valid (both map and gate walkability, plus directional ramp logic)
-    if (!this._isPositionWalkable(newPosition, direction)) {
-      this._showBlockedGateHint(newPosition);
+    const walkCheck = this._checkWalkability(newPosition, direction);
+    if (!walkCheck.walkable) {
+      if (walkCheck.blockedBy && typeof this._gameRenderer.showLockedGateHint === 'function') {
+        this._gameRenderer.showLockedGateHint(walkCheck.blockedBy);
+      }
       return { success: false, reason: 'invalid_position' };
     }
 
@@ -65,8 +68,8 @@ export class MovePlayerUseCase {
     const currentPosition = this._gameState.cursor.position;
     const newPosition = this._calculateNewPosition(currentPosition, direction);
 
-    // Check if move is valid (both map and gate walkability, plus directional ramp logic)
-    if (!this._isPositionWalkable(newPosition, direction)) {
+    // Check if move is valid
+    if (!this._checkWalkability(newPosition, direction).walkable) {
       return { success: false, reason: 'invalid_position' }; // Invalid move, do nothing
     }
 
@@ -103,49 +106,41 @@ export class MovePlayerUseCase {
     };
   }
 
-  _isPositionWalkable(position, direction = null) {
-    // First check if the map position is walkable
+  _checkWalkability(position, direction = null) {
     if (!this._gameState.map.isWalkable(position)) {
-      return false;
+      return { walkable: false };
     }
 
-    // Check directional ramp logic if we have direction info
     if (direction && !this._isRampMovementAllowed(position, direction)) {
-      return false;
+      return { walkable: false };
     }
 
-    // Then check if there's a gate at this position and if it's walkable
-    // Only check gates if the game state supports them (backward compatibility)
     if (typeof this._gameState.getGate === 'function') {
       const gate = this._gameState.getGate();
-      if (gate && gate.position.equals(position)) {
-        return gate.isWalkable();
+      if (gate && gate.position.equals(position) && !gate.isWalkable()) {
+        return { walkable: false, blockedBy: 'main' };
       }
     }
 
-    // Check secondary gates if they exist
     if (typeof this._gameState.getSecondaryGates === 'function') {
-      const secondaryGates = this._gameState.getSecondaryGates();
-      for (const gate of secondaryGates) {
+      for (const gate of this._gameState.getSecondaryGates()) {
         if (gate && gate.position.equals(position)) {
-          // If gate is already open, it's walkable
-          if (gate.isWalkable()) {
-            return true;
-          }
-
-          // If gate is closed, try to unlock it with collectible keys
+          if (gate.isWalkable()) return { walkable: true };
           if (typeof this._gameState.tryUnlockSecondaryGate === 'function') {
-            const unlocked = this._gameState.tryUnlockSecondaryGate(position);
-            return unlocked; // Return true if unlocked, false if player doesn't have key
+            return this._gameState.tryUnlockSecondaryGate(position)
+              ? { walkable: true }
+              : { walkable: false, blockedBy: 'secondary' };
           }
-
-          // Fallback: gate is not walkable
-          return false;
+          return { walkable: false, blockedBy: 'secondary' };
         }
       }
     }
 
-    return true;
+    return { walkable: true };
+  }
+
+  _isPositionWalkable(position, direction = null) {
+    return this._checkWalkability(position, direction).walkable;
   }
 
   _isRampMovementAllowed(targetPosition, direction) {
@@ -536,29 +531,4 @@ export class MovePlayerUseCase {
     });
   }
 
-  _showBlockedGateHint(position) {
-    // Check if the blocked position is a closed main gate
-    if (typeof this._gameState.getGate === 'function') {
-      const gate = this._gameState.getGate();
-      if (gate && gate.position.equals(position) && !gate.isWalkable()) {
-        if (typeof this._gameRenderer.showLockedGateHint === 'function') {
-          this._gameRenderer.showLockedGateHint('main');
-        }
-        return;
-      }
-    }
-
-    // Check if the blocked position is a closed secondary gate
-    if (typeof this._gameState.getSecondaryGates === 'function') {
-      const secondaryGates = this._gameState.getSecondaryGates();
-      for (const gate of secondaryGates) {
-        if (gate && gate.position.equals(position) && !gate.isWalkable()) {
-          if (typeof this._gameRenderer.showLockedGateHint === 'function') {
-            this._gameRenderer.showLockedGateHint('secondary');
-          }
-          return;
-        }
-      }
-    }
-  }
 }
