@@ -429,6 +429,7 @@ export class BlinkingGroveZone {
 
               { text: ':', position: [30, 9], color: '#ffa726', fontSize: '14px', group: 'vim_secret_aside' },
               { text: ')', position: [31, 9], color: '#ffa726', fontSize: '14px', group: 'vim_secret_aside' },
+              { text: ')', position: [35, 9], color: '#ffa726', fontSize: '14px', group: 'vim_secret_aside' },
             ],
             specialTiles: [
               // Three keys positioned near the letters for the three gates
