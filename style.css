@@ -1136,16 +1136,26 @@ h1 {
 }
 
 /* UI Elements — Neo-brutalist kids-friendly style */
+
+/* Bottom HUD bar — flex container so the two panels grow naturally without
+   overlapping each other as the player collects more keys. */
+.bottom-ui-bar {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  z-index: 1000;
+  max-width: calc(100% - 32px);
+}
+
 .collected-keys {
   margin: 0;
   padding: 10px 12px;
   background-color: #ffffff;
   border-radius: 10px;
   border: 3px solid #1a1a2e;
-  position: absolute;
-  bottom: 16px;
-  left: 16px;
-  z-index: 1000;
   font-size: 12px;
   height: 80px;
   box-sizing: border-box;
@@ -1205,10 +1215,6 @@ h1 {
   background-color: #ffffff;
   border-radius: 10px;
   border: 3px solid #1a1a2e;
-  position: absolute;
-  bottom: 16px;
-  left: 286px;
-  z-index: 1000;
   font-size: 12px;
   height: 80px;
   box-sizing: border-box;
@@ -1344,8 +1350,6 @@ h1 {
   }
 
   .collectible-inventory {
-    bottom: 20px;
-    right: 270px;
     max-width: 220px;
     height: 80px;
   }
@@ -1379,8 +1383,6 @@ h1 {
   }
 
   .collectible-inventory {
-    bottom: 20px;
-    right: 230px;
     max-width: 180px;
     height: 80px;
   }
