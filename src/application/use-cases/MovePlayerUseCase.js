@@ -200,8 +200,9 @@ export class MovePlayerUseCase {
 
   // Side-effect-free walkability predicate used by the WordMotion flood-fill.
   // Mirrors _checkWalkability but never triggers tryUnlockSecondaryGate (which
-  // would consume collected keys), and treats rocks as jumpable so 'w' can hop
-  // over them even though h/j/k/l cannot step on them.
+  // would consume collected keys). Word motions (w, e) can hop over rocks AND
+  // walls — but water (and any other non-walkable tile not in this list) stays
+  // a hard border between text groups.
   _isWalkableForWordMotion(position) {
     if (typeof this._gameState.getGate === 'function') {
       const gate = this._gameState.getGate();
@@ -218,7 +219,7 @@ export class MovePlayerUseCase {
     }
     if (this._gameState.map.isWalkable(position)) return true;
     const tile = this._gameState.map.getTileAt(position);
-    return !!(tile && tile.name === 'rock');
+    return !!(tile && (tile.name === 'rock' || tile.name === 'wall'));
   }
 
   _isRampMovementAllowed(targetPosition, direction) {

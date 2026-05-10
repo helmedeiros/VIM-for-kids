@@ -184,20 +184,47 @@ describe('MovePlayerUseCase', () => {
         expect(mockGameState.tryUnlockSecondaryGate).not.toHaveBeenCalled();
       });
 
-      it('jumps over a rock tile (rocks are passable for w-motion but not for h/j/k/l)', async () => {
+      it('jumps over a full rock column (rocks are passable for w-motion)', async () => {
         mockGameState.collectedKeys = new Set(['w']);
         mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
-        // (6, 5) is a rock — non-walkable to step-by-step movement but jumpable for w-motion.
-        mockMap.isWalkable.mockImplementation((pos) => !(pos.x === 6 && pos.y === 5));
+        // Entire column 6 is rock — a true barrier that BFS cannot detour around.
+        mockMap.isWalkable.mockImplementation((pos) => pos.x !== 6);
         mockMap.getTileAt.mockImplementation((pos) =>
-          pos.x === 6 && pos.y === 5 ? { name: 'rock', walkable: false } : { name: 'grass' }
+          pos.x === 6 ? { name: 'rock', walkable: false } : { name: 'grass' }
         );
 
         const result = await movePlayerUseCase.execute('word_forward');
 
         expect(result.success).toBe(true);
         expect(mockGameState.cursor.position.x).toBe(7);
-        expect(mockGameState.cursor.position.y).toBe(5);
+      });
+
+      it('jumps over a full wall column (walls are passable for w-motion)', async () => {
+        mockGameState.collectedKeys = new Set(['w']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+        mockMap.isWalkable.mockImplementation((pos) => pos.x !== 6);
+        mockMap.getTileAt.mockImplementation((pos) =>
+          pos.x === 6 ? { name: 'wall', walkable: false } : { name: 'grass' }
+        );
+
+        const result = await movePlayerUseCase.execute('word_forward');
+
+        expect(result.success).toBe(true);
+        expect(mockGameState.cursor.position.x).toBe(7);
+      });
+
+      it('refuses to jump across a full water column (water is a hard border)', async () => {
+        mockGameState.collectedKeys = new Set(['w']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+        mockMap.isWalkable.mockImplementation((pos) => pos.x !== 6);
+        mockMap.getTileAt.mockImplementation((pos) =>
+          pos.x === 6 ? { name: 'water', walkable: false } : { name: 'grass' }
+        );
+
+        const result = await movePlayerUseCase.execute('word_forward');
+
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('no_next_word');
       });
 
       it('routes around an isolated non-walkable tile and reaches the next word', async () => {
