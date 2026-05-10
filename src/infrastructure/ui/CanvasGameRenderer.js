@@ -547,8 +547,8 @@ export class CanvasGameRenderer extends GameRenderer {
       if (hasCharSprites) {
         this._drawCharSprite(ctx, this._characterSprites.getVimKeyFrame(), screenX, screenY, ts);
         // Draw key letter on top of keycap
-        ctx.fillStyle = '#2c3e50';
-        ctx.font = 'bold 11px "Courier New", monospace';
+        ctx.fillStyle = '#1a1a2e';
+        ctx.font = 'bold 16px Arial, Helvetica, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(key.key, screenX + half, screenY + half);
@@ -630,11 +630,16 @@ export class CanvasGameRenderer extends GameRenderer {
     // Text Label
     const label = this._entityIndex.getTextLabelAt(worldX, worldY);
     if (label) {
-      ctx.fillStyle = label.color || '#2c3e50';
-      ctx.font = `${label.fontWeight || 'bold'} ${label.fontSize || '10px'} "Courier New", monospace`;
+      ctx.font = 'bold 18px Arial, Helvetica, sans-serif';
       ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText(label.text, screenX + half, screenY + ts - 2);
+      ctx.textBaseline = 'middle';
+      // Dark outline for readability on any background
+      ctx.strokeStyle = '#1a1a2e';
+      ctx.lineWidth = 4;
+      ctx.lineJoin = 'round';
+      ctx.strokeText(label.text, screenX + half, screenY + half);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(label.text, screenX + half, screenY + half);
     }
 
     // NPC
