@@ -328,25 +328,35 @@ export class CanvasGameRenderer extends GameRenderer {
     balloon.className = 'npc-balloon';
     balloon.textContent = message;
 
-    // Position balloon relative to container
     const container = this._container || document.body;
+    balloon.style.position = 'absolute';
+    balloon.style.visibility = 'hidden';
     container.appendChild(balloon);
 
-    // Try to position above the NPC using canvas coordinates
+    // Position directly above the NPC tile
     if (this._currentGameState && npc) {
       const npcPos = this._findNPCScreenPosition(npc);
       if (npcPos) {
         const canvasRect = this.gameBoard.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
-        const balloonX = canvasRect.left - containerRect.left + npcPos.x + this._camera.tileSize / 2;
-        const balloonY = canvasRect.top - containerRect.top + npcPos.y - 60;
+        const balloonRect = balloon.getBoundingClientRect();
+        const ts = this._camera.tileSize;
 
-        balloon.style.left = `${balloonX}px`;
-        balloon.style.top = `${Math.max(balloonY, 10)}px`;
+        // NPC center in page coords
+        const npcCenterX = canvasRect.left + npcPos.x + ts / 2;
+        const npcTopY = canvasRect.top + npcPos.y;
+
+        // Position balloon centered above NPC
+        const balloonLeft = npcCenterX - containerRect.left;
+        const balloonTop = npcTopY - containerRect.top - balloonRect.height - 18;
+
+        balloon.style.left = `${balloonLeft}px`;
+        balloon.style.top = `${Math.max(balloonTop, 10)}px`;
         balloon.style.transform = 'translateX(-50%)';
-        balloon.style.position = 'absolute';
       }
     }
+
+    balloon.style.visibility = 'visible';
 
     if (duration > 0) {
       setTimeout(() => {
