@@ -439,7 +439,7 @@ export class BlinkingGroveZone {
             // Gate in the hidden area that leads to the real next level
             gate: {
               locked: false, // Unlocked - player earned access by reaching hidden area
-              position: [73, 10], // Gate position in the hidden area (on the dirt path at the far right)
+              position: [34, 17], // Bottom of the vertical path, next to the level-complete NPC
               leadsTo: 'zone_2', // This gate leads to the actual next zone
             },
             // Secondary gates within the hidden area that require specific keys

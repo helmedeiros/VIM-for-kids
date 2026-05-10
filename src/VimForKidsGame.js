@@ -414,14 +414,10 @@ export class VimForKidsGame {
           }
         }
 
-        // Trigger progression
+        // Trigger progression through the standard flow
         this.gameState.markEscProgressionPressed();
 
-        if (isAtLevelCompleteNPC) {
-          // Near the level-complete NPC — directly transition to next level
-          this.gameRenderer.showMessage('Level Complete! Progressing to Level 2...', { duration: 3000 });
-          setTimeout(() => this.transitionToLevel('level_2'), 2000);
-        } else if (this.handleProgressionUseCase && this.handleProgressionUseCase.shouldExecuteProgression()) {
+        if (this.handleProgressionUseCase && this.handleProgressionUseCase.shouldExecuteProgression()) {
           await this.handleProgressionUseCase.execute();
         }
       }
