@@ -821,48 +821,33 @@ h1 {
   box-shadow: 1px 1px 0 #1a1a2e;
 }
 
-/* Help Modal — content styles (reuses game-modal structure) */
-.help-section {
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.help-section h3 {
-  font-size: 1em;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin: 0 0 10px 0;
-  color: #1a1a2e;
-}
-
-.help-section h3::before,
-.help-section h3::after {
-  content: ' \2014 ';
-  color: #ccc;
-}
-
-.help-section p {
-  font-size: 0.9em;
-  line-height: 1.6;
-  margin: 6px 0;
-  color: #333;
-  text-align: center;
-}
-
+/* Help Modal — content styles (reuses game-modal + game-item cards) */
 .help-hint {
   font-size: 0.82em !important;
   color: #4ecdc4 !important;
   font-weight: 700 !important;
   margin-top: 8px !important;
+  text-align: center;
 }
 
 .help-keys {
   display: flex;
   justify-content: center;
-  gap: 16px;
-  margin: 12px 0;
+  gap: 14px;
+  margin: 10px 0;
   flex-wrap: wrap;
+}
+
+.help-list {
+  font-size: 0.88em;
+  line-height: 1.7;
+  padding-left: 22px;
+  margin: 6px 0;
+  color: #333;
+}
+
+.help-list li {
+  margin-bottom: 4px;
 }
 
 .help-key-row {
@@ -892,21 +877,6 @@ h1 {
   color: #666;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-
-.help-section ol,
-.help-section ul {
-  font-size: 0.88em;
-  line-height: 1.7;
-  padding-left: 24px;
-  margin: 8px auto;
-  color: #333;
-  text-align: left;
-  max-width: 340px;
-}
-
-.help-section li {
-  margin-bottom: 4px;
 }
 
 .help-faq {
