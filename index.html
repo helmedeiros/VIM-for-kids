@@ -52,14 +52,11 @@
           var levelBar = document.querySelector('.level-selection');
           var title = document.querySelector('h1');
           var hideTimer = null;
-
-          function isVisible() {
-            return !levelBar.classList.contains('hidden-levels') &&
-                   !levelBar.classList.contains('hiding');
-          }
+          var shown = true;
 
           function hideLevels() {
-            if (!levelBar) return;
+            if (!levelBar || !shown) return;
+            shown = false;
             clearTimeout(hideTimer);
             hideTimer = null;
             levelBar.classList.add('hiding');
@@ -70,11 +67,11 @@
           }
 
           function showLevels() {
-            if (!levelBar) return;
+            if (!levelBar || shown) return;
+            shown = true;
             clearTimeout(hideTimer);
-            levelBar.classList.remove('hidden-levels');
+            levelBar.classList.remove('hidden-levels', 'hiding');
             void levelBar.offsetWidth;
-            levelBar.classList.remove('hiding');
             hideTimer = setTimeout(hideLevels, 60000);
           }
 
@@ -84,7 +81,7 @@
           // Toggle on title click
           if (title) {
             title.addEventListener('click', function () {
-              if (isVisible()) {
+              if (shown) {
                 hideLevels();
               } else {
                 showLevels();
