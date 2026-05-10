@@ -33,6 +33,31 @@ describe('VimKeyInfo', () => {
       expect(info.category).toBe('VIM');
       expect(info.desc).toContain('unknown');
     });
+
+    // Popup descriptions explain what happens to the character (long form,
+    // matching the h/j/k/l style). The helper menu uses a separate shortLabel.
+    describe('word-jump descriptions and short labels', () => {
+      it('w has a character-focused desc and a two-word shortLabel', () => {
+        const info = VimKeyInfo.get('w');
+        expect(info.desc.toLowerCase()).toContain('character');
+        expect(info.desc.toLowerCase()).toContain('next word');
+        expect(info.shortLabel).toBe('Jump forward');
+      });
+
+      it('e has a character-focused desc and a two-word shortLabel', () => {
+        const info = VimKeyInfo.get('e');
+        expect(info.desc.toLowerCase()).toContain('character');
+        expect(info.desc.toLowerCase()).toContain('end');
+        expect(info.shortLabel).toBe('Jump end');
+      });
+
+      it('b has a character-focused desc and a two-word shortLabel', () => {
+        const info = VimKeyInfo.get('b');
+        expect(info.desc.toLowerCase()).toContain('character');
+        expect(info.desc.toLowerCase()).toContain('previous word');
+        expect(info.shortLabel).toBe('Jump back');
+      });
+    });
   });
 
   describe('_buildOverlay', () => {
@@ -274,6 +299,15 @@ describe('VimKeyInfo', () => {
     it('does nothing if container missing', () => {
       document.body.innerHTML = '';
       expect(() => VimKeyInfo.updateHelpKeys(new Set(['h']), jest.fn())).not.toThrow();
+    });
+
+    it('uses the short shortLabel (not the long popup desc) for extra-key labels', () => {
+      VimKeyInfo.updateHelpKeys(new Set(['h', 'j', 'k', 'l', 'w', 'e', 'b']), jest.fn());
+      const container = document.getElementById('helpCollectedKeys');
+      const extraLabels = Array.from(container.querySelectorAll('.help-key-row .help-key-label'))
+        .slice(4) // skip h/j/k/l rows
+        .map((el) => el.textContent);
+      expect(extraLabels).toEqual(['Jump forward', 'Jump end', 'Jump back']);
     });
   });
 });
