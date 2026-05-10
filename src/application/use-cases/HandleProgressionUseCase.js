@@ -99,7 +99,7 @@ export class HandleProgressionUseCase {
       await this._showLevelCutscene(gameId, nextLevelId);
     }
 
-    // Show level completion as centered overlay card
+    // Show level completion message
     if (typeof this._gameRenderer.showLevelComplete === 'function') {
       this._gameRenderer.showLevelComplete(nextLevelId);
     } else if (this._gameRenderer.showMessage) {
@@ -108,7 +108,7 @@ export class HandleProgressionUseCase {
       alert(`Level Complete! Progressing to ${nextLevelId}...`);
     }
 
-    // Trigger level transition through the game instance
+    // Trigger level transition after delay so player can read the message
     this._triggerLevelTransition(nextLevelId);
   }
 
@@ -127,15 +127,13 @@ export class HandleProgressionUseCase {
         ) {
           await window.vimForKidsGame.transitionToLevel(nextLevelId);
         } else {
-          // Fallback: reload page with new level parameter
           this._fallbackLevelTransition(nextLevelId);
         }
       } catch (error) {
         console.error('Error during level transition:', error);
-        // Fallback on error
         this._fallbackLevelTransition(nextLevelId);
       }
-    }, 2000); // 2 second delay to show the message
+    }, 3000);
   }
 
   /**

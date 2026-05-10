@@ -25,6 +25,7 @@ describe('HandleProgressionUseCase', () => {
     mockGameRenderer = {
       render: jest.fn(),
       showMessage: jest.fn(),
+      showLevelComplete: jest.fn(),
     };
 
     // Mock game instance
@@ -92,9 +93,7 @@ describe('HandleProgressionUseCase', () => {
       const result = await handleProgressionUseCase.execute();
 
       expect(result).toEqual({ type: 'level', nextLevelId: 'level_2' });
-      expect(mockGameRenderer.showMessage).toHaveBeenCalledWith(
-        'Level Complete! Progressing to level_2...'
-      );
+      expect(mockGameRenderer.showLevelComplete).toHaveBeenCalledWith('level_2');
     });
 
     it('should handle no progression needed', async () => {
@@ -172,7 +171,7 @@ describe('HandleProgressionUseCase', () => {
       await handleProgressionUseCase.execute();
 
       // Fast-forward timers
-      jest.advanceTimersByTime(2000);
+      jest.advanceTimersByTime(3000);
       await Promise.resolve(); // Wait for async operations
 
       expect(mockGameInstance.transitionToLevel).toHaveBeenCalledWith('level_2');
@@ -190,9 +189,7 @@ describe('HandleProgressionUseCase', () => {
       const result = await useCaseWithoutInstance.execute();
 
       expect(result).toEqual({ type: 'level', nextLevelId: 'level_2' });
-      expect(mockGameRenderer.showMessage).toHaveBeenCalledWith(
-        'Level Complete! Progressing to level_2...'
-      );
+      expect(mockGameRenderer.showLevelComplete).toHaveBeenCalledWith('level_2');
     });
 
     it('should handle level progression messaging correctly', async () => {
@@ -204,9 +201,7 @@ describe('HandleProgressionUseCase', () => {
       const result = await handleProgressionUseCase.execute();
 
       expect(result).toEqual({ type: 'level', nextLevelId: 'level_3' });
-      expect(mockGameRenderer.showMessage).toHaveBeenCalledWith(
-        'Level Complete! Progressing to level_3...'
-      );
+      expect(mockGameRenderer.showLevelComplete).toHaveBeenCalledWith('level_3');
     });
 
     it('should handle level progression with game instance correctly', async () => {
@@ -218,9 +213,7 @@ describe('HandleProgressionUseCase', () => {
       const result = await handleProgressionUseCase.execute();
 
       expect(result).toEqual({ type: 'level', nextLevelId: 'level_4' });
-      expect(mockGameRenderer.showMessage).toHaveBeenCalledWith(
-        'Level Complete! Progressing to level_4...'
-      );
+      expect(mockGameRenderer.showLevelComplete).toHaveBeenCalledWith('level_4');
       // The actual transition is scheduled asynchronously, so we just verify the immediate response
     });
   });
@@ -340,6 +333,7 @@ describe('HandleProgressionUseCase', () => {
   describe('level progression without showMessage', () => {
     it('should use alert as fallback when showMessage is not available', async () => {
       delete mockGameRenderer.showMessage;
+      delete mockGameRenderer.showLevelComplete;
       global.alert = jest.fn();
 
       mockGameState.executeProgression.mockReturnValue({
