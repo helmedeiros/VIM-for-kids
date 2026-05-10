@@ -512,12 +512,12 @@ export class TilePainter {
     slope.addColorStop(1, '#384858');
     ctx.fillStyle = slope;
     ctx.fillRect(ts / 2 - 4, 0, 8, ts);
-    // Arrow pointing left (enter from right)
+    // Arrow pointing right (movement direction)
     ctx.fillStyle = 'rgba(200, 210, 230, 0.5)';
     ctx.beginPath();
-    ctx.moveTo(6, ts / 2);
-    ctx.lineTo(12, ts / 2 - 4);
-    ctx.lineTo(12, ts / 2 + 4);
+    ctx.moveTo(ts - 6, ts / 2);
+    ctx.lineTo(ts - 12, ts / 2 - 4);
+    ctx.lineTo(ts - 12, ts / 2 + 4);
     ctx.closePath();
     ctx.fill();
   }
@@ -534,12 +534,12 @@ export class TilePainter {
     slope.addColorStop(1, '#90a0b8');
     ctx.fillStyle = slope;
     ctx.fillRect(ts / 2 - 4, 0, 8, ts);
-    // Arrow pointing right (enter from left)
+    // Arrow pointing left (movement direction)
     ctx.fillStyle = 'rgba(200, 210, 230, 0.5)';
     ctx.beginPath();
-    ctx.moveTo(ts - 6, ts / 2);
-    ctx.lineTo(ts - 12, ts / 2 - 4);
-    ctx.lineTo(ts - 12, ts / 2 + 4);
+    ctx.moveTo(6, ts / 2);
+    ctx.lineTo(12, ts / 2 - 4);
+    ctx.lineTo(12, ts / 2 + 4);
     ctx.closePath();
     ctx.fill();
   }
