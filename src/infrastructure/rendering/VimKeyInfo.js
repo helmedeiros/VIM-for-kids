@@ -71,12 +71,12 @@ export class VimKeyInfo {
     },
     j: {
       category: 'Movement',
-      desc: 'Moves your character one step DOWN. The j hangs down, just like going down!',
+      desc: 'Moves your character one step DOWN.',
       example: 'You go down one row, like stepping off a stair!',
     },
     k: {
       category: 'Movement',
-      desc: 'Moves your character one step UP. The k points up, like climbing a mountain!',
+      desc: 'Moves your character one step UP.',
       example: 'You go up one row, like jumping onto a stair!',
     },
     l: {
