@@ -313,6 +313,10 @@ export class CanvasGameRenderer extends GameRenderer {
 
   resetCamera() {
     this._camera.reset();
+    this._lastCursorX = null;
+    this._lastCursorY = null;
+    this._prevCollectedCount = 0;
+    this._prevGateOpen = null;
   }
 
   showNPCDialogue(npc, dialogue, options = {}) {
