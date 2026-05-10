@@ -223,7 +223,7 @@ export class VimKeyInfo {
     },
     w: {
       category: 'Word Jump',
-      desc: 'Jump forward.',
+      desc: 'Jump forward',
       example: 'the [c]at sat \u2192 press w \u2192 the cat [s]at',
     },
     W: {
@@ -233,7 +233,7 @@ export class VimKeyInfo {
     },
     e: {
       category: 'Word Jump',
-      desc: 'Your character jumps to the END of the current or next word.',
+      desc: 'Jump end',
       example: '[t]he cat \u2192 press e \u2192 th[e] cat',
     },
     E: {
@@ -243,7 +243,7 @@ export class VimKeyInfo {
     },
     b: {
       category: 'Word Jump',
-      desc: 'Your character jumps BACK to the start of the previous word!',
+      desc: 'Jump back',
       example: 'the ca[t] \u2192 press b \u2192 the [c]at',
     },
     B: {
