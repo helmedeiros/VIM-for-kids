@@ -946,8 +946,11 @@ h1 {
   line-height: 1.5;
   color: #1a1a2e;
   font-weight: 600;
-  white-space: pre;
   font-family: 'Courier New', monospace;
+}
+
+.vim-key-example-columns .vim-key-example-text {
+  white-space: pre;
 }
 
 .vim-key-hint {
