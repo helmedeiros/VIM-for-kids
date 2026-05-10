@@ -438,9 +438,10 @@ export class BlinkingGroveZone {
             playerStartPosition: [0, 0], // Just inside the hidden area, right after the connection
             // Gate in the hidden area that leads to the real next level
             gate: {
-              locked: false, // Unlocked - player earned access by reaching hidden area
+              locked: true,
+              unlocksWhen: { collectedVimKeys: ['h', 'j', 'k', 'l'] }, // Player already has these when entering hidden area
               position: [34, 17], // Bottom of the vertical path, next to the level-complete NPC
-              leadsTo: 'zone_2', // This gate leads to the actual next zone
+              leadsTo: 'zone_2',
             },
             // Secondary gates within the hidden area that require specific keys
             secondaryGates: [

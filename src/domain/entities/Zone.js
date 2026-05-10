@@ -74,7 +74,12 @@ export class Zone {
       );
       const unlockConditions = currentArea.gate.unlocksWhen || {};
       const leadsTo = currentArea.gate.leadsTo || null;
-      return new Gate(absolutePos, unlockConditions, leadsTo);
+      const hiddenGate = new Gate(absolutePos, unlockConditions, leadsTo);
+      // Auto-open if player already meets unlock conditions
+      if (hiddenGate.canUnlock(this._collectedKeys, this._collectedCollectibleKeys)) {
+        hiddenGate.open();
+      }
+      return hiddenGate;
     }
     // Return main zone gate
     return this._gate;
