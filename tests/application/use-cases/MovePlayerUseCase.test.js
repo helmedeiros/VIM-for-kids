@@ -257,6 +257,97 @@ describe('MovePlayerUseCase', () => {
       });
     });
 
+    describe("word_end (vim 'e' motion)", () => {
+      const labelAt = (x, y, text) => ({ position: new Position(x, y), text });
+      // Cursor starts at (5, 5) and sits on the start of a 3-letter word "abc"
+      // at cols 5..7, gap at col 8, then "de" at cols 9..10.
+      const wordRow = [
+        labelAt(5, 5, 'a'), labelAt(6, 5, 'b'), labelAt(7, 5, 'c'),
+        labelAt(9, 5, 'd'), labelAt(10, 5, 'e'),
+      ];
+
+      it('does nothing when e key has not been collected', async () => {
+        mockGameState.collectedKeys = new Set();
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(wordRow);
+
+        const result = await movePlayerUseCase.execute('word_end');
+
+        expect(mockGameState.cursor.position.x).toBe(5);
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('word_motion_locked');
+      });
+
+      it('does nothing when there are no text labels in the zone', async () => {
+        mockGameState.collectedKeys = new Set(['e']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue([]);
+
+        const result = await movePlayerUseCase.execute('word_end');
+
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('no_text');
+      });
+
+      it('does nothing when the cursor is not on a text label', async () => {
+        mockGameState.collectedKeys = new Set(['e']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue([
+          labelAt(0, 5, 'x'), labelAt(9, 5, 'y'),
+        ]);
+
+        const result = await movePlayerUseCase.execute('word_end');
+
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('not_on_text');
+        expect(mockGameState.cursor.position.x).toBe(5);
+      });
+
+      it('jumps cursor to the end of the current word', async () => {
+        mockGameState.collectedKeys = new Set(['e']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(wordRow);
+
+        const result = await movePlayerUseCase.execute('word_end');
+
+        expect(result.success).toBe(true);
+        expect(mockGameState.cursor.position.x).toBe(7);
+        expect(mockGameState.cursor.position.y).toBe(5);
+      });
+
+      it('jumps to the end of the next word when cursor is already at end of current', async () => {
+        mockGameState.collectedKeys = new Set(['e']);
+        mockGameState.cursor = new Cursor(new Position(7, 5)); // last char of "abc"
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(wordRow);
+
+        const result = await movePlayerUseCase.execute('word_end');
+
+        expect(result.success).toBe(true);
+        expect(mockGameState.cursor.position.x).toBe(10);
+        expect(mockGameState.cursor.position.y).toBe(5);
+      });
+
+      it('returns no_next_word when there are no further word ends', async () => {
+        mockGameState.collectedKeys = new Set(['e']);
+        mockGameState.cursor = new Cursor(new Position(10, 5)); // last char of last word
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(wordRow);
+
+        const result = await movePlayerUseCase.execute('word_end');
+
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('no_next_word');
+      });
+
+      it('does not unlock secondary gates as a side effect of the flood-fill', async () => {
+        mockGameState.collectedKeys = new Set(['e']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(wordRow);
+        mockGameState.getSecondaryGates = jest.fn().mockReturnValue([
+          { position: new Position(8, 5), isWalkable: jest.fn().mockReturnValue(false) },
+        ]);
+        mockGameState.tryUnlockSecondaryGate = jest.fn().mockReturnValue(true);
+
+        await movePlayerUseCase.execute('word_end');
+
+        expect(mockGameState.tryUnlockSecondaryGate).not.toHaveBeenCalled();
+      });
+    });
+
     it('should collect key when moving to key position', async () => {
       const key = new VimKey(new Position(6, 5), 'h', 'Move left');
       mockGameState.availableKeys = [key];

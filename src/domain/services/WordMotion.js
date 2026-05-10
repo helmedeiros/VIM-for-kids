@@ -1,6 +1,6 @@
 import { Position } from '../value-objects/Position.js';
 
-// Vim 'w' word definition: a "word" is a maximal run of [A-Za-z0-9_],
+// Vim 'w' / 'e' word definition: a "word" is a maximal run of [A-Za-z0-9_],
 // OR a maximal run of non-blank non-word chars. A class change without a gap
 // also starts a new word (so "time," yields two words: "time" and ",").
 //
@@ -15,26 +15,34 @@ import { Position } from '../value-objects/Position.js';
 // remain hard borders even within a group.
 export const WordMotion = {
   findNextWordStart(cursor, textLabels, isWalkable = null) {
-    if (!textLabels || textLabels.length === 0) return null;
+    return findNext(cursor, textLabels, isWalkable, collectWordStarts);
+  },
 
-    const cursorLabel = textLabels.find((l) => l.position.equals(cursor));
-    const cursorGroup = cursorLabel ? (cursorLabel.group ?? null) : null;
-    const eligibleLabels = textLabels.filter((l) => (l.group ?? null) === cursorGroup);
-
-    const candidates = collectCandidates(cursor, eligibleLabels);
-    if (candidates.length === 0) return null;
-
-    if (!isWalkable) return candidates[0];
-
-    const reachable = computeReachable(cursor, eligibleLabels, isWalkable);
-    for (const target of candidates) {
-      if (reachable.has(keyOf(target))) return target;
-    }
-    return null;
+  findNextWordEnd(cursor, textLabels, isWalkable = null) {
+    return findNext(cursor, textLabels, isWalkable, collectWordEnds);
   },
 };
 
-function collectCandidates(cursor, textLabels) {
+function findNext(cursor, textLabels, isWalkable, xExtractor) {
+  if (!textLabels || textLabels.length === 0) return null;
+
+  const cursorLabel = textLabels.find((l) => l.position.equals(cursor));
+  const cursorGroup = cursorLabel ? (cursorLabel.group ?? null) : null;
+  const eligibleLabels = textLabels.filter((l) => (l.group ?? null) === cursorGroup);
+
+  const candidates = collectCandidates(cursor, eligibleLabels, xExtractor);
+  if (candidates.length === 0) return null;
+
+  if (!isWalkable) return candidates[0];
+
+  const reachable = computeReachable(cursor, eligibleLabels, isWalkable);
+  for (const target of candidates) {
+    if (reachable.has(keyOf(target))) return target;
+  }
+  return null;
+}
+
+function collectCandidates(cursor, textLabels, xExtractor) {
   const byRow = new Map();
   for (const label of textLabels) {
     const y = label.position.y;
@@ -47,9 +55,9 @@ function collectCandidates(cursor, textLabels) {
 
   for (const y of forwardRows) {
     const sortedLabels = byRow.get(y).sort((a, b) => a.position.x - b.position.x);
-    for (const startX of collectWordStarts(sortedLabels)) {
-      if (y === cursor.y && startX <= cursor.x) continue;
-      result.push(new Position(startX, y));
+    for (const x of xExtractor(sortedLabels)) {
+      if (y === cursor.y && x <= cursor.x) continue;
+      result.push(new Position(x, y));
     }
   }
 
@@ -116,6 +124,24 @@ function collectWordStarts(sortedRowLabels) {
     prevClass = cls;
   }
   return starts;
+}
+
+function collectWordEnds(sortedRowLabels) {
+  const ends = [];
+  let prevX = null;
+  let prevClass = null;
+  let currentEnd = null;
+  for (const label of sortedRowLabels) {
+    const x = label.position.x;
+    const cls = charClass(label.text);
+    const continues = prevX !== null && x === prevX + 1 && cls === prevClass;
+    if (!continues && currentEnd !== null) ends.push(currentEnd);
+    currentEnd = x;
+    prevX = x;
+    prevClass = cls;
+  }
+  if (currentEnd !== null) ends.push(currentEnd);
+  return ends;
 }
 
 function keyOf(pos) {

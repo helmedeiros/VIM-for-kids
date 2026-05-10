@@ -54,7 +54,8 @@ export class KeyboardInputHandler extends InputHandler {
             'h': 'left',
             'arrowright': 'right',
             'l': 'right',
-            'w': 'word_forward'
+            'w': 'word_forward',
+            'e': 'word_end'
         };
 
         return keyMappings[key] || null;
