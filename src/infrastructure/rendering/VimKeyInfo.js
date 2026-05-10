@@ -110,7 +110,7 @@ export class VimKeyInfo {
       exampleText: isMain
         ? 'Explore the map \u2192 Collect all letter keys \u2192 Gate opens!'
         : 'Look around \u2192 Find the special key \u2192 Walk to this door \u2192 It opens!',
-    }, { delayAllKeys: 0, onDismiss });
+    }, { delayAllKeys: 5000, onDismiss });
   }
 
   // ── Help modal key list ──
