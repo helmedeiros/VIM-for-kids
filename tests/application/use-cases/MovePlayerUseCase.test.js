@@ -166,6 +166,24 @@ describe('MovePlayerUseCase', () => {
         expect(mockGameState.cursor.position.x).toBe(5);
       });
 
+      it('does not unlock secondary gates as a side effect of the flood-fill', async () => {
+        // Regression: w-motion uses a pure walkability predicate; touching a closed
+        // gate during BFS must NOT call tryUnlockSecondaryGate (which would consume
+        // the collected key and open a far-away door).
+        mockGameState.collectedKeys = new Set(['w']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+        const closedGate = {
+          position: new Position(6, 5),
+          isWalkable: jest.fn().mockReturnValue(false),
+        };
+        mockGameState.getSecondaryGates = jest.fn().mockReturnValue([closedGate]);
+        mockGameState.tryUnlockSecondaryGate = jest.fn().mockReturnValue(true);
+
+        await movePlayerUseCase.execute('word_forward');
+
+        expect(mockGameState.tryUnlockSecondaryGate).not.toHaveBeenCalled();
+      });
+
       it('jumps over a rock tile (rocks are passable for w-motion but not for h/j/k/l)', async () => {
         mockGameState.collectedKeys = new Set(['w']);
         mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);

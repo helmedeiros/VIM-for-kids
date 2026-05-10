@@ -188,12 +188,25 @@ export class MovePlayerUseCase {
     return this._checkWalkability(position, direction).walkable;
   }
 
-  // Word-motion (vim 'w') can jump OVER rocks once the player has collected the
-  // 'w' key — but step-by-step movement (h/j/k/l) cannot. This predicate is used
-  // by the WordMotion flood-fill to decide whether a target word is in the
-  // cursor's reachable region.
+  // Side-effect-free walkability predicate used by the WordMotion flood-fill.
+  // Mirrors _checkWalkability but never triggers tryUnlockSecondaryGate (which
+  // would consume collected keys), and treats rocks as jumpable so 'w' can hop
+  // over them even though h/j/k/l cannot step on them.
   _isWalkableForWordMotion(position) {
-    if (this._isPositionWalkable(position)) return true;
+    if (typeof this._gameState.getGate === 'function') {
+      const gate = this._gameState.getGate();
+      if (gate && gate.position.equals(position)) {
+        return gate.isWalkable();
+      }
+    }
+    if (typeof this._gameState.getSecondaryGates === 'function') {
+      for (const gate of this._gameState.getSecondaryGates()) {
+        if (gate && gate.position.equals(position)) {
+          return gate.isWalkable();
+        }
+      }
+    }
+    if (this._gameState.map.isWalkable(position)) return true;
     const tile = this._gameState.map.getTileAt(position);
     return !!(tile && tile.name === 'rock');
   }
