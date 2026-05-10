@@ -76,7 +76,7 @@ describe('MovePlayerUseCase', () => {
       });
     });
 
-    it('should block rock tile when w key has not been collected', async () => {
+    it('should block step-onto-rock for h/j/k/l movement when w key has not been collected', async () => {
       mockMap.isWalkable.mockReturnValue(false);
       mockMap.getTileAt.mockReturnValue({ name: 'rock', walkable: false });
       mockGameState.collectedKeys = new Set();
@@ -87,20 +87,10 @@ describe('MovePlayerUseCase', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should allow walking onto a rock tile after w key is collected', async () => {
+    it('should still block step-onto-rock for h/j/k/l movement even after collecting the w key', async () => {
+      // 'w' unlocks the word-motion COMMAND; it does not let h/j/k/l walk over rocks.
       mockMap.isWalkable.mockReturnValue(false);
       mockMap.getTileAt.mockReturnValue({ name: 'rock', walkable: false });
-      mockGameState.collectedKeys = new Set(['w']);
-
-      const result = await movePlayerUseCase.execute('right');
-
-      expect(mockGameState.cursor.position.x).toBe(6);
-      expect(result.success).toBe(true);
-    });
-
-    it('should not allow walking onto non-rock blocked tiles even with w key', async () => {
-      mockMap.isWalkable.mockReturnValue(false);
-      mockMap.getTileAt.mockReturnValue({ name: 'water', walkable: false });
       mockGameState.collectedKeys = new Set(['w']);
 
       const result = await movePlayerUseCase.execute('right');
@@ -174,6 +164,22 @@ describe('MovePlayerUseCase', () => {
         expect(result.success).toBe(false);
         expect(result.reason).toBe('no_next_word');
         expect(mockGameState.cursor.position.x).toBe(5);
+      });
+
+      it('jumps over a rock tile (rocks are passable for w-motion but not for h/j/k/l)', async () => {
+        mockGameState.collectedKeys = new Set(['w']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+        // (6, 5) is a rock — non-walkable to step-by-step movement but jumpable for w-motion.
+        mockMap.isWalkable.mockImplementation((pos) => !(pos.x === 6 && pos.y === 5));
+        mockMap.getTileAt.mockImplementation((pos) =>
+          pos.x === 6 && pos.y === 5 ? { name: 'rock', walkable: false } : { name: 'grass' }
+        );
+
+        const result = await movePlayerUseCase.execute('word_forward');
+
+        expect(result.success).toBe(true);
+        expect(mockGameState.cursor.position.x).toBe(7);
+        expect(mockGameState.cursor.position.y).toBe(5);
       });
 
       it('routes around an isolated non-walkable tile and reaches the next word', async () => {
