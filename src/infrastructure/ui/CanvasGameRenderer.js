@@ -9,6 +9,9 @@ import { CharacterSprites } from '../rendering/CharacterSprites.js';
 import { TilePainter } from '../rendering/TilePainter.js';
 import { MovementAnimator } from '../rendering/MovementAnimator.js';
 import { AudioManager } from '../audio/AudioManager.js';
+import { ParticleSystem } from '../rendering/ParticleSystem.js';
+import { AnimatedTile } from '../rendering/AnimatedTile.js';
+import { AutoTiler } from '../rendering/AutoTiler.js';
 
 /**
  * Canvas-based game renderer implementing the GameRenderer port.
@@ -73,6 +76,11 @@ export class CanvasGameRenderer extends GameRenderer {
     this._audio = new AudioManager();
     this._prevCollectedCount = 0;
     this._prevGateOpen = null;
+
+    // Visual effects systems
+    this._particleSystem = new ParticleSystem();
+    this._animatedTile = new AnimatedTile();
+    this._autoTiler = new AutoTiler();
 
     // Paint tiles at runtime using Canvas 2D API
     this._initSprites();
@@ -164,10 +172,16 @@ export class CanvasGameRenderer extends GameRenderer {
     this._lastCursorX = cursorX;
     this._lastCursorY = cursorY;
 
-    // Detect key collection for audio
+    // Detect key collection for audio + particles
     const collectedCount = gameState.collectedKeys.size + (gameState.collectedCollectibleKeys ? gameState.collectedCollectibleKeys.size : 0);
     if (collectedCount > this._prevCollectedCount) {
       this._audio.playSound('collect');
+      // Emit sparkle at cursor screen position
+      const bounds = this._camera.getVisibleBounds();
+      const ts = this._camera.tileSize;
+      const sparkleX = (cursorX - bounds.startX) * ts + ts / 2;
+      const sparkleY = (cursorY - bounds.startY) * ts + ts / 2;
+      this._particleSystem.emit('sparkle', sparkleX, sparkleY, 12);
     }
     this._prevCollectedCount = collectedCount;
 
@@ -410,6 +424,15 @@ export class CanvasGameRenderer extends GameRenderer {
       this._movementAnimator.update(deltaTime);
       this._gameLoop.requestRedraw();
     }
+
+    // Tick particle system
+    if (this._particleSystem.particleCount > 0) {
+      this._particleSystem.update(deltaTime);
+      this._gameLoop.requestRedraw();
+    }
+
+    // Continuous redraw for animated tiles (water, field)
+    this._gameLoop.requestRedraw();
   }
 
   _draw(_deltaTime) {
@@ -455,6 +478,18 @@ export class CanvasGameRenderer extends GameRenderer {
           ctx.fillRect(screenX, screenY, ts, ts);
         }
 
+        // Animated tile overlay (water shimmer, field sway)
+        if (this._animatedTile.isAnimated(tileName)) {
+          const frameOffset = this._animatedTile.getFrameOffset(tileName, this._animationTime);
+          if (frameOffset > 0) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${0.03 * frameOffset})`;
+            ctx.fillRect(screenX, screenY, ts, ts);
+          }
+        }
+
+        // Auto-tiler edge transitions
+        this._drawAutoTileTransition(ctx, col, row, screenX, screenY, ts, tileName, map, mapWidth, mapHeight, gameState);
+
         // Draw entities at this position
         this._drawEntitiesAt(ctx, col, row, screenX, screenY, ts);
       }
@@ -462,6 +497,34 @@ export class CanvasGameRenderer extends GameRenderer {
 
     // Draw cursor on top
     this._drawCursor(ctx, gameState.cursor, bounds, ts);
+
+    // Draw particles on top of everything
+    this._particleSystem.draw(ctx);
+  }
+
+  _drawAutoTileTransition(ctx, col, row, screenX, screenY, ts, tileName, map, mapWidth, mapHeight, gameState) {
+    const PositionClass = Object.getPrototypeOf(gameState.cursor.position).constructor;
+    const getNeighborName = (nx, ny) => {
+      if (nx < 0 || nx >= mapWidth || ny < 0 || ny >= mapHeight) return 'water';
+      try {
+        return map.getTileAt(new PositionClass(nx, ny)).name;
+      } catch {
+        return 'water';
+      }
+    };
+
+    const north = getNeighborName(col, row - 1);
+    const east = getNeighborName(col + 1, row);
+    const south = getNeighborName(col, row + 1);
+    const west = getNeighborName(col - 1, row);
+
+    const mask = this._autoTiler.computeMask(tileName, north, east, south, west);
+    if (mask > 0) {
+      // Determine dominant neighbor group for color
+      const neighborTile = (mask & 1) ? north : (mask & 2) ? east : (mask & 4) ? south : west;
+      const neighborGroup = this._autoTiler.getGroup(neighborTile);
+      this._autoTiler.drawTransition(ctx, mask, screenX, screenY, ts, neighborGroup);
+    }
   }
 
   _drawEntitiesAt(ctx, worldX, worldY, screenX, screenY, ts) {
