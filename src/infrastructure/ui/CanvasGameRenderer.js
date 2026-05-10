@@ -734,9 +734,13 @@ export class CanvasGameRenderer extends GameRenderer {
 
   showLevelComplete(nextLevelId) {
     this.clearAllOverlays();
-    const overlay = VimKeyInfo.createLevelCompleteOverlay(nextLevelId, () => this.focus());
-    const container = this._container || document.body;
-    container.appendChild(overlay);
+    return new Promise((resolve) => {
+      const overlay = VimKeyInfo.createLevelCompleteOverlay(nextLevelId, () => {
+        this.focus();
+        resolve();
+      });
+      (this._container || document.body).appendChild(overlay);
+    });
   }
 
   clearAllOverlays() {

@@ -472,9 +472,13 @@ export class DOMGameRenderer extends GameRenderer {
 
   showLevelComplete(nextLevelId) {
     this.clearAllOverlays();
-    const overlay = VimKeyInfo.createLevelCompleteOverlay(nextLevelId, () => this.gameBoard.focus());
-    const container = document.getElementById('game-container') || document.body;
-    container.appendChild(overlay);
+    return new Promise((resolve) => {
+      const overlay = VimKeyInfo.createLevelCompleteOverlay(nextLevelId, () => {
+        this.gameBoard.focus();
+        resolve();
+      });
+      (document.getElementById('game-container') || document.body).appendChild(overlay);
+    });
   }
 
   clearAllOverlays() {

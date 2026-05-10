@@ -92,23 +92,23 @@ export class HandleProgressionUseCase {
    * @private
    */
   async _handleLevelProgression(nextLevelId) {
-    // Check if there's a cutscene for this level
-    const gameId = this._getGameId();
-
-    if (await this._shouldShowLevelCutscene(gameId, nextLevelId)) {
-      await this._showLevelCutscene(gameId, nextLevelId);
-    }
-
-    // Show level completion message
+    // Show congrats card and wait for kid to dismiss it
     if (typeof this._gameRenderer.showLevelComplete === 'function') {
-      this._gameRenderer.showLevelComplete(nextLevelId);
+      await this._gameRenderer.showLevelComplete(nextLevelId);
     } else if (this._gameRenderer.showMessage) {
       this._gameRenderer.showMessage(`Level Complete! Progressing to ${nextLevelId}...`);
+      await new Promise((r) => setTimeout(r, 3000));
     } else {
       alert(`Level Complete! Progressing to ${nextLevelId}...`);
     }
 
-    // Trigger level transition after delay so player can read the message
+    // Then play cutscene if available
+    const gameId = this._getGameId();
+    if (await this._shouldShowLevelCutscene(gameId, nextLevelId)) {
+      await this._showLevelCutscene(gameId, nextLevelId);
+    }
+
+    // Then transition to next level
     this._triggerLevelTransition(nextLevelId);
   }
 

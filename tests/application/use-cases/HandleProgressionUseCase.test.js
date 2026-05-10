@@ -25,7 +25,7 @@ describe('HandleProgressionUseCase', () => {
     mockGameRenderer = {
       render: jest.fn(),
       showMessage: jest.fn(),
-      showLevelComplete: jest.fn(),
+      showLevelComplete: jest.fn().mockResolvedValue(),
     };
 
     // Mock game instance
