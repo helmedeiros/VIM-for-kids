@@ -53,11 +53,13 @@ export class CutsceneService {
       // Create story identifier for persistence
       const identifier = this._createStoryIdentifier(gameId, type, levelId, zoneId);
 
-      // Check if story has already been shown
-      const cutsceneState = this._persistenceService.getCutsceneState();
-      const storyState = cutsceneState[identifier];
-      if (storyState && storyState.hasBeenShown) {
-        return false;
+      // Skip "already shown" check if repeat cutscenes is enabled
+      if (!this._featureFlags.isEnabled('REPEAT_CUTSCENES')) {
+        const cutsceneState = this._persistenceService.getCutsceneState();
+        const storyState = cutsceneState[identifier];
+        if (storyState && storyState.hasBeenShown) {
+          return false;
+        }
       }
 
       return true;
@@ -179,11 +181,13 @@ export class CutsceneService {
       return false;
     }
 
-    // Check if story has already been shown
-    const cutsceneState = this._persistenceService.getCutsceneState();
-    const gameState = cutsceneState[gameId];
-    if (gameState && gameState.hasBeenShown) {
-      return false;
+    // Skip "already shown" check if repeat cutscenes is enabled
+    if (!this._featureFlags.isEnabled('REPEAT_CUTSCENES')) {
+      const cutsceneState = this._persistenceService.getCutsceneState();
+      const gameState = cutsceneState[gameId];
+      if (gameState && gameState.hasBeenShown) {
+        return false;
+      }
     }
 
     return true;

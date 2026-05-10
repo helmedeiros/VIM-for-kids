@@ -1,5 +1,6 @@
 import { GameRenderer } from '../../ports/output/GameRenderer.js';
 import { Position } from '../../domain/value-objects/Position.js';
+import { VimKeyInfo } from '../rendering/VimKeyInfo.js';
 
 export class DOMGameRenderer extends GameRenderer {
   constructor() {
@@ -409,11 +410,18 @@ export class DOMGameRenderer extends GameRenderer {
     } else {
       collectedKeys.forEach((keyName) => {
         const keyElement = document.createElement('div');
-        keyElement.className = 'collected-key';
+        keyElement.className = 'collected-key clickable';
         keyElement.textContent = keyName;
+        keyElement.title = `Click to learn about ${keyName}`;
+        keyElement.addEventListener('click', () => {
+          this._showVimKeyExplanation({ key: keyName, description: '' });
+        });
         this.collectedKeysDisplay.appendChild(keyElement);
       });
     }
+
+    // Also update help modal's "Your Keys" section
+    VimKeyInfo.updateHelpKeys(collectedKeys, (vk) => this._showVimKeyExplanation(vk));
   }
 
     updateCollectibleInventoryDisplay(collectedCollectibleKeys) {
@@ -455,11 +463,60 @@ export class DOMGameRenderer extends GameRenderer {
   }
 
   showKeyInfo(key) {
-    // Enhanced key collection feedback with visual animation
     if (key && key.type === 'collectible_key') {
       this._showCollectibleKeyFeedback(key);
+    } else if (key && key.key && key.description) {
+      this._showVimKeyExplanation(key);
     }
-    // VIM keys still use the existing simple feedback (no popup)
+  }
+
+  showLevelComplete(nextLevelId) {
+    this.clearAllOverlays();
+    return new Promise((resolve) => {
+      const overlay = VimKeyInfo.createLevelCompleteOverlay(nextLevelId, () => {
+        this.gameBoard.focus();
+        resolve();
+      });
+      (document.getElementById('game-container') || document.body).appendChild(overlay);
+    });
+  }
+
+  clearAllOverlays() {
+    const overlay = document.getElementById('vimKeyExplanation');
+    if (overlay) overlay.remove();
+    this.hideMessage();
+    this.fadeOutExistingBalloons();
+  }
+
+  showLockedGateHint(gateType) {
+    const existing = document.getElementById('vimKeyExplanation');
+    if (existing) return;
+    if (this._gateHintCooldown) return;
+
+    this._gateHintCooldown = true;
+    setTimeout(() => { this._gateHintCooldown = false; }, 5000);
+
+    const overlay = VimKeyInfo.createLockedGateOverlay(gateType, () => this.gameBoard.focus());
+    const container = document.getElementById('game-container') || document.body;
+    container.appendChild(overlay);
+  }
+
+  showCollectibleKeyIntro(collectibleKey) {
+    const existing = document.getElementById('vimKeyExplanation');
+    if (existing) existing.remove();
+
+    const overlay = VimKeyInfo.createCollectibleIntroOverlay(collectibleKey, () => this.gameBoard.focus());
+    const container = document.getElementById('game-container') || document.body;
+    container.appendChild(overlay);
+  }
+
+  _showVimKeyExplanation(vimKey) {
+    const existing = document.getElementById('vimKeyExplanation');
+    if (existing) existing.remove();
+
+    const overlay = VimKeyInfo.createOverlay(vimKey, () => this.gameBoard.focus());
+    const container = document.getElementById('game-container') || document.body;
+    container.appendChild(overlay);
   }
 
   _showCollectibleKeyFeedback(collectibleKey) {

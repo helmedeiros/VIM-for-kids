@@ -19,8 +19,25 @@ export class MovePlayerUseCase {
     const newPosition = this._calculateNewPosition(currentPosition, direction);
 
     // Check if move is valid (both map and gate walkability, plus directional ramp logic)
-    if (!this._isPositionWalkable(newPosition, direction)) {
-      return { success: false, reason: 'invalid_position' }; // Invalid move, do nothing
+    const walkCheck = this._checkWalkability(newPosition, direction);
+    if (!walkCheck.walkable) {
+      if (walkCheck.blockedBy && typeof this._gameRenderer.showLockedGateHint === 'function') {
+        this._gameRenderer.showLockedGateHint(walkCheck.blockedBy);
+      }
+      return { success: false, reason: 'invalid_position' };
+    }
+
+    // If column memory returned same position, check if direct target has a locked gate
+    if (newPosition.equals(currentPosition)) {
+      const directTarget = currentPosition.move(
+        direction === 'right' ? 1 : direction === 'left' ? -1 : 0,
+        direction === 'down' ? 1 : direction === 'up' ? -1 : 0
+      );
+      const directCheck = this._checkWalkability(directTarget, direction);
+      if (directCheck.blockedBy && typeof this._gameRenderer.showLockedGateHint === 'function') {
+        this._gameRenderer.showLockedGateHint(directCheck.blockedBy);
+      }
+      return { success: false, reason: 'invalid_position' };
     }
 
     // Check if we're leaving an NPC position (fade out balloons)
@@ -64,8 +81,8 @@ export class MovePlayerUseCase {
     const currentPosition = this._gameState.cursor.position;
     const newPosition = this._calculateNewPosition(currentPosition, direction);
 
-    // Check if move is valid (both map and gate walkability, plus directional ramp logic)
-    if (!this._isPositionWalkable(newPosition, direction)) {
+    // Check if move is valid
+    if (!this._checkWalkability(newPosition, direction).walkable) {
       return { success: false, reason: 'invalid_position' }; // Invalid move, do nothing
     }
 
@@ -102,49 +119,43 @@ export class MovePlayerUseCase {
     };
   }
 
-  _isPositionWalkable(position, direction = null) {
-    // First check if the map position is walkable
-    if (!this._gameState.map.isWalkable(position)) {
-      return false;
-    }
-
-    // Check directional ramp logic if we have direction info
-    if (direction && !this._isRampMovementAllowed(position, direction)) {
-      return false;
-    }
-
-    // Then check if there's a gate at this position and if it's walkable
-    // Only check gates if the game state supports them (backward compatibility)
+  _checkWalkability(position, direction = null) {
+    // Check gates first (they overlay map tiles and have their own walkability)
     if (typeof this._gameState.getGate === 'function') {
       const gate = this._gameState.getGate();
       if (gate && gate.position.equals(position)) {
-        return gate.isWalkable();
+        return gate.isWalkable() ? { walkable: true } : { walkable: false, blockedBy: 'main' };
       }
     }
 
-    // Check secondary gates if they exist
     if (typeof this._gameState.getSecondaryGates === 'function') {
-      const secondaryGates = this._gameState.getSecondaryGates();
-      for (const gate of secondaryGates) {
+      for (const gate of this._gameState.getSecondaryGates()) {
         if (gate && gate.position.equals(position)) {
-          // If gate is already open, it's walkable
-          if (gate.isWalkable()) {
-            return true;
-          }
-
-          // If gate is closed, try to unlock it with collectible keys
+          if (gate.isWalkable()) return { walkable: true };
           if (typeof this._gameState.tryUnlockSecondaryGate === 'function') {
-            const unlocked = this._gameState.tryUnlockSecondaryGate(position);
-            return unlocked; // Return true if unlocked, false if player doesn't have key
+            return this._gameState.tryUnlockSecondaryGate(position)
+              ? { walkable: true }
+              : { walkable: false, blockedBy: 'secondary' };
           }
-
-          // Fallback: gate is not walkable
-          return false;
+          return { walkable: false, blockedBy: 'secondary' };
         }
       }
     }
 
-    return true;
+    // Then check map walkability
+    if (!this._gameState.map.isWalkable(position)) {
+      return { walkable: false };
+    }
+
+    if (direction && !this._isRampMovementAllowed(position, direction)) {
+      return { walkable: false };
+    }
+
+    return { walkable: true };
+  }
+
+  _isPositionWalkable(position, direction = null) {
+    return this._checkWalkability(position, direction).walkable;
   }
 
   _isRampMovementAllowed(targetPosition, direction) {
@@ -434,7 +445,6 @@ export class MovePlayerUseCase {
     );
 
     if (vimKeyAtPosition) {
-      console.log('✅ COLLECTING VIM KEY:', vimKeyAtPosition.key);
       this._gameState.collectKey(vimKeyAtPosition);
       this._gameRenderer.showKeyInfo(vimKeyAtPosition);
       return vimKeyAtPosition;
@@ -450,13 +460,22 @@ export class MovePlayerUseCase {
       );
 
       if (collectibleKeyAtPosition) {
+        const isFirstCollectible = this._gameState.collectedCollectibleKeys
+          ? this._gameState.collectedCollectibleKeys.size === 0
+          : false;
+
         if (typeof this._gameState.collectCollectibleKey === 'function') {
           this._gameState.collectCollectibleKey(collectibleKeyAtPosition);
         } else {
-          // Fallback for compatibility
           this._gameState.collectKey(collectibleKeyAtPosition);
         }
-        this._gameRenderer.showKeyInfo(collectibleKeyAtPosition);
+
+        if (isFirstCollectible && typeof this._gameRenderer.showCollectibleKeyIntro === 'function') {
+          this._gameRenderer.showCollectibleKeyIntro(collectibleKeyAtPosition);
+        } else {
+          this._gameRenderer.showKeyInfo(collectibleKeyAtPosition);
+        }
+
         return collectibleKeyAtPosition;
       }
     }
@@ -526,4 +545,5 @@ export class MovePlayerUseCase {
       return false;
     });
   }
+
 }

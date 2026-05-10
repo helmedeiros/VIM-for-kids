@@ -438,9 +438,10 @@ export class BlinkingGroveZone {
             playerStartPosition: [0, 0], // Just inside the hidden area, right after the connection
             // Gate in the hidden area that leads to the real next level
             gate: {
-              locked: false, // Unlocked - player earned access by reaching hidden area
-              position: [73, 10], // Gate position in the hidden area (on the dirt path at the far right)
-              leadsTo: 'zone_2', // This gate leads to the actual next zone
+              locked: true,
+              unlocksWhen: { collectedVimKeys: ['h', 'j', 'k', 'l'] }, // Player already has these when entering hidden area
+              position: [34, 17], // Bottom of the vertical path, next to the level-complete NPC
+              leadsTo: 'zone_2',
             },
             // Secondary gates within the hidden area that require specific keys
             secondaryGates: [
@@ -493,10 +494,20 @@ export class BlinkingGroveZone {
           dialogue: [
             'Very good oh Shadowy One! You learned the hjkl skill.',
             'Go on!',
-            'Press Esc to continue...',
+            'Press ESC to enter the secret area...',
           ],
           position: [74, 1], // NPC position at the gate
           requiresEscToProgress: true, // Custom flag for ESC progression
+        },
+        {
+          id: 'level_complete_spirit',
+          type: 'practice_buddy',
+          dialogue: [
+            'Congratulations! You completed Level 1!',
+            'You mastered h, j, k, l movement!',
+            'Press ESC here to advance to Level 2!',
+          ],
+          position: [108, 19], // Below the three secondary gates in the hidden area
         },
       ],
       events: [

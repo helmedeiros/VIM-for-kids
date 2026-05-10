@@ -303,7 +303,8 @@ describe('LevelGameState', () => {
       // Create mock zone with secondary gates
       mockZone = {
         tryUnlockSecondaryGate: jest.fn(),
-        collectedCollectibleKeys: new Set(['maze_key', 'extra_key']),
+        _collectedCollectibleKeys: new Set(['maze_key', 'extra_key']),
+        getCollectedCollectibleKeys() { return new Set(this._collectedCollectibleKeys); },
         gate: mockGate,
         secondaryGates: [mockGate],
         vimKeys: [mockKey],
@@ -342,7 +343,7 @@ describe('LevelGameState', () => {
       // Mock zone's tryUnlockSecondaryGate to return true and simulate key consumption
       mockZone.tryUnlockSecondaryGate.mockImplementation(() => {
         // Simulate consuming 'maze_key' during unlock
-        mockZone.collectedCollectibleKeys.delete('maze_key');
+        mockZone._collectedCollectibleKeys.delete('maze_key');
         return true;
       });
 
@@ -376,7 +377,7 @@ describe('LevelGameState', () => {
     it('should handle empty CollectibleKeys after all are consumed', () => {
       // Mock zone's tryUnlockSecondaryGate to consume all keys
       mockZone.tryUnlockSecondaryGate.mockImplementation(() => {
-        mockZone.collectedCollectibleKeys.clear(); // All keys consumed
+        mockZone._collectedCollectibleKeys.clear(); // All keys consumed
         return true;
       });
 
