@@ -375,6 +375,125 @@ describe('MovePlayerUseCase', () => {
       });
     });
 
+    describe("word_backward (vim 'b' motion)", () => {
+      const labelAt = (x, y, text) => ({ position: new Position(x, y), text });
+      // Two words on row 5: "ab" at cols 1-2, "cd" at cols 4-5. Cursor at (5, 5) on 'd'.
+      const sameRowLabels = [
+        labelAt(1, 5, 'a'), labelAt(2, 5, 'b'),
+        labelAt(4, 5, 'c'), labelAt(5, 5, 'd'),
+      ];
+
+      it('does nothing when b key has not been collected', async () => {
+        mockGameState.collectedKeys = new Set();
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+
+        const result = await movePlayerUseCase.execute('word_backward');
+
+        expect(mockGameState.cursor.position.x).toBe(5);
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('word_motion_locked');
+      });
+
+      it('does nothing when there are no text labels in the zone', async () => {
+        mockGameState.collectedKeys = new Set(['b']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue([]);
+
+        const result = await movePlayerUseCase.execute('word_backward');
+
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('no_text');
+      });
+
+      it('does nothing when the cursor is not on a text label', async () => {
+        mockGameState.collectedKeys = new Set(['b']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue([
+          labelAt(0, 5, 'x'), labelAt(9, 5, 'y'),
+        ]);
+
+        const result = await movePlayerUseCase.execute('word_backward');
+
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('not_on_text');
+      });
+
+      it('jumps cursor back to the start of the current word', async () => {
+        mockGameState.collectedKeys = new Set(['b']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+
+        const result = await movePlayerUseCase.execute('word_backward');
+
+        expect(result.success).toBe(true);
+        expect(mockGameState.cursor.position.x).toBe(4);
+        expect(mockGameState.cursor.position.y).toBe(5);
+      });
+
+      it('jumps to the start of the previous word when cursor is already at start of current', async () => {
+        mockGameState.collectedKeys = new Set(['b']);
+        mockGameState.cursor = new Cursor(new Position(4, 5)); // start of "cd"
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+
+        const result = await movePlayerUseCase.execute('word_backward');
+
+        expect(result.success).toBe(true);
+        expect(mockGameState.cursor.position.x).toBe(1);
+        expect(mockGameState.cursor.position.y).toBe(5);
+      });
+
+      it('returns no_next_word when no earlier words exist', async () => {
+        mockGameState.collectedKeys = new Set(['b']);
+        mockGameState.cursor = new Cursor(new Position(1, 5)); // start of first word
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+
+        const result = await movePlayerUseCase.execute('word_backward');
+
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('no_next_word');
+      });
+
+      it('does not unlock secondary gates as a side effect of the flood-fill', async () => {
+        mockGameState.collectedKeys = new Set(['b']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+        mockGameState.getSecondaryGates = jest.fn().mockReturnValue([
+          { position: new Position(3, 5), isWalkable: jest.fn().mockReturnValue(false) },
+        ]);
+        mockGameState.tryUnlockSecondaryGate = jest.fn().mockReturnValue(true);
+
+        await movePlayerUseCase.execute('word_backward');
+
+        expect(mockGameState.tryUnlockSecondaryGate).not.toHaveBeenCalled();
+      });
+
+      it('jumps over a full rock or wall barrier (rocks and walls are passable for b)', async () => {
+        mockGameState.collectedKeys = new Set(['b']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+        // Entire column 3 is wall — a barrier the BFS cannot route around.
+        mockMap.isWalkable.mockImplementation((pos) => pos.x !== 3);
+        mockMap.getTileAt.mockImplementation((pos) =>
+          pos.x === 3 ? { name: 'wall', walkable: false } : { name: 'grass' }
+        );
+
+        const result = await movePlayerUseCase.execute('word_backward');
+
+        expect(result.success).toBe(true);
+        expect(mockGameState.cursor.position.x).toBe(4); // back to start of "cd"
+      });
+
+      it('refuses to jump across a full water column (water is a hard border)', async () => {
+        mockGameState.collectedKeys = new Set(['b']);
+        mockGameState.cursor = new Cursor(new Position(4, 5)); // start of "cd"
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+        mockMap.isWalkable.mockImplementation((pos) => pos.x !== 3);
+        mockMap.getTileAt.mockImplementation((pos) =>
+          pos.x === 3 ? { name: 'water', walkable: false } : { name: 'grass' }
+        );
+
+        const result = await movePlayerUseCase.execute('word_backward');
+
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('no_next_word');
+      });
+    });
+
     it('should collect key when moving to key position', async () => {
       const key = new VimKey(new Position(6, 5), 'h', 'Move left');
       mockGameState.availableKeys = [key];

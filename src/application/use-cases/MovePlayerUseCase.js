@@ -22,6 +22,9 @@ export class MovePlayerUseCase {
     if (direction === 'word_end') {
       return this._executeWordMotion('e', WordMotion.findNextWordEnd);
     }
+    if (direction === 'word_backward') {
+      return this._executeWordMotion('b', WordMotion.findPreviousWordStart);
+    }
 
     const currentPosition = this._gameState.cursor.position;
     const newPosition = this._calculateNewPosition(currentPosition, direction);

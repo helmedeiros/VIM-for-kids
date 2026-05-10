@@ -15,22 +15,26 @@ import { Position } from '../value-objects/Position.js';
 // remain hard borders even within a group.
 export const WordMotion = {
   findNextWordStart(cursor, textLabels, isWalkable = null) {
-    return findNext(cursor, textLabels, isWalkable, collectWordStarts);
+    return findInDirection(cursor, textLabels, isWalkable, collectWordStarts, 'forward');
   },
 
   findNextWordEnd(cursor, textLabels, isWalkable = null) {
-    return findNext(cursor, textLabels, isWalkable, collectWordEnds);
+    return findInDirection(cursor, textLabels, isWalkable, collectWordEnds, 'forward');
+  },
+
+  findPreviousWordStart(cursor, textLabels, isWalkable = null) {
+    return findInDirection(cursor, textLabels, isWalkable, collectWordStarts, 'backward');
   },
 };
 
-function findNext(cursor, textLabels, isWalkable, xExtractor) {
+function findInDirection(cursor, textLabels, isWalkable, xExtractor, direction) {
   if (!textLabels || textLabels.length === 0) return null;
 
   const cursorLabel = textLabels.find((l) => l.position.equals(cursor));
   const cursorGroup = cursorLabel ? (cursorLabel.group ?? null) : null;
   const eligibleLabels = textLabels.filter((l) => (l.group ?? null) === cursorGroup);
 
-  const candidates = collectCandidates(cursor, eligibleLabels, xExtractor);
+  const candidates = collectCandidates(cursor, eligibleLabels, xExtractor, direction);
   if (candidates.length === 0) return null;
 
   if (!isWalkable) return candidates[0];
@@ -42,7 +46,7 @@ function findNext(cursor, textLabels, isWalkable, xExtractor) {
   return null;
 }
 
-function collectCandidates(cursor, textLabels, xExtractor) {
+function collectCandidates(cursor, textLabels, xExtractor, direction) {
   const byRow = new Map();
   for (const label of textLabels) {
     const y = label.position.y;
@@ -50,13 +54,21 @@ function collectCandidates(cursor, textLabels, xExtractor) {
     byRow.get(y).push(label);
   }
 
-  const forwardRows = [...byRow.keys()].filter((y) => y >= cursor.y).sort((a, b) => a - b);
+  const forward = direction === 'forward';
+  const rowsInDir = [...byRow.keys()]
+    .filter((y) => (forward ? y >= cursor.y : y <= cursor.y))
+    .sort((a, b) => (forward ? a - b : b - a));
   const result = [];
 
-  for (const y of forwardRows) {
+  for (const y of rowsInDir) {
     const sortedLabels = byRow.get(y).sort((a, b) => a.position.x - b.position.x);
-    for (const x of xExtractor(sortedLabels)) {
-      if (y === cursor.y && x <= cursor.x) continue;
+    const xs = xExtractor(sortedLabels);
+    const orderedXs = forward ? xs : [...xs].reverse();
+    for (const x of orderedXs) {
+      if (y === cursor.y) {
+        if (forward && x <= cursor.x) continue;
+        if (!forward && x >= cursor.x) continue;
+      }
       result.push(new Position(x, y));
     }
   }

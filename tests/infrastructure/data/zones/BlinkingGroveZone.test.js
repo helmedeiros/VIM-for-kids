@@ -107,6 +107,12 @@ describe('BlinkingGroveZone', () => {
       expect(hiddenVimKeys.map(k => k.value)).toContain('e');
       const eKey = hiddenVimKeys.find(k => k.value === 'e');
       expect(eKey.position).toEqual([11, 8]);
+
+      // The 'b' (word-backward motion) vim_key sits on the dirt tile just after
+      // "prevail." on the poem's last line (hidden-area coords [35, 12]).
+      expect(hiddenVimKeys.map(k => k.value)).toContain('b');
+      const bKey = hiddenVimKeys.find(k => k.value === 'b');
+      expect(bKey.position).toEqual([35, 12]);
     });
 
     test('should have correct text labels configuration', () => {

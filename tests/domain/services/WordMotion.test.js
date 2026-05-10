@@ -233,3 +233,80 @@ describe('WordMotion.findNextWordEnd', () => {
     expect(target).toBeNull();
   });
 });
+
+describe('WordMotion.findPreviousWordStart', () => {
+  it('returns null for empty text labels', () => {
+    expect(WordMotion.findPreviousWordStart(new Position(0, 0), [])).toBeNull();
+    expect(WordMotion.findPreviousWordStart(new Position(0, 0), null)).toBeNull();
+  });
+
+  it('jumps from the middle of a word back to the start of the same word', () => {
+    const labels = [
+      label(0, 3, 'T'), label(1, 3, 'h'), label(2, 3, 'e'),
+      label(4, 3, 'c'), label(5, 3, 'a'), label(6, 3, 't'),
+    ];
+    const target = WordMotion.findPreviousWordStart(new Position(5, 3), labels);
+    expect(target).toEqual(new Position(4, 3));
+  });
+
+  it('jumps from the end of a word back to its start', () => {
+    const labels = [
+      label(0, 3, 'T'), label(1, 3, 'h'), label(2, 3, 'e'),
+      label(4, 3, 'c'), label(5, 3, 'a'), label(6, 3, 't'),
+    ];
+    const target = WordMotion.findPreviousWordStart(new Position(6, 3), labels);
+    expect(target).toEqual(new Position(4, 3));
+  });
+
+  it('jumps from the start of a word back to the start of the previous word', () => {
+    const labels = [
+      label(0, 3, 'T'), label(1, 3, 'h'), label(2, 3, 'e'),
+      label(4, 3, 'c'), label(5, 3, 'a'), label(6, 3, 't'),
+    ];
+    const target = WordMotion.findPreviousWordStart(new Position(4, 3), labels);
+    expect(target).toEqual(new Position(0, 3));
+  });
+
+  it('treats punctuation as a separate word', () => {
+    // "hi!" — 'hi' word at 0-1, '!' word at 2
+    const labels = [
+      label(0, 3, 'h'), label(1, 3, 'i'), label(2, 3, '!'),
+    ];
+    const target = WordMotion.findPreviousWordStart(new Position(2, 3), labels);
+    expect(target).toEqual(new Position(0, 3));
+  });
+
+  it('wraps to the previous row when no more word starts remain backwards on current row', () => {
+    const labels = [
+      label(5, 3, 'a'), label(7, 3, 'b'), label(8, 3, 'c'),
+      label(0, 5, 'd'),
+    ];
+    const target = WordMotion.findPreviousWordStart(new Position(0, 5), labels);
+    // From start of row 5's single word, b wraps to the LAST word on row 3 ("bc" at x=7).
+    expect(target).toEqual(new Position(7, 3));
+  });
+
+  it('returns null when no earlier words exist', () => {
+    const labels = [label(5, 3, 'a')];
+    expect(WordMotion.findPreviousWordStart(new Position(5, 3), labels)).toBeNull();
+  });
+
+  it('only considers labels in the same group as the cursor', () => {
+    const labels = [
+      label(0, 3, 'a', 'poem'),
+      label(5, 3, 'b', 'aside'), // different group — should be ignored
+      label(10, 3, 'c', 'poem'),
+    ];
+    // Cursor on 'c' (poem). Previous poem word is at x=0, NOT the aside at x=5.
+    const target = WordMotion.findPreviousWordStart(new Position(10, 3), labels);
+    expect(target).toEqual(new Position(0, 3));
+  });
+
+  it('returns null when a wall fully isolates the cursor from the previous word', () => {
+    const labels = [label(0, 3, 'a'), label(5, 3, 'b')];
+    // Block the entire column 3 — two disconnected regions.
+    const isWalkable = (pos) => pos.x !== 3;
+    const target = WordMotion.findPreviousWordStart(new Position(5, 3), labels, isWalkable);
+    expect(target).toBeNull();
+  });
+});
