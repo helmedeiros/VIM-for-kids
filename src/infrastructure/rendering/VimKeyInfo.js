@@ -185,7 +185,7 @@ export class VimKeyInfo {
 
         const desc = document.createElement('span');
         desc.className = 'help-key-label';
-        desc.textContent = info.desc.split('.')[0];
+        desc.textContent = info.shortLabel || info.desc.split('.')[0];
 
         row.appendChild(badge);
         row.appendChild(desc);
@@ -223,7 +223,8 @@ export class VimKeyInfo {
     },
     w: {
       category: 'Word Jump',
-      desc: 'Jump forward',
+      desc: 'Jumps your character forward to the START of the next word.',
+      shortLabel: 'Jump forward',
       example: 'the [c]at sat \u2192 press w \u2192 the cat [s]at',
     },
     W: {
@@ -233,7 +234,8 @@ export class VimKeyInfo {
     },
     e: {
       category: 'Word Jump',
-      desc: 'Jump end',
+      desc: 'Jumps your character to the END of the current or next word.',
+      shortLabel: 'Jump end',
       example: '[t]he cat \u2192 press e \u2192 th[e] cat',
     },
     E: {
@@ -243,7 +245,8 @@ export class VimKeyInfo {
     },
     b: {
       category: 'Word Jump',
-      desc: 'Jump back',
+      desc: 'Jumps your character BACK to the start of the previous word.',
+      shortLabel: 'Jump back',
       example: 'the ca[t] \u2192 press b \u2192 the [c]at',
     },
     B: {
