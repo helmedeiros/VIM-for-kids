@@ -1004,37 +1004,46 @@ export class TilePainter {
     const ts = this._ts;
     const cx = ts / 2, cy = ts / 2;
 
-    // Star body
-    ctx.fillStyle = '#ff69b4';
+    // Bright yellow background circle for visibility
+    ctx.fillStyle = '#ffe040';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Star body — vivid hot pink
+    ctx.fillStyle = '#ff1493';
     ctx.beginPath();
     for (let i = 0; i < 10; i++) {
       const angle = (i * Math.PI) / 5 - Math.PI / 2;
-      const r = i % 2 === 0 ? 14 : 6;
+      const r = i % 2 === 0 ? 12 : 5;
       const x = cx + Math.cos(angle) * r;
       const y = cy + Math.sin(angle) * r;
       i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     }
     ctx.closePath();
     ctx.fill();
-    // Outline
-    ctx.strokeStyle = '#a03060';
-    ctx.lineWidth = 1.5;
+    // Dark outline
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth = 2;
     ctx.stroke();
-    // Inner glow
-    const glow = ctx.createRadialGradient(cx - 1, cy - 1, 0, cx, cy, 8);
-    glow.addColorStop(0, 'rgba(255, 200, 230, 0.6)');
-    glow.addColorStop(1, 'rgba(255, 105, 180, 0)');
-    ctx.fillStyle = glow;
-    ctx.fill();
-    // Face
-    ctx.fillStyle = '#401020';
+
+    // Face — white eyes with dark pupils
+    ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.arc(cx - 3, cy - 2, 1.5, 0, Math.PI * 2);
-    ctx.arc(cx + 3, cy - 2, 1.5, 0, Math.PI * 2);
+    ctx.arc(cx - 3, cy - 1, 2.5, 0, Math.PI * 2);
+    ctx.arc(cx + 3, cy - 1, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#1a1a2e';
+    ctx.beginPath();
+    ctx.arc(cx - 2.5, cy - 0.5, 1.2, 0, Math.PI * 2);
+    ctx.arc(cx + 3.5, cy - 0.5, 1.2, 0, Math.PI * 2);
     ctx.fill();
     // Smile
-    ctx.strokeStyle = '#401020';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(cx, cy + 1, 3, 0.2, Math.PI - 0.2);
     ctx.stroke();
