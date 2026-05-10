@@ -502,27 +502,7 @@ export class TilePainter {
 
   _paintRampRight(ctx) {
     const ts = this._ts;
-    ctx.fillStyle = '#90a0b8';
-    ctx.fillRect(0, 0, ts, ts);
-    ctx.fillStyle = '#586878';
-    ctx.fillRect(0, 0, ts / 2, ts);
-    const slope = ctx.createLinearGradient(ts / 2 - 4, 0, ts / 2 + 4, 0);
-    slope.addColorStop(0, '#384858');
-    slope.addColorStop(1, '#90a0b8');
-    ctx.fillStyle = slope;
-    ctx.fillRect(ts / 2 - 4, 0, 8, ts);
-    // Arrow
-    ctx.fillStyle = 'rgba(200, 210, 230, 0.5)';
-    ctx.beginPath();
-    ctx.moveTo(ts - 6, ts / 2);
-    ctx.lineTo(ts - 12, ts / 2 - 4);
-    ctx.lineTo(ts - 12, ts / 2 + 4);
-    ctx.closePath();
-    ctx.fill();
-  }
-
-  _paintRampLeft(ctx) {
-    const ts = this._ts;
+    // Right half is wall (high side), left half is ground (low side)
     ctx.fillStyle = '#90a0b8';
     ctx.fillRect(0, 0, ts, ts);
     ctx.fillStyle = '#586878';
@@ -532,11 +512,34 @@ export class TilePainter {
     slope.addColorStop(1, '#384858');
     ctx.fillStyle = slope;
     ctx.fillRect(ts / 2 - 4, 0, 8, ts);
+    // Arrow pointing left (enter from right)
     ctx.fillStyle = 'rgba(200, 210, 230, 0.5)';
     ctx.beginPath();
     ctx.moveTo(6, ts / 2);
     ctx.lineTo(12, ts / 2 - 4);
     ctx.lineTo(12, ts / 2 + 4);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  _paintRampLeft(ctx) {
+    const ts = this._ts;
+    // Left half is wall (high side), right half is ground (low side)
+    ctx.fillStyle = '#90a0b8';
+    ctx.fillRect(0, 0, ts, ts);
+    ctx.fillStyle = '#586878';
+    ctx.fillRect(0, 0, ts / 2, ts);
+    const slope = ctx.createLinearGradient(ts / 2 - 4, 0, ts / 2 + 4, 0);
+    slope.addColorStop(0, '#384858');
+    slope.addColorStop(1, '#90a0b8');
+    ctx.fillStyle = slope;
+    ctx.fillRect(ts / 2 - 4, 0, 8, ts);
+    // Arrow pointing right (enter from left)
+    ctx.fillStyle = 'rgba(200, 210, 230, 0.5)';
+    ctx.beginPath();
+    ctx.moveTo(ts - 6, ts / 2);
+    ctx.lineTo(ts - 12, ts / 2 - 4);
+    ctx.lineTo(ts - 12, ts / 2 + 4);
     ctx.closePath();
     ctx.fill();
   }
