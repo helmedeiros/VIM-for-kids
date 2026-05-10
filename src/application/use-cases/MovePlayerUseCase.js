@@ -17,7 +17,10 @@ export class MovePlayerUseCase {
 
   async execute(direction) {
     if (direction === 'word_forward') {
-      return this._executeWordForward();
+      return this._executeWordMotion('w', WordMotion.findNextWordStart);
+    }
+    if (direction === 'word_end') {
+      return this._executeWordMotion('e', WordMotion.findNextWordEnd);
     }
 
     const currentPosition = this._gameState.cursor.position;
@@ -56,8 +59,11 @@ export class MovePlayerUseCase {
     return this._finalizeMove(newPosition);
   }
 
-  async _executeWordForward() {
-    if (!this._hasWordKey()) {
+  // Shared driver for word-based motions (vim 'w', 'e'). The strategy parameter
+  // picks WHICH word-position to land on (start vs end). Required key is the
+  // vim-key letter the player must have collected to use this motion.
+  async _executeWordMotion(requiredKey, findTarget) {
+    if (!this._hasCollectedKey(requiredKey)) {
       return { success: false, reason: 'word_motion_locked' };
     }
 
@@ -73,7 +79,7 @@ export class MovePlayerUseCase {
     }
 
     const isWalkable = (pos) => this._isWalkableForWordMotion(pos);
-    const target = WordMotion.findNextWordStart(cursorPos, labels, isWalkable);
+    const target = findTarget(cursorPos, labels, isWalkable);
     if (!target) {
       return { success: false, reason: 'no_next_word' };
     }
@@ -181,7 +187,11 @@ export class MovePlayerUseCase {
   }
 
   _hasWordKey() {
-    return this._gameState.collectedKeys.has('w');
+    return this._hasCollectedKey('w');
+  }
+
+  _hasCollectedKey(key) {
+    return this._gameState.collectedKeys.has(key);
   }
 
   _isPositionWalkable(position, direction = null) {

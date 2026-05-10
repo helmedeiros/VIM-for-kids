@@ -101,6 +101,12 @@ describe('BlinkingGroveZone', () => {
       // Verify the word-motion vim_key is also present (power-up that lets the player walk over rocks)
       const hiddenVimKeys = hiddenArea.specialTiles.filter(tile => tile.type === 'vim_key');
       expect(hiddenVimKeys.map(k => k.value)).toContain('w');
+
+      // The 'e' (end-of-word motion) vim_key sits on the 'e' of "one" in the
+      // "A shadowy one emerges," poem line (hidden-area coords [12, 9]).
+      expect(hiddenVimKeys.map(k => k.value)).toContain('e');
+      const eKey = hiddenVimKeys.find(k => k.value === 'e');
+      expect(eKey.position).toEqual([12, 9]);
     });
 
     test('should have correct text labels configuration', () => {

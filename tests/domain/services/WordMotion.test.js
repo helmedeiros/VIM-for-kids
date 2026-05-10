@@ -157,3 +157,79 @@ describe('WordMotion.findNextWordStart', () => {
     });
   });
 });
+
+describe('WordMotion.findNextWordEnd', () => {
+  it('returns null for empty text labels', () => {
+    expect(WordMotion.findNextWordEnd(new Position(0, 0), [])).toBeNull();
+    expect(WordMotion.findNextWordEnd(new Position(0, 0), null)).toBeNull();
+  });
+
+  it('jumps from the start of a word to the end of the same word', () => {
+    const labels = [
+      label(0, 3, 'T'), label(1, 3, 'h'), label(2, 3, 'e'),
+      label(4, 3, 'c'), label(5, 3, 'a'), label(6, 3, 't'),
+    ];
+    const target = WordMotion.findNextWordEnd(new Position(0, 3), labels);
+    expect(target).toEqual(new Position(2, 3));
+  });
+
+  it('jumps from the middle of a word to the end of the same word', () => {
+    const labels = [
+      label(0, 3, 'T'), label(1, 3, 'h'), label(2, 3, 'e'),
+      label(4, 3, 'c'), label(5, 3, 'a'), label(6, 3, 't'),
+    ];
+    const target = WordMotion.findNextWordEnd(new Position(1, 3), labels);
+    expect(target).toEqual(new Position(2, 3));
+  });
+
+  it('jumps from the end of a word to the end of the next word', () => {
+    const labels = [
+      label(0, 3, 'T'), label(1, 3, 'h'), label(2, 3, 'e'),
+      label(4, 3, 'c'), label(5, 3, 'a'), label(6, 3, 't'),
+    ];
+    const target = WordMotion.findNextWordEnd(new Position(2, 3), labels);
+    expect(target).toEqual(new Position(6, 3));
+  });
+
+  it('treats punctuation as a separate word with its own end', () => {
+    const labels = [
+      label(0, 3, 'h'), label(1, 3, 'i'), label(2, 3, '!'),
+    ];
+    const target = WordMotion.findNextWordEnd(new Position(0, 3), labels);
+    expect(target).toEqual(new Position(1, 3));
+  });
+
+  it('wraps to the next row when no more word ends remain on current row', () => {
+    const labels = [
+      label(0, 3, 'a'),
+      label(0, 5, 'b'), label(1, 5, 'c'),
+    ];
+    const target = WordMotion.findNextWordEnd(new Position(0, 3), labels);
+    expect(target).toEqual(new Position(1, 5));
+  });
+
+  it('returns null when no further word ends exist', () => {
+    const labels = [label(0, 3, 'a')];
+    expect(WordMotion.findNextWordEnd(new Position(0, 3), labels)).toBeNull();
+  });
+
+  it('only considers labels in the same group as the cursor', () => {
+    const labels = [
+      label(0, 3, 'a', 'poem'),
+      label(5, 3, 'b', 'aside'),
+      label(10, 3, 'c', 'poem'), label(11, 3, 'd', 'poem'),
+    ];
+    const target = WordMotion.findNextWordEnd(new Position(0, 3), labels);
+    expect(target).toEqual(new Position(11, 3));
+  });
+
+  it('refuses to jump when target is unreachable via the walkability predicate', () => {
+    const labels = [
+      label(0, 3, 'a'),
+      label(5, 3, 'b'), label(6, 3, 'c'),
+    ];
+    const isWalkable = (pos) => pos.x !== 3;
+    const target = WordMotion.findNextWordEnd(new Position(0, 3), labels, isWalkable);
+    expect(target).toBeNull();
+  });
+});
