@@ -105,6 +105,9 @@ export class VimKeyInfo {
       el.textContent = keyName;
       el.title = `Learn about ${keyName}`;
       el.addEventListener('click', () => {
+        // Close the help modal first so the explanation shows on top
+        const helpModal = document.getElementById('helpModal');
+        if (helpModal) helpModal.classList.add('hidden');
         onKeyClick({ key: keyName, description: '' });
       });
       container.appendChild(el);
