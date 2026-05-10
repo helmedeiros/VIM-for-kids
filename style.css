@@ -770,36 +770,79 @@ h1 {
   }
 }
 
+/* Help Button */
+.help-button {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  background-color: #ffffff;
+  border: 3px solid #1a1a2e;
+  color: #1a1a2e;
+  padding: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  font-weight: 900;
+  z-index: 1001;
+  transition: all 0.15s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 3px 3px 0 #1a1a2e;
+}
+
+.help-button:hover {
+  background-color: #e3f2fd;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 #1a1a2e;
+}
+
+.help-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #1a1a2e;
+}
+
 /* UI Elements — Neo-brutalist kids-friendly style */
 .instructions {
   margin: 0;
-  padding: 10px 12px;
+  padding: 12px 14px;
   background-color: #ffffff;
   border-radius: 10px;
   border: 3px solid #1a1a2e;
   position: absolute;
-  bottom: 16px;
+  bottom: 64px;
   left: 16px;
   z-index: 1000;
-  max-width: 300px;
+  max-width: 280px;
   font-size: 12px;
   color: #1a1a2e;
   box-shadow: 4px 4px 0 #1a1a2e;
 }
 
+.instructions.hidden {
+  display: none;
+}
+
 .instructions p {
-  margin: 3px 0;
+  margin: 4px 0;
   font-size: 11px;
   color: #333;
+  line-height: 1.4;
 }
 
 .instructions .warning {
-  background: #ff6b6b !important;
-  border: 2px solid #1a1a2e !important;
-  border-radius: 6px !important;
-  color: #fff !important;
-  font-weight: 700 !important;
-  box-shadow: 2px 2px 0 #1a1a2e !important;
+  background: #ff6b6b;
+  border: 2px solid #1a1a2e;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 8px;
+  margin-top: 8px;
+  box-shadow: 2px 2px 0 #1a1a2e;
 }
 
 .collected-keys {
