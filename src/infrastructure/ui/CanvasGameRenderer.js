@@ -756,7 +756,7 @@ export class CanvasGameRenderer extends GameRenderer {
     // Dismiss hint
     const hint = document.createElement('div');
     hint.className = 'vim-key-hint';
-    hint.textContent = 'Click anywhere to continue';
+    hint.textContent = 'Press ESC to continue';
     card.appendChild(hint);
 
     overlay.appendChild(card);
