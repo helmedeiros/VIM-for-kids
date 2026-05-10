@@ -502,27 +502,68 @@ export class TilePainter {
 
   _paintRampRight(ctx) {
     const ts = this._ts;
-    // Right half is wall (high side), left half is ground (low side)
+    // Left half is ground
     ctx.fillStyle = '#90a0b8';
     ctx.fillRect(0, 0, ts, ts);
-    ctx.fillStyle = '#586878';
+
+    // Right half is wall with brick pattern
+    ctx.fillStyle = '#5a6878';
     ctx.fillRect(ts / 2, 0, ts / 2, ts);
+    const bh = 6, bw = 8;
+    for (let row = 0; row < ts / bh; row++) {
+      const offset = (row % 2) * (bw / 2);
+      for (let col = 0; col < ts / 2 / bw + 1; col++) {
+        const bx = ts / 2 + col * bw + offset;
+        const by = row * bh;
+        ctx.fillStyle = `rgb(${90 + (row + col) % 3 * 2}, ${105 + (row + col) % 3 * 2}, ${118 + (row + col) % 3 * 2})`;
+        ctx.fillRect(bx + 1, by + 1, bw - 2, bh - 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.fillRect(bx + 1, by + 1, bw - 2, 1);
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.fillRect(bx + 1, by + bh - 2, bw - 2, 1);
+      }
+      ctx.fillStyle = '#3a4858';
+      ctx.fillRect(ts / 2, row * bh, ts / 2, 1);
+    }
+
+    // Slope gradient transition
     const slope = ctx.createLinearGradient(ts / 2 - 4, 0, ts / 2 + 4, 0);
     slope.addColorStop(0, '#90a0b8');
-    slope.addColorStop(1, '#384858');
+    slope.addColorStop(1, '#4a5868');
     ctx.fillStyle = slope;
     ctx.fillRect(ts / 2 - 4, 0, 8, ts);
   }
 
   _paintRampLeft(ctx) {
     const ts = this._ts;
-    // Left half is wall (high side), right half is ground (low side)
+    // Right half is ground
     ctx.fillStyle = '#90a0b8';
     ctx.fillRect(0, 0, ts, ts);
-    ctx.fillStyle = '#586878';
+
+    // Left half is wall with brick pattern
+    ctx.fillStyle = '#5a6878';
     ctx.fillRect(0, 0, ts / 2, ts);
+    const bh = 6, bw = 8;
+    for (let row = 0; row < ts / bh; row++) {
+      const offset = (row % 2) * (bw / 2);
+      for (let col = -1; col < ts / 2 / bw + 1; col++) {
+        const bx = col * bw + offset;
+        const by = row * bh;
+        if (bx + bw <= 0 || bx >= ts / 2) continue;
+        ctx.fillStyle = `rgb(${90 + (row + col) % 3 * 2}, ${105 + (row + col) % 3 * 2}, ${118 + (row + col) % 3 * 2})`;
+        ctx.fillRect(Math.max(0, bx + 1), by + 1, Math.min(bw - 2, ts / 2 - bx - 1), bh - 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.fillRect(Math.max(0, bx + 1), by + 1, Math.min(bw - 2, ts / 2 - bx - 1), 1);
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.fillRect(Math.max(0, bx + 1), by + bh - 2, Math.min(bw - 2, ts / 2 - bx - 1), 1);
+      }
+      ctx.fillStyle = '#3a4858';
+      ctx.fillRect(0, row * bh, ts / 2, 1);
+    }
+
+    // Slope gradient transition
     const slope = ctx.createLinearGradient(ts / 2 - 4, 0, ts / 2 + 4, 0);
-    slope.addColorStop(0, '#384858');
+    slope.addColorStop(0, '#4a5868');
     slope.addColorStop(1, '#90a0b8');
     ctx.fillStyle = slope;
     ctx.fillRect(ts / 2 - 4, 0, 8, ts);
