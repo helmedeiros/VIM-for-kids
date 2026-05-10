@@ -34,6 +34,7 @@ describe('Origin Story Cutscenes Integration', () => {
 
     const cutsceneProvider = new CutsceneProviderAdapter();
     featureFlags = new FeatureFlags();
+    featureFlags.disable('REPEAT_CUTSCENES'); // Tests verify "shown once" behavior
     cutsceneService = new CutsceneService(cutsceneProvider, persistenceService, featureFlags);
 
     const cutsceneRenderer = new CutsceneRenderer('test-container');

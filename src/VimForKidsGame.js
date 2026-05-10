@@ -7,7 +7,7 @@ import { NPCInteractionUseCase } from './application/use-cases/NPCInteractionUse
 import { HandleProgressionUseCase } from './application/use-cases/HandleProgressionUseCase.js';
 import { SelectGameUseCase } from './application/use-cases/SelectGameUseCase.js';
 import { DialogueService } from './application/services/DialogueService.js';
-import { DOMGameRenderer } from './infrastructure/ui/DOMGameRenderer.js';
+import { DOMGameRenderer } from './infrastructure/ui/DOMGameRenderer.js'; // Fallback for tests
 import { KeyboardInputHandler } from './infrastructure/input/KeyboardInputHandler.js';
 import { ZoneRegistryAdapter } from './infrastructure/data/zones/ZoneRegistryAdapter.js';
 import { GameProviderAdapter } from './infrastructure/data/games/GameProviderAdapter.js';
@@ -181,16 +181,11 @@ export class VimForKidsGame {
    * @private
    */
   _updateLevelSelectionForCurrentGame() {
-    const levelSelection = document.querySelector('.level-selection');
-    if (levelSelection) {
-      if (this.currentGameId === 'cursor-before-clickers') {
-        // Show level selection for level-based games
-        levelSelection.style.display = 'flex';
-      } else {
-        // Hide level selection for free exploration games
-        levelSelection.style.display = 'none';
-      }
-    }
+    const isLevelBased = this.currentGameId === 'cursor-before-clickers';
+    // Dispatch event so LevelSelectorUI handles visibility with auto-hide
+    document.dispatchEvent(
+      new CustomEvent('levelSelectionVisibility', { detail: { visible: isLevelBased } })
+    );
   }
 
   /**
@@ -333,6 +328,11 @@ export class VimForKidsGame {
   }
 
   async transitionToLevel(newLevelId) {
+    // Clear any lingering overlays from previous level
+    if (typeof this.gameRenderer.clearAllOverlays === 'function') {
+      this.gameRenderer.clearAllOverlays();
+    }
+
     // Show level cutscene if applicable
     await this._showLevelCutsceneIfNeeded(this.currentGameId, newLevelId);
 
@@ -388,44 +388,55 @@ export class VimForKidsGame {
       const hasAllMovementKeys = ['h', 'j', 'k', 'l'].every(key => collectedKeys.has(key));
       const isAtGate = gate && cursor.position.equals(gate.position);
 
-      if (hasAllMovementKeys && isAtGate) {
-        // Check if the gate leads to a hidden area
-        const gateDestination = gate.leadsTo;
+      // Check if player is next to the level_complete_spirit NPC (hidden area exit)
+      const isAtLevelCompleteNPC = this._isPlayerNearNPC(currentState, 'level_complete_spirit');
 
-        if (gateDestination && gateDestination.startsWith('vim_') && currentZone.getHiddenAreas().some(area => area.id === gateDestination)) {
-          // Gate leads to a hidden area - reveal and enter it
-          const areasRevealed = currentZone.revealHiddenArea('escProgression');
+      if (hasAllMovementKeys && (isAtGate || isAtLevelCompleteNPC)) {
+        // If at the main gate and it leads to a hidden area, enter it
+        if (isAtGate) {
+          const gateDestination = gate.leadsTo;
 
-          if (areasRevealed) {
-            // Enter the hidden area
-            const hiddenArea = currentZone.enterHiddenArea(gateDestination);
+          if (gateDestination && gateDestination.startsWith('vim_') && currentZone.getHiddenAreas().some(area => area.id === gateDestination)) {
+            const areasRevealed = currentZone.revealHiddenArea('escProgression');
 
-            if (hiddenArea) {
-              // Move player to hidden area start position
-              const startPos = currentZone.getHiddenAreaStartPosition(gateDestination);
-              if (startPos) {
-                this.gameState.cursor = this.gameState.cursor.moveTo(startPos);
+            if (areasRevealed) {
+              const hiddenArea = currentZone.enterHiddenArea(gateDestination);
+
+              if (hiddenArea) {
+                const startPos = currentZone.getHiddenAreaStartPosition(gateDestination);
+                if (startPos) {
+                  this.gameState.cursor = this.gameState.cursor.moveTo(startPos);
+                }
+                this.gameRenderer.render(this.gameState.getCurrentState());
+                return;
               }
-
-              // Re-render to show the newly revealed areas and player position
-              this.gameRenderer.render(this.gameState.getCurrentState());
-
-              // Don't mark ESC progression yet - save it for when they exit the hidden area
-              return; // Exit early to prevent normal progression
             }
           }
         }
 
-        // If we get here, either no hidden area or failed to enter - do normal progression
-        // Mark ESC progression as pressed for this zone
+        // Trigger progression through the standard flow
         this.gameState.markEscProgressionPressed();
 
-        // Gate leads to next level - trigger normal progression
         if (this.handleProgressionUseCase && this.handleProgressionUseCase.shouldExecuteProgression()) {
           await this.handleProgressionUseCase.execute();
         }
       }
     }
+  }
+
+  /**
+   * Check if the player cursor is adjacent to a specific NPC
+   * @private
+   */
+  _isPlayerNearNPC(currentState, npcId) {
+    if (!currentState.npcs) return false;
+    const cursor = currentState.cursor;
+    const npc = currentState.npcs.find((n) => n.id === npcId);
+    if (!npc || !npc.position || !Array.isArray(npc.position)) return false;
+
+    const dx = Math.abs(cursor.position.x - npc.position[0]);
+    const dy = Math.abs(cursor.position.y - npc.position[1]);
+    return dx <= 1 && dy <= 1;
   }
 
   /**

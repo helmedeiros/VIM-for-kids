@@ -9,6 +9,8 @@ export class LevelSelectorUI {
     this._gameId = gameId;
     this._levelConfiguration = levelConfiguration || this._getDefaultLevelConfiguration();
     this._onLevelSelected = null;
+    this._autoHideTimer = null;
+    this._shown = false;
   }
 
   /**
@@ -25,6 +27,11 @@ export class LevelSelectorUI {
   initialize() {
     this._createLevelButtons();
     this._setupLevelButtons();
+
+    // Listen for visibility events from other components
+    document.addEventListener('levelSelectionVisibility', (e) => {
+      this.setVisible(e.detail.visible);
+    });
   }
 
   /**
@@ -45,14 +52,65 @@ export class LevelSelectorUI {
   }
 
   /**
-   * Show or hide level selection
+   * Show or hide level selection with auto-hide after 30 seconds
    * @param {boolean} visible - Whether to show level selection
    */
   setVisible(visible) {
-    const levelSelection = document.querySelector('.level-selection');
-    if (levelSelection) {
-      levelSelection.style.display = visible ? 'flex' : 'none';
+    if (visible) {
+      this._showWithAutoHide();
+    } else {
+      this._hide();
     }
+  }
+
+  /**
+   * Toggle level selection visibility (used by title click)
+   */
+  toggle() {
+    if (this._shown) {
+      this._hideAnimated();
+    } else {
+      this._showWithAutoHide();
+    }
+  }
+
+  /** @private */
+  _showWithAutoHide() {
+    const levelSelection = document.querySelector('.level-selection');
+    if (!levelSelection) return;
+    clearTimeout(this._autoHideTimer);
+    levelSelection.style.display = 'flex';
+    levelSelection.classList.remove('hiding');
+    this._shown = true;
+    this._autoHideTimer = setTimeout(() => this._hideAnimated(), 30000);
+  }
+
+  /** @private */
+  _hideAnimated() {
+    const levelSelection = document.querySelector('.level-selection');
+    if (!levelSelection || !this._shown) return;
+    this._shown = false;
+    clearTimeout(this._autoHideTimer);
+    this._autoHideTimer = null;
+    levelSelection.classList.add('hiding');
+    setTimeout(() => {
+      const bar = document.querySelector('.level-selection');
+      if (bar) {
+        bar.style.display = 'none';
+        bar.classList.remove('hiding');
+      }
+    }, 400);
+  }
+
+  /** @private */
+  _hide() {
+    const levelSelection = document.querySelector('.level-selection');
+    if (!levelSelection) return;
+    clearTimeout(this._autoHideTimer);
+    this._autoHideTimer = null;
+    levelSelection.style.display = 'none';
+    levelSelection.classList.remove('hiding');
+    this._shown = false;
   }
 
   /**

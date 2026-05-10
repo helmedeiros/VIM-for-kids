@@ -37,7 +37,9 @@ describe('CanvasGameRenderer', () => {
       save: jest.fn(),
       restore: jest.fn(),
       drawImage: jest.fn(),
+      strokeText: jest.fn(),
       fillStyle: '',
+      strokeStyle: '',
       font: '',
       textAlign: '',
       textBaseline: '',
@@ -450,6 +452,105 @@ describe('CanvasGameRenderer', () => {
     it('removes canvas from DOM', () => {
       renderer.cleanup();
       expect(document.getElementById('gameBoardCanvas')).toBeNull();
+    });
+  });
+
+  describe('clearAllOverlays', () => {
+    it('removes explanation overlays', () => {
+      const overlay = document.createElement('div');
+      overlay.id = 'vimKeyExplanation';
+      document.body.appendChild(overlay);
+      renderer.clearAllOverlays();
+      expect(document.getElementById('vimKeyExplanation')).toBeNull();
+    });
+
+    it('does not throw when no overlays exist', () => {
+      expect(() => renderer.clearAllOverlays()).not.toThrow();
+    });
+  });
+
+  describe('showLockedGateHint', () => {
+    it('creates a locked gate overlay', () => {
+      renderer.showLockedGateHint('main');
+      const overlay = document.getElementById('vimKeyExplanation');
+      expect(overlay).not.toBeNull();
+      expect(overlay.innerHTML).toContain('Locked');
+    });
+
+    it('respects cooldown', () => {
+      renderer.showLockedGateHint('main');
+      document.getElementById('vimKeyExplanation').remove();
+      renderer.showLockedGateHint('main');
+      // Second call within cooldown — no overlay
+      expect(document.getElementById('vimKeyExplanation')).toBeNull();
+    });
+  });
+
+  describe('showLevelComplete', () => {
+    it('returns a promise that resolves on dismiss', async () => {
+      jest.useFakeTimers();
+      const promise = renderer.showLevelComplete('level_2');
+      const overlay = document.getElementById('vimKeyExplanation');
+      expect(overlay).not.toBeNull();
+      // Dismiss via click
+      overlay.click();
+      jest.advanceTimersByTime(300);
+      await promise;
+      jest.useRealTimers();
+    });
+  });
+
+  describe('showCollectibleKeyIntro', () => {
+    it('creates collectible intro overlay', () => {
+      renderer.showCollectibleKeyIntro({ keyId: 'test_key', name: 'Test Key' });
+      const overlay = document.getElementById('vimKeyExplanation');
+      expect(overlay).not.toBeNull();
+      expect(overlay.innerHTML).toContain('Test Key');
+    });
+  });
+
+  describe('_showVimKeyExplanation', () => {
+    it('creates VIM key explanation overlay', () => {
+      renderer._showVimKeyExplanation({ key: 'h', description: '' });
+      const overlay = document.getElementById('vimKeyExplanation');
+      expect(overlay).not.toBeNull();
+      expect(overlay.innerHTML).toContain('Movement');
+    });
+
+    it('replaces existing overlay', () => {
+      renderer._showVimKeyExplanation({ key: 'h', description: '' });
+      renderer._showVimKeyExplanation({ key: 'j', description: '' });
+      const overlays = document.querySelectorAll('#vimKeyExplanation');
+      expect(overlays).toHaveLength(1);
+    });
+  });
+
+  describe('render with state changes', () => {
+    it('detects cursor movement', () => {
+      const state1 = createMockGameState({ cursorPosition: { x: 5, y: 5 } });
+      renderer.render(state1);
+      const state2 = createMockGameState({ cursorPosition: { x: 6, y: 5 } });
+      renderer.render(state2);
+      // Movement animator should have started
+      expect(renderer._movementAnimator.isAnimating).toBe(true);
+    });
+
+    it('detects key collection', () => {
+      const state1 = createMockGameState({ collectedKeys: new Set(['h']) });
+      renderer.render(state1);
+      const state2 = createMockGameState({ collectedKeys: new Set(['h', 'j']) });
+      renderer.render(state2);
+      // Particle system should have particles
+      expect(renderer._particleSystem.particleCount).toBeGreaterThan(0);
+    });
+  });
+
+  describe('resetCamera', () => {
+    it('resets tracking state', () => {
+      renderer.render(createMockGameState({ cursorPosition: { x: 10, y: 10 } }));
+      renderer.resetCamera();
+      expect(renderer._lastCursorX).toBeNull();
+      expect(renderer._lastCursorY).toBeNull();
     });
   });
 });

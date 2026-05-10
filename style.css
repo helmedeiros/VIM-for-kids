@@ -7,7 +7,7 @@
 body {
   font-family: 'Courier New', monospace;
   background-color: #2c3e50;
-  color: #ecf0f1;
+  color: #1a1a2e;
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -32,17 +32,21 @@ body {
 
 h1 {
   margin: 0;
-  color: #e74c3c;
-  font-size: 1.5em;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  color: #1a1a2e;
+  font-size: 1.4em;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
   position: absolute;
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
-  background-color: rgba(52, 73, 94, 0.9);
-  padding: 5px 15px;
-  border-radius: 5px;
+  background-color: #ffe156;
+  padding: 6px 18px;
+  border: 3px solid #1a1a2e;
+  border-radius: 8px;
+  box-shadow: 4px 4px 0 #1a1a2e;
 }
 
 /* Game Settings Button */
@@ -50,31 +54,43 @@ h1 {
   position: absolute;
   top: 10px;
   right: 15px;
-  background-color: rgba(52, 73, 94, 0.9);
-  border: 2px solid #2c3e50;
-  color: #ecf0f1;
+  background-color: #ffffff;
+  border: 3px solid #1a1a2e;
+  color: #1a1a2e;
   padding: 8px 12px;
-  border-radius: 50%;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
   z-index: 1000;
-  transition: all 0.3s ease;
+  transition: all 0.15s ease;
   width: 40px;
   height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 3px 3px 0 #1a1a2e;
 }
 
 .settings-button:hover {
-  background-color: #4a6278;
-  transform: rotate(90deg);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background-color: #ffe156;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 #1a1a2e;
+}
+
+.settings-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #1a1a2e;
 }
 
 .settings-button:focus {
-  outline: 2px solid #e74c3c;
+  outline: 2px solid #ff6b6b;
   outline-offset: 2px;
+}
+
+/* Title — clickable to toggle levels */
+h1 {
+  cursor: pointer;
+  user-select: none;
 }
 
 /* Level Selection */
@@ -82,36 +98,54 @@ h1 {
   margin: 0;
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   position: absolute;
-  top: 60px;
+  top: 55px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
+  transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
+.level-selection.hiding {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-10px);
+  pointer-events: none;
+}
+
+/* hidden-levels is no longer used — display is set via style.display
+   to stay in sync with LevelSelectorUI and GameSelectorUI inline styles */
+
 .level-btn {
-  background-color: #34495e;
-  color: #ecf0f1;
-  border: 2px solid #2c3e50;
-  padding: 8px 12px;
-  border-radius: 5px;
+  background-color: #ffffff;
+  color: #1a1a2e;
+  border: 3px solid #1a1a2e;
+  padding: 6px 12px;
+  border-radius: 8px;
   cursor: pointer;
   font-family: 'Courier New', monospace;
-  font-weight: bold;
-  font-size: 12px;
-  transition: all 0.3s ease;
+  font-weight: 800;
+  font-size: 11px;
+  transition: all 0.15s ease;
+  box-shadow: 3px 3px 0 #1a1a2e;
 }
 
 .level-btn:hover {
-  background-color: #4a6278;
-  transform: translateY(-2px);
+  background-color: #e8f5e9;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 #1a1a2e;
+}
+
+.level-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #1a1a2e;
 }
 
 .level-btn.active {
-  background-color: #e74c3c;
-  border-color: #c0392b;
-  color: white;
+  background-color: #ff6b6b;
+  border-color: #1a1a2e;
+  color: #ffffff;
+  box-shadow: 3px 3px 0 #1a1a2e;
 }
 
 /* Game Selection Modal */
@@ -147,14 +181,14 @@ h1 {
 
 .modal-content {
   position: relative;
-  background-color: #34495e;
-  border-radius: 10px;
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8);
+  background-color: #fffef5;
+  border-radius: 12px;
+  box-shadow: 8px 8px 0 #1a1a2e;
   max-width: 600px;
   width: 90%;
   max-height: 80vh;
   overflow: hidden;
-  border: 2px solid #2c3e50;
+  border: 3px solid #1a1a2e;
   z-index: 2;
 }
 
@@ -162,108 +196,120 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #2c3e50;
-  background-color: #2c3e50;
+  padding: 16px 20px;
+  border-bottom: 3px solid #1a1a2e;
+  background-color: #ffe156;
 }
 
 .modal-header h2 {
   margin: 0;
-  color: #e74c3c;
-  font-size: 1.3em;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  color: #1a1a2e;
+  font-size: 1.2em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .close-button {
-  background: none;
-  border: none;
-  color: #ecf0f1;
-  font-size: 24px;
+  background: #ffffff;
+  border: 3px solid #1a1a2e;
+  color: #1a1a2e;
+  font-size: 18px;
   cursor: pointer;
-  padding: 5px;
-  border-radius: 3px;
-  transition: all 0.3s ease;
+  padding: 2px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
   width: 30px;
   height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 2px 2px 0 #1a1a2e;
+  font-weight: 900;
 }
 
 .close-button:hover {
-  background-color: #e74c3c;
+  background-color: #ff6b6b;
   color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 #1a1a2e;
 }
 
 .modal-body {
   padding: 20px;
   max-height: 60vh;
   overflow-y: auto;
+  background-color: #fffef5;
 }
 
 .games-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px;
 }
 
 .game-item {
-  padding: 15px;
-  border: 2px solid #2c3e50;
-  border-radius: 8px;
-  background-color: #3a5169;
+  padding: 14px;
+  border: 3px solid #1a1a2e;
+  border-radius: 10px;
+  background-color: #ffffff;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.15s ease;
+  box-shadow: 3px 3px 0 #1a1a2e;
 }
 
 .game-item:hover {
-  border-color: #4a6278;
-  background-color: #4a6278;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  background-color: #e8f5e9;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 #1a1a2e;
+}
+
+.game-item:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #1a1a2e;
 }
 
 .game-item.active {
-  border-color: #e74c3c;
-  background-color: #2c3e50;
-  box-shadow: 0 0 10px rgba(231, 76, 60, 0.3);
+  border-color: #1a1a2e;
+  background-color: #fff3e0;
+  box-shadow: 3px 3px 0 #1a1a2e;
 }
 
 .game-item.active::before {
   content: '▶ ';
-  color: #e74c3c;
-  font-weight: bold;
+  color: #ff6b6b;
+  font-weight: 900;
 }
 
 .game-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .game-name {
   margin: 0;
-  color: #ecf0f1;
-  font-size: 1.1em;
-  font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  color: #1a1a2e;
+  font-size: 1.05em;
+  font-weight: 800;
 }
 
 .game-description {
   margin: 0;
-  color: #bdc3c7;
-  font-size: 0.9em;
+  color: #555;
+  font-size: 0.85em;
   line-height: 1.4;
 }
 
 .game-type {
   align-self: flex-start;
-  background-color: #e74c3c;
+  background-color: #ff6b6b;
   color: white;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.8em;
-  font-weight: bold;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 2px solid #1a1a2e;
+  font-size: 0.75em;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -740,117 +786,462 @@ h1 {
   }
 }
 
-/* UI Elements */
-.instructions {
-  margin: 0;
-  padding: 10px;
-  background-color: rgba(44, 62, 80, 0.9);
-  border-radius: 5px;
-  border-left: 4px solid #e74c3c;
+/* Help Button */
+.help-button {
   position: absolute;
-  bottom: 20px;
-  left: 20px;
-  z-index: 1000;
-  max-width: 300px;
-  font-size: 12px;
+  top: 10px;
+  right: 62px;
+  background-color: #ffffff;
+  border: 3px solid #1a1a2e;
+  color: #1a1a2e;
+  padding: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  font-weight: 900;
+  z-index: 1001;
+  transition: all 0.15s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 3px 3px 0 #1a1a2e;
 }
 
-.instructions p {
-  margin: 3px 0;
-  font-size: 11px;
+.help-button:hover {
+  background-color: #e3f2fd;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 #1a1a2e;
 }
 
+.help-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #1a1a2e;
+}
+
+/* VIM Key Explanation Overlay */
+.vim-key-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: vimKeyFadeIn 0.25s ease-out;
+}
+
+.vim-key-overlay.vim-key-dismissing {
+  animation: vimKeyFadeOut 0.3s ease-out forwards;
+}
+
+.vim-key-card {
+  background: #fffef5;
+  border: 3px solid #1a1a2e;
+  border-radius: 14px;
+  box-shadow: 8px 8px 0 #1a1a2e;
+  padding: 28px 36px;
+  text-align: center;
+  max-width: 340px;
+  width: 88%;
+  font-family: 'Courier New', monospace;
+  animation: vimKeyPopIn 0.3s ease-out;
+}
+
+.vim-key-category {
+  display: inline-block;
+  background: #ff6b6b;
+  color: #fff;
+  font-size: 0.7em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 3px 12px;
+  border: 2px solid #1a1a2e;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.vim-key-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #4ecdc4;
+  color: #1a1a2e;
+  border: 3px solid #1a1a2e;
+  border-radius: 10px;
+  font-size: 32px;
+  font-weight: 900;
+  width: 60px;
+  height: 60px;
+  box-shadow: 4px 4px 0 #1a1a2e;
+  margin-bottom: 14px;
+}
+
+.vim-key-badge-gold {
+  background: #ffe156;
+  font-size: 28px;
+}
+
+.vim-key-badge-locked {
+  background: #ff6b6b;
+  font-size: 28px;
+}
+
+.vim-key-title {
+  font-size: 1.1em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #1a1a2e;
+  margin-bottom: 12px;
+}
+
+.vim-key-desc {
+  font-size: 0.92em;
+  line-height: 1.5;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.vim-key-example {
+  background: #f5f4ec;
+  border: 2px solid #1a1a2e;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.vim-key-example-columns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.vim-key-example-col {
+  flex: 1;
+}
+
+.vim-key-example-arrow {
+  font-size: 1.2em;
+  font-weight: 900;
+  color: #4ecdc4;
+  flex-shrink: 0;
+}
+
+.vim-key-example-label {
+  font-size: 0.7em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.vim-key-example-text {
+  font-size: 0.85em;
+  line-height: 1.5;
+  color: #1a1a2e;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.vim-key-example-columns .vim-key-example-text {
+  white-space: pre;
+}
+
+.vim-key-hint {
+  font-size: 0.75em;
+  color: #999;
+  font-style: italic;
+}
+
+@keyframes vimKeyFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes vimKeyFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes vimKeyPopIn {
+  from { transform: scale(0.7); opacity: 0; }
+  50% { transform: scale(1.05); }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Help Modal — content styles (reuses game-modal + game-item cards) */
+.help-hint {
+  font-size: 0.82em !important;
+  color: #4ecdc4 !important;
+  font-weight: 700 !important;
+  margin-top: 8px !important;
+  text-align: center;
+}
+
+.help-keys {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin: 10px 0;
+  flex-wrap: wrap;
+}
+
+.help-list {
+  font-size: 0.88em;
+  line-height: 1.7;
+  padding-left: 22px;
+  margin: 6px 0;
+  color: #333;
+}
+
+.help-list li {
+  margin-bottom: 4px;
+}
+
+.help-key-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.help-key {
+  background: #4ecdc4;
+  color: #1a1a2e;
+  border: 3px solid #1a1a2e;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-weight: 900;
+  font-size: 16px;
+  font-family: 'Courier New', monospace;
+  box-shadow: 3px 3px 0 #1a1a2e;
+  min-width: 36px;
+  text-align: center;
+}
+
+.help-key-label {
+  font-size: 0.75em;
+  font-weight: 800;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.help-collected-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0;
+  justify-content: center;
+}
+
+.help-collected-keys .help-key-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.help-key.clickable {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.help-key.clickable:hover {
+  background: #3dbdb5;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 #1a1a2e;
+}
+
+.help-key-locked {
+  background: #ccc !important;
+  color: #888 !important;
+  border-color: #999 !important;
+  box-shadow: 2px 2px 0 #999 !important;
+  opacity: 0.5;
+}
+
+.help-keys-divider {
+  width: 100%;
+  height: 2px;
+  background: #1a1a2e;
+  margin: 4px 0;
+  border-radius: 1px;
+}
+
+.help-faq {
+  margin-top: 16px;
+  border: 3px solid #1a1a2e;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 3px 3px 0 #1a1a2e;
+}
+
+.help-faq summary {
+  background: #fffef5;
+  padding: 12px 16px;
+  font-size: 0.88em;
+  font-weight: 900;
+  cursor: pointer;
+  color: #1a1a2e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  list-style: none;
+  text-align: center;
+  transition: background 0.15s ease;
+}
+
+.help-faq summary::before {
+  content: '+ ';
+  font-weight: 900;
+}
+
+.help-faq[open] summary {
+  border-bottom: 3px solid #1a1a2e;
+}
+
+.help-faq[open] summary::before {
+  content: '- ';
+}
+
+.help-faq summary:hover {
+  background: #f0efe5;
+}
+
+.help-faq-content {
+  padding: 14px 18px;
+  font-size: 0.84em;
+  line-height: 1.6;
+  color: #444;
+  text-align: left;
+}
+
+.help-faq-content p {
+  margin: 0 0 12px 0;
+}
+
+.help-faq-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* UI Elements — Neo-brutalist kids-friendly style */
 .collected-keys {
   margin: 0;
-  padding: 10px;
-  background-color: rgba(44, 62, 80, 0.9);
-  border-radius: 5px;
-  border-left: 4px solid #27ae60;
+  padding: 10px 12px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  border: 3px solid #1a1a2e;
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  bottom: 16px;
+  left: 16px;
   z-index: 1000;
-  max-width: 250px;
   font-size: 12px;
   height: 80px;
   box-sizing: border-box;
+  box-shadow: 4px 4px 0 #1a1a2e;
 }
 
 .collected-keys h3 {
-  margin-bottom: 10px;
-  color: #27ae60;
-  font-size: 14px;
+  margin-bottom: 8px;
+  color: #1a1a2e;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .key-display {
   display: flex;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 6px;
+  flex-wrap: nowrap;
   min-height: 30px;
   align-items: center;
 }
 
 .collected-key {
-  background-color: #27ae60;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 5px;
-  font-weight: bold;
+  background-color: #4ecdc4;
+  color: #1a1a2e;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 800;
   font-size: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 2px 2px 0 #1a1a2e;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 20px;
   max-height: 36px;
-  border: 2px solid transparent;
+  border: 2px solid #1a1a2e;
   box-sizing: border-box;
+}
+
+.collected-key.clickable {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.collected-key.clickable:hover {
+  background-color: #3dbdb5;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 #1a1a2e;
 }
 
 /* CollectibleKey Inventory */
 .collectible-inventory {
   margin: 0;
-  padding: 10px;
-  background-color: rgba(44, 62, 80, 0.9);
-  border-radius: 5px;
-  border-left: 4px solid #f39c12;
+  padding: 10px 12px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  border: 3px solid #1a1a2e;
   position: absolute;
-  bottom: 20px;
-  right: 290px;
+  bottom: 16px;
+  left: 286px;
   z-index: 1000;
-  max-width: 250px;
   font-size: 12px;
   height: 80px;
   box-sizing: border-box;
+  box-shadow: 4px 4px 0 #1a1a2e;
 }
 
 .collectible-inventory h3 {
-  margin-bottom: 10px;
-  color: #f39c12;
-  font-size: 14px;
+  margin-bottom: 8px;
+  color: #1a1a2e;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .collectible-display {
   display: flex;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 6px;
+  flex-wrap: nowrap;
   min-height: 30px;
   align-items: center;
 }
 
 .collected-collectible-key {
-  background: linear-gradient(145deg, #f39c12, #e67e22);
-  color: white;
-  padding: 6px 10px;
-  border-radius: 5px;
-  font-weight: bold;
+  background-color: #ffe156;
+  color: #1a1a2e;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 800;
   font-size: 12px;
-  box-shadow:
-    0 3px 6px rgba(243, 156, 18, 0.3),
-    0 0 10px rgba(243, 156, 18, 0.2);
-  border: 2px solid #d68910;
+  box-shadow: 2px 2px 0 #1a1a2e;
+  border: 2px solid #1a1a2e;
   position: relative;
   display: flex;
   align-items: center;
@@ -858,43 +1249,26 @@ h1 {
   min-height: 20px;
   max-height: 36px;
   box-sizing: border-box;
-  animation: collectibleKeyShine 3s ease-in-out infinite;
 }
 
 .collected-collectible-key::before {
   content: '🔑';
-  font-size: 12px;
-  filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.8));
-  margin-right: 6px;
+  font-size: 11px;
+  margin-right: 5px;
 }
 
 .collectible-key-name {
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 800;
   text-transform: capitalize;
-  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
 }
 
 .collectible-empty-message {
-  color: #95a5a6;
+  color: #999;
   font-style: italic;
   font-size: 11px;
   text-align: center;
   padding: 10px;
-}
-
-@keyframes collectibleKeyShine {
-  0%, 100% {
-    box-shadow:
-      0 3px 6px rgba(243, 156, 18, 0.3),
-      0 0 10px rgba(243, 156, 18, 0.2);
-  }
-  50% {
-    box-shadow:
-      0 3px 6px rgba(243, 156, 18, 0.5),
-      0 0 15px rgba(243, 156, 18, 0.4),
-      0 0 25px rgba(255, 215, 0, 0.3);
-  }
 }
 
 /* Collection Feedback Animation */
@@ -903,26 +1277,24 @@ h1 {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: linear-gradient(145deg, #f39c12, #e67e22);
-  color: white;
-  padding: 15px 25px;
+  background: #ffe156;
+  color: #1a1a2e;
+  padding: 14px 24px;
   border-radius: 10px;
   font-size: 16px;
-  font-weight: bold;
-  box-shadow:
-    0 5px 15px rgba(243, 156, 18, 0.4),
-    0 0 30px rgba(243, 156, 18, 0.3);
-  border: 3px solid #d68910;
+  font-weight: 900;
+  box-shadow: 6px 6px 0 #1a1a2e;
+  border: 3px solid #1a1a2e;
   z-index: 2000;
   animation: keyCollectionPopup 2s ease-out forwards;
   pointer-events: none;
+  text-transform: uppercase;
 }
 
 .key-collection-feedback::before {
   content: '🔑';
-  font-size: 20px;
-  margin-right: 10px;
-  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.8));
+  font-size: 18px;
+  margin-right: 8px;
 }
 
 @keyframes keyCollectionPopup {
@@ -1785,93 +2157,78 @@ h1 {
   }
 }
 
-/* Message Bubble Styles */
+/* Message Bubble Styles — Neo-brutalist */
 .message-bubble {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #ffffff;
-  color: #2c3e50;
-  padding: 20px 25px;
-  border-radius: 20px;
-  border: 2px solid #bdc3c7;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  background: #fffef5;
+  color: #1a1a2e;
+  padding: 18px 22px;
+  border-radius: 10px;
+  border: 3px solid #1a1a2e;
+  box-shadow: 5px 5px 0 #1a1a2e;
   max-width: 400px;
   min-width: 250px;
   z-index: 10000;
   font-family: 'Courier New', monospace;
-  font-size: 14px;
-  line-height: 1.4;
-  animation: messageSlideIn 0.3s ease-out;
+  font-size: 13px;
+  line-height: 1.5;
+  animation: messageSlideIn 0.2s ease-out;
 }
 
-/* Small NPC Balloon Styles - appears above NPCs */
-/* NPC Speech Balloon - Clean CSS-based positioning */
+/* NPC Speech Balloon — Neo-brutalist */
 .npc-balloon {
-  /* Positioning */
   position: absolute;
   z-index: 10000;
   pointer-events: none;
-
-  /* Container properties for proper text containment */
   display: inline-block;
   width: auto;
   max-width: 250px;
   min-width: 120px;
 
-  /* Enhanced visual styling - RPG style */
-  background: #ffffff;
-  color: #2c3e50;
-  border: 3px solid #34495e;
-  border-radius: 12px;
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.25),
-    0 2px 4px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background: #fffef5;
+  color: #1a1a2e;
+  border: 3px solid #1a1a2e;
+  border-radius: 10px;
+  box-shadow: 4px 4px 0 #1a1a2e;
 
-  /* Improved typography for better readability */
   font-family: 'Courier New', monospace;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.4;
   text-align: left;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 
-  /* Better text containment and spacing */
-  padding: 12px 16px;
+  padding: 10px 14px;
   box-sizing: border-box;
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
   word-break: break-word;
-  hyphens: auto;
 
-  /* Enhanced visibility and animations */
   opacity: 1;
   visibility: visible;
-  animation: balloonAppear 0.3s ease-out;
+  animation: balloonAppear 0.2s ease-out;
   transform: translateX(-50%);
 }
 
-/* Enhanced speech bubble arrow pointing down to NPC */
+/* Speech bubble arrow */
 .npc-balloon::after {
   content: '';
   position: absolute;
-  bottom: -12px;
+  bottom: -11px;
   left: 50%;
   transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-left: 12px solid transparent;
-  border-right: 12px solid transparent;
-  border-top: 12px solid #ffffff;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #fffef5;
   z-index: 2;
-  /* Add subtle shadow to the tail */
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
 }
 
-/* Enhanced arrow border for cleaner look */
+/* Arrow border (dark outline) */
 .npc-balloon::before {
   content: '';
   position: absolute;
@@ -1880,9 +2237,9 @@ h1 {
   transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  border-top: 15px solid #34495e;
+  border-left: 13px solid transparent;
+  border-right: 13px solid transparent;
+  border-top: 13px solid #1a1a2e;
   z-index: 1;
 }
 
@@ -1921,126 +2278,104 @@ h1 {
   border-color: #e67e22;
 }
 
-/* Subtle pulse effect for important messages */
+/* Important messages get accent background */
 .npc-balloon.important {
-  animation: balloonAppear 0.3s ease-out, balloonPulse 2s ease-in-out infinite 0.5s;
+  background: #fff3e0;
+  animation: balloonAppear 0.2s ease-out;
 }
 
-@keyframes balloonPulse {
-  0%, 100% {
-    box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.25),
-      0 2px 4px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  }
-  50% {
-    box-shadow:
-      0 6px 16px rgba(0, 0, 0, 0.3),
-      0 3px 6px rgba(0, 0, 0, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      0 0 0 2px rgba(52, 152, 219, 0.2);
-  }
-}
-
-/* Character-specific balloon themes for variety */
+/* Character-specific balloon themes — neo-brutalist accent colors */
 .npc-balloon.mystical {
-  border-color: #9b59b6;
-  background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+  background: #f3e8ff;
 }
 
 .npc-balloon.ancient {
-  border-color: #8b4513;
-  background: linear-gradient(to bottom, #fefefe, #f5f3f0);
+  background: #fff8e1;
 }
 
 .npc-balloon.friendly {
-  border-color: #27ae60;
-  background: linear-gradient(to bottom, #ffffff, #f0fff4);
+  background: #e8f5e9;
 }
 
 .npc-balloon.wise {
-  border-color: #3498db;
-  background: linear-gradient(to bottom, #ffffff, #f0f8ff);
+  background: #e3f2fd;
 }
 
 .message-bubble.dialogue {
-  background: #ffffff;
-  border: 2px solid #3498db;
-  box-shadow: 0 4px 20px rgba(52, 152, 219, 0.2);
+  background: #e3f2fd;
 }
 
 .message-bubble.info {
-  background: #ffffff;
-  border-color: #2ecc71;
-  box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
+  background: #e8f5e9;
 }
 
 .message-bubble.warning {
-  background: #ffffff;
-  border-color: #f39c12;
-  box-shadow: 0 4px 20px rgba(243, 156, 18, 0.15);
+  background: #fff3e0;
 }
 
 .message-bubble.error {
-  background: #ffffff;
-  border-color: #e74c3c;
-  box-shadow: 0 4px 20px rgba(231, 76, 60, 0.15);
+  background: #ffebee;
 }
 
 .message-speaker {
-  font-weight: bold;
-  color: #2980b9;
-  margin-bottom: 8px;
-  font-size: 13px;
+  font-weight: 900;
+  color: #1a1a2e;
+  margin-bottom: 6px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  border-bottom: 1px solid rgba(41, 128, 185, 0.3);
-  padding-bottom: 5px;
+  border-bottom: 2px solid #1a1a2e;
+  padding-bottom: 4px;
 }
 
 .message-text {
-  margin: 10px 0;
+  margin: 8px 0;
   white-space: pre-line;
   word-wrap: break-word;
+  color: #333;
 }
 
 .message-close {
   position: absolute;
-  top: 8px;
-  right: 12px;
-  background: none;
-  border: none;
-  color: #7f8c8d;
-  font-size: 20px;
+  top: 6px;
+  right: 8px;
+  background: #ffffff;
+  border: 2px solid #1a1a2e;
+  color: #1a1a2e;
+  font-size: 14px;
   cursor: pointer;
   width: 24px;
   height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s ease;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  font-weight: 900;
+  box-shadow: 2px 2px 0 #1a1a2e;
 }
 
 .message-close:hover {
-  background-color: rgba(231, 76, 60, 0.8);
+  background-color: #ff6b6b;
   color: white;
-  transform: scale(1.1);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 #1a1a2e;
 }
 
-/* Message bubble speech bubble effect */
+/* Message bubble tail */
 .message-bubble::before {
   content: '';
   position: absolute;
-  bottom: -8px;
+  bottom: -10px;
   left: 30px;
   width: 0;
   height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-top: 8px solid #bdc3c7;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #1a1a2e;
 }
 
+/* All bubble types use the same dark tail */
 .message-bubble.dialogue::before {
   border-top-color: #3498db;
 }

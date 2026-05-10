@@ -23,7 +23,7 @@ import { CutsceneProviderAdapter } from './infrastructure/data/CutsceneProviderA
 import { CutsceneRenderer } from './infrastructure/ui/CutsceneRenderer.js';
 import { LevelSelectorUI } from './infrastructure/ui/LevelSelectorUI.js';
 import { FeatureFlags } from './infrastructure/FeatureFlags.js';
-import { CanvasGameRenderer } from './infrastructure/ui/CanvasGameRenderer.js';
+import { CanvasGameRenderer } from './infrastructure/ui/CanvasGameRenderer.js'; // Default renderer
 
 
 /**
@@ -68,20 +68,15 @@ class Application {
       this._cutsceneRenderer = null;
     }
 
-    // Create game renderer based on feature flag
-    const gameRenderer = featureFlags.isEnabled('CANVAS_RENDERER')
-      ? new CanvasGameRenderer()
-      : null; // null falls back to DOMGameRenderer in VimForKidsGame
+    // Create game renderer
+    const gameRenderer = new CanvasGameRenderer();
 
     // Create game factory and initialization service
-    const factoryDependencies = {
+    const gameFactory = new GameFactory({
       cutsceneService: this._cutsceneService,
       cutsceneRenderer: this._cutsceneRenderer,
-    };
-    if (gameRenderer) {
-      factoryDependencies.gameRenderer = gameRenderer;
-    }
-    const gameFactory = new GameFactory(factoryDependencies);
+      gameRenderer,
+    });
     this._initializationService = new GameInitializationService(
       gameFactory,
       this._persistenceService,
@@ -115,6 +110,12 @@ class Application {
 
     // Initialize UI
     this._levelSelectorUI.initialize();
+
+    // Title click toggles level selector
+    const title = document.querySelector('h1');
+    if (title) {
+      title.addEventListener('click', () => this._levelSelectorUI.toggle());
+    }
   }
 
   /**

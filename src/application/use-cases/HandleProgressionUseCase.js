@@ -92,22 +92,21 @@ export class HandleProgressionUseCase {
    * @private
    */
   async _handleLevelProgression(nextLevelId) {
-    // Check if there's a cutscene for this level
-    const gameId = this._getGameId();
-
-    if (await this._shouldShowLevelCutscene(gameId, nextLevelId)) {
-      await this._showLevelCutscene(gameId, nextLevelId);
-    }
-
-    // Show level progression message
-    if (this._gameRenderer.showMessage) {
+    // Show congrats card and wait for kid to dismiss it
+    if (typeof this._gameRenderer.showLevelComplete === 'function') {
+      await this._gameRenderer.showLevelComplete(nextLevelId);
+    } else if (this._gameRenderer.showMessage) {
       this._gameRenderer.showMessage(`Level Complete! Progressing to ${nextLevelId}...`);
+      await new Promise((r) => setTimeout(r, 3000));
     } else {
-      // Fallback to alert if showMessage is not available
       alert(`Level Complete! Progressing to ${nextLevelId}...`);
     }
 
-    // Trigger level transition through the game instance
+    // Clear any remaining overlays before transition
+    if (typeof this._gameRenderer.clearAllOverlays === 'function') {
+      this._gameRenderer.clearAllOverlays();
+    }
+
     this._triggerLevelTransition(nextLevelId);
   }
 
@@ -126,15 +125,13 @@ export class HandleProgressionUseCase {
         ) {
           await window.vimForKidsGame.transitionToLevel(nextLevelId);
         } else {
-          // Fallback: reload page with new level parameter
           this._fallbackLevelTransition(nextLevelId);
         }
       } catch (error) {
         console.error('Error during level transition:', error);
-        // Fallback on error
         this._fallbackLevelTransition(nextLevelId);
       }
-    }, 2000); // 2 second delay to show the message
+    }, 3000);
   }
 
   /**

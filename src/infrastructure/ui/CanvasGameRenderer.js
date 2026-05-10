@@ -2,6 +2,17 @@ import { GameRenderer } from '../../ports/output/GameRenderer.js';
 import { Camera } from '../rendering/Camera.js';
 import { GameLoop } from '../rendering/GameLoop.js';
 import { EntityIndex } from '../rendering/EntityIndex.js';
+import { SpriteSheet } from '../rendering/SpriteSheet.js';
+import { TileAtlas } from '../rendering/TileAtlas.js';
+import { TileRenderer } from '../rendering/TileRenderer.js';
+import { CharacterSprites } from '../rendering/CharacterSprites.js';
+import { TilePainter } from '../rendering/TilePainter.js';
+import { MovementAnimator } from '../rendering/MovementAnimator.js';
+import { AudioManager } from '../audio/AudioManager.js';
+import { ParticleSystem } from '../rendering/ParticleSystem.js';
+import { AnimatedTile } from '../rendering/AnimatedTile.js';
+import { AutoTiler } from '../rendering/AutoTiler.js';
+import { VimKeyInfo } from '../rendering/VimKeyInfo.js';
 
 /**
  * Canvas-based game renderer implementing the GameRenderer port.
@@ -48,25 +59,74 @@ export class CanvasGameRenderer extends GameRenderer {
     this._currentMessage = null;
     this._messageTimeout = null;
 
-    // Tile color map for colored-rectangle rendering (P0 placeholder)
+    // Animation time tracker
+    this._animationTime = 0;
+
+    // Sprite rendering system
+    this._tileAtlas = new TileAtlas();
+    this._characterSprites = new CharacterSprites();
+    this._tileRenderer = null;
+    this._charSpriteSheet = null;
+
+    // Movement animation
+    this._movementAnimator = new MovementAnimator(0.1);
+    this._lastCursorX = null;
+    this._lastCursorY = null;
+
+    // Audio
+    this._audio = new AudioManager();
+    this._prevCollectedCount = 0;
+    this._prevGateOpen = null;
+
+    // Visual effects systems
+    this._particleSystem = new ParticleSystem();
+    this._animatedTile = new AnimatedTile();
+    this._autoTiler = new AutoTiler();
+
+    // Paint tiles at runtime using Canvas 2D API
+    this._initSprites();
+
+    // Tile color fallback map (used until sprites load)
     this._tileColors = {
-      water: '#2980b9',
-      grass: '#27ae60',
-      dirt: '#d2b48c',
-      tree: '#228b22',
-      stone: '#b8b8aa',
-      path: '#f4d03f',
-      wall: '#566573',
-      bridge: '#8b4513',
-      sand: '#f4d03f',
-      ruins: '#85929e',
-      field: '#58d68d',
-      test_ground: '#bb8fce',
+      water: '#1a8fc4',
+      grass: '#3db84a',
+      dirt: '#c9a66b',
+      tree: '#1b7a1b',
+      stone: '#9e9e90',
+      path: '#e8c840',
+      wall: '#4a5568',
+      bridge: '#8b5e3c',
+      sand: '#e8d060',
+      ruins: '#7a8690',
+      field: '#48c868',
+      test_ground: '#9b6ab6',
       void: '#1a1a1a',
-      boss_area: '#e74c3c',
+      boss_area: '#c83030',
       ramp_right: '#8b9dc3',
       ramp_left: '#8b9dc3',
     };
+  }
+
+  _initSprites() {
+    try {
+      const ts = this._camera.tileSize;
+      const painter = new TilePainter(ts, 16);
+
+      const tilesetCanvas = painter.createTilesetCanvas();
+      const tilesetSheet = new SpriteSheet(tilesetCanvas, ts, ts, 16);
+      this._tileRenderer = new TileRenderer(tilesetSheet, this._tileAtlas, ts);
+
+      const charsCanvas = painter.createCharacterCanvas();
+      this._charSpriteSheet = new SpriteSheet(charsCanvas, ts, ts, 10);
+
+      this._gameLoop.requestRedraw();
+    } catch (error) {
+      console.warn('Failed to paint sprites, using color fallback:', error);
+    }
+  }
+
+  get spritesLoaded() {
+    return this._tileRenderer !== null && this._charSpriteSheet !== null;
   }
 
   _createCanvas() {
@@ -102,6 +162,38 @@ export class CanvasGameRenderer extends GameRenderer {
     this._currentGameState = gameState;
     this._entityIndex.rebuild(gameState);
 
+    const cursorX = gameState.cursor.position.x;
+    const cursorY = gameState.cursor.position.y;
+
+    // Detect cursor movement for animation and audio
+    if (this._lastCursorX !== null && (this._lastCursorX !== cursorX || this._lastCursorY !== cursorY)) {
+      this._movementAnimator.startMove(this._lastCursorX, this._lastCursorY, cursorX, cursorY);
+      this._audio.playSound('move');
+    }
+    this._lastCursorX = cursorX;
+    this._lastCursorY = cursorY;
+
+    // Detect key collection for audio + particles
+    const collectedCount = gameState.collectedKeys.size + (gameState.collectedCollectibleKeys ? gameState.collectedCollectibleKeys.size : 0);
+    if (collectedCount > this._prevCollectedCount) {
+      this._audio.playSound('collect');
+      // Emit sparkle at cursor screen position
+      const bounds = this._camera.getVisibleBounds();
+      const ts = this._camera.tileSize;
+      const sparkleX = (cursorX - bounds.startX) * ts + ts / 2;
+      const sparkleY = (cursorY - bounds.startY) * ts + ts / 2;
+      this._particleSystem.emit('sparkle', sparkleX, sparkleY, 12);
+    }
+    this._prevCollectedCount = collectedCount;
+
+    // Detect gate open for audio
+    if (gameState.gate) {
+      if (this._prevGateOpen === false && gameState.gate.isOpen) {
+        this._audio.playSound('gate_open');
+      }
+      this._prevGateOpen = gameState.gate.isOpen;
+    }
+
     // Update camera
     const mapBounds = {
       width: gameState.map.width || gameState.map.size,
@@ -130,11 +222,18 @@ export class CanvasGameRenderer extends GameRenderer {
     } else {
       collectedKeys.forEach((keyName) => {
         const el = document.createElement('div');
-        el.className = 'collected-key';
+        el.className = 'collected-key clickable';
         el.textContent = keyName;
+        el.title = `Click to learn about ${keyName}`;
+        el.addEventListener('click', () => {
+          this._showVimKeyExplanation({ key: keyName, description: '' });
+        });
         this._collectedKeysDisplay.appendChild(el);
       });
     }
+
+    // Also update help modal's "Your Keys" section
+    VimKeyInfo.updateHelpKeys(collectedKeys, (vk) => this._showVimKeyExplanation(vk));
   }
 
   updateCollectibleInventoryDisplay(collectedCollectibleKeys) {
@@ -163,6 +262,8 @@ export class CanvasGameRenderer extends GameRenderer {
   showKeyInfo(key) {
     if (key && key.type === 'collectible_key') {
       this._showCollectibleKeyFeedback(key);
+    } else if (key && key.key && key.description) {
+      this._showVimKeyExplanation(key);
     }
   }
 
@@ -222,6 +323,11 @@ export class CanvasGameRenderer extends GameRenderer {
 
   resetCamera() {
     this._camera.reset();
+    this._lastCursorX = null;
+    this._lastCursorY = null;
+    this._prevCollectedCount = 0;
+    this._prevGateOpen = null;
+    this.clearAllOverlays();
   }
 
   showNPCDialogue(npc, dialogue, options = {}) {
@@ -237,25 +343,35 @@ export class CanvasGameRenderer extends GameRenderer {
     balloon.className = 'npc-balloon';
     balloon.textContent = message;
 
-    // Position balloon relative to container
     const container = this._container || document.body;
+    balloon.style.position = 'absolute';
+    balloon.style.visibility = 'hidden';
     container.appendChild(balloon);
 
-    // Try to position above the NPC using canvas coordinates
+    // Position directly above the NPC tile
     if (this._currentGameState && npc) {
       const npcPos = this._findNPCScreenPosition(npc);
       if (npcPos) {
         const canvasRect = this.gameBoard.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
-        const balloonX = canvasRect.left - containerRect.left + npcPos.x + this._camera.tileSize / 2;
-        const balloonY = canvasRect.top - containerRect.top + npcPos.y - 60;
+        const balloonRect = balloon.getBoundingClientRect();
+        const ts = this._camera.tileSize;
 
-        balloon.style.left = `${balloonX}px`;
-        balloon.style.top = `${Math.max(balloonY, 10)}px`;
+        // NPC center in page coords
+        const npcCenterX = canvasRect.left + npcPos.x + ts / 2;
+        const npcTopY = canvasRect.top + npcPos.y;
+
+        // Position balloon centered above NPC
+        const balloonLeft = npcCenterX - containerRect.left;
+        const balloonTop = npcTopY - containerRect.top - balloonRect.height - 18;
+
+        balloon.style.left = `${balloonLeft}px`;
+        balloon.style.top = `${Math.max(balloonTop, 10)}px`;
         balloon.style.transform = 'translateX(-50%)';
-        balloon.style.position = 'absolute';
       }
     }
+
+    balloon.style.visibility = 'visible';
 
     if (duration > 0) {
       setTimeout(() => {
@@ -320,11 +436,28 @@ export class CanvasGameRenderer extends GameRenderer {
 
   // --- Private: Game loop callbacks ---
 
-  _update(_deltaTime) {
+  _update(deltaTime) {
+    this._animationTime += deltaTime;
+
     // Interpolate camera for smooth scrolling
     if (this._camera.interpolate()) {
       this._gameLoop.requestRedraw();
     }
+
+    // Tick movement animation
+    if (this._movementAnimator.isAnimating) {
+      this._movementAnimator.update(deltaTime);
+      this._gameLoop.requestRedraw();
+    }
+
+    // Tick particle system
+    if (this._particleSystem.particleCount > 0) {
+      this._particleSystem.update(deltaTime);
+      this._gameLoop.requestRedraw();
+    }
+
+    // Continuous redraw for animated tiles (water, field)
+    this._gameLoop.requestRedraw();
   }
 
   _draw(_deltaTime) {
@@ -362,9 +495,25 @@ export class CanvasGameRenderer extends GameRenderer {
           }
         }
 
-        // Draw tile rectangle
-        ctx.fillStyle = this._tileColors[tileName] || '#3498db';
-        ctx.fillRect(screenX, screenY, ts, ts);
+        // Draw tile (sprite or colored rectangle fallback)
+        if (this._tileRenderer) {
+          this._tileRenderer.drawTile(ctx, tileName, screenX, screenY);
+        } else {
+          ctx.fillStyle = this._tileColors[tileName] || '#1a8fc4';
+          ctx.fillRect(screenX, screenY, ts, ts);
+        }
+
+        // Animated tile overlay (water shimmer, field sway)
+        if (this._animatedTile.isAnimated(tileName)) {
+          const frameOffset = this._animatedTile.getFrameOffset(tileName, this._animationTime);
+          if (frameOffset > 0) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${0.03 * frameOffset})`;
+            ctx.fillRect(screenX, screenY, ts, ts);
+          }
+        }
+
+        // Auto-tiler edge transitions
+        this._drawAutoTileTransition(ctx, col, row, screenX, screenY, ts, tileName, map, mapWidth, mapHeight, gameState);
 
         // Draw entities at this position
         this._drawEntitiesAt(ctx, col, row, screenX, screenY, ts);
@@ -373,97 +522,195 @@ export class CanvasGameRenderer extends GameRenderer {
 
     // Draw cursor on top
     this._drawCursor(ctx, gameState.cursor, bounds, ts);
+
+    // Draw particles on top of everything
+    this._particleSystem.draw(ctx);
+  }
+
+  _drawAutoTileTransition(ctx, col, row, screenX, screenY, ts, tileName, map, mapWidth, mapHeight, gameState) {
+    const PositionClass = Object.getPrototypeOf(gameState.cursor.position).constructor;
+    const getNeighborName = (nx, ny) => {
+      if (nx < 0 || nx >= mapWidth || ny < 0 || ny >= mapHeight) return 'water';
+      try {
+        return map.getTileAt(new PositionClass(nx, ny)).name;
+      } catch {
+        return 'water';
+      }
+    };
+
+    const north = getNeighborName(col, row - 1);
+    const east = getNeighborName(col + 1, row);
+    const south = getNeighborName(col, row + 1);
+    const west = getNeighborName(col - 1, row);
+
+    const mask = this._autoTiler.computeMask(tileName, north, east, south, west);
+    if (mask > 0) {
+      // Determine dominant neighbor group for color
+      const neighborTile = (mask & 1) ? north : (mask & 2) ? east : (mask & 4) ? south : west;
+      const neighborGroup = this._autoTiler.getGroup(neighborTile);
+      this._autoTiler.drawTransition(ctx, mask, screenX, screenY, ts, neighborGroup);
+    }
   }
 
   _drawEntitiesAt(ctx, worldX, worldY, screenX, screenY, ts) {
     const half = ts / 2;
+    const hasCharSprites = this._charSpriteSheet !== null;
 
     // VIM Key
     const key = this._entityIndex.getKeyAt(worldX, worldY);
     if (key) {
-      ctx.fillStyle = '#e74c3c';
-      ctx.font = 'bold 14px "Courier New", monospace';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(key.key, screenX + half, screenY + half);
+      if (hasCharSprites) {
+        this._drawCharSprite(ctx, this._characterSprites.getVimKeyFrame(), screenX, screenY, ts);
+        // Draw key letter on top of keycap
+        ctx.fillStyle = '#1a1a2e';
+        ctx.font = 'bold 16px Arial, Helvetica, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(key.key, screenX + half, screenY + half);
+      } else {
+        ctx.fillStyle = '#e74c3c';
+        ctx.font = 'bold 14px "Courier New", monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(key.key, screenX + half, screenY + half);
+      }
     }
 
     // Collectible Key
     const ck = this._entityIndex.getCollectibleAt(worldX, worldY);
     if (ck) {
-      ctx.fillStyle = ck.color || '#FFD700';
-      ctx.font = '18px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('\uD83D\uDD11', screenX + half, screenY + half);
+      if (hasCharSprites) {
+        this._drawCharSprite(
+          ctx,
+          this._characterSprites.getCollectibleKeyFrame(),
+          screenX,
+          screenY,
+          ts
+        );
+      } else {
+        ctx.fillStyle = ck.color || '#FFD700';
+        ctx.font = '18px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('\uD83D\uDD11', screenX + half, screenY + half);
+      }
     }
 
     // Gate
     const gate = this._entityIndex.getGateAt(worldX, worldY);
     if (gate) {
-      ctx.fillStyle = gate.isOpen ? '#27ae60' : '#e74c3c';
-      ctx.fillRect(screenX + 4, screenY + 4, ts - 8, ts - 8);
-      ctx.font = '16px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(gate.isOpen ? '\uD83D\uDEAA' : '\uD83D\uDEA7', screenX + half, screenY + half);
+      if (hasCharSprites) {
+        this._drawCharSprite(
+          ctx,
+          this._characterSprites.getGateFrame(gate.isOpen),
+          screenX,
+          screenY,
+          ts
+        );
+      } else {
+        ctx.fillStyle = gate.isOpen ? '#27ae60' : '#e74c3c';
+        ctx.fillRect(screenX + 4, screenY + 4, ts - 8, ts - 8);
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(
+          gate.isOpen ? '\uD83D\uDEAA' : '\uD83D\uDEA7',
+          screenX + half,
+          screenY + half
+        );
+      }
     }
 
     // Secondary Gate
     const sg = this._entityIndex.getSecondaryGateAt(worldX, worldY);
     if (sg) {
-      ctx.fillStyle = '#8B4513';
-      ctx.fillRect(screenX + 2, screenY + 2, ts - 4, ts - 4);
-      // Door knob
-      ctx.fillStyle = '#FFD700';
-      ctx.beginPath();
-      ctx.arc(screenX + ts * 0.75, screenY + half, 3, 0, Math.PI * 2);
-      ctx.fill();
+      if (hasCharSprites) {
+        this._drawCharSprite(
+          ctx,
+          this._characterSprites.getGateFrame(false),
+          screenX,
+          screenY,
+          ts
+        );
+      } else {
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(screenX + 2, screenY + 2, ts - 4, ts - 4);
+        ctx.fillStyle = '#FFD700';
+        ctx.beginPath();
+        ctx.arc(screenX + ts * 0.75, screenY + half, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
     // Text Label
     const label = this._entityIndex.getTextLabelAt(worldX, worldY);
     if (label) {
-      ctx.fillStyle = label.color || '#2c3e50';
-      ctx.font = `${label.fontWeight || 'bold'} ${label.fontSize || '10px'} "Courier New", monospace`;
+      ctx.font = 'bold 13px Arial, Helvetica, sans-serif';
       ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText(label.text, screenX + half, screenY + ts - 2);
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#333333';
+      ctx.fillText(label.text, screenX + half, screenY + half);
     }
 
     // NPC
     const npc = this._entityIndex.getNPCAt(worldX, worldY);
     if (npc) {
-      const symbol =
-        npc.getVisualSymbol && typeof npc.getVisualSymbol === 'function'
-          ? npc.getVisualSymbol()
-          : this._getNpcFallbackSymbol(npc);
-      ctx.font = '16px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(symbol, screenX + half, screenY + half);
+      const npcSpriteId = this._characterSprites.hasNPC(npc.id) ? npc.id : (npc.type || '');
+      if (hasCharSprites && this._characterSprites.hasNPC(npcSpriteId)) {
+        this._drawCharSprite(
+          ctx,
+          this._characterSprites.getNPCFrame(npcSpriteId),
+          screenX,
+          screenY,
+          ts
+        );
+      } else {
+        const symbol =
+          npc.getVisualSymbol && typeof npc.getVisualSymbol === 'function'
+            ? npc.getVisualSymbol()
+            : this._getNpcFallbackSymbol(npc);
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(symbol, screenX + half, screenY + half);
+      }
     }
   }
 
   _drawCursor(ctx, cursor, bounds, ts) {
-    const cx = cursor.position.x;
-    const cy = cursor.position.y;
+    // Use animated position if movement animation is active
+    let cx, cy;
+    if (this._movementAnimator.isAnimating) {
+      const animPos = this._movementAnimator.getCurrentPosition();
+      cx = animPos.x;
+      cy = animPos.y;
+    } else {
+      cx = cursor.position.x;
+      cy = cursor.position.y;
+    }
 
-    if (cx >= bounds.startX && cx < bounds.endX && cy >= bounds.startY && cy < bounds.endY) {
+    if (cx >= bounds.startX - 1 && cx < bounds.endX + 1 && cy >= bounds.startY - 1 && cy < bounds.endY + 1) {
       const screenX = (cx - bounds.startX) * ts;
       const screenY = (cy - bounds.startY) * ts;
 
-      // Orange highlight background
-      ctx.fillStyle = 'rgba(243, 156, 18, 0.85)';
-      ctx.fillRect(screenX, screenY, ts, ts);
-
-      // Cursor bullet
-      ctx.fillStyle = '#2c3e50';
-      ctx.font = 'bold 16px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('\u25CF', screenX + ts / 2, screenY + ts / 2);
+      if (this._charSpriteSheet) {
+        const cursorFrame = this._characterSprites.getCursorFrame(this._animationTime);
+        this._drawCharSprite(ctx, cursorFrame, screenX, screenY, ts);
+      } else {
+        ctx.fillStyle = 'rgba(243, 156, 18, 0.85)';
+        ctx.fillRect(screenX, screenY, ts, ts);
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('\u25CF', screenX + ts / 2, screenY + ts / 2);
+      }
     }
+  }
+
+  _drawCharSprite(ctx, frameIndex, screenX, screenY, ts) {
+    const frame = this._charSpriteSheet.getFrame(frameIndex);
+    ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, screenX, screenY, ts, ts);
   }
 
   // --- Private: Helpers ---
@@ -483,6 +730,56 @@ export class CanvasGameRenderer extends GameRenderer {
     setTimeout(() => {
       if (document.body.contains(el)) document.body.removeChild(el);
     }, 2000);
+  }
+
+  showLevelComplete(nextLevelId) {
+    this.clearAllOverlays();
+    return new Promise((resolve) => {
+      const overlay = VimKeyInfo.createLevelCompleteOverlay(nextLevelId, () => {
+        this.focus();
+        resolve();
+      });
+      (this._container || document.body).appendChild(overlay);
+    });
+  }
+
+  clearAllOverlays() {
+    const overlay = document.getElementById('vimKeyExplanation');
+    if (overlay) overlay.remove();
+    this.hideMessage();
+    this.fadeOutExistingBalloons();
+  }
+
+  showLockedGateHint(gateType) {
+    // Don't show if one is already visible or was shown recently
+    const existing = document.getElementById('vimKeyExplanation');
+    if (existing) return;
+    if (this._gateHintCooldown) return;
+
+    this._gateHintCooldown = true;
+    setTimeout(() => { this._gateHintCooldown = false; }, 5000);
+
+    const overlay = VimKeyInfo.createLockedGateOverlay(gateType, () => this.focus());
+    const container = this._container || document.body;
+    container.appendChild(overlay);
+  }
+
+  showCollectibleKeyIntro(collectibleKey) {
+    const existing = document.getElementById('vimKeyExplanation');
+    if (existing) existing.remove();
+
+    const overlay = VimKeyInfo.createCollectibleIntroOverlay(collectibleKey, () => this.focus());
+    const container = this._container || document.body;
+    container.appendChild(overlay);
+  }
+
+  _showVimKeyExplanation(vimKey) {
+    const existing = document.getElementById('vimKeyExplanation');
+    if (existing) existing.remove();
+
+    const overlay = VimKeyInfo.createOverlay(vimKey, () => this.focus());
+    const container = this._container || document.body;
+    container.appendChild(overlay);
   }
 
   _getNpcFallbackSymbol(npc) {
