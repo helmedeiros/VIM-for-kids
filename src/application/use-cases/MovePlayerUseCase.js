@@ -435,14 +435,7 @@ export class MovePlayerUseCase {
     );
 
     if (vimKeyAtPosition) {
-      const isFirstKey = this._gameState.collectedKeys ? this._gameState.collectedKeys.size === 0 : false;
       this._gameState.collectKey(vimKeyAtPosition);
-      if (isFirstKey && typeof this._gameRenderer.showMessage === 'function') {
-        this._gameRenderer.showMessage(
-          'You found your first VIM key! Keys teach you VIM commands. Collect them all to unlock the gate!',
-          { duration: 5000, type: 'info' }
-        );
-      }
       this._gameRenderer.showKeyInfo(vimKeyAtPosition);
       return vimKeyAtPosition;
     }
@@ -457,12 +450,23 @@ export class MovePlayerUseCase {
       );
 
       if (collectibleKeyAtPosition) {
+        const isFirstCollectible = this._gameState.collectedCollectibleKeys
+          ? this._gameState.collectedCollectibleKeys.size === 0
+          : false;
+
         if (typeof this._gameState.collectCollectibleKey === 'function') {
           this._gameState.collectCollectibleKey(collectibleKeyAtPosition);
         } else {
-          // Fallback for compatibility
           this._gameState.collectKey(collectibleKeyAtPosition);
         }
+
+        if (isFirstCollectible && typeof this._gameRenderer.showMessage === 'function') {
+          this._gameRenderer.showMessage(
+            'You found a special key! These keys open locked doors. Check your Key Inventory!',
+            { duration: 5000, type: 'info' }
+          );
+        }
+
         this._gameRenderer.showKeyInfo(collectibleKeyAtPosition);
         return collectibleKeyAtPosition;
       }
