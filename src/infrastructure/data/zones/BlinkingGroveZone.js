@@ -506,7 +506,7 @@ export class BlinkingGroveZone {
             'You mastered h, j, k, l movement!',
             'Press ESC here to advance to Level 2!',
           ],
-          position: [90, 18], // Bottom of hidden area exit path, always visible
+          position: [108, 19], // Below the three secondary gates in the hidden area
         },
       ],
       events: [

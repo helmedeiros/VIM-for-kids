@@ -184,7 +184,7 @@ describe('BlinkingGroveZone', () => {
 
       const levelCompleteSpirit = config.npcs[2];
       expect(levelCompleteSpirit.id).toBe('level_complete_spirit');
-      expect(levelCompleteSpirit.position).toEqual([90, 18]);
+      expect(levelCompleteSpirit.position).toEqual([108, 19]);
       expect(levelCompleteSpirit.appearsWhen).toBeUndefined();
       expect(levelCompleteSpirit.dialogue).toHaveLength(3);
       expect(levelCompleteSpirit.dialogue[0]).toContain('Congratulations');
