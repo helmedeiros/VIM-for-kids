@@ -39,6 +39,7 @@ describe('Game Switching Cutscenes Integration', () => {
     // Create cutscene services
     const cutsceneProvider = new CutsceneProviderAdapter();
     const featureFlags = new FeatureFlags();
+    featureFlags.disable('REPEAT_CUTSCENES');
     cutsceneService = new CutsceneService(cutsceneProvider, persistenceService, featureFlags);
     cutsceneRenderer = new CutsceneRenderer('test-container');
 

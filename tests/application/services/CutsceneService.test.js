@@ -30,7 +30,11 @@ describe('CutsceneService', () => {
     };
 
     mockFeatureFlags = {
-      isEnabled: jest.fn(),
+      isEnabled: jest.fn((flag) => {
+        if (flag === 'ORIGIN_STORY_CUTSCENES') return true;
+        if (flag === 'REPEAT_CUTSCENES') return false;
+        return false;
+      }),
     };
 
     cutsceneService = new CutsceneService(
@@ -67,7 +71,10 @@ describe('CutsceneService', () => {
   describe('Multi-level cutscene methods', () => {
     describe('shouldShowCutsceneStory', () => {
       beforeEach(() => {
-        mockFeatureFlags.isEnabled.mockReturnValue(true);
+        mockFeatureFlags.isEnabled.mockImplementation((flag) => {
+          if (flag === 'REPEAT_CUTSCENES') return false;
+          return true;
+        });
         mockCutsceneProvider.hasCutsceneStory.mockResolvedValue(true);
         mockPersistenceService.getCutsceneState.mockReturnValue({});
       });
@@ -350,7 +357,10 @@ describe('CutsceneService', () => {
   describe('Legacy origin story methods (backward compatibility)', () => {
     describe('shouldShowOriginStory', () => {
       beforeEach(() => {
-        mockFeatureFlags.isEnabled.mockReturnValue(true);
+        mockFeatureFlags.isEnabled.mockImplementation((flag) => {
+          if (flag === 'REPEAT_CUTSCENES') return false;
+          return true;
+        });
         mockCutsceneProvider.hasOriginStory.mockResolvedValue(true);
         mockPersistenceService.getCutsceneState.mockReturnValue({});
       });

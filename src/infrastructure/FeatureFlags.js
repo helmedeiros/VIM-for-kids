@@ -28,6 +28,7 @@ class FeatureFlags {
       TUTORIAL_MODE: true,
       ACHIEVEMENT_SYSTEM: false,
       ENHANCED_3D_EFFECTS: true, // Toggle for pseudo-3D tile enhancements
+      REPEAT_CUTSCENES: true, // Show cutscenes every time (false = show only once)
 
       // Load flags from environment or remote config
       ...this.loadFromEnvironment(),

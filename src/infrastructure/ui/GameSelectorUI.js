@@ -1,3 +1,5 @@
+import { featureFlags } from '../FeatureFlags.js';
+
 /**
  * Infrastructure UI adapter for game selection
  * Handles all DOM interactions for game selection interface
@@ -106,6 +108,15 @@ export class GameSelectorUI {
           <div class="games-list" id="gamesList">
             <!-- Games will be populated here -->
           </div>
+          <div class="game-item" style="margin-top:12px">
+            <div class="game-info">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:800;font-size:0.9em">
+                <input type="checkbox" id="repeatCutscenesToggle" checked>
+                Repeat story cutscenes
+              </label>
+              <p class="game-description">When off, cutscenes only play once per level.</p>
+            </div>
+          </div>
         </div>
       </div>
       <div class="modal-backdrop"></div>
@@ -149,6 +160,19 @@ export class GameSelectorUI {
         this._hideModal();
       }
     });
+
+    // Repeat cutscenes toggle
+    const toggle = document.getElementById('repeatCutscenesToggle');
+    if (toggle) {
+      toggle.checked = featureFlags.isEnabled('REPEAT_CUTSCENES');
+      toggle.addEventListener('change', () => {
+        if (toggle.checked) {
+          featureFlags.enable('REPEAT_CUTSCENES');
+        } else {
+          featureFlags.disable('REPEAT_CUTSCENES');
+        }
+      });
+    }
   }
 
   /**
