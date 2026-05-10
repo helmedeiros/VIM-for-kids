@@ -12,6 +12,7 @@ import { AudioManager } from '../audio/AudioManager.js';
 import { ParticleSystem } from '../rendering/ParticleSystem.js';
 import { AnimatedTile } from '../rendering/AnimatedTile.js';
 import { AutoTiler } from '../rendering/AutoTiler.js';
+import { VimKeyInfo } from '../rendering/VimKeyInfo.js';
 
 /**
  * Canvas-based game renderer implementing the GameRenderer port.
@@ -724,63 +725,12 @@ export class CanvasGameRenderer extends GameRenderer {
   }
 
   _showVimKeyExplanation(vimKey) {
-    // Remove any existing explanation
     const existing = document.getElementById('vimKeyExplanation');
     if (existing) existing.remove();
 
-    const overlay = document.createElement('div');
-    overlay.id = 'vimKeyExplanation';
-    overlay.className = 'vim-key-overlay';
-
-    const card = document.createElement('div');
-    card.className = 'vim-key-card';
-
-    // Key badge
-    const badge = document.createElement('div');
-    badge.className = 'vim-key-badge';
-    badge.textContent = vimKey.key;
-    card.appendChild(badge);
-
-    // Title
-    const title = document.createElement('div');
-    title.className = 'vim-key-title';
-    title.textContent = 'New Key Unlocked!';
-    card.appendChild(title);
-
-    // Description
-    const desc = document.createElement('div');
-    desc.className = 'vim-key-desc';
-    desc.textContent = vimKey.description;
-    card.appendChild(desc);
-
-    // Dismiss hint
-    const hint = document.createElement('div');
-    hint.className = 'vim-key-hint';
-    hint.textContent = 'Press ESC to continue';
-    card.appendChild(hint);
-
-    overlay.appendChild(card);
+    const overlay = VimKeyInfo.createOverlay(vimKey, () => this.focus());
     const container = this._container || document.body;
     container.appendChild(overlay);
-
-    // Dismiss on click or ESC immediately; other keys after 10s
-    let allowAllKeys = false;
-    const timer = setTimeout(() => { allowAllKeys = true; }, 10000);
-    const dismiss = () => {
-      clearTimeout(timer);
-      overlay.classList.add('vim-key-dismissing');
-      setTimeout(() => overlay.remove(), 300);
-      document.removeEventListener('keydown', onKey);
-      this.focus();
-    };
-    const onKey = (e) => {
-      if (e.key === 'Escape' || allowAllKeys) {
-        e.preventDefault();
-        dismiss();
-      }
-    };
-    overlay.addEventListener('click', dismiss);
-    document.addEventListener('keydown', onKey);
   }
 
   _getNpcFallbackSymbol(npc) {

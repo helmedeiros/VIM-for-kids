@@ -853,6 +853,20 @@ h1 {
   animation: vimKeyPopIn 0.3s ease-out;
 }
 
+.vim-key-category {
+  display: inline-block;
+  background: #ff6b6b;
+  color: #fff;
+  font-size: 0.7em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 3px 12px;
+  border: 2px solid #1a1a2e;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
 .vim-key-badge {
   display: inline-flex;
   align-items: center;
@@ -883,6 +897,31 @@ h1 {
   line-height: 1.5;
   color: #333;
   margin-bottom: 16px;
+}
+
+.vim-key-example {
+  background: #f5f4ec;
+  border: 2px solid #1a1a2e;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.vim-key-example-label {
+  font-size: 0.7em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.vim-key-example-text {
+  font-size: 0.85em;
+  line-height: 1.5;
+  color: #1a1a2e;
+  font-weight: 600;
 }
 
 .vim-key-hint {
