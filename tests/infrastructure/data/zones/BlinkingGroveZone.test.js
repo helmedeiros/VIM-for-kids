@@ -92,11 +92,15 @@ describe('BlinkingGroveZone', () => {
       const hiddenCollectibleKeys = hiddenArea.specialTiles.filter(tile => tile.type === 'collectible_key');
       expect(hiddenCollectibleKeys).toHaveLength(3);
 
-      // Verify the three keys for the gates exist in hidden area
+      // Verify the three gate-unlocking keys exist in hidden area
       const keyIds = hiddenCollectibleKeys.map(key => key.keyId);
       expect(keyIds).toContain('golden_key');
       expect(keyIds).toContain('silver_key');
       expect(keyIds).toContain('bronze_key');
+
+      // Verify the word-motion vim_key is also present (power-up that lets the player walk over rocks)
+      const hiddenVimKeys = hiddenArea.specialTiles.filter(tile => tile.type === 'vim_key');
+      expect(hiddenVimKeys.map(k => k.value)).toContain('w');
     });
 
     test('should have correct text labels configuration', () => {

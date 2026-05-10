@@ -34,14 +34,14 @@ describe('TilePainter', () => {
     };
 
     HTMLCanvasElement.prototype.getContext = jest.fn().mockReturnValue(mockCtx);
-    painter = new TilePainter(32, 16);
+    painter = new TilePainter(32, 17);
   });
 
   describe('constructor', () => {
     it('uses default tile size and columns', () => {
       const p = new TilePainter();
       expect(p._ts).toBe(32);
-      expect(p._columns).toBe(16);
+      expect(p._columns).toBe(17);
     });
 
     it('accepts custom tile size and columns', () => {
@@ -59,13 +59,13 @@ describe('TilePainter', () => {
 
     it('creates canvas with correct dimensions', () => {
       const canvas = painter.createTilesetCanvas();
-      expect(canvas.width).toBe(16 * 32);
+      expect(canvas.width).toBe(17 * 32);
       expect(canvas.height).toBe(32);
     });
 
-    it('paints all 16 tile types', () => {
+    it('paints all 17 tile types', () => {
       painter.createTilesetCanvas();
-      expect(mockCtx.drawImage).toHaveBeenCalledTimes(16);
+      expect(mockCtx.drawImage).toHaveBeenCalledTimes(17);
     });
 
     it('positions tiles sequentially', () => {

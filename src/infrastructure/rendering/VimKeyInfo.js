@@ -223,7 +223,7 @@ export class VimKeyInfo {
     },
     w: {
       category: 'Word Jump',
-      desc: 'Your character jumps forward to the START of the next word. Super fast!',
+      desc: 'Jump forward.',
       example: 'the [c]at sat \u2192 press w \u2192 the cat [s]at',
     },
     W: {

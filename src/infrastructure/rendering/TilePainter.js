@@ -7,7 +7,7 @@
  * and clear silhouettes that create a 2D-that-looks-3D effect.
  */
 export class TilePainter {
-  constructor(tileSize = 32, columns = 16) {
+  constructor(tileSize = 32, columns = 17) {
     this._ts = tileSize;
     this._columns = columns;
   }
@@ -36,6 +36,7 @@ export class TilePainter {
       (c) => this._paintRampRight(c),
       (c) => this._paintRampLeft(c),
       (c) => this._paintVoid(c),
+      (c) => this._paintRock(c),
     ];
 
     painters.forEach((paint, i) => {
@@ -572,6 +573,44 @@ export class TilePainter {
   _paintVoid(ctx) {
     ctx.fillStyle = '#0e0e14';
     ctx.fillRect(0, 0, this._ts, this._ts);
+  }
+
+  _paintRock(ctx) {
+    // Path-tile background underneath so a rock looks like a boulder placed on the path.
+    this._paintPath(ctx);
+
+    const ts = this._ts;
+    const cx = ts / 2;
+    const cy = ts / 2 + 1;
+    const r = ts * 0.34;
+
+    // Drop shadow on the path
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + r * 0.85, r * 0.95, r * 0.28, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Boulder body
+    this._sphere(ctx, cx, cy, r, '#8a8a8a', '#c8c8c8', '#4a4a52');
+
+    // Faceted highlights to suggest a chunky stone, not a smooth ball
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.beginPath();
+    ctx.moveTo(cx - r * 0.55, cy - r * 0.15);
+    ctx.lineTo(cx - r * 0.15, cy - r * 0.55);
+    ctx.lineTo(cx + r * 0.05, cy - r * 0.25);
+    ctx.lineTo(cx - r * 0.35, cy + r * 0.05);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.beginPath();
+    ctx.moveTo(cx + r * 0.6, cy + r * 0.05);
+    ctx.lineTo(cx + r * 0.2, cy + r * 0.55);
+    ctx.lineTo(cx - r * 0.1, cy + r * 0.45);
+    ctx.lineTo(cx + r * 0.35, cy - r * 0.05);
+    ctx.closePath();
+    ctx.fill();
   }
 
   // ========== CHARACTER / ENTITY PAINTERS ==========

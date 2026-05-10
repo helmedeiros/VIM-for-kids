@@ -199,6 +199,7 @@ export class Zone {
       // Directional ramp tiles
       ramp_right: TileType.RAMP_RIGHT,
       ramp_left: TileType.RAMP_LEFT,
+      rock: TileType.ROCK,
       // Special tiles that should be walkable paths
       vim_key_spot: TileType.PATH,
       gate: TileType.PATH,
@@ -254,12 +255,14 @@ export class Zone {
     if (specialTiles) {
       specialTiles.forEach((tile) => {
         if (tile.type === 'vim_key') {
-          // Convert zone-relative coordinates to absolute coordinates
-          const absolutePosition = this._gameMap.zoneToAbsolute(tile.position[0], tile.position[1]);
+          // Hidden-area tiles arrive pre-converted to absolute coordinates; main-area tiles
+          // are zone-relative and still need conversion.
+          const absolutePosition = tile.isFromHiddenArea
+            ? new Position(tile.position[0], tile.position[1])
+            : this._gameMap.zoneToAbsolute(tile.position[0], tile.position[1]);
           const key = tile.value;
           const description = this._getKeyDescription(key);
 
-          // Check if this key already exists (avoid duplicates)
           const existingKey = this._vimKeys.find(k => k.key === key && k.position.equals(absolutePosition));
           if (!existingKey) {
             this._vimKeys.push(new VimKey(absolutePosition, key, description));
@@ -303,7 +306,13 @@ export class Zone {
       textLabels.forEach((label) => {
         // Convert zone-relative coordinates to absolute coordinates
         const absolutePosition = this._gameMap.zoneToAbsolute(label.position[0], label.position[1]);
-        this._textLabels.push(new TextLabel(absolutePosition, label.text));
+        const options = {
+          color: label.color,
+          fontSize: label.fontSize,
+          fontWeight: label.fontWeight,
+          group: label.group,
+        };
+        this._textLabels.push(new TextLabel(absolutePosition, label.text, options));
       });
     }
   }
@@ -648,7 +657,8 @@ export class Zone {
         const options = {
           color: label.color,
           fontSize: label.fontSize,
-          fontWeight: label.fontWeight
+          fontWeight: label.fontWeight,
+          group: label.group,
         };
         this._textLabels.push(new TextLabel(absolutePos, label.text, options));
       });
@@ -707,6 +717,7 @@ export class Zone {
       'N': 'wall',
       '>': 'ramp_left',
       '<': 'ramp_right',
+      'R': 'rock',
     };
     return hiddenAreaLegend[char] || 'grass';
   }

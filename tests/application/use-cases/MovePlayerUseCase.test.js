@@ -76,6 +76,163 @@ describe('MovePlayerUseCase', () => {
       });
     });
 
+    it('should block rock tile when w key has not been collected', async () => {
+      mockMap.isWalkable.mockReturnValue(false);
+      mockMap.getTileAt.mockReturnValue({ name: 'rock', walkable: false });
+      mockGameState.collectedKeys = new Set();
+
+      const result = await movePlayerUseCase.execute('right');
+
+      expect(mockGameState.cursor.position.x).toBe(5);
+      expect(result.success).toBe(false);
+    });
+
+    it('should allow walking onto a rock tile after w key is collected', async () => {
+      mockMap.isWalkable.mockReturnValue(false);
+      mockMap.getTileAt.mockReturnValue({ name: 'rock', walkable: false });
+      mockGameState.collectedKeys = new Set(['w']);
+
+      const result = await movePlayerUseCase.execute('right');
+
+      expect(mockGameState.cursor.position.x).toBe(6);
+      expect(result.success).toBe(true);
+    });
+
+    it('should not allow walking onto non-rock blocked tiles even with w key', async () => {
+      mockMap.isWalkable.mockReturnValue(false);
+      mockMap.getTileAt.mockReturnValue({ name: 'water', walkable: false });
+      mockGameState.collectedKeys = new Set(['w']);
+
+      const result = await movePlayerUseCase.execute('right');
+
+      expect(mockGameState.cursor.position.x).toBe(5);
+      expect(result.success).toBe(false);
+    });
+
+    describe("word_forward (vim 'w' motion)", () => {
+      const labelAt = (x, y, text) => ({ position: new Position(x, y), text });
+      // Cursor sits at (5, 5) per beforeEach. Place a single-letter word 'a' at
+      // (5, 5) so the cursor is on text, leave a gap at (6, 5), then start the
+      // next word "bc" at (7, 5).
+      const sameRowLabels = [
+        labelAt(5, 5, 'a'),
+        labelAt(7, 5, 'b'), labelAt(8, 5, 'c'),
+      ];
+
+      it('does nothing when w key has not been collected', async () => {
+        mockGameState.collectedKeys = new Set();
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+
+        const result = await movePlayerUseCase.execute('word_forward');
+
+        expect(mockGameState.cursor.position.x).toBe(5);
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('word_motion_locked');
+      });
+
+      it('does nothing when there are no text labels in the zone', async () => {
+        mockGameState.collectedKeys = new Set(['w']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue([]);
+
+        const result = await movePlayerUseCase.execute('word_forward');
+
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('no_text');
+      });
+
+      it('does nothing when the cursor is not currently sitting on a text label', async () => {
+        mockGameState.collectedKeys = new Set(['w']);
+        // Labels exist but none at cursor (5, 5).
+        mockGameState.getTextLabels = jest.fn().mockReturnValue([
+          labelAt(0, 5, 'x'), labelAt(7, 5, 'y'),
+        ]);
+
+        const result = await movePlayerUseCase.execute('word_forward');
+
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('not_on_text');
+        expect(mockGameState.cursor.position.x).toBe(5);
+      });
+
+      it('jumps cursor to the start of the next word on the same row', async () => {
+        mockGameState.collectedKeys = new Set(['w']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+
+        const result = await movePlayerUseCase.execute('word_forward');
+
+        expect(result.success).toBe(true);
+        expect(mockGameState.cursor.position.x).toBe(7);
+        expect(mockGameState.cursor.position.y).toBe(5);
+      });
+
+      it('returns no_next_word when no further words exist on the same row', async () => {
+        mockGameState.collectedKeys = new Set(['w']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue([labelAt(5, 5, 'a')]);
+
+        const result = await movePlayerUseCase.execute('word_forward');
+
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('no_next_word');
+        expect(mockGameState.cursor.position.x).toBe(5);
+      });
+
+      it('routes around an isolated non-walkable tile and reaches the next word', async () => {
+        mockGameState.collectedKeys = new Set(['w']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+        // Single tile blocked between cursor and target — flood-fill detours via adjacent rows.
+        mockMap.isWalkable.mockImplementation((pos) => !(pos.x === 6 && pos.y === 5));
+
+        const result = await movePlayerUseCase.execute('word_forward');
+
+        expect(result.success).toBe(true);
+        expect(mockGameState.cursor.position.x).toBe(7);
+        expect(mockGameState.cursor.position.y).toBe(5);
+      });
+
+      it('refuses to jump across a wall that fully separates cursor from target', async () => {
+        mockGameState.collectedKeys = new Set(['w']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+        // Block the entire column 6 — splits row 5 into two disconnected regions.
+        mockMap.isWalkable.mockImplementation((pos) => pos.x !== 6);
+
+        const result = await movePlayerUseCase.execute('word_forward');
+
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('no_next_word');
+        expect(mockGameState.cursor.position.x).toBe(5);
+      });
+
+      it('wraps to the first word on a later row when the rows are connected', async () => {
+        mockGameState.collectedKeys = new Set(['w']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue([
+          labelAt(5, 5, 'a'), // cursor here, last word on row 5
+          labelAt(0, 7, 'b'), // first word on a later row
+        ]);
+
+        const result = await movePlayerUseCase.execute('word_forward');
+
+        expect(result.success).toBe(true);
+        expect(mockGameState.cursor.position.x).toBe(0);
+        expect(mockGameState.cursor.position.y).toBe(7);
+      });
+
+      it('refuses to wrap when a barrier row fully separates the two text rows', async () => {
+        mockGameState.collectedKeys = new Set(['w']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue([
+          labelAt(5, 5, 'a'),
+          labelAt(0, 7, 'b'),
+        ]);
+        // Block the entire row 6 — the two text rows become disconnected regions.
+        mockMap.isWalkable.mockImplementation((pos) => pos.y !== 6);
+
+        const result = await movePlayerUseCase.execute('word_forward');
+
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('no_next_word');
+        expect(mockGameState.cursor.position.x).toBe(5);
+      });
+    });
+
     it('should collect key when moving to key position', async () => {
       const key = new VimKey(new Position(6, 5), 'h', 'Move left');
       mockGameState.availableKeys = [key];

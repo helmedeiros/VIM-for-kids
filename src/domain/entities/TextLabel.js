@@ -17,6 +17,10 @@ export class TextLabel {
     this._color = options.color || '#2c3e50'; // Default or custom color
     this._fontSize = options.fontSize || '12px'; // Default or custom fontSize
     this._fontWeight = options.fontWeight || 'normal'; // Support fontWeight
+    // Optional group identifier. Word-motion (vim 'w') only jumps between labels
+    // that share the same group, so designers can isolate conceptually-distinct
+    // text blocks that happen to share a walkable region.
+    this._group = options.group || null;
 
     // Make properties immutable
     Object.defineProperty(this, 'position', {
@@ -52,6 +56,10 @@ export class TextLabel {
 
   get fontWeight() {
     return this._fontWeight;
+  }
+
+  get group() {
+    return this._group;
   }
 
   equals(other) {

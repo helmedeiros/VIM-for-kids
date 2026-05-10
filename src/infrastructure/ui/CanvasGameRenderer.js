@@ -104,16 +104,17 @@ export class CanvasGameRenderer extends GameRenderer {
       boss_area: '#c83030',
       ramp_right: '#8b9dc3',
       ramp_left: '#8b9dc3',
+      rock: '#7a7a7a',
     };
   }
 
   _initSprites() {
     try {
       const ts = this._camera.tileSize;
-      const painter = new TilePainter(ts, 16);
+      const painter = new TilePainter(ts, 17);
 
       const tilesetCanvas = painter.createTilesetCanvas();
-      const tilesetSheet = new SpriteSheet(tilesetCanvas, ts, ts, 16);
+      const tilesetSheet = new SpriteSheet(tilesetCanvas, ts, ts, 17);
       this._tileRenderer = new TileRenderer(tilesetSheet, this._tileAtlas, ts);
 
       const charsCanvas = painter.createCharacterCanvas();
