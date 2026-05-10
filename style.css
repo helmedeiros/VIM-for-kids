@@ -87,6 +87,12 @@ h1 {
   outline-offset: 2px;
 }
 
+/* Title — clickable to toggle levels */
+h1 {
+  cursor: pointer;
+  user-select: none;
+}
+
 /* Level Selection */
 .level-selection {
   margin: 0;
@@ -98,6 +104,17 @@ h1 {
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.level-selection.hiding {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-10px);
+  pointer-events: none;
+}
+
+.level-selection.hidden-levels {
+  display: none;
 }
 
 .level-btn {

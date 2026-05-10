@@ -46,6 +46,46 @@
         document.getElementById('helpButton').addEventListener('click', function () {
           document.getElementById('instructionsPanel').classList.toggle('hidden');
         });
+
+        // Level selector: auto-hide after 60s, toggle by clicking title
+        (function () {
+          var levelBar = document.querySelector('.level-selection');
+          var title = document.querySelector('h1');
+          var hideTimer = null;
+
+          function hideLevels() {
+            if (!levelBar) return;
+            levelBar.classList.add('hiding');
+            setTimeout(function () {
+              levelBar.classList.add('hidden-levels');
+              levelBar.classList.remove('hiding');
+            }, 400);
+          }
+
+          function showLevels() {
+            if (!levelBar) return;
+            levelBar.classList.remove('hidden-levels');
+            // Force reflow so the transition plays
+            void levelBar.offsetWidth;
+            levelBar.classList.remove('hiding');
+            clearTimeout(hideTimer);
+            hideTimer = setTimeout(hideLevels, 60000);
+          }
+
+          // Auto-hide after 60s on page load
+          hideTimer = setTimeout(hideLevels, 60000);
+
+          // Toggle on title click
+          if (title) {
+            title.addEventListener('click', function () {
+              if (levelBar.classList.contains('hidden-levels')) {
+                showLevels();
+              } else {
+                hideLevels();
+              }
+            });
+          }
+        })();
       </script>
       <div class="collected-keys" id="collectedKeys">
         <h3>Collected Keys:</h3>
