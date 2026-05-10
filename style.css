@@ -821,46 +821,132 @@ h1 {
   box-shadow: 1px 1px 0 #1a1a2e;
 }
 
-/* UI Elements — Neo-brutalist kids-friendly style */
-.instructions {
-  margin: 0;
-  padding: 12px 14px;
-  background-color: #ffffff;
-  border-radius: 10px;
-  border: 3px solid #1a1a2e;
-  position: absolute;
-  top: 56px;
-  right: 15px;
-  z-index: 1000;
-  max-width: 280px;
-  font-size: 12px;
+/* Help Modal — content styles (reuses game-modal structure) */
+.help-section {
+  margin-bottom: 16px;
+}
+
+.help-section h3 {
+  font-size: 0.95em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px 0;
   color: #1a1a2e;
-  box-shadow: 4px 4px 0 #1a1a2e;
+  border-bottom: 2px solid #1a1a2e;
+  padding-bottom: 4px;
+  display: inline-block;
 }
 
-.instructions.hidden {
-  display: none;
-}
-
-.instructions p {
+.help-section p {
+  font-size: 0.85em;
+  line-height: 1.5;
   margin: 4px 0;
-  font-size: 11px;
   color: #333;
-  line-height: 1.4;
 }
 
-.instructions .warning {
-  background: #ff6b6b;
+.help-hint {
+  font-size: 0.8em !important;
+  color: #666 !important;
+  font-style: italic;
+  margin-top: 6px !important;
+}
+
+.help-keys {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.help-key-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.help-key {
+  background: #4ecdc4;
+  color: #1a1a2e;
   border: 2px solid #1a1a2e;
   border-radius: 6px;
-  color: #fff;
-  font-weight: 700;
-  font-size: 11px;
-  padding: 8px;
-  margin-top: 8px;
+  padding: 4px 10px;
+  font-weight: 900;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
   box-shadow: 2px 2px 0 #1a1a2e;
+  min-width: 28px;
+  text-align: center;
 }
 
+.help-key-label {
+  font-size: 0.82em;
+  font-weight: 700;
+  color: #333;
+}
+
+.help-section ol,
+.help-section ul {
+  font-size: 0.85em;
+  line-height: 1.6;
+  padding-left: 20px;
+  margin: 6px 0;
+  color: #333;
+}
+
+.help-section li {
+  margin-bottom: 3px;
+}
+
+.help-faq {
+  margin-top: 14px;
+  border: 2px solid #1a1a2e;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.help-faq summary {
+  background: #f0f0e8;
+  padding: 10px 14px;
+  font-size: 0.85em;
+  font-weight: 800;
+  cursor: pointer;
+  color: #1a1a2e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #1a1a2e;
+  list-style: none;
+}
+
+.help-faq summary::before {
+  content: '+ ';
+  font-weight: 900;
+}
+
+.help-faq[open] summary::before {
+  content: '- ';
+}
+
+.help-faq summary:hover {
+  background: #e8e8e0;
+}
+
+.help-faq-content {
+  padding: 12px 14px;
+  font-size: 0.82em;
+  line-height: 1.5;
+  color: #444;
+}
+
+.help-faq-content p {
+  margin: 0 0 10px 0;
+}
+
+.help-faq-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* UI Elements — Neo-brutalist kids-friendly style */
 .collected-keys {
   margin: 0;
   padding: 10px 12px;
