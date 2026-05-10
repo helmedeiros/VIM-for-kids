@@ -72,12 +72,12 @@ export class VimKeyInfo {
     j: {
       category: 'Movement',
       desc: 'Moves your character one step DOWN.',
-      example: 'You go down one row, like stepping off a stair!',
+      example: 'ABC     ABC\n[*]DE \u2192 press j \u2192  DE\n FGH     [*]FGH',
     },
     k: {
       category: 'Movement',
       desc: 'Moves your character one step UP.',
-      example: 'You go up one row, like jumping onto a stair!',
+      example: ' ABC      [*]ABC\n DE  \u2192 press k \u2192  DE\n[*]FGH     FGH',
     },
     l: {
       category: 'Movement',
