@@ -869,7 +869,7 @@ h1 {
   border: 3px solid #1a1a2e;
   position: absolute;
   bottom: 16px;
-  right: 16px;
+  left: 16px;
   z-index: 1000;
   max-width: 250px;
   font-size: 12px;
@@ -922,7 +922,7 @@ h1 {
   border: 3px solid #1a1a2e;
   position: absolute;
   bottom: 16px;
-  right: 286px;
+  left: 286px;
   z-index: 1000;
   max-width: 250px;
   font-size: 12px;
