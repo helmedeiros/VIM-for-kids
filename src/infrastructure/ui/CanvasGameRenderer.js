@@ -7,6 +7,8 @@ import { TileAtlas } from '../rendering/TileAtlas.js';
 import { TileRenderer } from '../rendering/TileRenderer.js';
 import { CharacterSprites } from '../rendering/CharacterSprites.js';
 import { TilePainter } from '../rendering/TilePainter.js';
+import { MovementAnimator } from '../rendering/MovementAnimator.js';
+import { AudioManager } from '../audio/AudioManager.js';
 
 /**
  * Canvas-based game renderer implementing the GameRenderer port.
@@ -61,6 +63,16 @@ export class CanvasGameRenderer extends GameRenderer {
     this._characterSprites = new CharacterSprites();
     this._tileRenderer = null;
     this._charSpriteSheet = null;
+
+    // Movement animation
+    this._movementAnimator = new MovementAnimator(0.1);
+    this._lastCursorX = null;
+    this._lastCursorY = null;
+
+    // Audio
+    this._audio = new AudioManager();
+    this._prevCollectedCount = 0;
+    this._prevGateOpen = null;
 
     // Paint tiles at runtime using Canvas 2D API
     this._initSprites();
@@ -140,6 +152,32 @@ export class CanvasGameRenderer extends GameRenderer {
   render(gameState) {
     this._currentGameState = gameState;
     this._entityIndex.rebuild(gameState);
+
+    const cursorX = gameState.cursor.position.x;
+    const cursorY = gameState.cursor.position.y;
+
+    // Detect cursor movement for animation and audio
+    if (this._lastCursorX !== null && (this._lastCursorX !== cursorX || this._lastCursorY !== cursorY)) {
+      this._movementAnimator.startMove(this._lastCursorX, this._lastCursorY, cursorX, cursorY);
+      this._audio.playSound('move');
+    }
+    this._lastCursorX = cursorX;
+    this._lastCursorY = cursorY;
+
+    // Detect key collection for audio
+    const collectedCount = gameState.collectedKeys.size + (gameState.collectedCollectibleKeys ? gameState.collectedCollectibleKeys.size : 0);
+    if (collectedCount > this._prevCollectedCount) {
+      this._audio.playSound('collect');
+    }
+    this._prevCollectedCount = collectedCount;
+
+    // Detect gate open for audio
+    if (gameState.gate) {
+      if (this._prevGateOpen === false && gameState.gate.isOpen) {
+        this._audio.playSound('gate_open');
+      }
+      this._prevGateOpen = gameState.gate.isOpen;
+    }
 
     // Update camera
     const mapBounds = {
@@ -366,6 +404,12 @@ export class CanvasGameRenderer extends GameRenderer {
     if (this._camera.interpolate()) {
       this._gameLoop.requestRedraw();
     }
+
+    // Tick movement animation
+    if (this._movementAnimator.isAnimating) {
+      this._movementAnimator.update(deltaTime);
+      this._gameLoop.requestRedraw();
+    }
   }
 
   _draw(_deltaTime) {
@@ -546,10 +590,18 @@ export class CanvasGameRenderer extends GameRenderer {
   }
 
   _drawCursor(ctx, cursor, bounds, ts) {
-    const cx = cursor.position.x;
-    const cy = cursor.position.y;
+    // Use animated position if movement animation is active
+    let cx, cy;
+    if (this._movementAnimator.isAnimating) {
+      const animPos = this._movementAnimator.getCurrentPosition();
+      cx = animPos.x;
+      cy = animPos.y;
+    } else {
+      cx = cursor.position.x;
+      cy = cursor.position.y;
+    }
 
-    if (cx >= bounds.startX && cx < bounds.endX && cy >= bounds.startY && cy < bounds.endY) {
+    if (cx >= bounds.startX - 1 && cx < bounds.endX + 1 && cy >= bounds.startY - 1 && cy < bounds.endY + 1) {
       const screenX = (cx - bounds.startX) * ts;
       const screenY = (cy - bounds.startY) * ts;
 
