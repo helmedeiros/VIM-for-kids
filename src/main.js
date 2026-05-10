@@ -69,9 +69,9 @@ class Application {
     }
 
     // Create game renderer based on feature flag
-    const gameRenderer = featureFlags.isEnabled('CANVAS_RENDERER')
-      ? new CanvasGameRenderer()
-      : null; // null falls back to DOMGameRenderer in VimForKidsGame
+    // Check URL param (?renderer=canvas) or localStorage for activation
+    const useCanvas = this._shouldUseCanvasRenderer(featureFlags);
+    const gameRenderer = useCanvas ? new CanvasGameRenderer() : null;
 
     // Create game factory and initialization service
     const factoryDependencies = {
@@ -160,6 +160,29 @@ class Application {
         this._levelSelectorUI.setActiveLevel(config.level);
       }
     }
+  }
+
+  /**
+   * Check if Canvas renderer should be used via feature flag, URL param, or localStorage
+   * @private
+   */
+  _shouldUseCanvasRenderer(featureFlags) {
+    // 1. Check feature flag (static config)
+    if (featureFlags.isEnabled('CANVAS_RENDERER')) return true;
+
+    // 2. Check URL parameter: ?renderer=canvas
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('renderer') === 'canvas') return true;
+
+    // 3. Check localStorage directly (workaround for async loadFromRemoteConfig)
+    try {
+      const stored = localStorage.getItem('canvasRenderer');
+      if (stored === 'true') return true;
+    } catch {
+      // localStorage unavailable
+    }
+
+    return false;
   }
 
   /**

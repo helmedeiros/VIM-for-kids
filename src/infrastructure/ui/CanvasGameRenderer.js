@@ -2,6 +2,11 @@ import { GameRenderer } from '../../ports/output/GameRenderer.js';
 import { Camera } from '../rendering/Camera.js';
 import { GameLoop } from '../rendering/GameLoop.js';
 import { EntityIndex } from '../rendering/EntityIndex.js';
+import { SpriteSheet } from '../rendering/SpriteSheet.js';
+import { TileAtlas } from '../rendering/TileAtlas.js';
+import { TileRenderer } from '../rendering/TileRenderer.js';
+import { CharacterSprites } from '../rendering/CharacterSprites.js';
+import { TilePainter } from '../rendering/TilePainter.js';
 
 /**
  * Canvas-based game renderer implementing the GameRenderer port.
@@ -48,25 +53,59 @@ export class CanvasGameRenderer extends GameRenderer {
     this._currentMessage = null;
     this._messageTimeout = null;
 
-    // Tile color map for colored-rectangle rendering (P0 placeholder)
+    // Animation time tracker
+    this._animationTime = 0;
+
+    // Sprite rendering system
+    this._tileAtlas = new TileAtlas();
+    this._characterSprites = new CharacterSprites();
+    this._tileRenderer = null;
+    this._charSpriteSheet = null;
+
+    // Paint tiles at runtime using Canvas 2D API
+    this._initSprites();
+
+    // Tile color fallback map (used until sprites load)
     this._tileColors = {
-      water: '#2980b9',
-      grass: '#27ae60',
-      dirt: '#d2b48c',
-      tree: '#228b22',
-      stone: '#b8b8aa',
-      path: '#f4d03f',
-      wall: '#566573',
-      bridge: '#8b4513',
-      sand: '#f4d03f',
-      ruins: '#85929e',
-      field: '#58d68d',
-      test_ground: '#bb8fce',
+      water: '#1a8fc4',
+      grass: '#3db84a',
+      dirt: '#c9a66b',
+      tree: '#1b7a1b',
+      stone: '#9e9e90',
+      path: '#e8c840',
+      wall: '#4a5568',
+      bridge: '#8b5e3c',
+      sand: '#e8d060',
+      ruins: '#7a8690',
+      field: '#48c868',
+      test_ground: '#9b6ab6',
       void: '#1a1a1a',
-      boss_area: '#e74c3c',
+      boss_area: '#c83030',
       ramp_right: '#8b9dc3',
       ramp_left: '#8b9dc3',
     };
+  }
+
+  _initSprites() {
+    try {
+      const ts = this._camera.tileSize;
+      const painter = new TilePainter(ts, 16);
+
+      const tilesetCanvas = painter.createTilesetCanvas();
+      const tilesetSheet = new SpriteSheet(tilesetCanvas, ts, ts, 16);
+      this._tileRenderer = new TileRenderer(tilesetSheet, this._tileAtlas, ts);
+
+      const charsCanvas = painter.createCharacterCanvas();
+      this._charSpriteSheet = new SpriteSheet(charsCanvas, ts, ts, 10);
+
+      this._gameLoop.requestRedraw();
+    } catch (error) {
+      console.warn('Failed to paint sprites, using color fallback:', error);
+    }
+  }
+
+  get spritesLoaded() {
+    return this._tileRenderer !== null && this._charSpriteSheet !== null;
   }
 
   _createCanvas() {
@@ -320,7 +359,9 @@ export class CanvasGameRenderer extends GameRenderer {
 
   // --- Private: Game loop callbacks ---
 
-  _update(_deltaTime) {
+  _update(deltaTime) {
+    this._animationTime += deltaTime;
+
     // Interpolate camera for smooth scrolling
     if (this._camera.interpolate()) {
       this._gameLoop.requestRedraw();
@@ -362,9 +403,13 @@ export class CanvasGameRenderer extends GameRenderer {
           }
         }
 
-        // Draw tile rectangle
-        ctx.fillStyle = this._tileColors[tileName] || '#3498db';
-        ctx.fillRect(screenX, screenY, ts, ts);
+        // Draw tile (sprite or colored rectangle fallback)
+        if (this._tileRenderer) {
+          this._tileRenderer.drawTile(ctx, tileName, screenX, screenY);
+        } else {
+          ctx.fillStyle = this._tileColors[tileName] || '#1a8fc4';
+          ctx.fillRect(screenX, screenY, ts, ts);
+        }
 
         // Draw entities at this position
         this._drawEntitiesAt(ctx, col, row, screenX, screenY, ts);
@@ -377,48 +422,92 @@ export class CanvasGameRenderer extends GameRenderer {
 
   _drawEntitiesAt(ctx, worldX, worldY, screenX, screenY, ts) {
     const half = ts / 2;
+    const hasCharSprites = this._charSpriteSheet !== null;
 
     // VIM Key
     const key = this._entityIndex.getKeyAt(worldX, worldY);
     if (key) {
-      ctx.fillStyle = '#e74c3c';
-      ctx.font = 'bold 14px "Courier New", monospace';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(key.key, screenX + half, screenY + half);
+      if (hasCharSprites) {
+        this._drawCharSprite(ctx, this._characterSprites.getVimKeyFrame(), screenX, screenY, ts);
+        // Draw key letter on top of keycap
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = 'bold 11px "Courier New", monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(key.key, screenX + half, screenY + half);
+      } else {
+        ctx.fillStyle = '#e74c3c';
+        ctx.font = 'bold 14px "Courier New", monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(key.key, screenX + half, screenY + half);
+      }
     }
 
     // Collectible Key
     const ck = this._entityIndex.getCollectibleAt(worldX, worldY);
     if (ck) {
-      ctx.fillStyle = ck.color || '#FFD700';
-      ctx.font = '18px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('\uD83D\uDD11', screenX + half, screenY + half);
+      if (hasCharSprites) {
+        this._drawCharSprite(
+          ctx,
+          this._characterSprites.getCollectibleKeyFrame(),
+          screenX,
+          screenY,
+          ts
+        );
+      } else {
+        ctx.fillStyle = ck.color || '#FFD700';
+        ctx.font = '18px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('\uD83D\uDD11', screenX + half, screenY + half);
+      }
     }
 
     // Gate
     const gate = this._entityIndex.getGateAt(worldX, worldY);
     if (gate) {
-      ctx.fillStyle = gate.isOpen ? '#27ae60' : '#e74c3c';
-      ctx.fillRect(screenX + 4, screenY + 4, ts - 8, ts - 8);
-      ctx.font = '16px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(gate.isOpen ? '\uD83D\uDEAA' : '\uD83D\uDEA7', screenX + half, screenY + half);
+      if (hasCharSprites) {
+        this._drawCharSprite(
+          ctx,
+          this._characterSprites.getGateFrame(gate.isOpen),
+          screenX,
+          screenY,
+          ts
+        );
+      } else {
+        ctx.fillStyle = gate.isOpen ? '#27ae60' : '#e74c3c';
+        ctx.fillRect(screenX + 4, screenY + 4, ts - 8, ts - 8);
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(
+          gate.isOpen ? '\uD83D\uDEAA' : '\uD83D\uDEA7',
+          screenX + half,
+          screenY + half
+        );
+      }
     }
 
     // Secondary Gate
     const sg = this._entityIndex.getSecondaryGateAt(worldX, worldY);
     if (sg) {
-      ctx.fillStyle = '#8B4513';
-      ctx.fillRect(screenX + 2, screenY + 2, ts - 4, ts - 4);
-      // Door knob
-      ctx.fillStyle = '#FFD700';
-      ctx.beginPath();
-      ctx.arc(screenX + ts * 0.75, screenY + half, 3, 0, Math.PI * 2);
-      ctx.fill();
+      if (hasCharSprites) {
+        this._drawCharSprite(
+          ctx,
+          this._characterSprites.getGateFrame(false),
+          screenX,
+          screenY,
+          ts
+        );
+      } else {
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(screenX + 2, screenY + 2, ts - 4, ts - 4);
+        ctx.fillStyle = '#FFD700';
+        ctx.beginPath();
+        ctx.arc(screenX + ts * 0.75, screenY + half, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
     // Text Label
@@ -434,14 +523,25 @@ export class CanvasGameRenderer extends GameRenderer {
     // NPC
     const npc = this._entityIndex.getNPCAt(worldX, worldY);
     if (npc) {
-      const symbol =
-        npc.getVisualSymbol && typeof npc.getVisualSymbol === 'function'
-          ? npc.getVisualSymbol()
-          : this._getNpcFallbackSymbol(npc);
-      ctx.font = '16px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(symbol, screenX + half, screenY + half);
+      const npcId = npc.id || npc.type || '';
+      if (hasCharSprites && this._characterSprites.hasNPC(npcId)) {
+        this._drawCharSprite(
+          ctx,
+          this._characterSprites.getNPCFrame(npcId),
+          screenX,
+          screenY,
+          ts
+        );
+      } else {
+        const symbol =
+          npc.getVisualSymbol && typeof npc.getVisualSymbol === 'function'
+            ? npc.getVisualSymbol()
+            : this._getNpcFallbackSymbol(npc);
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(symbol, screenX + half, screenY + half);
+      }
     }
   }
 
@@ -453,17 +553,24 @@ export class CanvasGameRenderer extends GameRenderer {
       const screenX = (cx - bounds.startX) * ts;
       const screenY = (cy - bounds.startY) * ts;
 
-      // Orange highlight background
-      ctx.fillStyle = 'rgba(243, 156, 18, 0.85)';
-      ctx.fillRect(screenX, screenY, ts, ts);
-
-      // Cursor bullet
-      ctx.fillStyle = '#2c3e50';
-      ctx.font = 'bold 16px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('\u25CF', screenX + ts / 2, screenY + ts / 2);
+      if (this._charSpriteSheet) {
+        const cursorFrame = this._characterSprites.getCursorFrame(this._animationTime);
+        this._drawCharSprite(ctx, cursorFrame, screenX, screenY, ts);
+      } else {
+        ctx.fillStyle = 'rgba(243, 156, 18, 0.85)';
+        ctx.fillRect(screenX, screenY, ts, ts);
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('\u25CF', screenX + ts / 2, screenY + ts / 2);
+      }
     }
+  }
+
+  _drawCharSprite(ctx, frameIndex, screenX, screenY, ts) {
+    const frame = this._charSpriteSheet.getFrame(frameIndex);
+    ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, screenX, screenY, ts, ts);
   }
 
   // --- Private: Helpers ---
