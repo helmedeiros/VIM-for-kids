@@ -103,14 +103,18 @@
           var closeBtn = document.getElementById('helpClose');
           var backdrop = modal.querySelector('.modal-backdrop');
 
+          function closeHelp() {
+            modal.classList.add('hidden');
+          }
           helpBtn.addEventListener('click', function () {
             modal.classList.toggle('hidden');
           });
-          closeBtn.addEventListener('click', function () {
-            modal.classList.add('hidden');
-          });
-          backdrop.addEventListener('click', function () {
-            modal.classList.add('hidden');
+          closeBtn.addEventListener('click', closeHelp);
+          backdrop.addEventListener('click', closeHelp);
+          document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+              closeHelp();
+            }
           });
         })();
 

@@ -497,11 +497,18 @@ export class DOMGameRenderer extends GameRenderer {
     const container = document.getElementById('game-container') || document.body;
     container.appendChild(overlay);
 
-    overlay.addEventListener('click', () => {
+    const dismiss = () => {
       overlay.classList.add('vim-key-dismissing');
       setTimeout(() => overlay.remove(), 300);
+      document.removeEventListener('keydown', onKey);
       this.gameBoard.focus();
-    });
+    };
+    const onKey = (e) => {
+      e.preventDefault();
+      dismiss();
+    };
+    overlay.addEventListener('click', dismiss);
+    document.addEventListener('keydown', onKey);
   }
 
   _showCollectibleKeyFeedback(collectibleKey) {

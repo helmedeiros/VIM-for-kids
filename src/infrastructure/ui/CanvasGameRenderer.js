@@ -763,12 +763,19 @@ export class CanvasGameRenderer extends GameRenderer {
     const container = this._container || document.body;
     container.appendChild(overlay);
 
-    // Dismiss on click
-    overlay.addEventListener('click', () => {
+    // Dismiss on click, ESC, or any key press
+    const dismiss = () => {
       overlay.classList.add('vim-key-dismissing');
       setTimeout(() => overlay.remove(), 300);
+      document.removeEventListener('keydown', onKey);
       this.focus();
-    });
+    };
+    const onKey = (e) => {
+      e.preventDefault();
+      dismiss();
+    };
+    overlay.addEventListener('click', dismiss);
+    document.addEventListener('keydown', onKey);
   }
 
   _getNpcFallbackSymbol(npc) {
