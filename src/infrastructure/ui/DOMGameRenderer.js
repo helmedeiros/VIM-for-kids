@@ -473,6 +473,10 @@ export class DOMGameRenderer extends GameRenderer {
   showLockedGateHint(gateType) {
     const existing = document.getElementById('vimKeyExplanation');
     if (existing) return;
+    if (this._gateHintCooldown) return;
+
+    this._gateHintCooldown = true;
+    setTimeout(() => { this._gateHintCooldown = false; }, 5000);
 
     const overlay = VimKeyInfo.createLockedGateOverlay(gateType, () => this.gameBoard.focus());
     const container = document.getElementById('game-container') || document.body;

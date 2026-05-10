@@ -732,8 +732,13 @@ export class CanvasGameRenderer extends GameRenderer {
   }
 
   showLockedGateHint(gateType) {
+    // Don't show if one is already visible or was shown recently
     const existing = document.getElementById('vimKeyExplanation');
-    if (existing) return; // Don't stack hints
+    if (existing) return;
+    if (this._gateHintCooldown) return;
+
+    this._gateHintCooldown = true;
+    setTimeout(() => { this._gateHintCooldown = false; }, 5000);
 
     const overlay = VimKeyInfo.createLockedGateOverlay(gateType, () => this.focus());
     const container = this._container || document.body;
