@@ -630,15 +630,13 @@ export class CanvasGameRenderer extends GameRenderer {
     // Text Label
     const label = this._entityIndex.getTextLabelAt(worldX, worldY);
     if (label) {
-      ctx.font = 'bold 18px Arial, Helvetica, sans-serif';
+      ctx.font = '600 13px Arial, Helvetica, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      // Dark outline for readability on any background
-      ctx.strokeStyle = '#1a1a2e';
-      ctx.lineWidth = 4;
-      ctx.lineJoin = 'round';
-      ctx.strokeText(label.text, screenX + half, screenY + half);
-      ctx.fillStyle = '#ffffff';
+      // Subtle drop shadow for readability
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.fillText(label.text, screenX + half + 1, screenY + half + 1);
+      ctx.fillStyle = label.color || '#2c3e50';
       ctx.fillText(label.text, screenX + half, screenY + half);
     }
 
