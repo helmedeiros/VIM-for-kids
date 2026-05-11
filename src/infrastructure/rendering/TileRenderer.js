@@ -21,6 +21,22 @@ export class TileRenderer {
   }
 
   drawTile(ctx, tileName, screenX, screenY) {
+    const region = this._tileAtlas.getRegion?.(tileName);
+    if (region) {
+      ctx.drawImage(
+        region.image,
+        region.sx,
+        region.sy,
+        region.sw,
+        region.sh,
+        screenX,
+        screenY,
+        this._renderSize,
+        this._renderSize
+      );
+      return;
+    }
+
     const frameIndex = this._tileAtlas.getFrameIndex(tileName);
     const frame = this._spriteSheet.getFrame(frameIndex);
 

@@ -21,6 +21,7 @@ describe('TileRenderer', () => {
 
     mockTileAtlas = {
       getFrameIndex: jest.fn().mockReturnValue(1),
+      getRegion: jest.fn().mockReturnValue(null),
     };
 
     mockCtx = {
@@ -93,6 +94,59 @@ describe('TileRenderer', () => {
       const call = mockCtx.drawImage.mock.calls[0];
       expect(call[7]).toBe(48); // destination width
       expect(call[8]).toBe(48); // destination height
+    });
+  });
+
+  describe('drawTile with registered region', () => {
+    it('prefers the atlas region over the legacy frame index', () => {
+      const regionImage = { width: 256, height: 20832 };
+      mockTileAtlas.getRegion.mockReturnValue({
+        image: regionImage,
+        sx: 96,
+        sy: 2272,
+        sw: 32,
+        sh: 32,
+      });
+
+      renderer.drawTile(mockCtx, 'grass', 64, 128);
+
+      expect(mockTileAtlas.getRegion).toHaveBeenCalledWith('grass');
+      expect(mockSpriteSheet.getFrame).not.toHaveBeenCalled();
+      expect(mockCtx.drawImage).toHaveBeenCalledWith(
+        regionImage,
+        96,
+        2272,
+        32,
+        32,
+        64,
+        128,
+        32,
+        32
+      );
+    });
+
+    it('falls back to frame index when region is null', () => {
+      mockTileAtlas.getRegion.mockReturnValue(null);
+      renderer.drawTile(mockCtx, 'grass', 0, 0);
+      expect(mockSpriteSheet.getFrame).toHaveBeenCalled();
+    });
+
+    it('scales region draws to render size', () => {
+      const regionImage = { width: 256, height: 256 };
+      mockTileAtlas.getRegion.mockReturnValue({
+        image: regionImage,
+        sx: 0,
+        sy: 0,
+        sw: 32,
+        sh: 32,
+      });
+      const big = new TileRenderer(mockSpriteSheet, mockTileAtlas, 64);
+
+      big.drawTile(mockCtx, 'grass', 10, 20);
+
+      const call = mockCtx.drawImage.mock.calls[0];
+      expect(call[7]).toBe(64);
+      expect(call[8]).toBe(64);
     });
   });
 });

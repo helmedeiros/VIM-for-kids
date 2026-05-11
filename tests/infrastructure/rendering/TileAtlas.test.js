@@ -78,4 +78,52 @@ describe('TileAtlas', () => {
       expect(uniqueIndices.size).toBe(indices.length);
     });
   });
+
+  describe('region lookup', () => {
+    it('returns null when no region is registered for a tile', () => {
+      expect(atlas.getRegion('grass')).toBeNull();
+    });
+
+    it('registers and returns a region with image + pixel bounds', () => {
+      const image = { width: 256, height: 256 };
+      atlas.registerRegion('grass', { image, sx: 96, sy: 2272, sw: 32, sh: 32 });
+
+      expect(atlas.getRegion('grass')).toEqual({
+        image,
+        sx: 96,
+        sy: 2272,
+        sw: 32,
+        sh: 32,
+      });
+    });
+
+    it('registering a region does not affect the legacy frame index', () => {
+      const image = { width: 256, height: 256 };
+      atlas.registerRegion('grass', { image, sx: 0, sy: 0, sw: 32, sh: 32 });
+      expect(atlas.getFrameIndex('grass')).toBe(1);
+    });
+
+    it('overwrites a previously registered region for the same tile', () => {
+      const imageA = { width: 16, height: 16 };
+      const imageB = { width: 32, height: 32 };
+      atlas.registerRegion('grass', { image: imageA, sx: 0, sy: 0, sw: 16, sh: 16 });
+      atlas.registerRegion('grass', { image: imageB, sx: 8, sy: 8, sw: 16, sh: 16 });
+
+      const region = atlas.getRegion('grass');
+      expect(region.image).toBe(imageB);
+      expect(region.sx).toBe(8);
+    });
+
+    it('throws when registering an invalid region', () => {
+      expect(() => atlas.registerRegion('grass', null)).toThrow();
+      expect(() => atlas.registerRegion('grass', { sx: 0, sy: 0, sw: 32, sh: 32 })).toThrow(
+        /image/
+      );
+      expect(() => atlas.registerRegion('grass', { image: {} })).toThrow(/sx|sy|sw|sh/);
+    });
+
+    it('throws when registering a region with a non-string tile name', () => {
+      expect(() => atlas.registerRegion(null, { image: {}, sx: 0, sy: 0, sw: 1, sh: 1 })).toThrow();
+    });
+  });
 });

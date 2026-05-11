@@ -13,6 +13,10 @@ import { ParticleSystem } from '../rendering/ParticleSystem.js';
 import { AnimatedTile } from '../rendering/AnimatedTile.js';
 import { AutoTiler } from '../rendering/AutoTiler.js';
 import { VimKeyInfo } from '../rendering/VimKeyInfo.js';
+import { AssetLoader } from '../rendering/AssetLoader.js';
+import { registerTilesetRegions } from '../rendering/TilesetRegions.js';
+
+const RPG_TILESET_URL = '/assets/sprites/tileset-rpg.png';
 
 /**
  * Canvas-based game renderer implementing the GameRenderer port.
@@ -124,6 +128,21 @@ export class CanvasGameRenderer extends GameRenderer {
     } catch (error) {
       console.warn('Failed to paint sprites, using color fallback:', error);
     }
+
+    this._loadRpgTileset();
+  }
+
+  _loadRpgTileset() {
+    const loader = new AssetLoader();
+    loader
+      .loadImage(RPG_TILESET_URL)
+      .then((image) => {
+        registerTilesetRegions(this._tileAtlas, image);
+        this._gameLoop.requestRedraw();
+      })
+      .catch((error) => {
+        console.warn('RPG tileset unavailable, using procedural tiles:', error.message);
+      });
   }
 
   get spritesLoaded() {
