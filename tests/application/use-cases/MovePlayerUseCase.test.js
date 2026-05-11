@@ -730,6 +730,64 @@ describe('MovePlayerUseCase', () => {
     });
   });
 
+  describe('NPC blocking + bump-to-talk', () => {
+    const setupNPCAt = (x, y, extras = {}) => {
+      const npc = { id: 'caret_spirit', position: [x, y], dialogue: ['Hi!'], ...extras };
+      mockGameState.getCurrentState.mockReturnValue({ npcs: [npc] });
+      return npc;
+    };
+
+    it('blocks the cursor from stepping onto a cell occupied by an NPC', async () => {
+      setupNPCAt(6, 5);
+      const result = await movePlayerUseCase.execute('right');
+
+      expect(mockGameState.cursor.position.x).toBe(5);
+      expect(mockGameState.cursor.position.y).toBe(5);
+      expect(result.success).toBe(false);
+      expect(result.reason).toBe('npc_block');
+    });
+
+    it('triggers NPC dialogue at the NPC position when the cursor bumps into it', async () => {
+      const npc = setupNPCAt(6, 5);
+      await movePlayerUseCase.execute('right');
+
+      expect(mockNPCInteractionUseCase.execute).toHaveBeenCalledTimes(1);
+      const [pos] = mockNPCInteractionUseCase.execute.mock.calls[0];
+      expect(pos.x).toBe(6);
+      expect(pos.y).toBe(5);
+      // Returned interaction is exposed on the result for the caller to consume.
+      expect(mockNPCInteractionUseCase.execute).toHaveBeenCalledWith(
+        expect.objectContaining({ x: 6, y: 5 }),
+        expect.objectContaining({ npcs: [expect.objectContaining({ id: npc.id })] })
+      );
+    });
+
+    it('does not move when blocked by NPC and does not re-render the world', async () => {
+      setupNPCAt(6, 5);
+      await movePlayerUseCase.execute('right');
+
+      expect(mockGameRenderer.render).not.toHaveBeenCalled();
+    });
+
+    it('still allows movement to other walkable cells when no NPC is in the way', async () => {
+      setupNPCAt(6, 5);
+      const result = await movePlayerUseCase.execute('left');
+
+      expect(mockGameState.cursor.position.x).toBe(4);
+      expect(result.success).toBe(true);
+    });
+
+    it('exposes the same blocking via executeSync', () => {
+      setupNPCAt(6, 5);
+      const result = movePlayerUseCase.executeSync('right');
+
+      expect(mockGameState.cursor.position.x).toBe(5);
+      expect(result.success).toBe(false);
+      expect(result.reason).toBe('npc_block');
+      expect(mockNPCInteractionUseCase.execute).toHaveBeenCalled();
+    });
+  });
+
   describe('NPC Exit Functionality', () => {
     beforeEach(() => {
       mockGameRenderer.fadeOutExistingBalloons = jest.fn();
