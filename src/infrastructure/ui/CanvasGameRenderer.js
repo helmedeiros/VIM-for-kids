@@ -587,11 +587,12 @@ export class CanvasGameRenderer extends GameRenderer {
     };
     for (let row = bounds.startY; row < bounds.endY; row++) {
       for (let col = bounds.startX; col < bounds.endX; col++) {
-        // Cap appears above a "bottom-of-run" wall: this cell is non-wall, its
-        // south neighbor is a wall, and that wall's own south is non-wall.
+        // Cap appears above any top-of-wall cell — a non-wall cell whose south
+        // neighbor is a wall. This adds the cobblestone overhang at the tops of
+        // vertical runs and short wall stubs, not just at standalone horizontal
+        // walls. Without it, vertical wall columns end abruptly at their top.
         if (tileNameAt(col, row) === 'wall') continue;
         if (tileNameAt(col, row + 1) !== 'wall') continue;
-        if (tileNameAt(col, row + 2) === 'wall') continue;
 
         const screenX = (col - bounds.startX) * ts;
         const screenY = (row - bounds.startY) * ts;
