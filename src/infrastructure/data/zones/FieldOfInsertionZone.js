@@ -90,6 +90,16 @@ export class FieldOfInsertionZone {
           { regionName: 'tree_2x2', position: [3, 3], footprintW: 2, footprintH: 2, blocking: true },
           { regionName: 'tree_2x2', position: [43, 3], footprintW: 2, footprintH: 2, blocking: true },
           { regionName: 'tree_2x2', position: [5, 24], footprintW: 2, footprintH: 2, blocking: true },
+          // 1x1 non-blocking decorations: flowers, mushrooms, tall grass.
+          // Purely visual — the player walks through them.
+          { regionName: 'flower_cluster', position: [15, 3], footprintW: 1, footprintH: 1 },
+          { regionName: 'flower_cluster', position: [8, 15], footprintW: 1, footprintH: 1 },
+          { regionName: 'flower_cluster', position: [38, 18], footprintW: 1, footprintH: 1 },
+          { regionName: 'mushroom', position: [27, 4], footprintW: 1, footprintH: 1 },
+          { regionName: 'mushroom', position: [45, 28], footprintW: 1, footprintH: 1 },
+          { regionName: 'tall_grass', position: [12, 11], footprintW: 1, footprintH: 1 },
+          { regionName: 'tall_grass', position: [33, 23], footprintW: 1, footprintH: 1 },
+          { regionName: 'tall_grass', position: [22, 30], footprintW: 1, footprintH: 1 },
         ],
         specialTiles: [
           {
