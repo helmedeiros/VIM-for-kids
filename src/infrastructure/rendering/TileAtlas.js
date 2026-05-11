@@ -26,6 +26,8 @@ export class TileAtlas {
       ramp_left: 14,
       void: 15,
       rock: 16,
+      wall_mid: 17,
+      wall_cap: 18,
     };
     this._regions = new Map();
   }

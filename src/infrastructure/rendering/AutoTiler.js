@@ -19,6 +19,7 @@ export class AutoTiler {
       tree: 'obstacle',
       stone: 'obstacle',
       wall: 'obstacle',
+      wall_mid: 'obstacle',
       ruins: 'obstacle',
       ramp_right: 'obstacle',
       ramp_left: 'obstacle',

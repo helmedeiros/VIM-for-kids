@@ -41,7 +41,7 @@ describe('TilePainter', () => {
     it('uses default tile size and columns', () => {
       const p = new TilePainter();
       expect(p._ts).toBe(32);
-      expect(p._columns).toBe(17);
+      expect(p._columns).toBe(19);
     });
 
     it('accepts custom tile size and columns', () => {
@@ -63,9 +63,9 @@ describe('TilePainter', () => {
       expect(canvas.height).toBe(32);
     });
 
-    it('paints all 17 tile types', () => {
+    it('paints all 19 tile types', () => {
       painter.createTilesetCanvas();
-      expect(mockCtx.drawImage).toHaveBeenCalledTimes(17);
+      expect(mockCtx.drawImage).toHaveBeenCalledTimes(19);
     });
 
     it('positions tiles sequentially', () => {

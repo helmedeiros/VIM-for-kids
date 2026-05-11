@@ -35,7 +35,8 @@ describe('TilesetRegions', () => {
   it('does not register regions for tiles not in the region map', () => {
     const atlas = new TileAtlas();
     registerTilesetRegions(atlas, { width: 1, height: 1 });
-    // tree and void are not yet migrated to the PNG — they stay procedural.
+    // tree, wall, and void are not yet migrated to the PNG — they stay procedural.
+    expect(atlas.getRegion('wall')).toBeNull();
     expect(atlas.getRegion('tree')).toBeNull();
     expect(atlas.getRegion('void')).toBeNull();
   });
