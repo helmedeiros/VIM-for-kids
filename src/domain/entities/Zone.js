@@ -5,6 +5,7 @@ import { CollectibleKey } from './CollectibleKey.js';
 import { Gate } from './Gate.js';
 import { TextLabel } from './TextLabel.js';
 import { TileType } from '../value-objects/TileType.js';
+import { Decoration } from '../value-objects/Decoration.js';
 
 export class Zone {
   constructor(zoneConfig) {
@@ -133,6 +134,9 @@ export class Zone {
 
     // Create secondary gates (converting to absolute coordinates)
     this._buildSecondaryGates(config.tiles.secondaryGates);
+
+    // Multi-tile decorations (trees, houses, etc.) that live above the tile grid
+    this._buildDecorations(config.tiles.decorations);
 
     // Store NPCs configuration (for dynamic appearance)
     this._npcs = config.npcs || [];
@@ -370,6 +374,25 @@ export class Zone {
         }
       });
     }
+  }
+
+  _buildDecorations(decorationsConfig) {
+    if (!Array.isArray(decorationsConfig)) return;
+    decorationsConfig.forEach((entry) => {
+      if (!entry || !entry.regionName || !entry.position) return;
+      const anchor = entry.isFromHiddenArea
+        ? new Position(entry.position[0], entry.position[1])
+        : this._gameMap.zoneToAbsolute(entry.position[0], entry.position[1]);
+      this._gameMap.addDecoration(
+        new Decoration({
+          regionName: entry.regionName,
+          anchor,
+          footprintW: entry.footprintW,
+          footprintH: entry.footprintH,
+          blocking: entry.blocking,
+        })
+      );
+    });
   }
 
   _getKeyDescription(key) {

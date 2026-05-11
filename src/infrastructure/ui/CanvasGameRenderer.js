@@ -540,11 +540,27 @@ export class CanvasGameRenderer extends GameRenderer {
       }
     }
 
+    // Draw decorations (multi-tile sprites) above tiles, sorted by anchor Y
+    // so visually-southern decorations overlap northern ones.
+    this._drawDecorations(ctx, map, bounds, ts);
+
     // Draw cursor on top
     this._drawCursor(ctx, gameState.cursor, bounds, ts);
 
     // Draw particles on top of everything
     this._particleSystem.draw(ctx);
+  }
+
+  _drawDecorations(ctx, map, bounds, ts) {
+    if (!this._tileRenderer || typeof map.getDecorationsInBounds !== 'function') return;
+    const visible = map.getDecorationsInBounds(bounds);
+    if (visible.length === 0) return;
+    const sorted = [...visible].sort((a, b) => a.anchor.y - b.anchor.y);
+    for (const decoration of sorted) {
+      const screenX = (decoration.anchor.x - bounds.startX) * ts;
+      const screenY = (decoration.anchor.y - bounds.startY) * ts;
+      this._tileRenderer.drawDecoration(ctx, decoration, screenX, screenY);
+    }
   }
 
   _drawAutoTileTransition(ctx, col, row, screenX, screenY, ts, tileName, map, mapWidth, mapHeight, gameState) {
