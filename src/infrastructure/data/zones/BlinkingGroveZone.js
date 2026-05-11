@@ -72,9 +72,16 @@ export class BlinkingGroveZone {
           '<': 'ramp_right',
         },
         decorations: [
-          // 2x3 tree replacing the old single-tile 'T' in the western grass strip.
-          // Anchor is top-left of the footprint; the trunk lands on the bottom row.
-          { regionName: 'tree_2x3', position: [1, 12], footprintW: 2, footprintH: 3 },
+          // 2x2 chunky tree replacing the old single-tile 'T' in the western grass strip.
+          // Anchored at zone (0, 13) so the footprint avoids the 'Hello world!' labels
+          // at columns 2-7 and stays walkable around the tree via column 2 or row 12.
+          {
+            regionName: 'tree_2x2',
+            position: [0, 13],
+            footprintW: 2,
+            footprintH: 2,
+            blocking: true,
+          },
         ],
         specialTiles: [
           { type: 'vim_key', value: 'h', position: [1, 10] }, // Left movement key - on grass
