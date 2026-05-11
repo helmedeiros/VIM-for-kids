@@ -7,7 +7,7 @@
  * and clear silhouettes that create a 2D-that-looks-3D effect.
  */
 export class TilePainter {
-  constructor(tileSize = 32, columns = 24) {
+  constructor(tileSize = 32, columns = 27) {
     this._ts = tileSize;
     this._columns = columns;
   }
@@ -44,6 +44,9 @@ export class TilePainter {
       (c) => this._paintGrassEdgeE(c),
       (c) => this._paintGrassEdgeS(c),
       (c) => this._paintGrassEdgeW(c),
+      (c) => this._paintFlowerCluster(c),
+      (c) => this._paintMushroom(c),
+      (c) => this._paintTallGrass(c),
     ];
 
     painters.forEach((paint, i) => {
@@ -613,6 +616,91 @@ export class TilePainter {
       ],
       'v'
     );
+  }
+
+  // ===== 1x1 DECORATIONS (transparent backgrounds — overlay on any tile) =====
+
+  _paintFlowerCluster(ctx) {
+    // A handful of small flowers with green stems. Background stays
+    // transparent so the decoration overlays whatever tile sits underneath.
+    const flowers = [
+      { x: 6, y: 18, petal: '#ff8fb0', center: '#ffe060' },
+      { x: 13, y: 22, petal: '#ffffff', center: '#ffe060' },
+      { x: 21, y: 17, petal: '#a8d0ff', center: '#ffffff' },
+      { x: 25, y: 24, petal: '#ffa040', center: '#ffe060' },
+      { x: 10, y: 27, petal: '#e0a0ff', center: '#ffffff' },
+    ];
+    flowers.forEach(({ x, y, petal, center }) => {
+      // Short green stem
+      ctx.fillStyle = '#3a7838';
+      ctx.fillRect(x + 1, y + 2, 1, 3);
+      // 4 petals in a cross + center pixel
+      ctx.fillStyle = petal;
+      ctx.fillRect(x, y, 1, 1);
+      ctx.fillRect(x + 2, y, 1, 1);
+      ctx.fillRect(x + 1, y - 1, 1, 1);
+      ctx.fillRect(x + 1, y + 1, 1, 1);
+      ctx.fillStyle = center;
+      ctx.fillRect(x + 1, y, 1, 1);
+    });
+  }
+
+  _paintMushroom(ctx) {
+    // A single red-capped mushroom near the centre of the cell.
+    const cx = Math.floor(this._ts / 2);
+    const baseY = Math.floor(this._ts * 0.7);
+
+    // Tiny shadow beneath
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+    ctx.beginPath();
+    ctx.ellipse(cx, baseY + 5, 5, 1.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // White stem
+    ctx.fillStyle = '#f4ecd8';
+    ctx.fillRect(cx - 1, baseY, 3, 4);
+    ctx.fillStyle = '#bca988';
+    ctx.fillRect(cx - 1, baseY + 3, 3, 1);
+
+    // Red cap — wider half-dome
+    ctx.fillStyle = '#c8242a';
+    ctx.fillRect(cx - 4, baseY - 1, 9, 2);
+    ctx.fillRect(cx - 3, baseY - 3, 7, 2);
+    ctx.fillRect(cx - 2, baseY - 4, 5, 1);
+    // Brighter highlight on top-left
+    ctx.fillStyle = '#f25a5a';
+    ctx.fillRect(cx - 3, baseY - 3, 4, 1);
+    ctx.fillRect(cx - 2, baseY - 4, 2, 1);
+    // White spots
+    ctx.fillStyle = '#fcf6e7';
+    ctx.fillRect(cx - 2, baseY - 2, 1, 1);
+    ctx.fillRect(cx + 1, baseY - 1, 1, 1);
+    ctx.fillRect(cx + 3, baseY, 1, 1);
+  }
+
+  _paintTallGrass(ctx) {
+    // Several tall grass blades clumped near the bottom of the cell.
+    const blades = [
+      { x: 6, h: 9, lean: 0 },
+      { x: 9, h: 11, lean: -1 },
+      { x: 13, h: 10, lean: 0 },
+      { x: 16, h: 12, lean: 1 },
+      { x: 20, h: 9, lean: 0 },
+      { x: 23, h: 11, lean: -1 },
+      { x: 26, h: 8, lean: 0 },
+    ];
+    const baseY = this._ts - 2;
+    blades.forEach(({ x, h, lean }) => {
+      ctx.fillStyle = '#1f5a1c';
+      for (let i = 0; i < h; i++) {
+        const offset = Math.round((lean * i) / 6);
+        ctx.fillRect(x + offset, baseY - i, 1, 1);
+      }
+      // Light-green tip
+      ctx.fillStyle = '#7ec860';
+      const tipOffset = Math.round((lean * (h - 1)) / 6);
+      ctx.fillRect(x + tipOffset, baseY - (h - 1), 1, 1);
+    });
   }
 
   _paintBridge(ctx) {
