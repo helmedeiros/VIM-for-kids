@@ -4,48 +4,55 @@
  */
 export class CharacterSprites {
   constructor() {
-    // Frame layout in characters.png sprite sheet (16x16, 10 columns):
-    // Row 0: cursor (4 blink frames), vim keys (h, j, k, l), collectible key, gate open
-    // Row 1: gate closed, NPCs (caret_spirit, syntax_wisp, bug_king, caret_stone,
-    //         maze_scribe, deletion_echo, insert_scribe, mirror_sprite, practice_buddy)
+    // Character canvas layout (11 cols × 2 rows = 22 frames):
+    // Row 0: cursor 8 frames (4 directions × 2 walk phases), then
+    //        vim_key (8), collectible_key (9), gate_open (10).
+    // Row 1: gate_closed (11), NPCs caret_spirit (12) through mirror_sprite (20).
+    //
+    // Cursor frame index = directionOffset + phase, where
+    //   directionOffset: s=0, n=2, e=4, w=6
+    //   phase:           0 = idle, 1 = step
 
-    this._cursorFrames = [0, 1, 2, 3];
-    this._cursorBlinkInterval = 0.5; // seconds per frame
+    this._cursorDirectionOffset = { s: 0, n: 2, e: 4, w: 6 };
+    this._cursorWalkInterval = 0.18; // seconds per walk frame while moving
+    this._cursorIdleInterval = 0.6; // seconds per frame while standing still
 
-    this._vimKeyFrame = 4;
-    this._collectibleKeyFrame = 5;
-    this._gateOpenFrame = 6;
-    this._gateClosedFrame = 10;
+    this._vimKeyFrame = 8;
+    this._collectibleKeyFrame = 9;
+    this._gateOpenFrame = 10;
+    this._gateClosedFrame = 11;
 
     this._npcFrames = {
-      caret_spirit: 11,
-      syntax_wisp: 12,
-      bug_king: 13,
-      bug_king_boss: 13,
-      caret_stone: 14,
-      maze_scribe: 15,
-      mode_guardian: 15,
-      deletion_echo: 16,
-      insert_scribe: 17,
-      scribe_poet: 17,
-      the_yanker: 18,
-      mirror_sprite: 19,
-      reflection_spirit: 19,
-      practice_buddy: 18,
-      practice_spirit_1: 18,
-      practice_spirit_2: 18,
-      practice_spirit_3: 18,
-      final_encourager: 18,
-      syntax_spirit: 15,
-      word_witch: 16,
+      caret_spirit: 12,
+      syntax_wisp: 13,
+      bug_king: 14,
+      bug_king_boss: 14,
+      caret_stone: 15,
+      maze_scribe: 16,
+      mode_guardian: 16,
+      deletion_echo: 17,
+      insert_scribe: 18,
+      scribe_poet: 18,
+      the_yanker: 19,
+      mirror_sprite: 20,
+      reflection_spirit: 20,
+      practice_buddy: 19,
+      practice_spirit_1: 19,
+      practice_spirit_2: 19,
+      practice_spirit_3: 19,
+      final_encourager: 19,
+      syntax_spirit: 16,
+      word_witch: 17,
     };
 
-    this._defaultNpcFrame = 18;
+    this._defaultNpcFrame = 19;
   }
 
-  getCursorFrame(time) {
-    const frameIndex = Math.floor(time / this._cursorBlinkInterval) % this._cursorFrames.length;
-    return this._cursorFrames[frameIndex];
+  getCursorFrame(time, direction = 's', moving = false) {
+    const dirOffset = this._cursorDirectionOffset[direction] ?? 0;
+    const interval = moving ? this._cursorWalkInterval : this._cursorIdleInterval;
+    const phase = Math.floor(time / interval) % 2;
+    return dirOffset + phase;
   }
 
   getVimKeyFrame() {

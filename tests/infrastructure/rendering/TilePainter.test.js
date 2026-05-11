@@ -22,6 +22,9 @@ describe('TilePainter', () => {
       drawImage: jest.fn(),
       save: jest.fn(),
       restore: jest.fn(),
+      translate: jest.fn(),
+      scale: jest.fn(),
+      rotate: jest.fn(),
       createLinearGradient: jest.fn().mockReturnValue({ addColorStop: jest.fn() }),
       createRadialGradient: jest.fn().mockReturnValue({ addColorStop: jest.fn() }),
       fillStyle: '',
@@ -85,14 +88,14 @@ describe('TilePainter', () => {
 
     it('creates canvas with correct dimensions', () => {
       const canvas = painter.createCharacterCanvas();
-      expect(canvas.width).toBe(10 * 32);
+      expect(canvas.width).toBe(11 * 32);
       expect(canvas.height).toBe(2 * 32);
     });
 
-    it('paints character sprites (skipping null slots)', () => {
+    it('paints all 21 character sprites', () => {
       painter.createCharacterCanvas();
-      // 17 painters out of 20 slots (3 null at indices 7, 8, 9)
-      expect(mockCtx.drawImage).toHaveBeenCalledTimes(17);
+      // 8 cursor frames + vim_key + collectible_key + gate_open + gate_closed + 9 NPCs
+      expect(mockCtx.drawImage).toHaveBeenCalledTimes(21);
     });
   });
 
@@ -135,11 +138,14 @@ describe('TilePainter', () => {
   });
 
   describe('character painters', () => {
-    it('paints cursor with opacity and resets globalAlpha', () => {
-      painter._paintCursor(mockCtx, 0.5);
-      expect(mockCtx.globalAlpha).toBe(1);
-      expect(mockCtx.fillRect).toHaveBeenCalled();
-      expect(mockCtx.strokeRect).toHaveBeenCalled();
+    it('paints cursor kid avatar for each pose', () => {
+      for (const pose of [0, 1, 2, 3]) {
+        mockCtx.fillRect.mockClear();
+        painter._paintCursor(mockCtx, pose);
+        // Each pose paints multiple body parts (hair, face, eyes, shirt,
+        // arms, pants, shoes) — many fillRect calls.
+        expect(mockCtx.fillRect.mock.calls.length).toBeGreaterThan(8);
+      }
     });
 
     it('paints vim key with keycap gradient', () => {
