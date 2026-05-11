@@ -83,6 +83,14 @@ export class FieldOfInsertionZone {
           G: 'gate',
           N: 'npc_spot',
         },
+        decorations: [
+          // 2x2 chunky trees sprinkled in the field areas to break up the
+          // wide expanses of grass. Placed away from paths, text labels,
+          // vim keys, and the cursor's main route from (49,31) to (25,0).
+          { regionName: 'tree_2x2', position: [3, 3], footprintW: 2, footprintH: 2, blocking: true },
+          { regionName: 'tree_2x2', position: [43, 3], footprintW: 2, footprintH: 2, blocking: true },
+          { regionName: 'tree_2x2', position: [5, 24], footprintW: 2, footprintH: 2, blocking: true },
+        ],
         specialTiles: [
           {
             type: 'vim_key',
