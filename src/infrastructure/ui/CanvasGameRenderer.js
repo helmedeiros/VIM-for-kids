@@ -82,6 +82,7 @@ export class CanvasGameRenderer extends GameRenderer {
     this._movementAnimator = new MovementAnimator(0.1);
     this._lastCursorX = null;
     this._lastCursorY = null;
+    this._facing = 's'; // direction the cursor character is facing
 
     // Audio
     this._audio = new AudioManager();
@@ -146,7 +147,7 @@ export class CanvasGameRenderer extends GameRenderer {
       }
 
       const charsCanvas = painter.createCharacterCanvas();
-      this._charSpriteSheet = new SpriteSheet(charsCanvas, ts, ts, 10);
+      this._charSpriteSheet = new SpriteSheet(charsCanvas, ts, ts, 11);
 
       this._gameLoop.requestRedraw();
     } catch (error) {
@@ -213,6 +214,18 @@ export class CanvasGameRenderer extends GameRenderer {
     if (this._lastCursorX !== null && (this._lastCursorX !== cursorX || this._lastCursorY !== cursorY)) {
       this._movementAnimator.startMove(this._lastCursorX, this._lastCursorY, cursorX, cursorY);
       this._audio.playSound('move');
+      // Update facing direction based on the move's dominant axis. The
+      // character stays facing this direction until the next move, so
+      // when the player stops the avatar still looks the right way.
+      const dx = cursorX - this._lastCursorX;
+      const dy = cursorY - this._lastCursorY;
+      if (Math.abs(dx) >= Math.abs(dy)) {
+        if (dx > 0) this._facing = 'e';
+        else if (dx < 0) this._facing = 'w';
+      } else {
+        if (dy > 0) this._facing = 's';
+        else if (dy < 0) this._facing = 'n';
+      }
     }
     this._lastCursorX = cursorX;
     this._lastCursorY = cursorY;
@@ -807,8 +820,30 @@ export class CanvasGameRenderer extends GameRenderer {
       const screenY = (cy - bounds.startY) * ts;
 
       if (this._charSpriteSheet) {
-        const cursorFrame = this._characterSprites.getCursorFrame(this._animationTime);
-        this._drawCharSprite(ctx, cursorFrame, screenX, screenY, ts);
+        const cursorFrame = this._characterSprites.getCursorFrame(
+          this._animationTime,
+          this._facing,
+          this._movementAnimator.isAnimating
+        );
+        // Pokemon-style sprite that overflows its grid cell: render the
+        // 32x32 source at 1.35x size, anchored at the cell's bottom edge
+        // (feet stay aligned with the grid; head spills above the cell).
+        const scale = 1.35;
+        const destSize = ts * scale;
+        const overflowX = (destSize - ts) / 2;
+        const overflowY = destSize - ts;
+        const frame = this._charSpriteSheet.getFrame(cursorFrame);
+        ctx.drawImage(
+          frame.image,
+          frame.sx,
+          frame.sy,
+          frame.sw,
+          frame.sh,
+          screenX - overflowX,
+          screenY - overflowY,
+          destSize,
+          destSize
+        );
       } else {
         ctx.fillStyle = 'rgba(243, 156, 18, 0.85)';
         ctx.fillRect(screenX, screenY, ts, ts);

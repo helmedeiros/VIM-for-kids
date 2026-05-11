@@ -62,22 +62,30 @@ export class TilePainter {
 
   createCharacterCanvas() {
     const ts = this._ts;
-    const cols = 10;
+    const cols = 11;
     const rows = 2;
     const canvas = document.createElement('canvas');
     canvas.width = cols * ts;
     canvas.height = rows * ts;
     const ctx = canvas.getContext('2d');
 
+    // Indices must match CharacterSprites:
+    //   0-7  : cursor (s/n/e/w × idle/step)
+    //   8-10 : vim_key, collectible_key, gate_open
+    //   11   : gate_closed
+    //   12-20: NPCs
     const painters = [
-      (c) => this._paintCursor(c, 1.0),
-      (c) => this._paintCursor(c, 0.82),
-      (c) => this._paintCursor(c, 0.55),
-      (c) => this._paintCursor(c, 0.82),
+      (c) => this._paintCursor(c, 's', 0),
+      (c) => this._paintCursor(c, 's', 1),
+      (c) => this._paintCursor(c, 'n', 0),
+      (c) => this._paintCursor(c, 'n', 1),
+      (c) => this._paintCursor(c, 'e', 0),
+      (c) => this._paintCursor(c, 'e', 1),
+      (c) => this._paintCursor(c, 'w', 0),
+      (c) => this._paintCursor(c, 'w', 1),
       (c) => this._paintVimKey(c),
       (c) => this._paintCollectibleKey(c),
       (c) => this._paintGateOpen(c),
-      null, null, null,
       (c) => this._paintGateClosed(c),
       (c) => this._paintCaretSpirit(c),
       (c) => this._paintSyntaxWisp(c),
@@ -918,39 +926,157 @@ export class TilePainter {
 
   // ========== CHARACTER / ENTITY PAINTERS ==========
 
-  _paintCursor(ctx, opacity) {
-    const ts = this._ts;
-    ctx.globalAlpha = opacity;
+  _paintCursor(ctx, direction = 's', phase = 0) {
+    // Chibi-proportioned trainer — big round black hair forming a soft
+    // helmet over a small peach face, compact black body with a white
+    // trim, short legs, and crisp white shoes. Eight frames: four
+    // directions × two walk phases. Phase 0 is idle, phase 1 is the
+    // mid-step. CharacterSprites alternates phases slowly when standing
+    // still (subtle bob) and quickly while moving (walk cycle).
 
-    // Shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    // The source sprite is painted at its base pixel layout (no internal
+    // scaling here). _drawCursor in CanvasGameRenderer enlarges the sprite
+    // at draw time and anchors the feet at the cell's bottom edge so the
+    // head overflows upward — same trick Pokemon uses to fit a taller
+    // trainer in a 32x32 movement grid without clipping.
+    ctx.save();
+
+    // Drop shadow under the feet
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
     ctx.beginPath();
-    ctx.ellipse(ts / 2 + 1, ts - 3, 10, 3, 0, 0, Math.PI * 2);
+    ctx.ellipse(16, 29, 6, 1.5, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Body
-    const bg = ctx.createLinearGradient(6, 0, ts - 6, 0);
-    bg.addColorStop(0, '#e8e0d0');
-    bg.addColorStop(0.15, '#ffffff');
-    bg.addColorStop(0.85, '#f0f0e8');
-    bg.addColorStop(1, '#d8d0c0');
-    ctx.fillStyle = bg;
-    ctx.fillRect(6, 2, ts - 12, ts - 6);
+    // ----- HEAD (rows 3..16) — round black hair forms the silhouette -----
+    const hair = '#1a1a1a';
+    const hairHi = '#3a3a3a';
 
-    // Outline
-    ctx.strokeStyle = '#2a2a3a';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(6, 2, ts - 12, ts - 6);
+    // Crown row (narrowest) — slight tuft up top
+    ctx.fillStyle = hair;
+    ctx.fillRect(12, 3, 8, 1);
+    // Main hair puff
+    ctx.fillRect(11, 4, 10, 8);
+    // Side tufts that bulge out at the temples
+    ctx.fillRect(10, 6, 1, 5);
+    ctx.fillRect(21, 6, 1, 5);
+    // Subtle hair shine on top-left
+    ctx.fillStyle = hairHi;
+    ctx.fillRect(13, 4, 2, 1);
+    ctx.fillRect(12, 5, 1, 1);
 
-    // Cursor bar
-    ctx.fillStyle = '#1a1a2a';
-    ctx.fillRect(9, 5, 3, ts - 12);
+    // Face area (skin) — small patch framed by hair on three sides
+    if (direction === 's') {
+      ctx.fillStyle = '#fad7b0';
+      ctx.fillRect(12, 11, 8, 5);
+      // Chin shadow
+      ctx.fillStyle = '#e6b88b';
+      ctx.fillRect(12, 15, 8, 1);
+      // Hair side bangs covering the cheeks slightly
+      ctx.fillStyle = hair;
+      ctx.fillRect(11, 11, 1, 4);
+      ctx.fillRect(20, 11, 1, 4);
+      // Front fringe over forehead
+      ctx.fillRect(13, 11, 6, 1);
+      // Eyes — two dark pixels
+      ctx.fillStyle = '#1a1d3a';
+      ctx.fillRect(13, 13, 1, 1);
+      ctx.fillRect(18, 13, 1, 1);
+      // Hint of a smile
+      ctx.fillStyle = '#c08868';
+      ctx.fillRect(15, 15, 2, 1);
+    } else if (direction === 'n') {
+      // Pure back of head — hair covers everything down to the neck
+      ctx.fillStyle = hair;
+      ctx.fillRect(11, 11, 10, 4);
+      // Neck nape
+      ctx.fillStyle = '#e6b88b';
+      ctx.fillRect(14, 15, 4, 1);
+    } else if (direction === 'e') {
+      // 3/4 east view — hair on the west side, face peeks on the east
+      ctx.fillStyle = hair;
+      ctx.fillRect(11, 11, 4, 5);
+      ctx.fillStyle = '#fad7b0';
+      ctx.fillRect(15, 11, 5, 5);
+      ctx.fillStyle = '#e6b88b';
+      ctx.fillRect(15, 15, 5, 1);
+      // Hair fringe over forehead on this side
+      ctx.fillStyle = hair;
+      ctx.fillRect(15, 11, 4, 1);
+      ctx.fillRect(20, 11, 1, 4);
+      // Single visible eye
+      ctx.fillStyle = '#1a1d3a';
+      ctx.fillRect(17, 13, 1, 1);
+    } else {
+      // 'w' — mirror of east
+      ctx.fillStyle = hair;
+      ctx.fillRect(17, 11, 4, 5);
+      ctx.fillStyle = '#fad7b0';
+      ctx.fillRect(12, 11, 5, 5);
+      ctx.fillStyle = '#e6b88b';
+      ctx.fillRect(12, 15, 5, 1);
+      ctx.fillStyle = hair;
+      ctx.fillRect(13, 11, 4, 1);
+      ctx.fillRect(11, 11, 1, 4);
+      ctx.fillStyle = '#1a1d3a';
+      ctx.fillRect(14, 13, 1, 1);
+    }
 
-    // Top highlight
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.fillRect(8, 3, ts - 16, 2);
+    // ----- BODY (rows 16..22) — compact black torso -----
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(12, 16, 8, 6);
+    // Body top highlight
+    ctx.fillStyle = '#3a3a3a';
+    ctx.fillRect(12, 16, 8, 1);
+    // White trim band
+    ctx.fillStyle = '#f4ecd8';
+    ctx.fillRect(12, 19, 8, 1);
 
-    ctx.globalAlpha = 1;
+    // Arms (small skin tabs at sides)
+    ctx.fillStyle = '#fad7b0';
+    if (direction === 's' || direction === 'n') {
+      const lArm = phase === 1 ? -1 : 0;
+      const rArm = phase === 1 ? 1 : 0;
+      ctx.fillRect(11, 17 + lArm, 1, 3);
+      ctx.fillRect(20, 17 + rArm, 1, 3);
+    } else if (direction === 'e') {
+      ctx.fillRect(11, 17 + (phase === 1 ? 1 : 0), 1, 3);
+    } else {
+      ctx.fillRect(20, 17 + (phase === 1 ? 1 : 0), 1, 3);
+    }
+
+    // ----- LEGS (rows 22..26) — short black pants -----
+    ctx.fillStyle = '#0a0a0a';
+    if (phase === 0) {
+      ctx.fillRect(13, 22, 2, 4);
+      ctx.fillRect(17, 22, 2, 4);
+    } else if (direction === 's' || direction === 'n') {
+      ctx.fillRect(12, 22, 2, 4);
+      ctx.fillRect(18, 22, 2, 3);
+    } else if (direction === 'e') {
+      ctx.fillRect(13, 22, 2, 4);
+      ctx.fillRect(18, 22, 2, 3);
+    } else {
+      ctx.fillRect(12, 22, 2, 3);
+      ctx.fillRect(17, 22, 2, 4);
+    }
+
+    // ----- SHOES (rows 25..27) — white toes -----
+    ctx.fillStyle = '#f0ece0';
+    if (phase === 0) {
+      ctx.fillRect(13, 26, 2, 1);
+      ctx.fillRect(17, 26, 2, 1);
+    } else if (direction === 's' || direction === 'n') {
+      ctx.fillRect(12, 26, 2, 1);
+      ctx.fillRect(18, 25, 2, 1);
+    } else if (direction === 'e') {
+      ctx.fillRect(13, 26, 2, 1);
+      ctx.fillRect(18, 25, 2, 1);
+    } else {
+      ctx.fillRect(12, 25, 2, 1);
+      ctx.fillRect(17, 26, 2, 1);
+    }
+
+    ctx.restore();
   }
 
   _paintVimKey(ctx) {
