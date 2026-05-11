@@ -170,10 +170,12 @@ export class MovePlayerUseCase {
   }
 
   _checkWalkability(position, direction = null) {
-    // NPCs are impassable. Detect them before any tile/gate checks so that
-    // bump-to-talk works even when the NPC stands on a walkable tile.
+    // NPCs are impassable EXCEPT when they share a cell with a walkable
+    // (unlocked) gate. Some progression NPCs — e.g. gate_completion_spirit
+    // in Blinking Grove — sit on the zone's exit gate; the player must
+    // step onto that cell for the ESC-to-enter-hidden-area flow to work.
     const npcAtTarget = this._findNPCAtPosition(position);
-    if (npcAtTarget) {
+    if (npcAtTarget && !this._isWalkableGateAtPosition(position)) {
       return { walkable: false, blockedBy: 'npc', npc: npcAtTarget };
     }
 
@@ -581,6 +583,19 @@ export class MovePlayerUseCase {
 
     // Fallback: no interaction occurred
     return { interactionOccurred: false, npc: null };
+  }
+
+  _isWalkableGateAtPosition(position) {
+    if (typeof this._gameState.getGate === 'function') {
+      const gate = this._gameState.getGate();
+      if (gate && gate.position.equals(position) && gate.isWalkable()) return true;
+    }
+    if (typeof this._gameState.getSecondaryGates === 'function') {
+      for (const g of this._gameState.getSecondaryGates()) {
+        if (g && g.position.equals(position) && g.isWalkable()) return true;
+      }
+    }
+    return false;
   }
 
   _findNPCAtPosition(position) {

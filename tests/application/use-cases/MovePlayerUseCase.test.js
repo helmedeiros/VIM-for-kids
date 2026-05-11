@@ -786,6 +786,38 @@ describe('MovePlayerUseCase', () => {
       expect(result.reason).toBe('npc_block');
       expect(mockNPCInteractionUseCase.execute).toHaveBeenCalled();
     });
+
+    it('allows stepping onto an NPC when the same cell is a walkable gate', async () => {
+      // Some progression NPCs (e.g. gate_completion_spirit in Blinking Grove)
+      // share their cell with the zone's exit gate. The gate must remain
+      // steppable so the existing ESC-to-enter-hidden-area flow still works.
+      setupNPCAt(6, 5);
+      const walkableGate = {
+        position: new Position(6, 5),
+        isWalkable: () => true,
+      };
+      mockGameState.getGate.mockReturnValue(walkableGate);
+
+      const result = await movePlayerUseCase.execute('right');
+
+      expect(mockGameState.cursor.position.x).toBe(6);
+      expect(result.success).toBe(true);
+    });
+
+    it('still blocks when the NPC stands on a locked gate', async () => {
+      setupNPCAt(6, 5);
+      const lockedGate = {
+        position: new Position(6, 5),
+        isWalkable: () => false,
+      };
+      mockGameState.getGate.mockReturnValue(lockedGate);
+
+      const result = await movePlayerUseCase.execute('right');
+
+      expect(mockGameState.cursor.position.x).toBe(5);
+      expect(result.success).toBe(false);
+      expect(result.reason).toBe('npc_block');
+    });
   });
 
   describe('NPC Exit Functionality', () => {
