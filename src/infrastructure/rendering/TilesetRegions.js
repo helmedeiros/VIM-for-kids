@@ -14,7 +14,8 @@ export const TILESET_REGIONS = {
   sand: { sx: 40, sy: 2208, sw: 16, sh: 16 },
   stone: { sx: 130, sy: 3184, sw: 16, sh: 16 },
   // Multi-tile decorations (drawn via TileRenderer.drawDecoration, not drawTile).
-  tree_2x3: { sx: 8, sy: 1228, sw: 32, sh: 48 },
+  // 2x2 footprint, 64x64 source = 1:1 with destination at renderSize 32 → crisp pixels.
+  tree_2x2: { sx: 0, sy: 0, sw: 64, sh: 64 },
 };
 
 export function registerTilesetRegions(atlas, image, regions = TILESET_REGIONS) {

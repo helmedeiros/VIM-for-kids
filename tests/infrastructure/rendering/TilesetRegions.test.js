@@ -15,7 +15,7 @@ describe('TilesetRegions', () => {
     ['dirt', { sx: 32, sy: 2576, sw: 16, sh: 16 }],
     ['sand', { sx: 40, sy: 2208, sw: 16, sh: 16 }],
     ['stone', { sx: 130, sy: 3184, sw: 16, sh: 16 }],
-    ['tree_2x3', { sx: 8, sy: 1228, sw: 32, sh: 48 }],
+    ['tree_2x2', { sx: 0, sy: 0, sw: 64, sh: 64 }],
   ])('exports the %s region', (name, region) => {
     expect(TILESET_REGIONS[name]).toEqual(region);
   });
