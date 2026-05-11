@@ -5,8 +5,18 @@ import {
 } from '../../../src/infrastructure/rendering/TilesetRegions.js';
 
 describe('TilesetRegions', () => {
-  it('exports at least the grass region', () => {
+  it('exports the grass region', () => {
     expect(TILESET_REGIONS.grass).toEqual({ sx: 96, sy: 2272, sw: 32, sh: 32 });
+  });
+
+  it.each([
+    ['water', { sx: 32, sy: 3680, sw: 16, sh: 16 }],
+    ['path', { sx: 128, sy: 2640, sw: 16, sh: 16 }],
+    ['dirt', { sx: 32, sy: 2576, sw: 16, sh: 16 }],
+    ['sand', { sx: 40, sy: 2208, sw: 16, sh: 16 }],
+    ['stone', { sx: 130, sy: 3184, sw: 16, sh: 16 }],
+  ])('exports the %s region', (name, region) => {
+    expect(TILESET_REGIONS[name]).toEqual(region);
   });
 
   it('registers all regions on the atlas using the provided image', () => {
@@ -24,8 +34,9 @@ describe('TilesetRegions', () => {
   it('does not register regions for tiles not in the region map', () => {
     const atlas = new TileAtlas();
     registerTilesetRegions(atlas, { width: 1, height: 1 });
-    expect(atlas.getRegion('water')).toBeNull();
+    // tree and void are not yet migrated to the PNG — they stay procedural.
     expect(atlas.getRegion('tree')).toBeNull();
+    expect(atlas.getRegion('void')).toBeNull();
   });
 
   it('accepts a custom region map for testing', () => {

@@ -8,6 +8,11 @@
  */
 export const TILESET_REGIONS = {
   grass: { sx: 96, sy: 2272, sw: 32, sh: 32 },
+  water: { sx: 32, sy: 3680, sw: 16, sh: 16 },
+  path: { sx: 128, sy: 2640, sw: 16, sh: 16 },
+  dirt: { sx: 32, sy: 2576, sw: 16, sh: 16 },
+  sand: { sx: 40, sy: 2208, sw: 16, sh: 16 },
+  stone: { sx: 130, sy: 3184, sw: 16, sh: 16 },
 };
 
 export function registerTilesetRegions(atlas, image, regions = TILESET_REGIONS) {
