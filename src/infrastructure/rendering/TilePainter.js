@@ -7,7 +7,7 @@
  * and clear silhouettes that create a 2D-that-looks-3D effect.
  */
 export class TilePainter {
-  constructor(tileSize = 32, columns = 20) {
+  constructor(tileSize = 32, columns = 24) {
     this._ts = tileSize;
     this._columns = columns;
   }
@@ -40,6 +40,10 @@ export class TilePainter {
       (c) => this._paintWallMid(c),
       (c) => this._paintWallCap(c),
       (c) => this._paintCliffN(c),
+      (c) => this._paintGrassEdgeN(c),
+      (c) => this._paintGrassEdgeE(c),
+      (c) => this._paintGrassEdgeS(c),
+      (c) => this._paintGrassEdgeW(c),
     ];
 
     painters.forEach((paint, i) => {
@@ -511,6 +515,104 @@ export class TilePainter {
     ctx.fillRect(0, cliffH, ts, 1);
 
     // Rest of the cell stays transparent so the water tile underneath shows.
+  }
+
+  // ===== GRASS EDGE OVERLAYS =====
+  // Small green tufts drawn on the corresponding edge of a non-grass cell to
+  // soften its boundary with a grass neighbor. Each painter draws tufts that
+  // extend from one edge into the cell; the rest of the sprite is transparent.
+
+  _paintGrassEdge(ctx, tufts, axis) {
+    // axis 'h' means tufts are columns of pixels stretching DOWN or UP from an
+    // edge; axis 'v' means tufts are rows of pixels stretching LEFT or RIGHT.
+    const dark = '#3a7838';
+    const mid = '#58a848';
+    const tip = '#70c860';
+    tufts.forEach(({ start, lengths, edge }) => {
+      lengths.forEach((len, i) => {
+        if (len <= 0) return;
+        const x = axis === 'h' ? start + i : edge === 'left' ? 0 : this._ts - len;
+        const y = axis === 'h' ? (edge === 'top' ? 0 : this._ts - len) : start + i;
+        const w = axis === 'h' ? 1 : len;
+        const h = axis === 'h' ? len : 1;
+        ctx.fillStyle = dark;
+        ctx.fillRect(x, y, w, h);
+        if (len >= 2) {
+          // Lighter body next to the tip edge
+          if (axis === 'h') {
+            const innerY = edge === 'top' ? 0 : this._ts - 1;
+            ctx.fillStyle = mid;
+            ctx.fillRect(x, edge === 'top' ? 0 : y, 1, Math.min(len, 2));
+            ctx.fillStyle = tip;
+            ctx.fillRect(x, innerY, 1, 1);
+          } else {
+            const innerX = edge === 'left' ? 0 : this._ts - 1;
+            ctx.fillStyle = mid;
+            ctx.fillRect(edge === 'left' ? x : x + len - 2, y, Math.min(len, 2), 1);
+            ctx.fillStyle = tip;
+            ctx.fillRect(innerX, y, 1, 1);
+          }
+        }
+      });
+    });
+  }
+
+  _paintGrassEdgeN(ctx) {
+    this._paintGrassEdge(
+      ctx,
+      [
+        { start: 1, lengths: [3, 5, 4, 2], edge: 'top' },
+        { start: 7, lengths: [2, 4, 3], edge: 'top' },
+        { start: 12, lengths: [4, 5, 6, 4, 3], edge: 'top' },
+        { start: 19, lengths: [3, 5, 4], edge: 'top' },
+        { start: 24, lengths: [2, 4, 3, 5, 3], edge: 'top' },
+        { start: 30, lengths: [3, 2], edge: 'top' },
+      ],
+      'h'
+    );
+  }
+
+  _paintGrassEdgeS(ctx) {
+    this._paintGrassEdge(
+      ctx,
+      [
+        { start: 2, lengths: [3, 5, 4, 2], edge: 'bottom' },
+        { start: 8, lengths: [2, 4, 3], edge: 'bottom' },
+        { start: 13, lengths: [4, 5, 6, 4, 3], edge: 'bottom' },
+        { start: 20, lengths: [3, 5, 4], edge: 'bottom' },
+        { start: 25, lengths: [2, 4, 3, 5, 3], edge: 'bottom' },
+      ],
+      'h'
+    );
+  }
+
+  _paintGrassEdgeW(ctx) {
+    this._paintGrassEdge(
+      ctx,
+      [
+        { start: 1, lengths: [3, 5, 4, 2], edge: 'left' },
+        { start: 7, lengths: [2, 4, 3], edge: 'left' },
+        { start: 12, lengths: [4, 5, 6, 4, 3], edge: 'left' },
+        { start: 19, lengths: [3, 5, 4], edge: 'left' },
+        { start: 24, lengths: [2, 4, 3, 5, 3], edge: 'left' },
+        { start: 30, lengths: [3, 2], edge: 'left' },
+      ],
+      'v'
+    );
+  }
+
+  _paintGrassEdgeE(ctx) {
+    this._paintGrassEdge(
+      ctx,
+      [
+        { start: 2, lengths: [3, 5, 4, 2], edge: 'right' },
+        { start: 8, lengths: [2, 4, 3], edge: 'right' },
+        { start: 13, lengths: [4, 5, 6, 4, 3], edge: 'right' },
+        { start: 20, lengths: [3, 5, 4], edge: 'right' },
+        { start: 25, lengths: [2, 4, 3, 5, 3], edge: 'right' },
+      ],
+      'v'
+    );
   }
 
   _paintBridge(ctx) {

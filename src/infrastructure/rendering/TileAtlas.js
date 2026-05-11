@@ -29,6 +29,10 @@ export class TileAtlas {
       wall_mid: 17,
       wall_cap: 18,
       cliff_n: 19,
+      grass_edge_n: 20,
+      grass_edge_e: 21,
+      grass_edge_s: 22,
+      grass_edge_w: 23,
     };
     this._regions = new Map();
   }
