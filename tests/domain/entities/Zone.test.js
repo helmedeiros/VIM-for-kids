@@ -959,4 +959,67 @@ describe('Zone', () => {
       expect(zone.name).toBe('Empty Zone');
     });
   });
+
+  describe('Decorations', () => {
+    test('builds Decoration entries from tiles.decorations config', () => {
+      const config = {
+        ...createTestZoneConfig(),
+        tiles: {
+          ...createTestZoneConfig().tiles,
+          decorations: [
+            {
+              regionName: 'tree_2x3',
+              position: [3, 3],
+              footprintW: 2,
+              footprintH: 3,
+              blocking: true,
+            },
+          ],
+        },
+      };
+      const zone = new Zone(config);
+      const decorations = zone.gameMap.getDecorations();
+
+      expect(decorations).toHaveLength(1);
+      expect(decorations[0].regionName).toBe('tree_2x3');
+      expect(decorations[0].footprintW).toBe(2);
+      expect(decorations[0].footprintH).toBe(3);
+      expect(decorations[0].blocking).toBe(true);
+
+      // Anchor converted to absolute coordinates
+      const expected = getAbsolutePosition(3, 3);
+      expect(decorations[0].anchor.equals(expected)).toBe(true);
+    });
+
+    test('zone with no decorations config has an empty decoration layer', () => {
+      const zone = new Zone(createTestZoneConfig());
+      expect(zone.gameMap.getDecorations()).toEqual([]);
+    });
+
+    test('blocking decorations make the underlying cells unwalkable', () => {
+      const config = {
+        ...createTestZoneConfig(),
+        tiles: {
+          ...createTestZoneConfig().tiles,
+          decorations: [
+            {
+              regionName: 'tree_2x3',
+              position: [3, 3],
+              footprintW: 2,
+              footprintH: 2,
+              blocking: true,
+            },
+          ],
+        },
+      };
+      const zone = new Zone(config);
+      const anchor = getAbsolutePosition(3, 3);
+
+      expect(zone.gameMap.isWalkable(anchor)).toBe(false);
+      expect(zone.gameMap.isWalkable(new Position(anchor.x + 1, anchor.y))).toBe(false);
+      // Outside footprint stays as the underlying tile allows
+      const outside = new Position(anchor.x + 5, anchor.y);
+      expect(zone.gameMap.isWalkable(outside)).toBe(zone.gameMap.getTileAt(outside).walkable);
+    });
+  });
 });

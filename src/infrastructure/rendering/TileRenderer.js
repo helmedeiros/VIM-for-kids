@@ -20,6 +20,22 @@ export class TileRenderer {
     return this._renderSize;
   }
 
+  drawDecoration(ctx, decoration, screenX, screenY) {
+    const region = this._tileAtlas.getRegion?.(decoration.regionName);
+    if (!region) return;
+    ctx.drawImage(
+      region.image,
+      region.sx,
+      region.sy,
+      region.sw,
+      region.sh,
+      screenX,
+      screenY,
+      decoration.footprintW * this._renderSize,
+      decoration.footprintH * this._renderSize
+    );
+  }
+
   drawTile(ctx, tileName, screenX, screenY) {
     const region = this._tileAtlas.getRegion?.(tileName);
     if (region) {

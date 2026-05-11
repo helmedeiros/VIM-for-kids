@@ -54,7 +54,7 @@ export class BlinkingGroveZone {
           'GDDDGGGGGDGGWWWWSSSSSDSDSDSSSSSDSDSSSSSSSSSSSSSSDSSSDSDSWWWWWWWWWWWWWWWWWWW',
           'GGGGGGGGGDGGWWWWSDDDDDSDSDDDDDDDSDSDDDDDDDDDDDDSDSSSDSDSWWWWWWWWWWWWWWWWWWW',
           'GGGGGGGGGDGGSSSSSDSSSSSDSSSSSSSSSDSDSSSSSSSSSSDSDSSSDSDSWWWWWWWWWWWWWWWWWWW',
-          'GTGGGGGGGDDDDDDDDDSDDDSDSDDDDDDDSDSDSDDDDDDDDDDSD<DDDSDSWWWWWWWWWWWWWWWWWWW',
+          'GGGGGGGGGDDDDDDDDDSDDDSDSDDDDDDDSDSDSDDDDDDDDDDSD<DDDSDSWWWWWWWWWWWWWWWWWWW',
           'GGGGGGGGGGGGSSSSSDSSSDSDSDSSSSSSSDSDSSSSSSSSSSSSDSSSSSDSWWWWWWWWWWWWWWWWWWW',
           'WWWWWWWWWWWWWWWWSD<DDDDDDDDDDDDDDD<DDDDDDDDDDDDDD>DDDDDSWWWWWWWWWWWWWWWWWWW',
           'WWWWWWWWWWWWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSWWWWWWWWWWWWWWWWWWW',
@@ -71,6 +71,11 @@ export class BlinkingGroveZone {
           '>': 'ramp_left',
           '<': 'ramp_right',
         },
+        decorations: [
+          // 2x3 tree replacing the old single-tile 'T' in the western grass strip.
+          // Anchor is top-left of the footprint; the trunk lands on the bottom row.
+          { regionName: 'tree_2x3', position: [1, 12], footprintW: 2, footprintH: 3 },
+        ],
         specialTiles: [
           { type: 'vim_key', value: 'h', position: [1, 10] }, // Left movement key - on grass
           { type: 'vim_key', value: 'j', position: [2, 11] }, // Down movement key - on grass

@@ -1,6 +1,7 @@
 import { DynamicZoneMap } from '../../../src/domain/entities/DynamicZoneMap.js';
 import { Position } from '../../../src/domain/value-objects/Position.js';
 import { TileType } from '../../../src/domain/value-objects/TileType.js';
+import { Decoration } from '../../../src/domain/value-objects/Decoration.js';
 
 describe('DynamicZoneMap', () => {
   let dynamicMap;
@@ -413,6 +414,92 @@ describe('DynamicZoneMap', () => {
       expect(removeEventListenerSpy).toHaveBeenCalledWith('resize', dynamicMap._resizeHandler);
 
       removeEventListenerSpy.mockRestore();
+    });
+
+    test('decorations layer is empty by default', () => {
+      dynamicMap = new DynamicZoneMap(12, 8);
+      expect(dynamicMap.getDecorations()).toEqual([]);
+    });
+
+    test('addDecoration stores the decoration and exposes it via getDecorations', () => {
+      dynamicMap = new DynamicZoneMap(12, 8);
+      const tree = new Decoration({
+        regionName: 'tree_big',
+        anchor: new Position(3, 3),
+        footprintW: 2,
+        footprintH: 2,
+        blocking: true,
+      });
+
+      dynamicMap.addDecoration(tree);
+
+      expect(dynamicMap.getDecorations()).toHaveLength(1);
+      expect(dynamicMap.getDecorations()[0]).toBe(tree);
+    });
+
+    test('addDecoration throws when given a non-Decoration', () => {
+      dynamicMap = new DynamicZoneMap(12, 8);
+      expect(() => dynamicMap.addDecoration({ regionName: 'x' })).toThrow(/Decoration/);
+    });
+
+    test('getDecorationsInBounds returns only decorations whose footprint overlaps', () => {
+      dynamicMap = new DynamicZoneMap(20, 20);
+      const inside = new Decoration({
+        regionName: 'tree',
+        anchor: new Position(5, 5),
+        footprintW: 2,
+        footprintH: 2,
+      });
+      const outside = new Decoration({
+        regionName: 'tree',
+        anchor: new Position(50, 50),
+        footprintW: 2,
+        footprintH: 2,
+      });
+
+      dynamicMap.addDecoration(inside);
+      dynamicMap.addDecoration(outside);
+
+      const visible = dynamicMap.getDecorationsInBounds({
+        startX: 0,
+        startY: 0,
+        endX: 10,
+        endY: 10,
+      });
+      expect(visible).toEqual([inside]);
+    });
+
+    test('isWalkable returns false when a blocking decoration covers the cell', () => {
+      dynamicMap = new DynamicZoneMap(12, 8);
+      const blockedPos = dynamicMap.zoneToAbsolute(0, 0); // grass by default, walkable
+      expect(dynamicMap.isWalkable(blockedPos)).toBe(true);
+
+      dynamicMap.addDecoration(
+        new Decoration({
+          regionName: 'tree',
+          anchor: blockedPos,
+          footprintW: 1,
+          footprintH: 1,
+          blocking: true,
+        })
+      );
+
+      expect(dynamicMap.isWalkable(blockedPos)).toBe(false);
+    });
+
+    test('isWalkable ignores non-blocking decorations', () => {
+      dynamicMap = new DynamicZoneMap(12, 8);
+      const pos = dynamicMap.zoneToAbsolute(0, 0);
+      dynamicMap.addDecoration(
+        new Decoration({
+          regionName: 'flower',
+          anchor: pos,
+          footprintW: 1,
+          footprintH: 1,
+          blocking: false,
+        })
+      );
+      expect(dynamicMap.isWalkable(pos)).toBe(true);
     });
 
     test('should not crash when window is undefined during cleanup', () => {

@@ -97,6 +97,56 @@ describe('TileRenderer', () => {
     });
   });
 
+  describe('drawDecoration', () => {
+    it('draws the region at footprint-scaled destination', () => {
+      const regionImage = { width: 256, height: 20832 };
+      mockTileAtlas.getRegion.mockReturnValue({
+        image: regionImage,
+        sx: 8,
+        sy: 1228,
+        sw: 32,
+        sh: 48,
+      });
+
+      const decoration = {
+        regionName: 'tree_2x3',
+        footprintW: 2,
+        footprintH: 3,
+      };
+
+      renderer.drawDecoration(mockCtx, decoration, 100, 200);
+
+      expect(mockTileAtlas.getRegion).toHaveBeenCalledWith('tree_2x3');
+      expect(mockCtx.drawImage).toHaveBeenCalledWith(
+        regionImage,
+        8,
+        1228,
+        32,
+        48,
+        100,
+        200,
+        64, // 2 * renderSize(32)
+        96 // 3 * renderSize(32)
+      );
+    });
+
+    it('does nothing when the atlas has no region for the decoration', () => {
+      mockTileAtlas.getRegion.mockReturnValue(null);
+      renderer.drawDecoration(mockCtx, { regionName: 'missing', footprintW: 1, footprintH: 1 }, 0, 0);
+      expect(mockCtx.drawImage).not.toHaveBeenCalled();
+    });
+
+    it('scales destination using the renderer renderSize', () => {
+      const regionImage = { width: 1, height: 1 };
+      mockTileAtlas.getRegion.mockReturnValue({ image: regionImage, sx: 0, sy: 0, sw: 16, sh: 16 });
+      const big = new TileRenderer(mockSpriteSheet, mockTileAtlas, 48);
+      big.drawDecoration(mockCtx, { regionName: 'x', footprintW: 2, footprintH: 2 }, 0, 0);
+      const call = mockCtx.drawImage.mock.calls[0];
+      expect(call[7]).toBe(96); // 2 * 48
+      expect(call[8]).toBe(96);
+    });
+  });
+
   describe('drawTile with registered region', () => {
     it('prefers the atlas region over the legacy frame index', () => {
       const regionImage = { width: 256, height: 20832 };

@@ -1,10 +1,12 @@
 import { Position } from '../value-objects/Position.js';
 import { TileType } from '../value-objects/TileType.js';
+import { Decoration } from '../value-objects/Decoration.js';
 
 export class DynamicZoneMap {
   constructor(zoneWidth = 12, zoneHeight = 8) {
     this._zoneWidth = zoneWidth;
     this._zoneHeight = zoneHeight;
+    this._decorations = [];
     this._calculateDynamicGridSize();
     this._initializeMap();
 
@@ -192,7 +194,28 @@ export class DynamicZoneMap {
       return false;
     }
     const tile = this.getTileAt(position);
-    return tile.walkable;
+    if (!tile.walkable) return false;
+    for (const decoration of this._decorations) {
+      if (decoration.blocking && decoration.occupies(position)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  addDecoration(decoration) {
+    if (!(decoration instanceof Decoration)) {
+      throw new Error('addDecoration requires a Decoration instance');
+    }
+    this._decorations.push(decoration);
+  }
+
+  getDecorations() {
+    return [...this._decorations];
+  }
+
+  getDecorationsInBounds(bounds) {
+    return this._decorations.filter((d) => d.overlapsBounds(bounds));
   }
 
   // Helper method to convert zone-relative coordinates to absolute coordinates
