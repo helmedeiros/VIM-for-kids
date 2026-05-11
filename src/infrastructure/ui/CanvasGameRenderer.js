@@ -115,10 +115,10 @@ export class CanvasGameRenderer extends GameRenderer {
   _initSprites() {
     try {
       const ts = this._camera.tileSize;
-      const painter = new TilePainter(ts, 19);
+      const painter = new TilePainter(ts, 20);
 
       const tilesetCanvas = painter.createTilesetCanvas();
-      const tilesetSheet = new SpriteSheet(tilesetCanvas, ts, ts, 19);
+      const tilesetSheet = new SpriteSheet(tilesetCanvas, ts, ts, 20);
       this._tileRenderer = new TileRenderer(tilesetSheet, this._tileAtlas, ts);
 
       const charsCanvas = painter.createCharacterCanvas();
@@ -550,6 +550,23 @@ export class CanvasGameRenderer extends GameRenderer {
 
         // Auto-tiler edge transitions
         this._drawAutoTileTransition(ctx, col, row, screenX, screenY, ts, tileName, map, mapWidth, mapHeight, gameState);
+
+        // Cliff edge overlay — when this cell is water and the cell to the
+        // north is non-water playable terrain, draw a short rocky cliff face
+        // on the top of the water cell so the playable area reads as a higher
+        // elevation than the surrounding sea.
+        if (this._tileRenderer && tileName === 'water' && row - 1 >= 0) {
+          try {
+            const PositionClass = Object.getPrototypeOf(gameState.cursor.position).constructor;
+            const northTile = map.getTileAt(new PositionClass(col, row - 1));
+            const northName = northTile && northTile.name;
+            if (northName && northName !== 'water' && northName !== 'void') {
+              this._tileRenderer.drawTile(ctx, 'cliff_n', screenX, screenY);
+            }
+          } catch {
+            // ignore — keep regular water rendering
+          }
+        }
 
         // Draw entities at this position
         this._drawEntitiesAt(ctx, col, row, screenX, screenY, ts);

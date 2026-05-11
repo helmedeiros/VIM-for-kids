@@ -7,7 +7,7 @@
  * and clear silhouettes that create a 2D-that-looks-3D effect.
  */
 export class TilePainter {
-  constructor(tileSize = 32, columns = 19) {
+  constructor(tileSize = 32, columns = 20) {
     this._ts = tileSize;
     this._columns = columns;
   }
@@ -39,6 +39,7 @@ export class TilePainter {
       (c) => this._paintRock(c),
       (c) => this._paintWallMid(c),
       (c) => this._paintWallCap(c),
+      (c) => this._paintCliffN(c),
     ];
 
     painters.forEach((paint, i) => {
@@ -474,6 +475,42 @@ export class TilePainter {
     drawStone(1, midY + 1, 10, 13, '#ebe4d2', 'rgba(255,255,250,0.55)', 'rgba(80,70,55,0.4)', '#9a8d72');
     drawStone(11, midY + 1, 10, 13, '#ede6d4', 'rgba(255,255,250,0.55)', 'rgba(80,70,55,0.4)', '#9a8d72');
     drawStone(21, midY + 1, 10, 13, '#ebe4d2', 'rgba(255,255,250,0.55)', 'rgba(80,70,55,0.4)', '#9a8d72');
+  }
+
+  _paintCliffN(ctx) {
+    // Short cliff edge overlay — drawn on water cells whose north neighbor is
+    // non-water playable terrain to make the playable area feel like a higher
+    // elevation. Roughly 10 px tall (~1/3 cell), about half the height of the
+    // wall's front face, so the border reads as a soft elevation cue rather
+    // than another wall.
+    const ts = this._ts;
+    const cliffH = 10;
+
+    // Thin cobblestone cap at the very top — gives the cliff a "stone edge".
+    ctx.fillStyle = '#cdc6b3';
+    ctx.fillRect(0, 0, ts, 2);
+    ctx.fillStyle = '#9a8d72';
+    for (let x = 0; x < ts; x += 10) ctx.fillRect(x, 0, 1, 2);
+
+    // Rocky face beneath the cap with a vertical gradient (lighter to darker).
+    const grad = ctx.createLinearGradient(0, 2, 0, cliffH);
+    grad.addColorStop(0, '#9c8470');
+    grad.addColorStop(1, '#4e3e28');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 2, ts, cliffH - 2);
+
+    // Sprinkle of small rocks for texture.
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    const rocks = [[3, 4], [10, 5], [18, 3], [24, 6], [28, 4], [6, 7], [14, 7], [21, 7], [2, 7]];
+    rocks.forEach(([rx, ry]) => ctx.fillRect(rx, ry, 2, 1));
+    ctx.fillStyle = 'rgba(255,220,180,0.25)';
+    rocks.slice(0, 4).forEach(([rx, ry]) => ctx.fillRect(rx, ry - 1, 1, 1));
+
+    // Soft shadow line where the cliff meets the water.
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillRect(0, cliffH, ts, 1);
+
+    // Rest of the cell stays transparent so the water tile underneath shows.
   }
 
   _paintBridge(ctx) {
