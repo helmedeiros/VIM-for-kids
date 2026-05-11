@@ -56,15 +56,15 @@ describe('TileAtlas', () => {
   });
 
   describe('tileCount', () => {
-    it('returns 20 tile types', () => {
-      expect(atlas.tileCount).toBe(20);
+    it('returns 24 tile types', () => {
+      expect(atlas.tileCount).toBe(24);
     });
   });
 
   describe('getAllMappings', () => {
     it('returns a copy of mappings', () => {
       const mappings = atlas.getAllMappings();
-      expect(Object.keys(mappings)).toHaveLength(20);
+      expect(Object.keys(mappings)).toHaveLength(24);
       mappings.water = 999;
       expect(atlas.getFrameIndex('water')).toBe(0);
     });

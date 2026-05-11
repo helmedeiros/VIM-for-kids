@@ -15,6 +15,12 @@ import { AutoTiler } from '../rendering/AutoTiler.js';
 import { VimKeyInfo } from '../rendering/VimKeyInfo.js';
 import { AssetLoader } from '../rendering/AssetLoader.js';
 import { registerTilesetRegions } from '../rendering/TilesetRegions.js';
+import {
+  pickWallVariant,
+  shouldDrawWallCap,
+  shouldDrawCliffN,
+  pickGrassEdges,
+} from '../rendering/TileOverlayRules.js';
 
 const RPG_TILESET_URL = '/assets/sprites/tileset-rpg.png';
 
@@ -115,10 +121,10 @@ export class CanvasGameRenderer extends GameRenderer {
   _initSprites() {
     try {
       const ts = this._camera.tileSize;
-      const painter = new TilePainter(ts, 20);
+      const painter = new TilePainter(ts, 24);
 
       const tilesetCanvas = painter.createTilesetCanvas();
-      const tilesetSheet = new SpriteSheet(tilesetCanvas, ts, ts, 20);
+      const tilesetSheet = new SpriteSheet(tilesetCanvas, ts, ts, 24);
       this._tileRenderer = new TileRenderer(tilesetSheet, this._tileAtlas, ts);
 
       const charsCanvas = painter.createCharacterCanvas();
@@ -515,21 +521,10 @@ export class CanvasGameRenderer extends GameRenderer {
           }
         }
 
-        // Continuous-wall variant: when a wall has another wall directly to its
-        // south, this cell is "above the bottom" of a vertical run — from the
-        // 3/4 player perspective only the cobblestone top is visible. The cell
-        // at the bottom of the run (no wall to its south) keeps the default
-        // cobblestone-top + stone-front sprite so the wall's face is shown.
-        let renderName = tileName;
-        if (tileName === 'wall' && row + 1 < mapHeight) {
-          try {
-            const PositionClass = Object.getPrototypeOf(gameState.cursor.position).constructor;
-            const southTile = map.getTileAt(new PositionClass(col, row + 1));
-            if (southTile && southTile.name === 'wall') renderName = 'wall_mid';
-          } catch {
-            // leave renderName as-is
-          }
-        }
+        // Pure overlay decisions delegated to TileOverlayRules
+        const getNeighborName = this._neighborGetter(map, mapWidth, mapHeight, col, row, gameState);
+        const renderName =
+          tileName === 'wall' ? pickWallVariant(getNeighborName) : tileName;
 
         // Draw tile (sprite or colored rectangle fallback)
         if (this._tileRenderer) {
@@ -551,20 +546,14 @@ export class CanvasGameRenderer extends GameRenderer {
         // Auto-tiler edge transitions
         this._drawAutoTileTransition(ctx, col, row, screenX, screenY, ts, tileName, map, mapWidth, mapHeight, gameState);
 
-        // Cliff edge overlay — when this cell is water and the cell to the
-        // north is non-water playable terrain, draw a short rocky cliff face
-        // on the top of the water cell so the playable area reads as a higher
-        // elevation than the surrounding sea.
-        if (this._tileRenderer && tileName === 'water' && row - 1 >= 0) {
-          try {
-            const PositionClass = Object.getPrototypeOf(gameState.cursor.position).constructor;
-            const northTile = map.getTileAt(new PositionClass(col, row - 1));
-            const northName = northTile && northTile.name;
-            if (northName && northName !== 'water' && northName !== 'void') {
-              this._tileRenderer.drawTile(ctx, 'cliff_n', screenX, screenY);
-            }
-          } catch {
-            // ignore — keep regular water rendering
+        // Neighbor-aware overlays — cliff edge on water above playable land,
+        // grass tufts on non-grass cells adjacent to grass.
+        if (this._tileRenderer) {
+          if (shouldDrawCliffN(tileName, getNeighborName)) {
+            this._tileRenderer.drawTile(ctx, 'cliff_n', screenX, screenY);
+          }
+          for (const edge of pickGrassEdges(tileName, getNeighborName)) {
+            this._tileRenderer.drawTile(ctx, edge, screenX, screenY);
           }
         }
 
@@ -593,29 +582,32 @@ export class CanvasGameRenderer extends GameRenderer {
     if (!this._tileRenderer) return;
     const mapWidth = map.width || map.size;
     const mapHeight = map.height || map.size;
-    const PositionClass = Object.getPrototypeOf(gameState.cursor.position).constructor;
-    const tileNameAt = (x, y) => {
-      if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) return null;
-      try {
-        return map.getTileAt(new PositionClass(x, y)).name;
-      } catch {
-        return null;
-      }
-    };
     for (let row = bounds.startY; row < bounds.endY; row++) {
       for (let col = bounds.startX; col < bounds.endX; col++) {
-        // Cap appears above any top-of-wall cell — a non-wall cell whose south
-        // neighbor is a wall. This adds the cobblestone overhang at the tops of
-        // vertical runs and short wall stubs, not just at standalone horizontal
-        // walls. Without it, vertical wall columns end abruptly at their top.
-        if (tileNameAt(col, row) === 'wall') continue;
-        if (tileNameAt(col, row + 1) !== 'wall') continue;
+        const getNeighborName = this._neighborGetter(map, mapWidth, mapHeight, col, row, gameState);
+        const cellName = getNeighborName(0, 0);
+        if (!shouldDrawWallCap(cellName, getNeighborName)) continue;
 
         const screenX = (col - bounds.startX) * ts;
         const screenY = (row - bounds.startY) * ts;
         this._tileRenderer.drawTile(ctx, 'wall_cap', screenX, screenY);
       }
     }
+  }
+
+  _neighborGetter(map, mapWidth, mapHeight, col, row, gameState) {
+    const PositionClass = Object.getPrototypeOf(gameState.cursor.position).constructor;
+    return (dx, dy) => {
+      const nx = col + dx;
+      const ny = row + dy;
+      if (nx < 0 || nx >= mapWidth || ny < 0 || ny >= mapHeight) return null;
+      try {
+        const t = map.getTileAt(new PositionClass(nx, ny));
+        return t ? t.name : null;
+      } catch {
+        return null;
+      }
+    };
   }
 
   _drawDecorations(ctx, map, bounds, ts) {
