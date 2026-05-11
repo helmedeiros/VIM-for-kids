@@ -7,7 +7,7 @@
  * and clear silhouettes that create a 2D-that-looks-3D effect.
  */
 export class TilePainter {
-  constructor(tileSize = 32, columns = 17) {
+  constructor(tileSize = 32, columns = 19) {
     this._ts = tileSize;
     this._columns = columns;
   }
@@ -37,6 +37,8 @@ export class TilePainter {
       (c) => this._paintRampLeft(c),
       (c) => this._paintVoid(c),
       (c) => this._paintRock(c),
+      (c) => this._paintWallMid(c),
+      (c) => this._paintWallCap(c),
     ];
 
     painters.forEach((paint, i) => {
@@ -339,65 +341,139 @@ export class TilePainter {
   }
 
   _paintWall(ctx) {
+    // Pokemon-style 2D-look-3D wall: cobblestone TOP face + darker STONE FRONT face
+    // inside a single 32x32 cell. Fold line at the midpoint, vertical shadow on the
+    // front, bottom drop shadow to seat the block on the ground.
     const ts = this._ts;
-    const faceW = 24, faceH = 24;
+    const midY = Math.floor(ts / 2);
 
-    // Main brick face
-    ctx.fillStyle = '#5a6878';
-    ctx.fillRect(0, 0, faceW, faceH);
+    const drawStone = (x, y, w, h, body, hi, sh, grout) => {
+      ctx.fillStyle = grout;
+      ctx.fillRect(x, y, w, h);
+      ctx.fillStyle = body;
+      ctx.fillRect(x + 1, y + 1, w - 2, h - 2);
+      ctx.fillStyle = hi;
+      ctx.fillRect(x + 1, y + 1, w - 2, 1);
+      ctx.fillRect(x + 1, y + 1, 1, h - 2);
+      ctx.fillStyle = sh;
+      ctx.fillRect(x + 1, y + h - 2, w - 2, 1);
+      ctx.fillRect(x + w - 2, y + 1, 1, h - 2);
+    };
 
-    const bh = 6, bw = 12;
-    for (let row = 0; row < faceH / bh; row++) {
-      const offset = (row % 2) * (bw / 2);
-      for (let col = -1; col < faceW / bw + 1; col++) {
-        const bx = col * bw + offset;
-        const by = row * bh;
-        const shade = ((row + col) % 3) * 2;
-        ctx.fillStyle = `rgb(${90 + shade}, ${105 + shade}, ${118 + shade})`;
-        ctx.fillRect(bx + 1, by + 1, bw - 2, bh - 2);
-        // Per-brick highlight
-        ctx.fillStyle = 'rgba(255,255,255,0.12)';
-        ctx.fillRect(bx + 1, by + 1, bw - 2, 1);
-        ctx.fillRect(bx + 1, by + 1, 1, bh - 2);
-        // Per-brick shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.12)';
-        ctx.fillRect(bx + 1, by + bh - 2, bw - 2, 1);
-        ctx.fillRect(bx + bw - 2, by + 1, 1, bh - 2);
-      }
-    }
-    // Mortar
-    ctx.fillStyle = '#3a4858';
-    for (let row = 0; row <= faceH / bh; row++) ctx.fillRect(0, row * bh, faceW, 1);
-    for (let row = 0; row < faceH / bh; row++) {
-      const offset = (row % 2) * (bw / 2);
-      for (let col = -1; col < faceW / bw + 2; col++) ctx.fillRect(col * bw + offset, row * bh, 1, bh);
-    }
+    // === FRONT FACE base — darker stone with vertical shadow gradient ===
+    const frontGrad = ctx.createLinearGradient(0, midY, 0, ts);
+    frontGrad.addColorStop(0, '#9c8e76');
+    frontGrad.addColorStop(0.6, '#7e7159');
+    frontGrad.addColorStop(1, '#5e5340');
+    ctx.fillStyle = frontGrad;
+    ctx.fillRect(0, midY, ts, ts - midY);
 
-    // Right face (3D depth)
-    const rf = ctx.createLinearGradient(faceW, 0, ts, 0);
-    rf.addColorStop(0, '#4a5565');
-    rf.addColorStop(1, '#252d38');
-    ctx.fillStyle = rf;
-    ctx.fillRect(faceW, 0, ts - faceW, faceH);
-    // Vertical mortar on right face
-    ctx.fillStyle = 'rgba(0,0,0,0.15)';
-    for (let row = 0; row <= faceH / bh; row++) ctx.fillRect(faceW, row * bh, ts - faceW, 1);
+    // Front-face stones — two staggered rows of small darker stones
+    const frontRow1 = [{ x: 0, y: midY + 2 }, { x: 8, y: midY + 2 }, { x: 16, y: midY + 2 }, { x: 24, y: midY + 2 }];
+    const frontRow2 = [{ x: -4, y: midY + 8 }, { x: 4, y: midY + 8 }, { x: 12, y: midY + 8 }, { x: 20, y: midY + 8 }, { x: 28, y: midY + 8 }];
+    frontRow1.forEach(({ x, y }) =>
+      drawStone(x, y, 8, 6, '#a89875', 'rgba(255,250,230,0.35)', 'rgba(0,0,0,0.25)', '#4a3e2a')
+    );
+    frontRow2.forEach(({ x, y }) =>
+      drawStone(x, y, 8, 6, '#8e7d5e', 'rgba(255,250,230,0.22)', 'rgba(0,0,0,0.3)', '#3a2f1e')
+    );
 
-    // Bottom face (3D depth)
-    const bf = ctx.createLinearGradient(0, faceH, 0, ts);
-    bf.addColorStop(0, '#4a5565');
-    bf.addColorStop(1, '#252d38');
-    ctx.fillStyle = bf;
-    ctx.fillRect(0, faceH, faceW, ts - faceH);
+    // === TOP FACE base — light gray-cream cobblestone backdrop ===
+    ctx.fillStyle = '#cdc6b3';
+    ctx.fillRect(0, 0, ts, midY);
 
-    // Corner
-    ctx.fillStyle = '#1a2028';
-    ctx.fillRect(faceW, faceH, ts - faceW, ts - faceH);
+    // Top-face stones — three larger rounded stones across the top face
+    drawStone(1, 1, 10, 13, '#ebe4d2', 'rgba(255,255,250,0.55)', 'rgba(80,70,55,0.4)', '#9a8d72');
+    drawStone(11, 1, 10, 13, '#ede6d4', 'rgba(255,255,250,0.55)', 'rgba(80,70,55,0.4)', '#9a8d72');
+    drawStone(21, 1, 10, 13, '#ebe4d2', 'rgba(255,255,250,0.55)', 'rgba(80,70,55,0.4)', '#9a8d72');
 
-    // Top-left edge highlight
-    ctx.fillStyle = 'rgba(160, 180, 200, 0.3)';
-    ctx.fillRect(0, 0, faceW, 1);
-    ctx.fillRect(0, 0, 1, faceH);
+    // === FOLD LINE — dark band between top face and front face ===
+    ctx.fillStyle = '#3e3624';
+    ctx.fillRect(0, midY - 1, ts, 1);
+    ctx.fillStyle = 'rgba(255,250,230,0.18)';
+    ctx.fillRect(0, midY, ts, 1);
+
+    // === BOTTOM DROP SHADOW — seats the block on the ground below ===
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.fillRect(0, ts - 1, ts, 1);
+  }
+
+  _paintWallMid(ctx) {
+    // Continuous cobblestone TOP face — drawn for wall cells that have another
+    // wall directly to the south. From the player's 3/4 perspective these cells
+    // are above the wall's visible front, so we only see the cobblestone top.
+    // No fold line, no stone-front, no drop shadow at the bottom: this lets
+    // vertical wall stacks read as one tall wall.
+    const ts = this._ts;
+
+    const drawStone = (x, y, w, h, body, hi, sh, grout) => {
+      ctx.fillStyle = grout;
+      ctx.fillRect(x, y, w, h);
+      ctx.fillStyle = body;
+      ctx.fillRect(x + 1, y + 1, w - 2, h - 2);
+      ctx.fillStyle = hi;
+      ctx.fillRect(x + 1, y + 1, w - 2, 1);
+      ctx.fillRect(x + 1, y + 1, 1, h - 2);
+      ctx.fillStyle = sh;
+      ctx.fillRect(x + 1, y + h - 2, w - 2, 1);
+      ctx.fillRect(x + w - 2, y + 1, 1, h - 2);
+    };
+
+    // Cobblestone backdrop matching the top half of _paintWall
+    ctx.fillStyle = '#cdc6b3';
+    ctx.fillRect(0, 0, ts, ts);
+
+    // Two rows of three large rounded cobblestones, slightly staggered to make
+    // the vertical seam between adjacent cells less obvious.
+    const stoneBody = '#ebe4d2';
+    const stoneBodyAlt = '#ede6d4';
+    const stoneHi = 'rgba(255,255,250,0.55)';
+    const stoneSh = 'rgba(80,70,55,0.4)';
+    const stoneGrout = '#9a8d72';
+
+    // Row 1 (y=1..14)
+    drawStone(1, 1, 10, 13, stoneBody, stoneHi, stoneSh, stoneGrout);
+    drawStone(11, 1, 10, 13, stoneBodyAlt, stoneHi, stoneSh, stoneGrout);
+    drawStone(21, 1, 10, 13, stoneBody, stoneHi, stoneSh, stoneGrout);
+
+    // Row 2 (y=16..29) — half-stone offset so adjacent vertical cells don't form
+    // a single straight grout line.
+    drawStone(-4, 16, 10, 13, stoneBodyAlt, stoneHi, stoneSh, stoneGrout);
+    drawStone(6, 16, 10, 13, stoneBody, stoneHi, stoneSh, stoneGrout);
+    drawStone(16, 16, 10, 13, stoneBodyAlt, stoneHi, stoneSh, stoneGrout);
+    drawStone(26, 16, 10, 13, stoneBody, stoneHi, stoneSh, stoneGrout);
+  }
+
+  _paintWallCap(ctx) {
+    // Wall overhang sprite — drawn into the cell directly NORTH of a wall whose
+    // south neighbor is non-wall ("bottom of run" wall showing its front face).
+    // Top half is transparent so the underlying terrain still shows; bottom half
+    // contains the cobblestone top of the wall, extending visually upward into
+    // the cell above. Painted AFTER the cursor so it occludes part of the cursor
+    // when the cursor stands directly north of a wall.
+    const ts = this._ts;
+    const midY = Math.floor(ts / 2);
+
+    const drawStone = (x, y, w, h, body, hi, sh, grout) => {
+      ctx.fillStyle = grout;
+      ctx.fillRect(x, y, w, h);
+      ctx.fillStyle = body;
+      ctx.fillRect(x + 1, y + 1, w - 2, h - 2);
+      ctx.fillStyle = hi;
+      ctx.fillRect(x + 1, y + 1, w - 2, 1);
+      ctx.fillRect(x + 1, y + 1, 1, h - 2);
+      ctx.fillStyle = sh;
+      ctx.fillRect(x + 1, y + h - 2, w - 2, 1);
+      ctx.fillRect(x + w - 2, y + 1, 1, h - 2);
+    };
+
+    // Bottom-half cobblestone backdrop — matches _paintWall's top face palette
+    ctx.fillStyle = '#cdc6b3';
+    ctx.fillRect(0, midY, ts, ts - midY);
+
+    drawStone(1, midY + 1, 10, 13, '#ebe4d2', 'rgba(255,255,250,0.55)', 'rgba(80,70,55,0.4)', '#9a8d72');
+    drawStone(11, midY + 1, 10, 13, '#ede6d4', 'rgba(255,255,250,0.55)', 'rgba(80,70,55,0.4)', '#9a8d72');
+    drawStone(21, midY + 1, 10, 13, '#ebe4d2', 'rgba(255,255,250,0.55)', 'rgba(80,70,55,0.4)', '#9a8d72');
   }
 
   _paintBridge(ctx) {

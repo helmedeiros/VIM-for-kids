@@ -115,10 +115,10 @@ export class CanvasGameRenderer extends GameRenderer {
   _initSprites() {
     try {
       const ts = this._camera.tileSize;
-      const painter = new TilePainter(ts, 17);
+      const painter = new TilePainter(ts, 19);
 
       const tilesetCanvas = painter.createTilesetCanvas();
-      const tilesetSheet = new SpriteSheet(tilesetCanvas, ts, ts, 17);
+      const tilesetSheet = new SpriteSheet(tilesetCanvas, ts, ts, 19);
       this._tileRenderer = new TileRenderer(tilesetSheet, this._tileAtlas, ts);
 
       const charsCanvas = painter.createCharacterCanvas();
@@ -515,11 +515,27 @@ export class CanvasGameRenderer extends GameRenderer {
           }
         }
 
+        // Continuous-wall variant: when a wall has another wall directly to its
+        // south, this cell is "above the bottom" of a vertical run — from the
+        // 3/4 player perspective only the cobblestone top is visible. The cell
+        // at the bottom of the run (no wall to its south) keeps the default
+        // cobblestone-top + stone-front sprite so the wall's face is shown.
+        let renderName = tileName;
+        if (tileName === 'wall' && row + 1 < mapHeight) {
+          try {
+            const PositionClass = Object.getPrototypeOf(gameState.cursor.position).constructor;
+            const southTile = map.getTileAt(new PositionClass(col, row + 1));
+            if (southTile && southTile.name === 'wall') renderName = 'wall_mid';
+          } catch {
+            // leave renderName as-is
+          }
+        }
+
         // Draw tile (sprite or colored rectangle fallback)
         if (this._tileRenderer) {
-          this._tileRenderer.drawTile(ctx, tileName, screenX, screenY);
+          this._tileRenderer.drawTile(ctx, renderName, screenX, screenY);
         } else {
-          ctx.fillStyle = this._tileColors[tileName] || '#1a8fc4';
+          ctx.fillStyle = this._tileColors[renderName] || this._tileColors[tileName] || '#1a8fc4';
           ctx.fillRect(screenX, screenY, ts, ts);
         }
 
@@ -547,8 +563,41 @@ export class CanvasGameRenderer extends GameRenderer {
     // Draw cursor on top
     this._drawCursor(ctx, gameState.cursor, bounds, ts);
 
+    // Wall overhang pass — drawn AFTER the cursor so the cobblestone cap of
+    // bottom-of-run walls visually extends up into the cell to the north and
+    // occludes part of the cursor when the cursor stands directly above a wall.
+    this._drawWallOverhang(ctx, map, bounds, ts, gameState);
+
     // Draw particles on top of everything
     this._particleSystem.draw(ctx);
+  }
+
+  _drawWallOverhang(ctx, map, bounds, ts, gameState) {
+    if (!this._tileRenderer) return;
+    const mapWidth = map.width || map.size;
+    const mapHeight = map.height || map.size;
+    const PositionClass = Object.getPrototypeOf(gameState.cursor.position).constructor;
+    const tileNameAt = (x, y) => {
+      if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) return null;
+      try {
+        return map.getTileAt(new PositionClass(x, y)).name;
+      } catch {
+        return null;
+      }
+    };
+    for (let row = bounds.startY; row < bounds.endY; row++) {
+      for (let col = bounds.startX; col < bounds.endX; col++) {
+        // Cap appears above a "bottom-of-run" wall: this cell is non-wall, its
+        // south neighbor is a wall, and that wall's own south is non-wall.
+        if (tileNameAt(col, row) === 'wall') continue;
+        if (tileNameAt(col, row + 1) !== 'wall') continue;
+        if (tileNameAt(col, row + 2) === 'wall') continue;
+
+        const screenX = (col - bounds.startX) * ts;
+        const screenY = (row - bounds.startY) * ts;
+        this._tileRenderer.drawTile(ctx, 'wall_cap', screenX, screenY);
+      }
+    }
   }
 
   _drawDecorations(ctx, map, bounds, ts) {
