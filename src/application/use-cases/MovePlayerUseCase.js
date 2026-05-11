@@ -31,6 +31,11 @@ export class MovePlayerUseCase {
 
     const walkCheck = this._checkWalkability(newPosition, direction);
     if (!walkCheck.walkable) {
+      if (walkCheck.blockedBy === 'npc') {
+        // Bump-to-talk: trigger NPC dialogue at the target without moving.
+        const npcInteraction = this._triggerNPCInteractionAt(newPosition);
+        return { success: false, reason: 'npc_block', npcInteraction };
+      }
       if (walkCheck.blockedBy && typeof this._gameRenderer.showLockedGateHint === 'function') {
         this._gameRenderer.showLockedGateHint(walkCheck.blockedBy);
       }
@@ -45,6 +50,10 @@ export class MovePlayerUseCase {
         direction === 'down' ? 1 : direction === 'up' ? -1 : 0
       );
       const directCheck = this._checkWalkability(directTarget, direction);
+      if (directCheck.blockedBy === 'npc') {
+        const npcInteraction = this._triggerNPCInteractionAt(directTarget);
+        return { success: false, reason: 'npc_block', npcInteraction };
+      }
       if (directCheck.blockedBy && typeof this._gameRenderer.showLockedGateHint === 'function') {
         this._gameRenderer.showLockedGateHint(directCheck.blockedBy);
       }
@@ -118,8 +127,13 @@ export class MovePlayerUseCase {
     const newPosition = this._calculateNewPosition(currentPosition, direction);
 
     // Check if move is valid
-    if (!this._checkWalkability(newPosition, direction).walkable) {
-      return { success: false, reason: 'invalid_position' }; // Invalid move, do nothing
+    const walk = this._checkWalkability(newPosition, direction);
+    if (!walk.walkable) {
+      if (walk.blockedBy === 'npc') {
+        const npcInteraction = this._triggerNPCInteractionAt(newPosition);
+        return { success: false, reason: 'npc_block', npcInteraction };
+      }
+      return { success: false, reason: 'invalid_position' };
     }
 
     // Check if we're leaving an NPC position (fade out balloons)
@@ -156,6 +170,13 @@ export class MovePlayerUseCase {
   }
 
   _checkWalkability(position, direction = null) {
+    // NPCs are impassable. Detect them before any tile/gate checks so that
+    // bump-to-talk works even when the NPC stands on a walkable tile.
+    const npcAtTarget = this._findNPCAtPosition(position);
+    if (npcAtTarget) {
+      return { walkable: false, blockedBy: 'npc', npc: npcAtTarget };
+    }
+
     // Check gates first (they overlay map tiles and have their own walkability)
     if (typeof this._gameState.getGate === 'function') {
       const gate = this._gameState.getGate();
@@ -560,6 +581,32 @@ export class MovePlayerUseCase {
 
     // Fallback: no interaction occurred
     return { interactionOccurred: false, npc: null };
+  }
+
+  _findNPCAtPosition(position) {
+    if (typeof this._gameState.getCurrentState !== 'function') return null;
+    const state = this._gameState.getCurrentState();
+    if (!state || !Array.isArray(state.npcs)) return null;
+    return (
+      state.npcs.find(
+        (npc) =>
+          npc &&
+          Array.isArray(npc.position) &&
+          npc.position[0] === position.x &&
+          npc.position[1] === position.y
+      ) || null
+    );
+  }
+
+  _triggerNPCInteractionAt(position) {
+    // Used by bump-to-talk: dialogue fires at the NPC's cell while the cursor
+    // stays in place. Returns the interaction result so callers can include it
+    // in the response payload alongside reason: 'npc_block'.
+    if (!this._npcInteractionUseCase) {
+      return { interactionOccurred: false, npc: null };
+    }
+    const gameState = this._gameState.getCurrentState();
+    return this._npcInteractionUseCase.execute(position, gameState);
   }
 
   _checkNPCExit(currentPosition, newPosition) {
