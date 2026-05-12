@@ -783,18 +783,29 @@ export class CanvasGameRenderer extends GameRenderer {
     if (npc) {
       const npcSpriteId = this._characterSprites.hasNPC(npc.id) ? npc.id : (npc.type || '');
       if (hasCharSprites && this._characterSprites.hasNPC(npcSpriteId)) {
-        // NPCs render at the cell's exact size (no overflow) so they never
-        // spill into adjacent water tiles when standing at the edge of the
-        // playable area. The chibi design already reads at the right scale;
-        // a 1-pixel idle bob (per-NPC phase) keeps them feeling alive.
+        // Match the cursor's 1.35x overflow rendering: feet anchored at
+        // the cell's bottom edge, head spills up into the cell above.
+        // Plus a 1-pixel idle bob with per-NPC phase so adjacent NPCs
+        // don't bob in unison.
+        const scale = 1.35;
+        const destSize = ts * scale;
+        const overflowX = (destSize - ts) / 2;
+        const overflowY = destSize - ts;
         const phaseSeed = (worldX * 7 + worldY * 13) % 4;
         const bob = Math.floor(this._animationTime / 0.45 + phaseSeed) % 2 === 0 ? 0 : -1;
-        this._drawCharSprite(
-          ctx,
-          this._characterSprites.getNPCFrame(npcSpriteId),
-          screenX,
-          screenY + bob,
-          ts
+        const frame = this._charSpriteSheet.getFrame(
+          this._characterSprites.getNPCFrame(npcSpriteId)
+        );
+        ctx.drawImage(
+          frame.image,
+          frame.sx,
+          frame.sy,
+          frame.sw,
+          frame.sh,
+          screenX - overflowX,
+          screenY - overflowY + bob,
+          destSize,
+          destSize
         );
       } else {
         const symbol =
