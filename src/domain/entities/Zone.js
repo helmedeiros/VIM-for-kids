@@ -663,7 +663,10 @@ export class Zone {
             const tileType = this._getTileTypeFromName(tileTypeName);
 
             if (tileType && this._gameMap.isValidPosition(absolutePosition)) {
-              this._gameMap.setTileAt(absolutePosition, tileType);
+              const existing = this._gameMap.getTileAt(absolutePosition);
+              if (!existing || existing.name === 'water') {
+                this._gameMap.setTileAt(absolutePosition, tileType);
+              }
             }
           }
         }
