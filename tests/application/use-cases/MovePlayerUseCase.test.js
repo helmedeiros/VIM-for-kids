@@ -804,6 +804,16 @@ describe('MovePlayerUseCase', () => {
       expect(result.success).toBe(true);
     });
 
+    it('allows stepping onto an NPC that opts into walkable: true', async () => {
+      // Progression NPCs (level-end guides, scripted stops) can declare
+      // walkable: true so the cursor can occupy their cell.
+      setupNPCAt(6, 5, { walkable: true });
+      const result = await movePlayerUseCase.execute('right');
+
+      expect(mockGameState.cursor.position.x).toBe(6);
+      expect(result.success).toBe(true);
+    });
+
     it('still blocks when the NPC stands on a locked gate', async () => {
       setupNPCAt(6, 5);
       const lockedGate = {

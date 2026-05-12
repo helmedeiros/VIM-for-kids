@@ -516,6 +516,7 @@ export class BlinkingGroveZone {
           ],
           position: [74, 1], // NPC position at the gate
           requiresEscToProgress: true, // Custom flag for ESC progression
+          walkable: true, // Sits on the exit gate — must be steppable for ESC flow
         },
         {
           id: 'level_complete_spirit',
@@ -526,6 +527,7 @@ export class BlinkingGroveZone {
             'Press ESC here to advance to Level 2!',
           ],
           position: [108, 19], // Below the three secondary gates in the hidden area
+          walkable: true, // Player must reach this cell to trigger level-end ESC
         },
       ],
       events: [

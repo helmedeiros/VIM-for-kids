@@ -170,12 +170,20 @@ export class MovePlayerUseCase {
   }
 
   _checkWalkability(position, direction = null) {
-    // NPCs are impassable EXCEPT when they share a cell with a walkable
-    // (unlocked) gate. Some progression NPCs — e.g. gate_completion_spirit
-    // in Blinking Grove — sit on the zone's exit gate; the player must
-    // step onto that cell for the ESC-to-enter-hidden-area flow to work.
+    // NPCs are impassable by default — bump into them to talk. Two
+    // exceptions let the cursor step ONTO an NPC cell:
+    //   1. The NPC sits on a walkable (unlocked) gate. Progression NPCs
+    //      like gate_completion_spirit in Blinking Grove use this so the
+    //      existing ESC-to-enter-hidden-area flow keeps working.
+    //   2. The NPC declares `walkable: true` in its zone config. Used for
+    //      end-of-level guides where the player must walk through the NPC
+    //      to reach a portal.
     const npcAtTarget = this._findNPCAtPosition(position);
-    if (npcAtTarget && !this._isWalkableGateAtPosition(position)) {
+    if (
+      npcAtTarget &&
+      !npcAtTarget.walkable &&
+      !this._isWalkableGateAtPosition(position)
+    ) {
       return { walkable: false, blockedBy: 'npc', npc: npcAtTarget };
     }
 

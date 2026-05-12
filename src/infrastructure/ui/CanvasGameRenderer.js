@@ -783,12 +783,29 @@ export class CanvasGameRenderer extends GameRenderer {
     if (npc) {
       const npcSpriteId = this._characterSprites.hasNPC(npc.id) ? npc.id : (npc.type || '');
       if (hasCharSprites && this._characterSprites.hasNPC(npcSpriteId)) {
-        this._drawCharSprite(
-          ctx,
-          this._characterSprites.getNPCFrame(npcSpriteId),
-          screenX,
-          screenY,
-          ts
+        // Render the NPC at the cursor's overflow scale (1.35x, feet
+        // anchored to the cell bottom) AND offset the y position with a
+        // slow vertical bob so the NPC feels alive.
+        const scale = 1.35;
+        const destSize = ts * scale;
+        const overflowX = (destSize - ts) / 2;
+        const overflowY = destSize - ts;
+        // Per-NPC stable phase so adjacent NPCs don't bob in unison.
+        const phaseSeed = (worldX * 7 + worldY * 13) % 4;
+        const bob = Math.floor(this._animationTime / 0.45 + phaseSeed) % 2 === 0 ? 0 : -1;
+        const frame = this._charSpriteSheet.getFrame(
+          this._characterSprites.getNPCFrame(npcSpriteId)
+        );
+        ctx.drawImage(
+          frame.image,
+          frame.sx,
+          frame.sy,
+          frame.sw,
+          frame.sh,
+          screenX - overflowX,
+          screenY - overflowY + bob,
+          destSize,
+          destSize
         );
       } else {
         const symbol =
