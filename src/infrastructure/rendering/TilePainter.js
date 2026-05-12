@@ -1221,360 +1221,300 @@ export class TilePainter {
 
   // ===== NPC PAINTERS (RPG sprite-character style) =====
 
-  _paintCaretSpirit(ctx) {
-    const ts = this._ts;
-    // Flame body with 3D glow layers
-    const layers = [
-      { y: ts - 6, rx: 10, ry: 12, color: '#1a6060' },
-      { y: ts - 8, rx: 8, ry: 11, color: '#28a0a0' },
-      { y: ts - 10, rx: 6, ry: 9, color: '#40d8d8' },
-      { y: ts - 12, rx: 4, ry: 6, color: '#90f0f0' },
-    ];
-    layers.forEach(({ y, rx, ry, color }) => {
-      const g = ctx.createRadialGradient(ts / 2, y - 2, 0, ts / 2, y, Math.max(rx, ry));
-      g.addColorStop(0, color);
-      g.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.ellipse(ts / 2, y, rx, ry, 0, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    // Flame tip
-    ctx.fillStyle = '#e0ffff';
+  _paintChibiNPC(ctx, palette) {
+    // Shared chibi painter for robed/hooded NPCs. Mirrors the cursor's
+    // proportions — round hood-or-hair dome, small skin face, compact
+    // robed body, short legs, light shoes. `palette` provides theme
+    // colors; `prop` is an optional callback for NPC-specific accessories
+    // (caret glow, scroll, quill, etc.).
+    const {
+      hair,
+      hairHi,
+      skin = '#fad7b0',
+      skinShadow = '#e6b88b',
+      robe,
+      robeHi,
+      robeTrim = '#f4ecd8',
+      eyes = '#1a1d3a',
+      shoe = '#f0ece0',
+      prop,
+    } = palette;
+
+    // Drop shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
     ctx.beginPath();
-    ctx.moveTo(ts / 2, 2);
-    ctx.quadraticCurveTo(ts / 2 + 4, 10, ts / 2, 14);
-    ctx.quadraticCurveTo(ts / 2 - 4, 10, ts / 2, 2);
+    ctx.ellipse(16, 29, 6, 1.5, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Eyes
-    ctx.fillStyle = '#e0ffff';
-    ctx.fillRect(12, 18, 3, 3);
-    ctx.fillRect(19, 18, 3, 3);
-    ctx.fillStyle = '#0a3030';
-    ctx.fillRect(13, 19, 1, 1);
-    ctx.fillRect(20, 19, 1, 1);
-    // Outline
-    ctx.strokeStyle = '#0a4040';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(ts / 2, 1);
-    ctx.quadraticCurveTo(ts - 4, ts / 2, ts - 6, ts - 4);
-    ctx.quadraticCurveTo(ts / 2, ts, 6, ts - 4);
-    ctx.quadraticCurveTo(4, ts / 2, ts / 2, 1);
-    ctx.stroke();
+
+    // Hair / hood — chibi round dome
+    ctx.fillStyle = hair;
+    ctx.fillRect(12, 3, 8, 1);
+    ctx.fillRect(11, 4, 10, 8);
+    ctx.fillRect(10, 6, 1, 5);
+    ctx.fillRect(21, 6, 1, 5);
+    if (hairHi) {
+      ctx.fillStyle = hairHi;
+      ctx.fillRect(13, 4, 2, 1);
+      ctx.fillRect(12, 5, 1, 1);
+    }
+
+    // Face (south view only — NPCs always face the player here)
+    ctx.fillStyle = skin;
+    ctx.fillRect(12, 11, 8, 5);
+    ctx.fillStyle = skinShadow;
+    ctx.fillRect(12, 15, 8, 1);
+    ctx.fillStyle = hair;
+    ctx.fillRect(11, 11, 1, 4);
+    ctx.fillRect(20, 11, 1, 4);
+    ctx.fillRect(13, 11, 6, 1);
+    ctx.fillStyle = eyes;
+    ctx.fillRect(13, 13, 1, 1);
+    ctx.fillRect(18, 13, 1, 1);
+
+    // Robe body
+    ctx.fillStyle = robe;
+    ctx.fillRect(11, 16, 10, 6);
+    if (robeHi) {
+      ctx.fillStyle = robeHi;
+      ctx.fillRect(11, 16, 10, 1);
+    }
+    if (robeTrim) {
+      ctx.fillStyle = robeTrim;
+      ctx.fillRect(11, 19, 10, 1);
+    }
+    // Sleeve hands at sides
+    ctx.fillStyle = skin;
+    ctx.fillRect(10, 17, 1, 3);
+    ctx.fillRect(21, 17, 1, 3);
+    // Robe hem flares for grounded look
+    ctx.fillStyle = robe;
+    ctx.fillRect(10, 22, 12, 3);
+    // Shoes
+    ctx.fillStyle = shoe;
+    ctx.fillRect(12, 25, 3, 1);
+    ctx.fillRect(17, 25, 3, 1);
+
+    if (typeof prop === 'function') prop(ctx);
+  }
+
+  _paintCaretSpirit(ctx) {
+    // Chibi spirit: cyan hood with a soft glow halo and a caret rune
+    // floating above the head. Robe matches the original teal palette.
+    this._paintChibiNPC(ctx, {
+      hair: '#28a0a0',
+      hairHi: '#5ce0e0',
+      skin: '#e8fafa',
+      skinShadow: '#a8d8d8',
+      robe: '#1a6060',
+      robeHi: '#28a0a0',
+      robeTrim: '#90f0f0',
+      eyes: '#0a3030',
+      prop: (c) => {
+        const aura = c.createRadialGradient(16, 6, 0, 16, 6, 10);
+        aura.addColorStop(0, 'rgba(144, 240, 240, 0.4)');
+        aura.addColorStop(1, 'rgba(144, 240, 240, 0)');
+        c.fillStyle = aura;
+        c.fillRect(4, -2, 24, 14);
+        c.fillStyle = '#e0ffff';
+        c.fillRect(16, 0, 1, 1);
+        c.fillRect(15, 1, 1, 1);
+        c.fillRect(17, 1, 1, 1);
+        c.fillRect(14, 2, 1, 1);
+        c.fillRect(18, 2, 1, 1);
+      },
+    });
   }
 
   _paintSyntaxWisp(ctx) {
-    const ts = this._ts;
-    // Ethereal body
-    const body = ctx.createRadialGradient(ts / 2, ts / 2, 0, ts / 2, ts / 2, 14);
-    body.addColorStop(0, '#e8d8f0');
-    body.addColorStop(0.4, '#c8a0e0');
-    body.addColorStop(0.8, '#a070c0');
-    body.addColorStop(1, 'rgba(100,50,140,0)');
-    ctx.fillStyle = body;
-    ctx.beginPath();
-    ctx.arc(ts / 2, ts / 2, 14, 0, Math.PI * 2);
-    ctx.fill();
-    // Wispy tendrils
-    ctx.strokeStyle = 'rgba(180,140,220,0.5)';
-    ctx.lineWidth = 2;
-    [[0, -3], [2, 2], [-2, 1]].forEach(([dx, dy]) => {
-      ctx.beginPath();
-      ctx.moveTo(ts / 2 + dx, ts / 2 + 8 + dy);
-      ctx.quadraticCurveTo(ts / 2 + dx + 4, ts - 2, ts / 2 + dx - 2, ts + 2);
-      ctx.stroke();
+    // Chibi wisp: purple hood with a small tilde rune floating above.
+    this._paintChibiNPC(ctx, {
+      hair: '#5a3070',
+      hairHi: '#a070c0',
+      robe: '#4a2868',
+      robeHi: '#7848a0',
+      robeTrim: '#e6e6fa',
+      eyes: '#1a0830',
+      prop: (c) => {
+        const aura = c.createRadialGradient(16, 6, 0, 16, 6, 9);
+        aura.addColorStop(0, 'rgba(200, 160, 230, 0.4)');
+        aura.addColorStop(1, 'rgba(200, 160, 230, 0)');
+        c.fillStyle = aura;
+        c.fillRect(4, -2, 24, 14);
+        c.fillStyle = '#e6e6fa';
+        // small tilde ~ floating
+        c.fillRect(14, 1, 1, 1);
+        c.fillRect(15, 0, 1, 1);
+        c.fillRect(16, 1, 1, 1);
+        c.fillRect(17, 2, 1, 1);
+        c.fillRect(18, 1, 1, 1);
+      },
     });
-    // Tilde symbol
-    ctx.fillStyle = '#e6e6fa';
-    ctx.font = 'bold 14px monospace';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('~', ts / 2, ts / 2 - 1);
-    // Outline
-    ctx.strokeStyle = '#4a2868';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(ts / 2, ts / 2, 12, 0, Math.PI * 2);
-    ctx.stroke();
   }
 
   _paintBugKing(ctx) {
-    const ts = this._ts;
-    // Body (dark red robe)
-    const robe = ctx.createLinearGradient(7, 12, ts - 7, 12);
-    robe.addColorStop(0, '#701010');
-    robe.addColorStop(0.5, '#b02020');
-    robe.addColorStop(1, '#801515');
-    ctx.fillStyle = robe;
-    ctx.fillRect(7, 12, ts - 14, 16);
-    ctx.strokeStyle = '#401010';
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(7, 12, ts - 14, 16);
-
-    // Crown
-    ctx.fillStyle = '#c02020';
-    ctx.beginPath();
-    ctx.moveTo(7, 12);
-    ctx.lineTo(7, 5);
-    ctx.lineTo(11, 10);
-    ctx.lineTo(16, 2);
-    ctx.lineTo(21, 10);
-    ctx.lineTo(25, 5);
-    ctx.lineTo(25, 12);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = '#401010';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Gold trim
-    ctx.fillStyle = '#ffd700';
-    ctx.fillRect(7, 12, ts - 14, 2);
-    // Jewels
-    [[9, 5], [16, 2], [23, 5]].forEach(([jx, jy]) => {
-      this._sphere(ctx, jx, jy, 2.5, '#ffd700', '#fff8b0', '#b8860b');
+    // Chibi villain in a dark red robe wearing a golden crown.
+    this._paintChibiNPC(ctx, {
+      hair: '#401010',
+      hairHi: '#701010',
+      robe: '#801515',
+      robeHi: '#b02020',
+      robeTrim: '#ffd700',
+      eyes: '#ffff00',
+      prop: (c) => {
+        // Crown spikes above the head
+        c.fillStyle = '#ffd700';
+        c.fillRect(10, 2, 12, 2);
+        c.fillRect(11, 1, 1, 1);
+        c.fillRect(15, 0, 2, 1);
+        c.fillRect(20, 1, 1, 1);
+        c.fillRect(13, 1, 1, 1);
+        c.fillRect(18, 1, 1, 1);
+        // Jewels on the crown
+        c.fillStyle = '#ff3030';
+        c.fillRect(15, 2, 2, 1);
+        c.fillStyle = '#c02020';
+        c.fillRect(11, 3, 1, 1);
+        c.fillRect(20, 3, 1, 1);
+      },
     });
-
-    // Eyes
-    ctx.fillStyle = '#ffff00';
-    ctx.fillRect(11, 17, 4, 3);
-    ctx.fillRect(19, 17, 4, 3);
-    ctx.fillStyle = '#400000';
-    ctx.fillRect(12, 18, 2, 1);
-    ctx.fillRect(20, 18, 2, 1);
-
-    // Shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    ctx.beginPath();
-    ctx.ellipse(ts / 2, ts - 2, 10, 3, 0, 0, Math.PI * 2);
-    ctx.fill();
   }
 
   _paintCaretStone(ctx) {
-    const ts = this._ts;
-    // 3D rock body
-    this._sphere(ctx, ts / 2, ts / 2 + 2, 13, '#788870', '#98a890', '#586858');
-    // Moss patches
-    ctx.fillStyle = 'rgba(60, 140, 50, 0.6)';
-    ctx.beginPath();
-    ctx.arc(8, 8, 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(25, 10, 3, 0, Math.PI * 2);
-    ctx.fill();
-    // Ancient face carved in stone
-    ctx.fillStyle = '#405040';
-    ctx.fillRect(11, 13, 3, 4);
-    ctx.fillRect(20, 13, 3, 4);
-    ctx.fillRect(13, 21, 8, 2);
-    // Caret symbol on forehead
-    ctx.fillStyle = '#a0c8a0';
-    ctx.font = 'bold 10px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('^', ts / 2, 10);
+    // Chibi stone-monk: grey-green hooded figure with a caret rune on the
+    // chest and a tiny moss patch on the shoulder. Keeps the ancient/mossy
+    // identity while matching the cursor's proportions.
+    this._paintChibiNPC(ctx, {
+      hair: '#586858',
+      hairHi: '#788870',
+      robe: '#788870',
+      robeHi: '#98a890',
+      robeTrim: '#a0c8a0',
+      skin: '#a8b8a0',
+      skinShadow: '#788870',
+      eyes: '#202820',
+      prop: (c) => {
+        // Caret rune on chest
+        c.fillStyle = '#a0c8a0';
+        c.fillRect(16, 17, 1, 1);
+        c.fillRect(15, 18, 1, 1);
+        c.fillRect(17, 18, 1, 1);
+        // Moss patch on the hood
+        c.fillStyle = 'rgba(60, 140, 50, 0.7)';
+        c.fillRect(11, 5, 2, 1);
+        c.fillRect(12, 6, 1, 1);
+      },
+    });
   }
 
   _paintMazeScribe(ctx) {
-    const ts = this._ts;
-    // Body (robed figure)
-    const robe = ctx.createLinearGradient(8, 8, ts - 8, 8);
-    robe.addColorStop(0, '#8b5e3c');
-    robe.addColorStop(0.5, '#b07848');
-    robe.addColorStop(1, '#8b5e3c');
-    ctx.fillStyle = robe;
-    // Robe shape
-    ctx.beginPath();
-    ctx.moveTo(ts / 2, 4);
-    ctx.quadraticCurveTo(ts - 6, 10, ts - 6, ts - 4);
-    ctx.lineTo(6, ts - 4);
-    ctx.quadraticCurveTo(6, 10, ts / 2, 4);
-    ctx.fill();
-    ctx.strokeStyle = '#4a2e18';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    // Scroll
-    ctx.fillStyle = '#f5deb3';
-    ctx.fillRect(18, 14, 8, 12);
-    ctx.fillStyle = '#8b4513';
-    ctx.fillRect(17, 13, 2, 14);
-    ctx.fillRect(26, 13, 2, 14);
-    // Face
-    ctx.fillStyle = '#ffe0b0';
-    ctx.beginPath();
-    ctx.arc(ts / 2, 10, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#4a2e18';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.fillStyle = '#2a1808';
-    ctx.fillRect(14, 9, 2, 2);
-    ctx.fillRect(18, 9, 2, 2);
-    // Shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.2)';
-    ctx.beginPath();
-    ctx.ellipse(ts / 2, ts - 2, 10, 3, 0, 0, Math.PI * 2);
-    ctx.fill();
+    // Chibi scribe with a brown hooded robe and a small parchment scroll
+    // held in front of the chest.
+    this._paintChibiNPC(ctx, {
+      hair: '#4a2e18',
+      hairHi: '#7a5238',
+      robe: '#6e4823',
+      robeHi: '#8b5e3c',
+      robeTrim: '#3a1f0c',
+      eyes: '#2a1808',
+      prop: (c) => {
+        // Scroll held at the chest
+        c.fillStyle = '#f5deb3';
+        c.fillRect(13, 17, 6, 4);
+        // Rolled ends
+        c.fillStyle = '#8b4513';
+        c.fillRect(12, 17, 1, 4);
+        c.fillRect(19, 17, 1, 4);
+        // Faint ink lines on the scroll
+        c.fillStyle = 'rgba(74,46,24,0.5)';
+        c.fillRect(14, 18, 4, 1);
+        c.fillRect(14, 20, 3, 1);
+      },
+    });
   }
 
   _paintDeletionEcho(ctx) {
-    const ts = this._ts;
-    // Ghost body
-    ctx.fillStyle = 'rgba(160, 180, 180, 0.7)';
-    ctx.beginPath();
-    ctx.arc(ts / 2, 12, 10, Math.PI, 0);
-    ctx.lineTo(ts / 2 + 10, 24);
-    // Wavy bottom
-    for (let x = ts / 2 + 10; x >= ts / 2 - 10; x -= 4) {
-      ctx.lineTo(x, x % 8 < 4 ? 27 : 23);
-    }
-    ctx.closePath();
-    ctx.fill();
-    // Outline
-    ctx.strokeStyle = 'rgba(80, 100, 100, 0.8)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    // Eyes
-    ctx.fillStyle = '#ff3030';
-    ctx.beginPath();
-    ctx.arc(13, 12, 2.5, 0, Math.PI * 2);
-    ctx.arc(21, 12, 2.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#800000';
-    ctx.beginPath();
-    ctx.arc(13, 12, 1, 0, Math.PI * 2);
-    ctx.arc(21, 12, 1, 0, Math.PI * 2);
-    ctx.fill();
-    // Mouth
-    ctx.fillStyle = 'rgba(60, 80, 80, 0.5)';
-    ctx.beginPath();
-    ctx.ellipse(ts / 2 + 1, 18, 3, 2, 0, 0, Math.PI * 2);
-    ctx.fill();
+    // Chibi ghost: ghostly grey hood, pale skin, ghostly body. Red eyes
+    // keep the spooky identity.
+    this._paintChibiNPC(ctx, {
+      hair: '#6e7878',
+      hairHi: '#a0b0b0',
+      skin: '#c8d4d4',
+      skinShadow: '#90a0a0',
+      robe: '#4a5858',
+      robeHi: '#788888',
+      robeTrim: '#a8b8b8',
+      eyes: '#ff3030',
+    });
   }
 
   _paintInsertScribe(ctx) {
-    const ts = this._ts;
-    // Body (blue robed figure)
-    const robe = ctx.createLinearGradient(8, 8, ts - 8, 8);
-    robe.addColorStop(0, '#2a4aa0');
-    robe.addColorStop(0.5, '#4169e1');
-    robe.addColorStop(1, '#2a4aa0');
-    ctx.fillStyle = robe;
-    ctx.beginPath();
-    ctx.moveTo(ts / 2, 4);
-    ctx.quadraticCurveTo(ts - 6, 10, ts - 6, ts - 4);
-    ctx.lineTo(6, ts - 4);
-    ctx.quadraticCurveTo(6, 10, ts / 2, 4);
-    ctx.fill();
-    ctx.strokeStyle = '#1a2868';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    // Quill in hand
-    ctx.strokeStyle = '#4a80ff';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(22, 10);
-    ctx.lineTo(26, 22);
-    ctx.stroke();
-    ctx.fillStyle = '#8b4513';
-    ctx.fillRect(25, 22, 3, 3);
-    // Face
-    ctx.fillStyle = '#ffe0b0';
-    ctx.beginPath();
-    ctx.arc(ts / 2, 10, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#1a2868';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.fillStyle = '#1a1a40';
-    ctx.fillRect(14, 9, 2, 2);
-    ctx.fillRect(18, 9, 2, 2);
-    // Shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.2)';
-    ctx.beginPath();
-    ctx.ellipse(ts / 2, ts - 2, 10, 3, 0, 0, Math.PI * 2);
-    ctx.fill();
+    // Chibi scribe with a blue hooded robe and a small quill poking up
+    // from the side, ink tip at the top.
+    this._paintChibiNPC(ctx, {
+      hair: '#1a2868',
+      hairHi: '#3a5dc0',
+      robe: '#2a4aa0',
+      robeHi: '#4169e1',
+      robeTrim: '#a8c8ff',
+      eyes: '#1a1a40',
+      prop: (c) => {
+        // Quill shaft — light blue line angled up-right
+        c.fillStyle = '#a8c8ff';
+        c.fillRect(22, 15, 1, 1);
+        c.fillRect(22, 14, 1, 1);
+        c.fillRect(23, 13, 1, 1);
+        c.fillRect(23, 12, 1, 1);
+        c.fillRect(24, 11, 1, 1);
+        c.fillRect(24, 10, 1, 1);
+        // Feather plume
+        c.fillStyle = '#f4ecd8';
+        c.fillRect(25, 9, 1, 2);
+        c.fillRect(26, 8, 1, 3);
+        c.fillRect(25, 7, 2, 1);
+      },
+    });
   }
 
   _paintPracticeBuddy(ctx) {
-    const ts = this._ts;
-    const cx = ts / 2, cy = ts / 2;
-
-    // Bright yellow background circle for visibility
-    ctx.fillStyle = '#ffe040';
-    ctx.beginPath();
-    ctx.arc(cx, cy, 15, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#1a1a2e';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Star body — vivid hot pink
-    ctx.fillStyle = '#ff1493';
-    ctx.beginPath();
-    for (let i = 0; i < 10; i++) {
-      const angle = (i * Math.PI) / 5 - Math.PI / 2;
-      const r = i % 2 === 0 ? 12 : 5;
-      const x = cx + Math.cos(angle) * r;
-      const y = cy + Math.sin(angle) * r;
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    }
-    ctx.closePath();
-    ctx.fill();
-    // Dark outline
-    ctx.strokeStyle = '#1a1a2e';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Face — white eyes with dark pupils
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(cx - 3, cy - 1, 2.5, 0, Math.PI * 2);
-    ctx.arc(cx + 3, cy - 1, 2.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#1a1a2e';
-    ctx.beginPath();
-    ctx.arc(cx - 2.5, cy - 0.5, 1.2, 0, Math.PI * 2);
-    ctx.arc(cx + 3.5, cy - 0.5, 1.2, 0, Math.PI * 2);
-    ctx.fill();
-    // Smile
-    ctx.strokeStyle = '#1a1a2e';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(cx, cy + 1, 3, 0.2, Math.PI - 0.2);
-    ctx.stroke();
+    // Cheerful chibi guide: bright yellow hood, pink shirt, star badge.
+    this._paintChibiNPC(ctx, {
+      hair: '#d8a000',
+      hairHi: '#ffe040',
+      robe: '#ff5090',
+      robeHi: '#ff80b0',
+      robeTrim: '#ffe040',
+      eyes: '#1a1a2e',
+      prop: (c) => {
+        // Pink star badge on the chest
+        c.fillStyle = '#ff1493';
+        c.fillRect(15, 17, 2, 1);
+        c.fillRect(14, 18, 4, 1);
+        c.fillRect(13, 19, 2, 1);
+        c.fillRect(17, 19, 2, 1);
+        c.fillStyle = '#ffe040';
+        c.fillRect(15, 18, 2, 1);
+      },
+    });
   }
 
   _paintMirrorSprite(ctx) {
-    const ts = this._ts;
-    const cx = ts / 2, cy = ts / 2 + 2;
-
-    // Droplet body
-    ctx.beginPath();
-    ctx.moveTo(cx, 3);
-    ctx.quadraticCurveTo(cx + 14, cy, cx, ts - 4);
-    ctx.quadraticCurveTo(cx - 14, cy, cx, 3);
-    ctx.closePath();
-    const dropG = ctx.createRadialGradient(cx - 3, cy - 2, 0, cx, cy, 14);
-    dropG.addColorStop(0, '#d0e8ff');
-    dropG.addColorStop(0.5, '#88b0d8');
-    dropG.addColorStop(1, '#5080a8');
-    ctx.fillStyle = dropG;
-    ctx.fill();
-    // Outline
-    ctx.strokeStyle = '#284060';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    // Specular
-    ctx.fillStyle = 'rgba(240,250,255,0.6)';
-    ctx.beginPath();
-    ctx.ellipse(cx - 4, cy - 4, 3, 4, -0.4, 0, Math.PI * 2);
-    ctx.fill();
-    // Eyes
-    ctx.fillStyle = '#1a3050';
-    ctx.beginPath();
-    ctx.arc(cx - 3, cy, 1.5, 0, Math.PI * 2);
-    ctx.arc(cx + 3, cy, 1.5, 0, Math.PI * 2);
-    ctx.fill();
+    // Chibi water sprite: light blue hood and robe with a teardrop emblem.
+    this._paintChibiNPC(ctx, {
+      hair: '#5080a8',
+      hairHi: '#88b0d8',
+      robe: '#88b0d8',
+      robeHi: '#d0e8ff',
+      robeTrim: '#284060',
+      eyes: '#1a3050',
+      prop: (c) => {
+        // Teardrop on chest
+        c.fillStyle = '#d0e8ff';
+        c.fillRect(16, 17, 1, 1);
+        c.fillRect(15, 18, 3, 1);
+        c.fillRect(16, 19, 1, 1);
+        c.fillStyle = '#ffffff';
+        c.fillRect(15, 18, 1, 1);
+      },
+    });
   }
 }

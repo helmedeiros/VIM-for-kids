@@ -167,34 +167,24 @@ describe('TilePainter', () => {
       expect(mockCtx.fillRect).toHaveBeenCalled();
     });
 
-    it('paints bug king with crown, jewels, and eyes', () => {
-      painter._paintBugKing(mockCtx);
-      expect(mockCtx.beginPath).toHaveBeenCalled();
-      expect(mockCtx.fillRect).toHaveBeenCalled();
-      expect(mockCtx.arc).toHaveBeenCalled();
-    });
-
-    it('paints deletion echo ghost with wavy bottom', () => {
-      painter._paintDeletionEcho(mockCtx);
-      expect(mockCtx.arc).toHaveBeenCalled();
-      expect(mockCtx.lineTo).toHaveBeenCalled();
-    });
-
-    it('paints maze scribe as robed figure with scroll', () => {
-      painter._paintMazeScribe(mockCtx);
-      expect(mockCtx.quadraticCurveTo).toHaveBeenCalled();
-      expect(mockCtx.fillRect).toHaveBeenCalled();
-    });
-
-    it('paints practice buddy as star with face', () => {
-      painter._paintPracticeBuddy(mockCtx);
-      expect(mockCtx.lineTo).toHaveBeenCalled();
-      expect(mockCtx.arc).toHaveBeenCalled();
-    });
-
-    it('paints mirror sprite as droplet with specular', () => {
-      painter._paintMirrorSprite(mockCtx);
-      expect(mockCtx.quadraticCurveTo).toHaveBeenCalled();
+    // All NPC painters now route through the shared _paintChibiNPC, so we
+    // just confirm that each delegates: draws many fillRects (body parts)
+    // and an ellipse for the drop shadow.
+    it.each([
+      ['bug king', '_paintBugKing'],
+      ['deletion echo', '_paintDeletionEcho'],
+      ['maze scribe', '_paintMazeScribe'],
+      ['insert scribe', '_paintInsertScribe'],
+      ['practice buddy', '_paintPracticeBuddy'],
+      ['mirror sprite', '_paintMirrorSprite'],
+      ['syntax wisp', '_paintSyntaxWisp'],
+      ['caret stone', '_paintCaretStone'],
+      ['caret spirit', '_paintCaretSpirit'],
+    ])('paints %s as a chibi NPC', (_label, method) => {
+      mockCtx.fillRect.mockClear();
+      mockCtx.ellipse.mockClear();
+      painter[method](mockCtx);
+      expect(mockCtx.fillRect.mock.calls.length).toBeGreaterThan(10);
       expect(mockCtx.ellipse).toHaveBeenCalled();
     });
   });
