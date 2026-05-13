@@ -85,6 +85,65 @@ describe('Decoration', () => {
     });
   });
 
+  describe('blocks(position)', () => {
+    it('returns true for every occupied cell when collisionFootprintH is omitted', () => {
+      const d = new Decoration({
+        regionName: 'tree_2x2',
+        anchor: new Position(5, 5),
+        footprintW: 2,
+        footprintH: 2,
+        blocking: true,
+      });
+
+      expect(d.blocks(new Position(5, 5))).toBe(true);
+      expect(d.blocks(new Position(6, 5))).toBe(true);
+      expect(d.blocks(new Position(5, 6))).toBe(true);
+      expect(d.blocks(new Position(6, 6))).toBe(true);
+    });
+
+    it('returns false for every cell when blocking is false', () => {
+      const d = new Decoration({
+        regionName: 'flowers',
+        anchor: new Position(5, 5),
+        footprintW: 2,
+        footprintH: 2,
+      });
+      expect(d.blocks(new Position(5, 5))).toBe(false);
+      expect(d.blocks(new Position(6, 6))).toBe(false);
+    });
+
+    it('with collisionFootprintH=1 only the bottom row of a 2x2 blocks', () => {
+      const d = new Decoration({
+        regionName: 'rock_2x2',
+        anchor: new Position(10, 4),
+        footprintW: 2,
+        footprintH: 2,
+        blocking: true,
+        collisionFootprintH: 1,
+      });
+
+      // Top row is visually occupied but NOT blocking — player can pass.
+      expect(d.occupies(new Position(10, 4))).toBe(true);
+      expect(d.occupies(new Position(11, 4))).toBe(true);
+      expect(d.blocks(new Position(10, 4))).toBe(false);
+      expect(d.blocks(new Position(11, 4))).toBe(false);
+
+      // Bottom row blocks.
+      expect(d.blocks(new Position(10, 5))).toBe(true);
+      expect(d.blocks(new Position(11, 5))).toBe(true);
+    });
+
+    it('exposes baseY = anchor.y + footprintH - 1 for render-order sorting', () => {
+      const d = new Decoration({
+        regionName: 'rock_2x2',
+        anchor: new Position(0, 4),
+        footprintW: 2,
+        footprintH: 2,
+      });
+      expect(d.baseY).toBe(5);
+    });
+  });
+
   describe('overlapsBounds', () => {
     const d = new Decoration({
       regionName: 'tree',

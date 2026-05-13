@@ -16,8 +16,10 @@ describe('TilesetRegions', () => {
     ['dirt', { sx: 32, sy: 2576, sw: 16, sh: 16 }],
     ['sand', { sx: 40, sy: 2208, sw: 16, sh: 16 }],
     ['stone', { sx: 130, sy: 3184, sw: 16, sh: 16 }],
-    // Chunky pale-green boulder from the big-rocks row of the rocks page.
-    ['rock', { sx: 0, sy: 6272, sw: 32, sh: 32 }],
+    // Small clean grey rock — 32x32 single-cell sprite for `R` tiles.
+    ['rock', { sx: 64, sy: 6240, sw: 32, sh: 32 }],
+    // Chunky pale-green boulder — drawn as a 2x2 decoration.
+    ['rock_2x2', { sx: 0, sy: 6272, sw: 32, sh: 32 }],
     ['tree_2x2', { sx: 0, sy: 0, sw: 64, sh: 64 }],
   ])('exports the %s region', (name, region) => {
     expect(TILESET_REGIONS[name]).toEqual(region);
