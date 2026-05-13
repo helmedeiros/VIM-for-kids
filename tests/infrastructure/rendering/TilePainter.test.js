@@ -44,7 +44,7 @@ describe('TilePainter', () => {
     it('uses default tile size and columns', () => {
       const p = new TilePainter();
       expect(p._ts).toBe(32);
-      expect(p._columns).toBe(27);
+      expect(p._columns).toBe(28);
     });
 
     it('accepts custom tile size and columns', () => {
@@ -66,9 +66,9 @@ describe('TilePainter', () => {
       expect(canvas.height).toBe(32);
     });
 
-    it('paints all 27 tile types', () => {
+    it('paints all 28 tile types', () => {
       painter.createTilesetCanvas();
-      expect(mockCtx.drawImage).toHaveBeenCalledTimes(27);
+      expect(mockCtx.drawImage).toHaveBeenCalledTimes(28);
     });
 
     it('positions tiles sequentially', () => {
@@ -124,10 +124,30 @@ describe('TilePainter', () => {
       expect(mockCtx.createRadialGradient).toHaveBeenCalled();
     });
 
+    it('paints cobblestone with rounded stones and grout lines', () => {
+      painter._paintCobblestone(mockCtx);
+      expect(mockCtx.fillRect).toHaveBeenCalled();
+      expect(mockCtx.arc).toHaveBeenCalled();
+    });
+
     it('paints stone with brick pattern and per-brick shading', () => {
       painter._paintStone(mockCtx);
       expect(mockCtx.createLinearGradient).toHaveBeenCalled();
       expect(mockCtx.fillRect).toHaveBeenCalled();
+    });
+
+    it('paints rock as an irregular pebble silhouette, not a smooth sphere', () => {
+      mockCtx.lineTo.mockClear();
+      mockCtx.closePath.mockClear();
+      painter._paintRock(mockCtx);
+      // Natural pebble: silhouette is an 8-vertex polygon drawn twice (outline
+      // + body) plus a 5-vertex highlight — so at least (7+7+4) = 18 lineTo
+      // segments. The old smooth-sphere body had 8 lineTos for facet overlays.
+      expect(mockCtx.lineTo.mock.calls.length).toBeGreaterThanOrEqual(15);
+      expect(mockCtx.closePath).toHaveBeenCalled();
+      // Drop shadow + body fill still required
+      expect(mockCtx.ellipse).toHaveBeenCalled();
+      expect(mockCtx.fill).toHaveBeenCalled();
     });
 
     it('paints wall with 3D depth faces', () => {

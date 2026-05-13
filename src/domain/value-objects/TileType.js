@@ -43,3 +43,4 @@ TileType.RAMP_RIGHT = new TileType('ramp_right', true);
 TileType.RAMP_LEFT = new TileType('ramp_left', true);
 
 TileType.ROCK = new TileType('rock', false);
+TileType.COBBLESTONE = new TileType('cobblestone', true);

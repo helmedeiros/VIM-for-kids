@@ -37,6 +37,10 @@ describe('TileAtlas', () => {
       expect(atlas.getFrameIndex('ramp_left')).toBe(14);
     });
 
+    it('returns correct index for cobblestone', () => {
+      expect(atlas.getFrameIndex('cobblestone')).toBe(24);
+    });
+
     it('falls back to water for unknown tile', () => {
       expect(atlas.getFrameIndex('lava')).toBe(0);
     });
@@ -56,15 +60,15 @@ describe('TileAtlas', () => {
   });
 
   describe('tileCount', () => {
-    it('returns 24 tile types', () => {
-      expect(atlas.tileCount).toBe(24);
+    it('returns 25 tile types', () => {
+      expect(atlas.tileCount).toBe(25);
     });
   });
 
   describe('getAllMappings', () => {
     it('returns a copy of mappings', () => {
       const mappings = atlas.getAllMappings();
-      expect(Object.keys(mappings)).toHaveLength(24);
+      expect(Object.keys(mappings)).toHaveLength(25);
       mappings.water = 999;
       expect(atlas.getFrameIndex('water')).toBe(0);
     });
