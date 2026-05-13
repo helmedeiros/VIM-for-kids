@@ -185,9 +185,9 @@ export class BlinkingGroveZone {
               // upper half (collisionFootprintH: 1). renderScale shrinks
               // the drawn sprite by 20% so the boulder reads chunky but
               // not oversized against the 32x32 grid.
-              { regionName: 'rock_2x2', position: [2, 11], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1, renderScale: 0.8 },
-              { regionName: 'rock_2x2', position: [26, 11], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1, renderScale: 0.8 },
-              { regionName: 'rock_2x2', position: [20, 4], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1, renderScale: 0.8 },
+              { regionName: 'rock_2x2', position: [2, 11], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1, renderScale: 0.7 },
+              { regionName: 'rock_2x2', position: [26, 11], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1, renderScale: 0.7 },
+              { regionName: 'rock_2x2', position: [20, 4], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1, renderScale: 0.7 },
             ],
             textLabels: [
               // "vim Total Rulez!!!" text in the hidden area (centered in the wider area)

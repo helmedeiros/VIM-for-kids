@@ -14,14 +14,11 @@ export const TILESET_REGIONS = {
   dirt: { sx: 32, sy: 2576, sw: 16, sh: 16 },
   sand: { sx: 40, sy: 2208, sw: 16, sh: 16 },
   stone: { sx: 130, sy: 3184, sw: 16, sh: 16 },
-  // Small clean grey rock — single 32x32 cell from row 1 of the rocks
-  // page, third from the left. Used for the inline `R` tiles that
-  // scatter across the hidden-area floor.
-  rock: { sx: 64, sy: 6240, sw: 32, sh: 32 },
-  // Chunky pale-green boulder — first cell of the big-rocks row of the
-  // rocks page. Drawn as a 2x2 decoration so it's a true 64x64 obstacle
-  // on the map; transparent background, composes over whatever floor
-  // sits beneath it.
+  // Inline `R` tiles share the same chunky pale-green boulder art as
+  // the 2x2 decoration — drawn at a single 32x32 cell — so every rock
+  // in the hidden area reads as the same kind of stone, just at two
+  // different sizes (single-cell pebble vs. 2x2 boulder).
+  rock: { sx: 0, sy: 6272, sw: 32, sh: 32 },
   rock_2x2: { sx: 0, sy: 6272, sw: 32, sh: 32 },
   // Multi-tile decorations (drawn via TileRenderer.drawDecoration, not drawTile).
   // 2x2 footprint, 64x64 source = 1:1 with destination at renderSize 32 → crisp pixels.
