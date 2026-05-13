@@ -393,6 +393,12 @@ export class CanvasGameRenderer extends GameRenderer {
     const drawH = region.sh * scale;
     const dx = screenX + (ts - drawW) / 2;
     const dy = screenY + ts - drawH;
+    // Disable canvas image-smoothing for this draw so a tiny source
+    // sprite scales up with crisp pixel-art edges instead of bleeding
+    // into the transparent background. Restore the original setting
+    // afterwards so the rest of the scene stays unaffected.
+    const prevSmoothing = ctx.imageSmoothingEnabled;
+    ctx.imageSmoothingEnabled = false;
     ctx.drawImage(
       region.image,
       region.sx,
@@ -404,6 +410,7 @@ export class CanvasGameRenderer extends GameRenderer {
       drawW,
       drawH
     );
+    ctx.imageSmoothingEnabled = prevSmoothing;
     return true;
   }
 
