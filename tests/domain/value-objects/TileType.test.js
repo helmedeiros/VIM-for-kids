@@ -32,6 +32,12 @@ describe('TileType', () => {
       expect(TileType.STONE.walkable).toBe(false);
     });
 
+    it('should have COBBLESTONE tile type', () => {
+      expect(TileType.COBBLESTONE).toBeInstanceOf(TileType);
+      expect(TileType.COBBLESTONE.name).toBe('cobblestone');
+      expect(TileType.COBBLESTONE.walkable).toBe(true);
+    });
+
     it('should have RAMP_RIGHT tile type', () => {
       expect(TileType.RAMP_RIGHT).toBeInstanceOf(TileType);
       expect(TileType.RAMP_RIGHT.name).toBe('ramp_right');

@@ -317,6 +317,22 @@ describe('BlinkingGroveZone', () => {
       expect(zone.gate).toBeDefined(); // Use the zone variable
     });
 
+    test('hidden-area legend maps C to cobblestone so the floor reads lighter', () => {
+      const config = BlinkingGroveZone.getConfig();
+      const hidden = config.tiles.hiddenAreas[0];
+
+      expect(hidden.legend.C).toBe('cobblestone');
+      // Keep dirt and path mappings available for reuse elsewhere
+      expect(hidden.legend.D).toBe('dirt');
+      expect(hidden.legend.P).toBe('path');
+
+      // The hidden-area layout uses C (the new cobblestone tile) for its
+      // playable floor — no leftover P/D in the floor cells.
+      const floorChars = hidden.layout.join('');
+      expect(floorChars).not.toMatch(/[DP]/);
+      expect(floorChars).toMatch(/C/);
+    });
+
     test('should have consistent NPC appearance conditions', () => {
       const config = BlinkingGroveZone.getConfig();
       const zone = BlinkingGroveZone.create();

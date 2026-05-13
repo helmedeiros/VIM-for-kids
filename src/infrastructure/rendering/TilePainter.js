@@ -7,7 +7,7 @@
  * and clear silhouettes that create a 2D-that-looks-3D effect.
  */
 export class TilePainter {
-  constructor(tileSize = 32, columns = 27) {
+  constructor(tileSize = 32, columns = 28) {
     this._ts = tileSize;
     this._columns = columns;
   }
@@ -44,6 +44,7 @@ export class TilePainter {
       (c) => this._paintGrassEdgeE(c),
       (c) => this._paintGrassEdgeS(c),
       (c) => this._paintGrassEdgeW(c),
+      (c) => this._paintCobblestone(c),
       (c) => this._paintFlowerCluster(c),
       (c) => this._paintMushroom(c),
       (c) => this._paintTallGrass(c),
@@ -354,6 +355,56 @@ export class TilePainter {
     });
     ctx.fillStyle = 'rgba(230,220,160,0.3)';
     [[12, 4], [24, 18], [6, 20]].forEach(([sx, sy]) => ctx.fillRect(sx, sy, 3, 2));
+  }
+
+  _paintCobblestone(ctx) {
+    const ts = this._ts;
+
+    // Warm pale base — slightly lighter at top-left for top-down lighting
+    const base = ctx.createLinearGradient(0, 0, ts, ts);
+    base.addColorStop(0, '#dccdb2');
+    base.addColorStop(1, '#c2b497');
+    ctx.fillStyle = base;
+    ctx.fillRect(0, 0, ts, ts);
+
+    // Rounded cobble bodies. Eight irregular stones tiled with subtle gaps so
+    // the grout reads as a continuous web rather than a strict grid.
+    const stones = [
+      { cx: 7, cy: 7, r: 6, body: '#e6d7be', hi: '#f3e9d6', sh: '#a89a82' },
+      { cx: 19, cy: 5, r: 5, body: '#dccdb2', hi: '#ece0c6', sh: '#a89a82' },
+      { cx: 27, cy: 9, r: 5, body: '#d5c6ab', hi: '#e8dcc4', sh: '#a2947d' },
+      { cx: 5, cy: 19, r: 5, body: '#d3c4a9', hi: '#e6dac1', sh: '#9f917a' },
+      { cx: 15, cy: 16, r: 6, body: '#e0d0b5', hi: '#efe4cc', sh: '#a89a82' },
+      { cx: 25, cy: 21, r: 5, body: '#d8c9ae', hi: '#ebdfc6', sh: '#a3957e' },
+      { cx: 9, cy: 27, r: 5, body: '#d5c6ab', hi: '#e8dcc4', sh: '#a2947d' },
+      { cx: 22, cy: 28, r: 5, body: '#dccdb2', hi: '#ece0c6', sh: '#a89a82' },
+    ];
+
+    // Grout: darker outline drawn first so the stones sit on top
+    ctx.fillStyle = '#9a8d76';
+    stones.forEach(({ cx, cy, r }) => {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r + 1, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Stone bodies with subtle radial highlight for a soft 3D feel
+    stones.forEach(({ cx, cy, r, body, hi, sh }) => {
+      const grad = ctx.createRadialGradient(cx - r * 0.4, cy - r * 0.4, 0, cx, cy, r);
+      grad.addColorStop(0, hi);
+      grad.addColorStop(0.55, body);
+      grad.addColorStop(1, sh);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Faint specular dots for stone texture
+    ctx.fillStyle = 'rgba(255, 246, 224, 0.45)';
+    stones.forEach(({ cx, cy, r }) => {
+      ctx.fillRect(cx - Math.floor(r * 0.55), cy - Math.floor(r * 0.55), 2, 2);
+    });
   }
 
   _paintWall(ctx) {
@@ -887,41 +938,74 @@ export class TilePainter {
   }
 
   _paintRock(ctx) {
-    // Path-tile background underneath so a rock looks like a boulder placed on the path.
-    this._paintPath(ctx);
+    // Cobblestone background underneath so the rock reads as a boulder set
+    // into the floor rather than floating.
+    this._paintCobblestone(ctx);
 
     const ts = this._ts;
     const cx = ts / 2;
-    const cy = ts / 2 + 1;
-    const r = ts * 0.34;
+    const cy = ts / 2 + 2;
+    const r = ts * 0.32;
 
-    // Drop shadow on the path
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    // Soft ground shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
     ctx.beginPath();
-    ctx.ellipse(cx, cy + r * 0.85, r * 0.95, r * 0.28, 0, 0, Math.PI * 2);
+    ctx.ellipse(cx, cy + r * 0.95, r * 1.0, r * 0.28, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Boulder body
-    this._sphere(ctx, cx, cy, r, '#8a8a8a', '#c8c8c8', '#4a4a52');
+    // Irregular pebble silhouette — eight-vertex polygon offset slightly to
+    // the right so the rock has a natural lopsided lean, not a perfect circle.
+    const verts = [
+      [cx - r * 0.95, cy + r * 0.05],
+      [cx - r * 0.75, cy - r * 0.55],
+      [cx - r * 0.15, cy - r * 0.95],
+      [cx + r * 0.45, cy - r * 0.85],
+      [cx + r * 0.95, cy - r * 0.35],
+      [cx + r * 0.85, cy + r * 0.35],
+      [cx + r * 0.35, cy + r * 0.85],
+      [cx - r * 0.45, cy + r * 0.75],
+    ];
 
-    // Faceted highlights to suggest a chunky stone, not a smooth ball
-    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    // Dark outline first (drawn slightly larger) so the body sits inside a
+    // crisp pixel-art border.
+    ctx.fillStyle = '#5a5a60';
     ctx.beginPath();
-    ctx.moveTo(cx - r * 0.55, cy - r * 0.15);
-    ctx.lineTo(cx - r * 0.15, cy - r * 0.55);
+    ctx.moveTo(verts[0][0] - 1, verts[0][1]);
+    for (let i = 1; i < verts.length; i++) {
+      ctx.lineTo(verts[i][0] + (i < 4 ? -1 : 1), verts[i][1] + (i > 2 && i < 6 ? -1 : 1));
+    }
+    ctx.closePath();
+    ctx.fill();
+
+    // Body gradient — top-down lighting from cool light grey to mid grey
+    const body = ctx.createLinearGradient(cx, cy - r, cx, cy + r);
+    body.addColorStop(0, '#cccfd3');
+    body.addColorStop(0.55, '#a8acb1');
+    body.addColorStop(1, '#7d8186');
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.moveTo(verts[0][0], verts[0][1]);
+    for (let i = 1; i < verts.length; i++) {
+      ctx.lineTo(verts[i][0], verts[i][1]);
+    }
+    ctx.closePath();
+    ctx.fill();
+
+    // Top-left highlight — a small inner polygon for the soft specular
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath();
+    ctx.moveTo(cx - r * 0.45, cy - r * 0.55);
+    ctx.lineTo(cx - r * 0.05, cy - r * 0.75);
+    ctx.lineTo(cx + r * 0.25, cy - r * 0.55);
     ctx.lineTo(cx + r * 0.05, cy - r * 0.25);
-    ctx.lineTo(cx - r * 0.35, cy + r * 0.05);
+    ctx.lineTo(cx - r * 0.35, cy - r * 0.15);
     ctx.closePath();
     ctx.fill();
 
-    ctx.fillStyle = 'rgba(0,0,0,0.18)';
-    ctx.beginPath();
-    ctx.moveTo(cx + r * 0.6, cy + r * 0.05);
-    ctx.lineTo(cx + r * 0.2, cy + r * 0.55);
-    ctx.lineTo(cx - r * 0.1, cy + r * 0.45);
-    ctx.lineTo(cx + r * 0.35, cy - r * 0.05);
-    ctx.closePath();
-    ctx.fill();
+    // A couple of darker speckles for texture
+    ctx.fillStyle = 'rgba(60, 64, 70, 0.55)';
+    ctx.fillRect(Math.round(cx + r * 0.25), Math.round(cy + r * 0.15), 2, 2);
+    ctx.fillRect(Math.round(cx - r * 0.4), Math.round(cy + r * 0.35), 2, 2);
   }
 
   // ========== CHARACTER / ENTITY PAINTERS ==========
