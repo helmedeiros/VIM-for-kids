@@ -392,6 +392,7 @@ export class Zone {
           footprintH: entry.footprintH,
           blocking: entry.blocking,
           collisionFootprintH: entry.collisionFootprintH,
+          renderScale: entry.renderScale,
         })
       );
     });

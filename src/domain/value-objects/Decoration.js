@@ -15,6 +15,7 @@ export class Decoration {
     footprintH,
     blocking = false,
     collisionFootprintH,
+    renderScale = 1.0,
   }) {
     if (typeof regionName !== 'string' || regionName.length === 0) {
       throw new Error('Decoration requires a non-empty regionName');
@@ -42,6 +43,7 @@ export class Decoration {
     // (trees, etc.) keep blocking every occupied cell.
     this._collisionFootprintH =
       collisionFootprintH === undefined ? footprintH : collisionFootprintH;
+    this._renderScale = renderScale;
   }
 
   get regionName() {
@@ -64,6 +66,9 @@ export class Decoration {
   }
   get baseY() {
     return this._anchor.y + this._footprintH - 1;
+  }
+  get renderScale() {
+    return this._renderScale;
   }
 
   blocks(position) {
