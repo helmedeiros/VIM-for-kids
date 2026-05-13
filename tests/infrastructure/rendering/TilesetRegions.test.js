@@ -16,9 +16,9 @@ describe('TilesetRegions', () => {
     ['dirt', { sx: 32, sy: 2576, sw: 16, sh: 16 }],
     ['sand', { sx: 40, sy: 2208, sw: 16, sh: 16 }],
     ['stone', { sx: 130, sy: 3184, sw: 16, sh: 16 }],
-    // Both rock sizes share the chunky pale-green boulder sprite —
-    // single-cell pebble and 2x2 boulder read as the same stone.
-    ['rock', { sx: 0, sy: 6272, sw: 32, sh: 32 }],
+    // Two distinct rocks: small grey pebble (1x1) and chunky pale-green
+    // boulder (2x2). Catalog keeps both available.
+    ['rock', { sx: 64, sy: 6240, sw: 32, sh: 32 }],
     ['rock_2x2', { sx: 0, sy: 6272, sw: 32, sh: 32 }],
     ['tree_2x2', { sx: 0, sy: 0, sw: 64, sh: 64 }],
   ])('exports the %s region', (name, region) => {
