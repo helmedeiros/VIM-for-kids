@@ -85,30 +85,42 @@ export class VimKeyInfo {
 
   static createCollectibleIntroOverlay(collectibleKey, onDismiss) {
     const name = collectibleKey.name || collectibleKey.keyId || 'Special Key';
+    const isGem =
+      typeof collectibleKey.spriteRegion === 'string' &&
+      collectibleKey.spriteRegion.startsWith('gem_');
     return VimKeyInfo._buildOverlay({
-      category: 'Special Item',
-      badge: '\uD83D\uDD11',
+      category: isGem ? 'Energy Gem' : 'Special Item',
+      badge: isGem ? '\uD83D\uDC8E' : '\uD83D\uDD11',
       badgeClass: 'vim-key-badge-gold',
       title: `${name} Found!`,
-      desc: 'You found a special key! These keys open locked doors that block your path. Check your <strong>Key Inventory</strong> at the bottom of the screen!',
+      desc: isGem
+        ? 'You found an energy gem! Each gem charges an <strong>energy meter</strong> that blocks your path. Check your <strong>Inventory</strong> at the bottom of the screen!'
+        : 'You found a special key! These keys open locked doors that block your path. Check your <strong>Key Inventory</strong> at the bottom of the screen!',
       exampleLabel: 'How it works',
-      exampleText: 'Find key \u2192 Walk to locked door \u2192 Door opens!',
+      exampleText: isGem
+        ? 'Find gem \u2192 Walk to empty meter \u2192 Meter charges!'
+        : 'Find key \u2192 Walk to locked door \u2192 Door opens!',
     }, { delayAllKeys: 10000, onDismiss });
   }
 
   static createLockedGateOverlay(gateType, onDismiss) {
     const isMain = gateType === 'main';
+    const isMeter = gateType === 'meter';
     return VimKeyInfo._buildOverlay({
-      category: isMain ? 'Locked Gate' : 'Locked Door',
-      badge: '\uD83D\uDD12',
+      category: isMain ? 'Locked Gate' : isMeter ? 'Empty Meter' : 'Locked Door',
+      badge: isMeter ? '\uD83D\uDD0B' : '\uD83D\uDD12',
       badgeClass: 'vim-key-badge-locked',
-      title: isMain ? 'Gate is Locked!' : 'Door is Locked!',
+      title: isMain ? 'Gate is Locked!' : isMeter ? 'Meter is Empty!' : 'Door is Locked!',
       desc: isMain
         ? 'This gate needs <strong>all the VIM letter keys</strong> to open. Look around the map for letters like h, j, k, l!'
+        : isMeter
+        ? 'This meter needs an <strong>energy gem</strong> to charge. Explore the area and look for a glowing gem!'
         : 'This door needs a <strong>special key</strong> to open. Explore the area and look for a shiny key!',
       exampleLabel: 'What to do',
       exampleText: isMain
         ? 'Explore the map \u2192 Collect all letter keys \u2192 Gate opens!'
+        : isMeter
+        ? 'Look around \u2192 Find the energy gem \u2192 Walk to this meter \u2192 It charges!'
         : 'Look around \u2192 Find the special key \u2192 Walk to this door \u2192 It opens!',
     }, { delayAllKeys: 5000, onDismiss });
   }
