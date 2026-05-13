@@ -95,7 +95,7 @@ export class VimKeyInfo {
       title: `${name} Found!`,
       desc: isGem
         ? 'You found an energy gem! Each gem charges an <strong>energy meter</strong> that blocks your path. Check your <strong>Inventory</strong> at the bottom of the screen!'
-        : 'You found a special key! These keys open locked doors that block your path. Check your <strong>Key Inventory</strong> at the bottom of the screen!',
+        : 'You found a special key! These keys open locked doors that block your path. Check your <strong>Inventory</strong> at the bottom of the screen!',
       exampleLabel: 'How it works',
       exampleText: isGem
         ? 'Find gem \u2192 Walk to empty meter \u2192 Meter charges!'

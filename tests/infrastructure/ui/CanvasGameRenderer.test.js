@@ -265,7 +265,7 @@ describe('CanvasGameRenderer', () => {
     it('shows empty message when no collectibles', () => {
       renderer.updateCollectibleInventoryDisplay(new Set());
       const display = document.querySelector('.collectible-display');
-      expect(display.textContent).toContain('No special keys found yet!');
+      expect(display.textContent).toContain('Nothing collected yet!');
     });
 
     it('shows collected collectible keys', () => {
@@ -274,6 +274,25 @@ describe('CanvasGameRenderer', () => {
       const keys = display.querySelectorAll('.collected-collectible-key');
       expect(keys).toHaveLength(1);
       expect(keys[0].textContent).toContain('Maze Key');
+    });
+
+    it('prefers the entity display name from the zone over the formatted keyId', () => {
+      const zone = {
+        getCollectibleKeyById: (id) =>
+          id === 'golden_key' ? { name: 'Orange Gem', spriteRegion: 'gem_orange' } : null,
+      };
+      renderer.updateCollectibleInventoryDisplay(new Set(['golden_key']), zone);
+      const display = document.querySelector('.collectible-display');
+      const entry = display.querySelector('.collected-collectible-key');
+      expect(entry.textContent).toContain('Orange Gem');
+      expect(entry.title).toBe('Collected: Orange Gem');
+    });
+
+    it('falls back to formatted keyId when the zone does not expose the lookup', () => {
+      renderer.updateCollectibleInventoryDisplay(new Set(['maze_key']), null);
+      const display = document.querySelector('.collectible-display');
+      const entry = display.querySelector('.collected-collectible-key');
+      expect(entry.textContent).toContain('Maze Key');
     });
   });
 

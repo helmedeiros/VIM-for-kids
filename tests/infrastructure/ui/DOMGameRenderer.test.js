@@ -472,7 +472,7 @@ describe('updateCollectibleInventoryDisplay', () => {
 
     const emptyMessage = mockCollectibleDisplay.querySelector('.collectible-empty-message');
     expect(emptyMessage).toBeTruthy();
-    expect(emptyMessage.textContent).toBe('No special keys found yet!');
+    expect(emptyMessage.textContent).toBe('Nothing collected yet!');
   });
 
   it('should display collected collectible keys with proper formatting', () => {
@@ -677,7 +677,10 @@ describe('render method CollectibleKey integration', () => {
     gameRenderer.render(mockGameState);
 
     expect(gameRenderer.updateCollectedKeysDisplay).toHaveBeenCalledWith(mockGameState.collectedKeys);
-    expect(gameRenderer.updateCollectibleInventoryDisplay).toHaveBeenCalledWith(mockGameState.collectedCollectibleKeys);
+    expect(gameRenderer.updateCollectibleInventoryDisplay).toHaveBeenCalledWith(
+      mockGameState.collectedCollectibleKeys,
+      mockGameState.currentZone
+    );
   });
 
   it('should handle missing collectedCollectibleKeys gracefully', () => {
@@ -687,6 +690,9 @@ describe('render method CollectibleKey integration', () => {
       gameRenderer.render(mockGameState);
     }).not.toThrow();
 
-    expect(gameRenderer.updateCollectibleInventoryDisplay).toHaveBeenCalledWith(new Set());
+    expect(gameRenderer.updateCollectibleInventoryDisplay).toHaveBeenCalledWith(
+      new Set(),
+      mockGameState.currentZone
+    );
   });
 });
