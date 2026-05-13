@@ -1,7 +1,7 @@
 import { Position } from '../value-objects/Position.js';
 
 export class Gate {
-  constructor(position, unlockConditions = null, leadsTo = null) {
+  constructor(position, unlockConditions = null, leadsTo = null, opts = {}) {
     if (!(position instanceof Position)) {
       throw new Error('Position must be a valid Position object');
     }
@@ -11,6 +11,12 @@ export class Gate {
     this._type = 'gate';
     this._unlockConditions = unlockConditions || {};
     this._leadsTo = leadsTo;
+    // Optional PNG-region overrides — when set the renderer draws these
+    // instead of the default gate sprite. Useful for thematic re-skins
+    // (e.g. "energy meter" gates that need a different visual when
+    // empty vs charged).
+    this._closedSpriteRegion = opts.closedSpriteRegion || null;
+    this._openSpriteRegion = opts.openSpriteRegion || null;
 
     // Make properties immutable
     Object.defineProperty(this, 'position', {
@@ -38,6 +44,20 @@ export class Gate {
 
   get unlockConditions() {
     return this._unlockConditions;
+  }
+
+  get closedSpriteRegion() {
+    return this._closedSpriteRegion;
+  }
+  get openSpriteRegion() {
+    return this._openSpriteRegion;
+  }
+  /**
+   * Returns the active sprite region based on current open/closed state,
+   * or null if no override was supplied.
+   */
+  get spriteRegion() {
+    return this._isOpen ? this._openSpriteRegion : this._closedSpriteRegion;
   }
 
   open() {

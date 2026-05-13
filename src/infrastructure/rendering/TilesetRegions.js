@@ -57,6 +57,21 @@ export const TILESET_REGIONS = {
   // Multi-tile decorations (drawn via TileRenderer.drawDecoration, not drawTile).
   // 2x2 footprint, 64x64 source = 1:1 with destination at renderSize 32 → crisp pixels.
   tree_2x2: { sx: 0, sy: 0, sw: 64, sh: 64 },
+
+  // === Gems (16x16) — collectible-key overrides for the hidden area ======
+  // Three jeweled gems sitting in a small metal dish. Picked from the
+  // items strip near sy=9152.
+  gem_orange: { sx: 168, sy: 9152, sw: 16, sh: 16 },
+  gem_green:  { sx: 200, sy: 9152, sw: 16, sh: 16 },
+  gem_bronze: { sx: 232, sy: 9152, sw: 16, sh: 16 },
+
+  // === Energy meters (16x24) — gate overrides for the hidden area =========
+  // Tall pod-like devices with a colored dome. Red = empty (locked),
+  // blue = charged (unlocked once the matching gem is collected).
+  // Drawn at 32x48 destination with the foot anchored at the bottom of
+  // the cell, so the dome overflows up into the cell above.
+  energy_meter_empty:    { sx: 208, sy: 9536, sw: 16, sh: 24 },
+  energy_meter_charged:  { sx: 224, sy: 9536, sw: 16, sh: 24 },
 };
 
 export function registerTilesetRegions(atlas, image, regions = TILESET_REGIONS) {

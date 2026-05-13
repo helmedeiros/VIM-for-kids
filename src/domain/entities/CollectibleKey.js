@@ -5,7 +5,7 @@ import { Position } from '../value-objects/Position.js';
  * and used to unlock gates. This is distinct from VimKey which is educational.
  */
 export class CollectibleKey {
-  constructor(position, keyId, name = 'Key', color = '#FFD700') {
+  constructor(position, keyId, name = 'Key', color = '#FFD700', spriteRegion = null) {
     if (!(position instanceof Position)) {
       throw new Error('CollectibleKey position must be a Position instance');
     }
@@ -24,6 +24,9 @@ export class CollectibleKey {
     this._name = name;
     this._color = color;
     this._type = 'collectible_key';
+    // Optional PNG-region override (e.g. "gem_orange") — when set the
+    // renderer draws this region instead of the default key sprite.
+    this._spriteRegion = spriteRegion;
   }
 
   get position() {
@@ -44,6 +47,10 @@ export class CollectibleKey {
 
   get type() {
     return this._type;
+  }
+
+  get spriteRegion() {
+    return this._spriteRegion;
   }
 
   equals(other) {

@@ -466,10 +466,12 @@ export class BlinkingGroveZone {
               { text: '.', position: [35, 9], color: '#ffa726', fontSize: '14px', group: 'vim_secret_aside' },
             ],
             specialTiles: [
-              // Three keys positioned near the letters for the three gates
-              { type: 'collectible_key', keyId: 'golden_key', name: 'Golden Key', color: '#FFD700', position: [12, 9] }, // Next to 'm' in 'vim'
-              { type: 'collectible_key', keyId: 'silver_key', name: 'Silver Key', color: '#C0C0C0', position: [33, 9] }, // Next to 'l' in 'Total'
-              { type: 'collectible_key', keyId: 'bronze_key', name: 'Bronze Key', color: '#CD7F32', position: [26, 0] }, // Next to 'z' in 'Rulez'
+              // Three "energy gems" visually replace the three keys — the
+              // collect-to-unlock mechanic is unchanged, only the artwork.
+              // Each gem charges its matching energy-meter gate below.
+              { type: 'collectible_key', keyId: 'golden_key', name: 'Orange Gem', color: '#FFD700', spriteRegion: 'gem_orange', position: [12, 9] }, // Next to 'm' in 'vim'
+              { type: 'collectible_key', keyId: 'silver_key', name: 'Green Gem',  color: '#C0C0C0', spriteRegion: 'gem_green',  position: [33, 9] }, // Next to 'l' in 'Total'
+              { type: 'collectible_key', keyId: 'bronze_key', name: 'Bronze Gem', color: '#CD7F32', spriteRegion: 'gem_bronze', position: [26, 0] }, // Next to 'z' in 'Rulez'
               { type: 'vim_key', value: 'w', position: [6, 3], description: 'w - jump forward to next word' },
               { type: 'vim_key', value: 'e', position: [11, 8], description: 'e - jump to end of word' },
               { type: 'vim_key', value: 'b', position: [35, 12], description: 'b - jump backward to start of word' },
@@ -484,24 +486,33 @@ export class BlinkingGroveZone {
               leadsTo: 'zone_2',
             },
             // Secondary gates within the hidden area that require specific keys
+            // Three "energy meter" gates — visually distinct, mechanically
+            // identical to key-locked gates. Empty (red) when locked,
+            // charged (blue) once the matching gem is collected.
             secondaryGates: [
               {
                 locked: true,
                 unlocksWhen: { requiredCollectibleKeys: ['golden_key'] },
-                position: [34, 13], // First gate in hidden area (relative to hidden area grid)
+                position: [34, 13],
                 leadsTo: 'golden_chamber',
+                closedSpriteRegion: 'energy_meter_empty',
+                openSpriteRegion: 'energy_meter_charged',
               },
               {
                 locked: true,
                 unlocksWhen: { requiredCollectibleKeys: ['silver_key'] },
-                position: [34, 14], // Second gate in hidden area (relative to hidden area grid)
+                position: [34, 14],
                 leadsTo: 'silver_chamber',
+                closedSpriteRegion: 'energy_meter_empty',
+                openSpriteRegion: 'energy_meter_charged',
               },
               {
                 locked: true,
                 unlocksWhen: { requiredCollectibleKeys: ['bronze_key'] },
-                position: [34, 15], // Third gate in hidden area (relative to hidden area grid)
+                position: [34, 15],
                 leadsTo: 'bronze_chamber',
+                closedSpriteRegion: 'energy_meter_empty',
+                openSpriteRegion: 'energy_meter_charged',
               },
             ],
           },
