@@ -826,6 +826,17 @@ describe('Zone', () => {
       return new Zone(zoneConfigWithHiddenArea);
     };
 
+    it('resolves hidden-area legend chars including C for cobblestone', () => {
+      const zone = createZoneWithHiddenAreaAndGate();
+      expect(zone._getHiddenAreaTileType('W')).toBe('water');
+      expect(zone._getHiddenAreaTileType('D')).toBe('dirt');
+      expect(zone._getHiddenAreaTileType('P')).toBe('path');
+      expect(zone._getHiddenAreaTileType('R')).toBe('rock');
+      expect(zone._getHiddenAreaTileType('C')).toBe('cobblestone');
+      // Unknown chars still fall back to grass for safety.
+      expect(zone._getHiddenAreaTileType('?')).toBe('grass');
+    });
+
     it('should return hidden area gate when hidden area is current', () => {
       const zone = createZoneWithHiddenAreaAndGate();
 

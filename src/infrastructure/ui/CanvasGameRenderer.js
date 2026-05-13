@@ -557,8 +557,13 @@ export class CanvasGameRenderer extends GameRenderer {
         const renderName =
           tileName === 'wall' ? pickWallVariant(getNeighborName) : tileName;
 
-        // Draw tile (sprite or colored rectangle fallback)
+        // Draw tile (sprite or colored rectangle fallback). Rock sprites
+        // have a transparent background, so paint a path tile beneath them
+        // first — the rock then reads as a boulder placed on the floor.
         if (this._tileRenderer) {
+          if (renderName === 'rock') {
+            this._tileRenderer.drawTile(ctx, 'path', screenX, screenY);
+          }
           this._tileRenderer.drawTile(ctx, renderName, screenX, screenY);
         } else {
           ctx.fillStyle = this._tileColors[renderName] || this._tileColors[tileName] || '#1a8fc4';
