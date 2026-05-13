@@ -8,7 +8,14 @@ import { Position } from './Position.js';
  * folds into walkability.
  */
 export class Decoration {
-  constructor({ regionName, anchor, footprintW, footprintH, blocking = false }) {
+  constructor({
+    regionName,
+    anchor,
+    footprintW,
+    footprintH,
+    blocking = false,
+    collisionFootprintH,
+  }) {
     if (typeof regionName !== 'string' || regionName.length === 0) {
       throw new Error('Decoration requires a non-empty regionName');
     }
@@ -28,6 +35,13 @@ export class Decoration {
     this._footprintW = footprintW;
     this._footprintH = footprintH;
     this._blocking = Boolean(blocking);
+    // Optional: number of bottom rows that actually block movement. Lets a
+    // tall sprite (2x2 boulder, tree) be passable through the top — the
+    // player walks "into" the cell and gets hidden behind the sprite.
+    // Defaults to the full visual footprint so existing decorations
+    // (trees, etc.) keep blocking every occupied cell.
+    this._collisionFootprintH =
+      collisionFootprintH === undefined ? footprintH : collisionFootprintH;
   }
 
   get regionName() {
@@ -44,6 +58,25 @@ export class Decoration {
   }
   get blocking() {
     return this._blocking;
+  }
+  get collisionFootprintH() {
+    return this._collisionFootprintH;
+  }
+  get baseY() {
+    return this._anchor.y + this._footprintH - 1;
+  }
+
+  blocks(position) {
+    if (!this._blocking) return false;
+    const dx = position.x - this._anchor.x;
+    const dy = position.y - this._anchor.y;
+    const collisionStartY = this._footprintH - this._collisionFootprintH;
+    return (
+      dx >= 0 &&
+      dx < this._footprintW &&
+      dy >= collisionStartY &&
+      dy < this._footprintH
+    );
   }
 
   occupies(position) {

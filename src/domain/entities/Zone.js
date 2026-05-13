@@ -391,6 +391,7 @@ export class Zone {
           footprintW: entry.footprintW,
           footprintH: entry.footprintH,
           blocking: entry.blocking,
+          collisionFootprintH: entry.collisionFootprintH,
         })
       );
     });
@@ -710,6 +711,22 @@ export class Zone {
           this._buildVimKeys([adjustedTile]);
         }
       });
+    }
+
+    // Add decorations from the hidden area — same shape as main-zone
+    // decorations but their position is in hidden-area-local coords, so
+    // shift through offsetX/offsetY before handing them to the builder.
+    if (Array.isArray(area.decorations) && area.decorations.length > 0) {
+      const adjustedDecorations = area.decorations.map((deco) => {
+        const absoluteX = this._gameMap.zoneStartX + deco.position[0] + (area.offsetX || 0);
+        const absoluteY = this._gameMap.zoneStartY + deco.position[1] + (area.offsetY || 0);
+        return {
+          ...deco,
+          position: [absoluteX, absoluteY],
+          isFromHiddenArea: true,
+        };
+      });
+      this._buildDecorations(adjustedDecorations);
     }
 
         // Add secondary gates from the hidden area

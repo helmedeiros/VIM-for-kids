@@ -196,7 +196,7 @@ export class DynamicZoneMap {
     const tile = this.getTileAt(position);
     if (!tile.walkable) return false;
     for (const decoration of this._decorations) {
-      if (decoration.blocking && decoration.occupies(position)) {
+      if (decoration.blocks(position)) {
         return false;
       }
     }

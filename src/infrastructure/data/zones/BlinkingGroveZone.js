@@ -178,6 +178,15 @@ export class BlinkingGroveZone {
             },
             offsetX: 56, // Positioned to connect directly to the main area
             offsetY: 1, // Same vertical level as the main area
+            decorations: [
+              // 2x2 chunky boulders dropped in open path stretches of the
+              // hidden-area maze. Top row is pass-through so the cursor
+              // can walk into it and be visually hidden behind the rock's
+              // upper half (collisionFootprintH: 1).
+              { regionName: 'rock_2x2', position: [2, 11], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+              { regionName: 'rock_2x2', position: [26, 11], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+              { regionName: 'rock_2x2', position: [20, 4], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+            ],
             textLabels: [
               // "vim Total Rulez!!!" text in the hidden area (centered in the wider area)
               { text: 'v', position: [16, 0], color: '#ff6b6b', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },

@@ -598,12 +598,18 @@ export class CanvasGameRenderer extends GameRenderer {
       }
     }
 
-    // Draw decorations (multi-tile sprites) above tiles, sorted by anchor Y
-    // so visually-southern decorations overlap northern ones.
-    this._drawDecorations(ctx, map, bounds, ts);
+    // Decorations split by Y relative to the cursor so the cursor walks
+    // BEHIND tall sprites (boulders, trees) at or south of its row, and
+    // IN FRONT OF decorations that are strictly north of it.
+    const cursorY = gameState.cursor.position.y;
+    this._drawDecorations(ctx, map, bounds, ts, (deco) => deco.baseY < cursorY);
 
-    // Draw cursor on top
+    // Draw cursor on top of the north-pass decorations.
     this._drawCursor(ctx, gameState.cursor, bounds, ts);
+
+    // South-pass decorations now draw OVER the cursor — the boulder's
+    // upper half occludes the cursor when it stands behind a 2x2 rock.
+    this._drawDecorations(ctx, map, bounds, ts, (deco) => deco.baseY >= cursorY);
 
     // Wall overhang pass — drawn AFTER the cursor so the cobblestone cap of
     // bottom-of-run walls visually extends up into the cell to the north and
@@ -646,11 +652,12 @@ export class CanvasGameRenderer extends GameRenderer {
     };
   }
 
-  _drawDecorations(ctx, map, bounds, ts) {
+  _drawDecorations(ctx, map, bounds, ts, filter) {
     if (!this._tileRenderer || typeof map.getDecorationsInBounds !== 'function') return;
     const visible = map.getDecorationsInBounds(bounds);
     if (visible.length === 0) return;
-    const sorted = [...visible].sort((a, b) => a.anchor.y - b.anchor.y);
+    const picked = typeof filter === 'function' ? visible.filter(filter) : visible;
+    const sorted = [...picked].sort((a, b) => a.anchor.y - b.anchor.y);
     for (const decoration of sorted) {
       const screenX = (decoration.anchor.x - bounds.startX) * ts;
       const screenY = (decoration.anchor.y - bounds.startY) * ts;
