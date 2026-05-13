@@ -199,12 +199,16 @@ export class MovePlayerUseCase {
       for (const gate of this._gameState.getSecondaryGates()) {
         if (gate && gate.position.equals(position)) {
           if (gate.isWalkable()) return { walkable: true };
+          // Pick a more descriptive blockedBy when the gate is re-skinned as
+          // an energy meter, so the renderer can show meter/gem wording.
+          const blockedBy =
+            gate.closedSpriteRegion === 'energy_meter_empty' ? 'meter' : 'secondary';
           if (typeof this._gameState.tryUnlockSecondaryGate === 'function') {
             return this._gameState.tryUnlockSecondaryGate(position)
               ? { walkable: true }
-              : { walkable: false, blockedBy: 'secondary' };
+              : { walkable: false, blockedBy };
           }
-          return { walkable: false, blockedBy: 'secondary' };
+          return { walkable: false, blockedBy };
         }
       }
     }

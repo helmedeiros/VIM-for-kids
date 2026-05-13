@@ -948,7 +948,10 @@ export class CanvasGameRenderer extends GameRenderer {
   _showCollectibleKeyFeedback(collectibleKey) {
     const el = document.createElement('div');
     el.className = 'key-collection-feedback';
-    el.textContent = `Found ${this._formatKeyName(collectibleKey.keyId)}!`;
+    // Prefer the entity's display name when present (e.g. "Orange Gem")
+    // so the feedback toast matches the visual re-skin.
+    const label = collectibleKey.name || this._formatKeyName(collectibleKey.keyId);
+    el.textContent = `Found ${label}!`;
     document.body.appendChild(el);
     setTimeout(() => {
       if (document.body.contains(el)) document.body.removeChild(el);
