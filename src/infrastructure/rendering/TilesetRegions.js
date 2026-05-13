@@ -58,12 +58,12 @@ export const TILESET_REGIONS = {
   // 2x2 footprint, 64x64 source = 1:1 with destination at renderSize 32 → crisp pixels.
   tree_2x2: { sx: 0, sy: 0, sw: 64, sh: 64 },
 
-  // === Gems (16x16) — collectible-key overrides for the hidden area ======
-  // Three jeweled gems sitting in a small metal dish. Picked from the
-  // items strip near sy=9152.
-  gem_orange: { sx: 168, sy: 9152, sw: 16, sh: 16 },
-  gem_green:  { sx: 200, sy: 9152, sw: 16, sh: 16 },
-  gem_bronze: { sx: 232, sy: 9152, sw: 16, sh: 16 },
+  // === Gems (24x24) — collectible-key overrides for the hidden area ======
+  // Each gem sits in a small metal dish with a base/stem. The art lives
+  // in the items strip near sy=9152 with irregular 24x24-ish packing.
+  gem_orange: { sx: 164, sy: 9152, sw: 24, sh: 24 },
+  gem_green:  { sx: 196, sy: 9152, sw: 24, sh: 24 },
+  gem_bronze: { sx: 228, sy: 9152, sw: 24, sh: 24 },
 
   // === Energy meters (16x24) — gate overrides for the hidden area =========
   // Tall pod-like devices with a colored dome. Red = empty (locked),
