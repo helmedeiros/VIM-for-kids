@@ -213,6 +213,23 @@ describe('MovePlayerUseCase', () => {
         expect(mockGameState.cursor.position.x).toBe(7);
       });
 
+      it('jumps over a column blocked by a decoration (boulder decorations are passable for w-motion)', async () => {
+        mockGameState.collectedKeys = new Set(['w']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+        // Column 6 is a path tile, but a blocking decoration sits on it —
+        // same shape as the chunky-boulder decorations in the hidden area.
+        mockMap.isWalkable.mockImplementation((pos) => pos.x !== 6);
+        mockMap.getTileAt.mockImplementation(() => ({ name: 'path' }));
+        mockMap.getDecorations = jest.fn().mockReturnValue([
+          { blocks: (pos) => pos.x === 6 },
+        ]);
+
+        const result = await movePlayerUseCase.execute('word_forward');
+
+        expect(result.success).toBe(true);
+        expect(mockGameState.cursor.position.x).toBe(7);
+      });
+
       it('refuses to jump across a full water column (water is a hard border)', async () => {
         mockGameState.collectedKeys = new Set(['w']);
         mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
