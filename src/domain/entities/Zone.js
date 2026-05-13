@@ -297,7 +297,9 @@ export class Zone {
           // Check if this key already exists (avoid duplicates)
           const existingKey = this._collectibleKeys.find(k => k.keyId === keyId);
           if (!existingKey) {
-            this._collectibleKeys.push(new CollectibleKey(absolutePosition, keyId, name, color));
+            this._collectibleKeys.push(
+              new CollectibleKey(absolutePosition, keyId, name, color, tile.spriteRegion || null)
+            );
           }
         }
       });
@@ -365,7 +367,10 @@ export class Zone {
             // Pass unlock conditions and leadsTo to the Gate constructor
             const unlockConditions = gateConfig.unlocksWhen || {};
             const leadsTo = gateConfig.leadsTo || null;
-            const secondaryGate = new Gate(absolutePosition, unlockConditions, leadsTo);
+            const secondaryGate = new Gate(absolutePosition, unlockConditions, leadsTo, {
+              closedSpriteRegion: gateConfig.closedSpriteRegion || null,
+              openSpriteRegion: gateConfig.openSpriteRegion || null,
+            });
 
             // Gate starts locked as per configuration
             secondaryGate.close();

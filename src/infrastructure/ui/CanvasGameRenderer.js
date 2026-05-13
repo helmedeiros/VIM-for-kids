@@ -374,6 +374,39 @@ export class CanvasGameRenderer extends GameRenderer {
 
   // --- Additional methods used by application code ---
 
+  /**
+   * Draw a TileAtlas region into a single cell, scaling to preserve the
+   * source aspect ratio. Square regions (e.g. 16x16 gems) fill the cell.
+   * Taller-than-wide regions (e.g. 16x24 energy meters) anchor at the
+   * cell's bottom and overflow upward — same trick the cursor uses to
+   * fit a taller sprite into a 32x32 cell.
+   *
+   * Returns true when the region was found and drawn so callers can
+   * skip their default sprite. Returns false when no region was
+   * registered, allowing graceful fallback.
+   */
+  _tryDrawCellRegion(ctx, regionName, screenX, screenY, ts) {
+    const region = this._tileAtlas?.getRegion?.(regionName);
+    if (!region) return false;
+    const scale = ts / region.sw;
+    const drawW = region.sw * scale;
+    const drawH = region.sh * scale;
+    const dx = screenX + (ts - drawW) / 2;
+    const dy = screenY + ts - drawH;
+    ctx.drawImage(
+      region.image,
+      region.sx,
+      region.sy,
+      region.sw,
+      region.sh,
+      dx,
+      dy,
+      drawW,
+      drawH
+    );
+    return true;
+  }
+
   focus() {
     this.gameBoard.focus();
   }
@@ -717,7 +750,9 @@ export class CanvasGameRenderer extends GameRenderer {
     // Collectible Key
     const ck = this._entityIndex.getCollectibleAt(worldX, worldY);
     if (ck) {
-      if (hasCharSprites) {
+      if (ck.spriteRegion && this._tryDrawCellRegion(ctx, ck.spriteRegion, screenX, screenY, ts)) {
+        // Drawn via PNG region override (e.g. gem sprite); skip default.
+      } else if (hasCharSprites) {
         this._drawCharSprite(
           ctx,
           this._characterSprites.getCollectibleKeyFrame(),
@@ -737,7 +772,9 @@ export class CanvasGameRenderer extends GameRenderer {
     // Gate
     const gate = this._entityIndex.getGateAt(worldX, worldY);
     if (gate) {
-      if (hasCharSprites) {
+      if (gate.spriteRegion && this._tryDrawCellRegion(ctx, gate.spriteRegion, screenX, screenY, ts)) {
+        // Drawn via PNG region override (e.g. energy-meter sprite).
+      } else if (hasCharSprites) {
         this._drawCharSprite(
           ctx,
           this._characterSprites.getGateFrame(gate.isOpen),
@@ -762,7 +799,9 @@ export class CanvasGameRenderer extends GameRenderer {
     // Secondary Gate
     const sg = this._entityIndex.getSecondaryGateAt(worldX, worldY);
     if (sg) {
-      if (hasCharSprites) {
+      if (sg.spriteRegion && this._tryDrawCellRegion(ctx, sg.spriteRegion, screenX, screenY, ts)) {
+        // Drawn via PNG region override (e.g. energy-meter sprite).
+      } else if (hasCharSprites) {
         this._drawCharSprite(
           ctx,
           this._characterSprites.getGateFrame(false),
