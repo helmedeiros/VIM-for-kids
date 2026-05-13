@@ -13,6 +13,10 @@ export const TILESET_REGIONS = {
   dirt: { sx: 32, sy: 2576, sw: 16, sh: 16 },
   sand: { sx: 40, sy: 2208, sw: 16, sh: 16 },
   stone: { sx: 130, sy: 3184, sw: 16, sh: 16 },
+  // Single 32x32 "small clean grey rock" — row 1 of the rocks page,
+  // third cell from the left. Sits on a transparent background so it
+  // composes over the cell's underlying floor.
+  rock: { sx: 64, sy: 6240, sw: 32, sh: 32 },
   // Multi-tile decorations (drawn via TileRenderer.drawDecoration, not drawTile).
   // 2x2 footprint, 64x64 source = 1:1 with destination at renderSize 32 → crisp pixels.
   tree_2x2: { sx: 0, sy: 0, sw: 64, sh: 64 },

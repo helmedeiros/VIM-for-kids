@@ -745,6 +745,7 @@ export class Zone {
       '>': 'ramp_left',
       '<': 'ramp_right',
       'R': 'rock',
+      'C': 'cobblestone',
     };
     return hiddenAreaLegend[char] || 'grass';
   }
