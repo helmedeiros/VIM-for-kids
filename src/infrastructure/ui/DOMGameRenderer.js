@@ -395,7 +395,10 @@ export class DOMGameRenderer extends GameRenderer {
     }
 
     this.updateCollectedKeysDisplay(gameState.collectedKeys);
-    this.updateCollectibleInventoryDisplay(gameState.collectedCollectibleKeys || new Set());
+    this.updateCollectibleInventoryDisplay(
+      gameState.collectedCollectibleKeys || new Set(),
+      gameState.currentZone
+    );
   }
 
   updateCollectedKeysDisplay(collectedKeys) {
@@ -424,7 +427,7 @@ export class DOMGameRenderer extends GameRenderer {
     VimKeyInfo.updateHelpKeys(collectedKeys, (vk) => this._showVimKeyExplanation(vk));
   }
 
-    updateCollectibleInventoryDisplay(collectedCollectibleKeys) {
+    updateCollectibleInventoryDisplay(collectedCollectibleKeys, currentZone) {
     // Gracefully handle missing DOM element (in tests or if HTML structure changes)
     if (!this.collectibleInventoryDisplay) {
       console.warn('CollectibleKey inventory display element not found - skipping update');
@@ -436,20 +439,27 @@ export class DOMGameRenderer extends GameRenderer {
     if (collectedCollectibleKeys.size === 0) {
       const emptyMessage = document.createElement('div');
       emptyMessage.className = 'collectible-empty-message';
-      emptyMessage.textContent = 'No special keys found yet!';
+      emptyMessage.textContent = 'Nothing collected yet!';
       this.collectibleInventoryDisplay.appendChild(emptyMessage);
     } else {
       collectedCollectibleKeys.forEach((keyId) => {
+        // Prefer the entity's display name so re-skinned items (e.g. gems)
+        // read correctly; fall back to the formatted keyId.
+        const entity =
+          (currentZone && typeof currentZone.getCollectibleKeyById === 'function')
+            ? currentZone.getCollectibleKeyById(keyId)
+            : null;
+        const label = (entity && entity.name) || this._formatKeyName(keyId);
+
         const keyElement = document.createElement('div');
         keyElement.className = 'collected-collectible-key';
 
         const keyNameSpan = document.createElement('span');
         keyNameSpan.className = 'collectible-key-name';
-        // Convert key ID to display name (e.g., 'maze_key' -> 'Maze Key')
-        keyNameSpan.textContent = this._formatKeyName(keyId);
+        keyNameSpan.textContent = label;
 
         keyElement.appendChild(keyNameSpan);
-        keyElement.title = `Collected: ${this._formatKeyName(keyId)}`;
+        keyElement.title = `Collected: ${label}`;
         this.collectibleInventoryDisplay.appendChild(keyElement);
       });
     }

@@ -263,7 +263,10 @@ export class CanvasGameRenderer extends GameRenderer {
 
     // Update UI overlays
     this.updateCollectedKeysDisplay(gameState.collectedKeys);
-    this.updateCollectibleInventoryDisplay(gameState.collectedCollectibleKeys || new Set());
+    this.updateCollectibleInventoryDisplay(
+      gameState.collectedCollectibleKeys || new Set(),
+      gameState.currentZone
+    );
   }
 
   updateCollectedKeysDisplay(collectedKeys) {
@@ -293,24 +296,31 @@ export class CanvasGameRenderer extends GameRenderer {
     VimKeyInfo.updateHelpKeys(collectedKeys, (vk) => this._showVimKeyExplanation(vk));
   }
 
-  updateCollectibleInventoryDisplay(collectedCollectibleKeys) {
+  updateCollectibleInventoryDisplay(collectedCollectibleKeys, currentZone) {
     if (!this._collectibleInventoryDisplay) return;
     this._collectibleInventoryDisplay.innerHTML = '';
 
     if (collectedCollectibleKeys.size === 0) {
       const empty = document.createElement('div');
       empty.className = 'collectible-empty-message';
-      empty.textContent = 'No special keys found yet!';
+      empty.textContent = 'Nothing collected yet!';
       this._collectibleInventoryDisplay.appendChild(empty);
     } else {
       collectedCollectibleKeys.forEach((keyId) => {
+        // Prefer the entity's display name (e.g. "Orange Gem") over the
+        // formatted keyId so re-skinned items read correctly.
+        const entity =
+          (currentZone && typeof currentZone.getCollectibleKeyById === 'function')
+            ? currentZone.getCollectibleKeyById(keyId)
+            : null;
+        const label = (entity && entity.name) || this._formatKeyName(keyId);
         const el = document.createElement('div');
         el.className = 'collected-collectible-key';
         const nameSpan = document.createElement('span');
         nameSpan.className = 'collectible-key-name';
-        nameSpan.textContent = this._formatKeyName(keyId);
+        nameSpan.textContent = label;
         el.appendChild(nameSpan);
-        el.title = `Collected: ${this._formatKeyName(keyId)}`;
+        el.title = `Collected: ${label}`;
         this._collectibleInventoryDisplay.appendChild(el);
       });
     }

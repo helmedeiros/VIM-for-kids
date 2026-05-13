@@ -282,6 +282,12 @@ export class Zone {
     if (!this._collectibleKeys) {
       this._collectibleKeys = [];
     }
+    // Persistent registry of every CollectibleKey the zone ever knew about
+    // — entries survive collection, so the inventory display can still
+    // look up the display name and sprite region after pickup.
+    if (!this._collectibleKeyRegistry) {
+      this._collectibleKeyRegistry = new Map();
+    }
 
     if (specialTiles) {
       specialTiles.forEach((tile) => {
@@ -297,13 +303,27 @@ export class Zone {
           // Check if this key already exists (avoid duplicates)
           const existingKey = this._collectibleKeys.find(k => k.keyId === keyId);
           if (!existingKey) {
-            this._collectibleKeys.push(
-              new CollectibleKey(absolutePosition, keyId, name, color, tile.spriteRegion || null)
+            const collectible = new CollectibleKey(
+              absolutePosition,
+              keyId,
+              name,
+              color,
+              tile.spriteRegion || null
             );
+            this._collectibleKeys.push(collectible);
+            this._collectibleKeyRegistry.set(keyId, collectible);
           }
         }
       });
     }
+  }
+
+  /**
+   * Look up a CollectibleKey by its keyId, even after the player has
+   * already collected it. Returns null if the zone never knew about it.
+   */
+  getCollectibleKeyById(keyId) {
+    return (this._collectibleKeyRegistry && this._collectibleKeyRegistry.get(keyId)) || null;
   }
 
   _buildTextLabels(textLabels) {
