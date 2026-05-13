@@ -16,10 +16,15 @@ describe('TilesetRegions', () => {
     ['dirt', { sx: 32, sy: 2576, sw: 16, sh: 16 }],
     ['sand', { sx: 40, sy: 2208, sw: 16, sh: 16 }],
     ['stone', { sx: 130, sy: 3184, sw: 16, sh: 16 }],
-    // Two distinct rocks: small grey pebble (1x1) and chunky pale-green
-    // boulder (2x2). Catalog keeps both available.
-    ['rock', { sx: 64, sy: 6240, sw: 32, sh: 32 }],
-    ['rock_2x2', { sx: 0, sy: 6272, sw: 32, sh: 32 }],
+    // In-use defaults pick brownish variants from the rocks-page catalog.
+    ['rock', { sx: 224, sy: 6208, sw: 32, sh: 32 }],
+    ['rock_2x2', { sx: 128, sy: 6208, sw: 32, sh: 32 }],
+    // A representative subset of the named catalog — the rest follow the
+    // same shape and are exercised together via TILESET_REGIONS itself.
+    ['rock_small_grey', { sx: 64, sy: 6240, sw: 32, sh: 32 }],
+    ['rock_pile_sandy', { sx: 128, sy: 6208, sw: 32, sh: 32 }],
+    ['rock_chunky_green', { sx: 0, sy: 6272, sw: 32, sh: 32 }],
+    ['rock_chunky_brown', { sx: 160, sy: 6272, sw: 32, sh: 32 }],
     ['tree_2x2', { sx: 0, sy: 0, sw: 64, sh: 64 }],
   ])('exports the %s region', (name, region) => {
     expect(TILESET_REGIONS[name]).toEqual(region);
