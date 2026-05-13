@@ -178,17 +178,11 @@ export class BlinkingGroveZone {
             },
             offsetX: 56, // Positioned to connect directly to the main area
             offsetY: 1, // Same vertical level as the main area
-            decorations: [
-              // 2x2 chunky boulders dropped in open path stretches of the
-              // hidden-area maze. Top row is pass-through so the cursor
-              // can walk into it and be visually hidden behind the rock's
-              // upper half (collisionFootprintH: 1). renderScale shrinks
-              // the drawn sprite by 20% so the boulder reads chunky but
-              // not oversized against the 32x32 grid.
-              { regionName: 'rock_2x2', position: [2, 11], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1, renderScale: 0.7 },
-              { regionName: 'rock_2x2', position: [26, 11], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1, renderScale: 0.7 },
-              { regionName: 'rock_2x2', position: [20, 4], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1, renderScale: 0.7 },
-            ],
+            // No 2x2 boulder decorations in this hidden area — every row of
+            // its floor carries poem text labels, so any 2x2 placement
+            // covers letters. The rock_2x2 decoration is still available
+            // for zones with open floor space.
+            decorations: [],
             textLabels: [
               // "vim Total Rulez!!!" text in the hidden area (centered in the wider area)
               { text: 'v', position: [16, 0], color: '#ff6b6b', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
