@@ -11,10 +11,13 @@ describe('TilesetRegions', () => {
 
   it.each([
     ['water', { sx: 32, sy: 3680, sw: 16, sh: 16 }],
-    ['path', { sx: 128, sy: 2640, sw: 16, sh: 16 }],
+    // path now reuses the sand region so floors read warm and pale.
+    ['path', { sx: 40, sy: 2208, sw: 16, sh: 16 }],
     ['dirt', { sx: 32, sy: 2576, sw: 16, sh: 16 }],
     ['sand', { sx: 40, sy: 2208, sw: 16, sh: 16 }],
     ['stone', { sx: 130, sy: 3184, sw: 16, sh: 16 }],
+    // Chunky pale-green boulder from the big-rocks row of the rocks page.
+    ['rock', { sx: 0, sy: 6272, sw: 32, sh: 32 }],
     ['tree_2x2', { sx: 0, sy: 0, sw: 64, sh: 64 }],
   ])('exports the %s region', (name, region) => {
     expect(TILESET_REGIONS[name]).toEqual(region);
