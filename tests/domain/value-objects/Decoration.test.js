@@ -142,6 +142,25 @@ describe('Decoration', () => {
       });
       expect(d.baseY).toBe(5);
     });
+
+    it('renderScale defaults to 1.0 and accepts a smaller value', () => {
+      const a = new Decoration({
+        regionName: 'rock_2x2',
+        anchor: new Position(0, 0),
+        footprintW: 2,
+        footprintH: 2,
+      });
+      expect(a.renderScale).toBe(1.0);
+
+      const b = new Decoration({
+        regionName: 'rock_2x2',
+        anchor: new Position(0, 0),
+        footprintW: 2,
+        footprintH: 2,
+        renderScale: 0.8,
+      });
+      expect(b.renderScale).toBe(0.8);
+    });
   });
 
   describe('overlapsBounds', () => {
