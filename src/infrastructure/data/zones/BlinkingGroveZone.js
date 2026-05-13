@@ -148,19 +148,19 @@ export class BlinkingGroveZone {
             id: 'vim_secret_area',
             revealWhen: 'escProgression',
             layout: [
-              'CWWWWWWWWWWWWWWWPPPRPPPPRPPRPPPPPPPPWWWWWWWWWWWWWWWW',
+              'CWWWWWWWWWWWWWWWPPPPPPPPRPPRPPPPPPPPWWWWWWWWWWWWWWWW',
               'PWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWCWWWWWWWWWWWWWWWW',
               'PCWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWCWWWWWWWWWWWWWWWW',
-              'PPPPPRPPPPPPPPPRPPPPPPPWWWWWWWWWWWWCWWWWWWWWWWWWWWWW',
+              'PPPPPPPPPPPPPPPRPPPPPPPWWWWWWWWWWWWCWWWWWWWWWWWWWWWW',
               'PPPPPPRPPPPPPPPPPPPPRPPPPPPPPPPPWWWCWWWWWWWWWWWWWWWW',
-              'PPPPPPPPRPPPPPPPPPPPPPRPPPPPWWWWWWWCWWWWWWWWWWWWWWWW',
-              'PPPPPPPRPPPPPPPPRPPRPPPPPWWWWWWWWWWCWWWWWWWWWWWWWWWW',
-              'PRPPPPPPRRRRPPPPRWWWWWWWWWWWWWPPPPPPWWWWWWWWWWWWWWWW',
-              'PPPRPPPPRPPPRPPPPPPPPWWWWWWWWWPPPPPRWWWWWWWWWWWWWWWW',
-              'PPPPPPPPPRPPPRPPPPPPPPWWWWWWWWPPPPRPWWWWWWWWWWWWWWWW',
-              'PPRPPPPPPPRPPPRPPPPPPPPPWWWWWWWWWWWCWWWWWWWWWWWWWWWW',
-              'PRPPPPPPPPPRRRWWWWWWWWWWWWWWWWWWWWWCWWWWWWWWWWWWWWWW',
-              'PPPPPPPRPPPPPPPPPPPPRPPPPRPPPPPPPPPCWWWWWWWWWWWWWWWW',
+              'PPPPPPPPRPPPPPPPPPPPPPPPPPPPWWWWWWWCWWWWWWWWWWWWWWWW',
+              'PPPPPPPRPPPPPPPPPPPRPPPPPWWWWWWWWWWCWWWWWWWWWWWWWWWW',
+              'PRPPPPPPPRPRPPPPRWWWWWWWWWWWWWPPPPPPWWWWWWWWWWWWWWWW',
+              'PPPRPPPPRPPPPPPPPPPPPWWWWWWWWWPPPPPRWWWWWWWWWWWWWWWW',
+              'PPPPPPPPPRPPPPPPPPPPPPWWWWWWWWPPPPRPWWWWWWWWWWWWWWWW',
+              'PPRPPPPPPPPPPPRPPPPPPPPPWWWWWWWWWWWCWWWWWWWWWWWWWWWW',
+              'PRPPPPPPPPPRPRWWWWWWWWWWWWWWWWWWWWWCWWWWWWWWWWWWWWWW',
+              'PPPPPPPRPPPPPPPPPPPPPPPPPRPPPPPPPPPCWWWWWWWWWWWWWWWW',
               'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGWWWWWWWWWWWWWWWWW',
               'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGWWWWWWWWWWWWWWWWW',
               'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGWWWWWWWWWWWWWWWWW',
@@ -178,11 +178,27 @@ export class BlinkingGroveZone {
             },
             offsetX: 56, // Positioned to connect directly to the main area
             offsetY: 1, // Same vertical level as the main area
-            // No 2x2 boulder decorations in this hidden area — every row of
-            // its floor carries poem text labels, so any 2x2 placement
-            // covers letters. The rock_2x2 decoration is still available
-            // for zones with open floor space.
-            decorations: [],
+            // ~30% of the hidden-area rocks use the chunky rock_2x2 sprite
+            // (the sandy pile boulder) instead of the small brown round
+            // pebble, mixing two distinct rock looks on the maze floor.
+            // Each entry replaces one of the layout's `R` cells with a
+            // 1x1 blocking decoration — same collision footprint as the
+            // tile it replaces, just a bigger-looking sprite. (2x2
+            // footprints would cover poem letters and aren't usable
+            // here; we stick with 1x1 in this poem-dense zone.)
+            decorations: [
+              { regionName: 'rock_2x2', position: [19, 0],  footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [5, 3],   footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [22, 5],  footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [16, 6],  footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [8, 7],   footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [10, 7],  footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [12, 8],  footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [13, 9],  footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [10, 10], footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [12, 11], footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [20, 12], footprintW: 1, footprintH: 1, blocking: true },
+            ],
             textLabels: [
               // "vim Total Rulez!!!" text in the hidden area (centered in the wider area)
               { text: 'v', position: [16, 0], color: '#ff6b6b', fontSize: '20px', fontWeight: 'bold', group: 'vim_secret_header' },
