@@ -121,7 +121,10 @@ export class VimForKidsGame {
           this.currentGameId,
           this.cutsceneService,
           this.cutsceneRenderer,
-          { initialCollectedKeys: this._carriedCollectedKeys || null }
+          {
+            initialCollectedKeys: this._carriedCollectedKeys || null,
+            initialCollectedCollectibleKeys: this._carriedCollectibleKeys || null,
+          }
         );
       } catch (error) {
         // Fallback to textland game state
@@ -341,6 +344,14 @@ export class VimForKidsGame {
     this._carriedCollectedKeys =
       this.gameState && this.gameState.collectedKeys
         ? new Set(this.gameState.collectedKeys)
+        : null;
+
+    // Carry the master key (and only the master key — silver/golden/bronze
+    // keys are zone-local) across the level boundary so a player who's
+    // already pocketed it can spend it on the next level's first door.
+    this._carriedCollectibleKeys =
+      this.gameState && this.gameState.collectedCollectibleKeys
+        ? new Set([...this.gameState.collectedCollectibleKeys].filter((id) => id === 'master_key'))
         : null;
 
     // Clean up current game state
