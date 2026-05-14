@@ -118,6 +118,7 @@ export class CommandCavernZone {
             'The cavern yields to your mastery. The playground awaits your skills.',
           ],
           position: [26, 31],
+          walkable: false, // Bump-to-talk; the player can't stand on this NPC.
         },
       ],
       events: [

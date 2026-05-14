@@ -144,6 +144,7 @@ export class FieldOfInsertionZone {
             'Text flows like poetry through your fingers.',
           ],
           position: [47, 31],
+          walkable: false, // Bump-to-talk; not steppable.
         },
       ],
       events: [

@@ -129,6 +129,7 @@ export class DeleteCanyonZone {
             'The path ahead leads to creation - the Field of Insertion awaits.',
           ],
           position: [2, 31],
+          walkable: false, // Bump-to-talk; not steppable.
         },
       ],
       events: [

@@ -130,6 +130,7 @@ export class MazeOfModesZone {
             'The maze yields to your understanding.',
           ],
           position: [46, 27],
+          walkable: false, // Bump-to-talk; not steppable.
         },
       ],
       events: [
