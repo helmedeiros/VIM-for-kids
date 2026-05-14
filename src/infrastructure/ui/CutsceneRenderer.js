@@ -163,6 +163,12 @@ export class CutsceneRenderer {
     this._isVisible = false;
     this._completionCallback = null;
     this._currentTimeouts = [];
+    // Promise tail used to serialize concurrent showCutscene calls.
+    // If a second caller fires while another cutscene is still on
+    // screen, this chain makes it wait — preventing two overlays from
+    // stacking (which would otherwise leave one undismissable, since
+    // hideCutscene only removes the most-recently-tracked overlay).
+    this._showChain = Promise.resolve();
   }
 
   /**
@@ -170,28 +176,46 @@ export class CutsceneRenderer {
    * @param {Object} cutsceneStory - The cutscene story to display (can be OriginStory or CutsceneStory)
    * @returns {Promise} Promise that resolves when cutscene is complete
    */
-  async showCutscene(cutsceneStory) {
+  showCutscene(cutsceneStory) {
     if (!cutsceneStory || !CutsceneLogic.isValidScript(cutsceneStory.script)) {
       return Promise.resolve();
     }
 
+    let next;
+    if (this._isVisible) {
+      // Something is already on screen — queue behind it so the new
+      // overlay doesn't stack on top of the current one.
+      next = this._showChain.then(() => this._presentCutscene(cutsceneStory));
+    } else {
+      // Idle — start rendering this cutscene in the current task so
+      // the overlay's DOM is available to synchronous observers.
+      next = this._presentCutscene(cutsceneStory);
+    }
+    // Swallow rejections on the chain itself; individual callers still
+    // see them via the returned `next` promise.
+    this._showChain = next.catch(() => undefined);
+    return next;
+  }
+
+  /**
+   * Internal: render one cutscene overlay end-to-end. Should never be
+   * called concurrently — `showCutscene` is the public entry point and
+   * serializes via _showChain.
+   * @private
+   */
+  _presentCutscene(cutsceneStory) {
     return new Promise((resolve) => {
-      // Determine cutscene type from the story object
       const cutsceneType = cutsceneStory.type || 'game';
 
       this._createCutsceneOverlay(cutsceneType);
       this._isVisible = true;
 
-      // Setup completion handler
       const completeHandler = () => {
         this._handleCutsceneComplete(cutsceneStory);
         resolve();
       };
 
-      // Display script lines with timing
       this._displayScript(cutsceneStory.script, completeHandler);
-
-      // Allow click to skip
       this._cutsceneOverlay.addEventListener('click', completeHandler, { once: true });
     });
   }
