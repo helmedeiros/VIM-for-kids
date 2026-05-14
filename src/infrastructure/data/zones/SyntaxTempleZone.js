@@ -134,6 +134,7 @@ export class SyntaxTempleZone {
               dialogue: 'THISSS ISSS THE END, CURSSSSOR!',
             },
           ],
+          walkable: false, // Boss is blocking by design — bump-to-fight.
         },
         {
           id: 'victory_spirit',
@@ -145,6 +146,7 @@ export class SyntaxTempleZone {
             'The world of text bows to your expertise. Well done!',
           ],
           position: [26, 31],
+          walkable: false, // Bump-to-talk; not steppable.
         },
       ],
       events: [

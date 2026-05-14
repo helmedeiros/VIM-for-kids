@@ -129,6 +129,7 @@ export class CopyCircleZone {
             'The circle is complete. Seek now the reflective pools of Search Springs.',
           ],
           position: [26, 31],
+          walkable: false, // Bump-to-talk; not steppable.
         },
       ],
       events: [

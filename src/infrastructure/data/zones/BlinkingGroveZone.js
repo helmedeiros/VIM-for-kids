@@ -537,6 +537,7 @@ export class BlinkingGroveZone {
             'The paths ahead... await your steps.',
           ],
           position: [6, 10], // NPC position in the stone maze
+          walkable: false, // Block step-onto so the player has to bump-to-talk.
         },
         {
           id: 'gate_completion_spirit',

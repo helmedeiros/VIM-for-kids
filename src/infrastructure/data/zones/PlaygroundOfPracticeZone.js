@@ -165,6 +165,7 @@ export class PlaygroundOfPracticeZone {
             'Every skill you practice makes you stronger! 💪',
           ],
           position: [10, 8],
+          walkable: false, // Bump-to-talk; not steppable.
         },
         {
           id: 'practice_buddy_2',
@@ -177,6 +178,7 @@ export class PlaygroundOfPracticeZone {
             "Keep exploring - there's so much more to discover!",
           ],
           position: [40, 13],
+          walkable: false, // Bump-to-talk; not steppable.
         },
         {
           id: 'practice_buddy_3',
@@ -189,6 +191,7 @@ export class PlaygroundOfPracticeZone {
             "You're becoming a real VIM warrior!",
           ],
           position: [25, 18],
+          walkable: false, // Bump-to-talk; not steppable.
         },
         {
           id: 'final_practice_buddy',
@@ -203,6 +206,7 @@ export class PlaygroundOfPracticeZone {
             'The playground celebrates your mastery!',
           ],
           position: [26, 0],
+          walkable: false, // Bump-to-talk; not steppable.
         },
       ],
       events: [

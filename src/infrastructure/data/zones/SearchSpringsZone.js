@@ -116,6 +116,7 @@ export class SearchSpringsZone {
             '~ The springs sing your victory! ~',
           ],
           position: [25, 1],
+          walkable: false, // Bump-to-talk; not steppable.
         },
       ],
       events: [

@@ -146,6 +146,7 @@ export class SwampOfWordsZone {
             'The swamp yields its secrets to you. Pass, and face the canyon ahead.',
           ],
           position: [1, 29],
+          walkable: false, // Bump-to-talk; not steppable.
         },
       ],
       events: [
