@@ -122,19 +122,21 @@ export class CanvasGameRenderer extends GameRenderer {
   _initSprites() {
     try {
       const ts = this._camera.tileSize;
-      const painter = new TilePainter(ts, 28);
+      const painter = new TilePainter(ts, 29);
 
       const tilesetCanvas = painter.createTilesetCanvas();
-      const tilesetSheet = new SpriteSheet(tilesetCanvas, ts, ts, 28);
+      const tilesetSheet = new SpriteSheet(tilesetCanvas, ts, ts, 29);
       this._tileRenderer = new TileRenderer(tilesetSheet, this._tileAtlas, ts);
 
-      // Register the 1x1 procedural decoration sprites (frames 25-27 of the
+      // Register the 1x1 procedural decoration sprites (frames 25-28 of the
       // tileset canvas) as TileAtlas regions so they can be used as
-      // Decoration regionName values without needing a separate PNG.
+      // Decoration regionName values or as CollectibleKey spriteRegion
+      // overrides without needing a separate PNG.
       const proceduralDecorations = {
         flower_cluster: 25,
         mushroom: 26,
         tall_grass: 27,
+        treasure_chest: 28,
       };
       for (const [name, frame] of Object.entries(proceduralDecorations)) {
         this._tileAtlas.registerRegion(name, {

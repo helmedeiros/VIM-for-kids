@@ -79,6 +79,14 @@ export class Gate {
    * @returns {boolean} - Whether the gate can be unlocked
    */
       canUnlock(collectedVimKeys = new Set(), collectedCollectibleKeyIds = new Set()) {
+    // Master key is a universal one-shot unlocker — if the player has
+    // one in their inventory, it opens this door regardless of the
+    // declared requirements. The caller is responsible for consuming
+    // the master_key after the unlock so it's only good for one door.
+    if (collectedCollectibleKeyIds && collectedCollectibleKeyIds.has('master_key')) {
+      return true;
+    }
+
     // If no unlock conditions defined at all, gate cannot be unlocked (stays closed)
     if (!this._unlockConditions || Object.keys(this._unlockConditions).length === 0) {
       return false;
@@ -109,6 +117,17 @@ export class Gate {
 
     // Both conditions must be met if specified
     return vimKeysMatch && collectibleKeysMatch;
+  }
+
+  /**
+   * Variant of canUnlock that ignores the master_key wildcard. Used by
+   * Zone to decide whether to consume the master key vs the normal
+   * required keys when both could have opened the gate.
+   */
+  canUnlockWithoutMasterKey(collectedVimKeys = new Set(), collectedCollectibleKeyIds = new Set()) {
+    const filtered = new Set(collectedCollectibleKeyIds);
+    filtered.delete('master_key');
+    return this.canUnlock(collectedVimKeys, filtered);
   }
 
   /**
