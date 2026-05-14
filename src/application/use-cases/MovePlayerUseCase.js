@@ -26,6 +26,12 @@ export class MovePlayerUseCase {
       return this._executeWordMotion('b', WordMotion.findPreviousWordStart);
     }
 
+    // Any user-initiated move ends the current dialogue balloon. If the
+    // move turns into a new bump or steps onto a walkable NPC, a fresh
+    // balloon will replace it; otherwise the player has walked away and
+    // the bubble disappears immediately instead of lingering on a timer.
+    this._dismissLingeringBalloons();
+
     const currentPosition = this._gameState.cursor.position;
     const newPosition = this._calculateNewPosition(currentPosition, direction);
 
@@ -75,6 +81,11 @@ export class MovePlayerUseCase {
   // picks WHICH word-position to land on (start vs end). Required key is the
   // vim-key letter the player must have collected to use this motion.
   async _executeWordMotion(requiredKey, findTarget) {
+    // Word-motion is also a "user move" — dismiss any lingering balloon
+    // before the BFS runs, so jumping away from an NPC clears the bubble
+    // immediately.
+    this._dismissLingeringBalloons();
+
     if (!this._hasCollectedKey(requiredKey)) {
       return { success: false, reason: 'word_motion_locked' };
     }
@@ -592,6 +603,12 @@ export class MovePlayerUseCase {
     }
 
     return null;
+  }
+
+  _dismissLingeringBalloons() {
+    if (this._gameRenderer && typeof this._gameRenderer.fadeOutExistingBalloons === 'function') {
+      this._gameRenderer.fadeOutExistingBalloons();
+    }
   }
 
   _checkNPCInteraction() {
