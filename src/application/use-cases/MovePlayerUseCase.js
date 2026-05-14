@@ -87,17 +87,20 @@ export class MovePlayerUseCase {
     this._dismissLingeringBalloons();
 
     if (!this._hasCollectedKey(requiredKey)) {
+      this._showHint(`I don't have the '${requiredKey}' button!`);
       return { success: false, reason: 'word_motion_locked' };
     }
 
     const labels = this._gameState.getTextLabels();
     if (labels.length === 0) {
+      this._showHint(`'${requiredKey}' can only be used on text.`);
       return { success: false, reason: 'no_text' };
     }
 
     const cursorPos = this._gameState.cursor.position;
     const onText = labels.some((l) => l.position.equals(cursorPos));
     if (!onText) {
+      this._showHint(`'${requiredKey}' can only be used on text.`);
       return { success: false, reason: 'not_on_text' };
     }
 
@@ -608,6 +611,12 @@ export class MovePlayerUseCase {
   _dismissLingeringBalloons() {
     if (this._gameRenderer && typeof this._gameRenderer.fadeOutExistingBalloons === 'function') {
       this._gameRenderer.fadeOutExistingBalloons();
+    }
+  }
+
+  _showHint(message) {
+    if (this._gameRenderer && typeof this._gameRenderer.showCursorHintBalloon === 'function') {
+      this._gameRenderer.showCursorHintBalloon(message);
     }
   }
 

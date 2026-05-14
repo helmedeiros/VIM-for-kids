@@ -349,6 +349,37 @@ describe('CanvasGameRenderer', () => {
     });
   });
 
+  describe('showCursorHintBalloon', () => {
+    it('renders an NPC-style balloon with the provided message', () => {
+      renderer.showCursorHintBalloon("'w' can only be used on text.");
+      const balloons = document.querySelectorAll('.npc-balloon');
+      expect(balloons).toHaveLength(1);
+      expect(balloons[0].textContent).toBe("'w' can only be used on text.");
+    });
+
+    it('removes itself after the configured duration', () => {
+      jest.useFakeTimers();
+      try {
+        renderer.showCursorHintBalloon('hi', { duration: 100 });
+        expect(document.querySelector('.npc-balloon')).not.toBeNull();
+        jest.advanceTimersByTime(120);
+        expect(document.querySelector('.npc-balloon')).toBeNull();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('replaces any existing balloon when a new hint fires', () => {
+      renderer.showCursorHintBalloon('first');
+      renderer.showCursorHintBalloon('second');
+      const visible = Array.from(document.querySelectorAll('.npc-balloon')).filter(
+        (b) => !b.classList.contains('fade-out')
+      );
+      expect(visible).toHaveLength(1);
+      expect(visible[0].textContent).toBe('second');
+    });
+  });
+
   describe('hideMessage', () => {
     it('removes current message', () => {
       renderer.showMessage('Test');
