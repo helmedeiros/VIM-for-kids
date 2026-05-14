@@ -43,11 +43,11 @@ export class BlinkingGroveZone {
         // Large layout matching the image: water left, grass center-left, stone maze right
         layout: [
           'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWGGGGGGGGD',
-          'WWWWWWWWWWWWWWWWRRRRRRRRRRRRSSSSSSSSSSSSSSSSSSSSSSSSSSSSSGGGGGGWWWGWWWWWGDD',
-          'WWWWWWWWWWWWWWWWRPPPPPPPPPRRDDDDDDDDSDDDDDSDDDDDDDDSDDDGGGGGGGWWWWGGGGGWDDD',
-          'WWWWWWWWWWWWWWWWRPPPPPPPPPRRDSSSSSSDSDSSSDSDSSSDSSDSDSSSSGGGGWWWWWWWGGWWWWW',
-          'WWWWWWWWWWWWWWWWRPPPPPPPPPRDDSDDDDDDSDSDSDSDSDSDSSDSDSDSWGGGWWWWGGGGGGWWWWW',
-          'WWWWWWWWWWWWWWWWRRRRRRRRRRRDSSSSSSSDSDSDSDSDSDSDSSDSDDDSWGGGGGWWGWWWWWWWWWW',
+          'WWWWWWWWWWWWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSGGGGGGWWWGWWWWWGDD',
+          'WWWWWWWWWWWWWWWWSPPPPPPPPPSSDDDDDDDDSDDDDDSDDDDDDDDSDDDGGGGGGGWWWWGGGGGWDDD',
+          'WWWWWWWWWWWWWWWWSPPPPPPPPPSSDSSSSSSDSDSSSDSDSSSDSSDSDSSSSGGGGWWWWWWWGGWWWWW',
+          'WWWWWWWWWWWWWWWWSPPPPPPPPPSDDSDDDDDDSDSDSDSDSDSDSSDSDSDSWGGGWWWWGGGGGGWWWWW',
+          'WWWWWWWWWWWWWWWWSPPPPPPPPPSDSSSSSSSDSDSDSDSDSDSDSSDSDDDSWGGGGGWWGWWWWWWWWWW',
           'WWWWWWWWWWWWWWWWSDDDDDDDDDSDSDDDDDSD<DSDSDSDSDDDDDDSDSDSWGGWWWWWGGGWWWWWWWW',
           'WWWWWWWWWWWWWWWWSSSSSSSSSDSDSDSSSSSDSSSDSDSDSSSSSSSSDSDSWGGGWWWWGGGGGWWWWWW',
           'GGGGGGGGGGGGWWWWSDDDDDDDDDDDSDSDDDSD>DDDSDSDDDDDDDDDDSDSWGGWWWWWGWWWWWWWWWW',
@@ -84,6 +84,21 @@ export class BlinkingGroveZone {
             footprintH: 2,
             blocking: true,
           },
+          // First line beneath the "not WORDS" text in the labyrinth's
+          // top-left room. Each cell uses the chunky boulder sprite
+          // (rock_2x2) at a 1x1 footprint — same look the hidden area
+          // uses to mix small + big rocks. Word-motion already treats
+          // blocking decorations as hoppable, so the row reads as
+          // "use w/e/b to skim across the words box".
+          { regionName: 'rock_2x2', position: [17, 5], footprintW: 1, footprintH: 1, blocking: true },
+          { regionName: 'rock_2x2', position: [18, 5], footprintW: 1, footprintH: 1, blocking: true },
+          { regionName: 'rock_2x2', position: [19, 5], footprintW: 1, footprintH: 1, blocking: true },
+          { regionName: 'rock_2x2', position: [20, 5], footprintW: 1, footprintH: 1, blocking: true },
+          { regionName: 'rock_2x2', position: [21, 5], footprintW: 1, footprintH: 1, blocking: true },
+          { regionName: 'rock_2x2', position: [22, 5], footprintW: 1, footprintH: 1, blocking: true },
+          { regionName: 'rock_2x2', position: [23, 5], footprintW: 1, footprintH: 1, blocking: true },
+          { regionName: 'rock_2x2', position: [24, 5], footprintW: 1, footprintH: 1, blocking: true },
+          { regionName: 'rock_2x2', position: [25, 5], footprintW: 1, footprintH: 1, blocking: true },
         ],
         specialTiles: [
           { type: 'vim_key', value: 'h', position: [1, 10] }, // Left movement key - on grass
