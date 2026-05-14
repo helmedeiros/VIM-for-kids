@@ -82,7 +82,7 @@ describe('Blinking Grove Game Integration', () => {
 
     it('should display text labels on the ground', () => {
       const textLabels = game.gameState.getTextLabels();
-      expect(textLabels).toHaveLength(36); // Updated for new layout: "Remember: words are not WORDS" + "Hello world!"
+      expect(textLabels).toHaveLength(37); // "Remember: words are not WORDS" + entry punctuation + "Hello world!"
 
       // Check that the individual characters for "Hello world!" are present
       const textContents = textLabels.map((label) => label.text);

@@ -46,8 +46,8 @@ export class BlinkingGroveZone {
           'WWWWWWWWWWWWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSGGGGGGWWWGWWWWWGDD',
           'WWWWWWWWWWWWWWWWSPPPPPPPPPSSDDDDDDDDSDDDDDSDDDDDDDDSDDDGGGGGGGWWWWGGGGGWDDD',
           'WWWWWWWWWWWWWWWWSPPPPPPPPPSSDSSSSSSDSDSSSDSDSSSDSSDSDSSSSGGGGWWWWWWWGGWWWWW',
-          'WWWWWWWWWWWWWWWWSPPPPPPPPPSDDSDDDDDDSDSDSDSDSDSDSSDSDSDSWGGGWWWWGGGGGGWWWWW',
-          'WWWWWWWWWWWWWWWWSPPPPPPPPPSDSSSSSSSDSDSDSDSDSDSDSSDSDDDSWGGGGGWWGWWWWWWWWWW',
+          'WWWWWWWWWWWWWWWWSPPPPPPPPPPPDSDDDDDDSDSDSDSDSDSDSSDSDSDSWGGGWWWWGGGGGGWWWWW',
+          'WWWWWWWWWWWWWWWWSDDDDDDDDDDDSSSSSSSDSDSDSDSDSDSDSSDSDDDSWGGGGGWWGWWWWWWWWWW',
           'WWWWWWWWWWWWWWWWSDDDDDDDDDSDSDDDDDSD<DSDSDSDSDDDDDDSDSDSWGGWWWWWGGGWWWWWWWW',
           'WWWWWWWWWWWWWWWWSSSSSSSSSDSDSDSSSSSDSSSDSDSDSSSSSSSSDSDSWGGGWWWWGGGGGWWWWWW',
           'GGGGGGGGGGGGWWWWSDDDDDDDDDDDSDSDDDSD>DDDSDSDDDDDDDDDDSDSWGGWWWWWGWWWWWWWWWW',
@@ -99,6 +99,8 @@ export class BlinkingGroveZone {
           { regionName: 'rock_2x2', position: [23, 5], footprintW: 1, footprintH: 1, blocking: true },
           { regionName: 'rock_2x2', position: [24, 5], footprintW: 1, footprintH: 1, blocking: true },
           { regionName: 'rock_2x2', position: [25, 5], footprintW: 1, footprintH: 1, blocking: true },
+          { regionName: 'rock_2x2', position: [26, 5], footprintW: 1, footprintH: 1, blocking: true },
+          { regionName: 'rock_2x2', position: [26, 4], footprintW: 1, footprintH: 1, blocking: true },
         ],
         specialTiles: [
           { type: 'vim_key', value: 'h', position: [1, 10] }, // Left movement key - on grass
@@ -138,6 +140,7 @@ export class BlinkingGroveZone {
           { text: 'R', position: [23, 4], color: '#000', fontSize: '14px' },
           { text: 'D', position: [24, 4], color: '#000', fontSize: '14px' },
           { text: 'S', position: [25, 4], color: '#000', fontSize: '14px' },
+          { text: '!', position: [27, 4], color: '#000', fontSize: '14px' },
 
           // "Hello" text on the grass area
           { text: 'H', position: [2, 13], color: '#22c55e', fontSize: '16px' },
@@ -204,14 +207,14 @@ export class BlinkingGroveZone {
             // footprints would cover poem letters and aren't usable
             // here; we stick with 1x1 in this poem-dense zone.)
             decorations: [
-              { regionName: 'rock_2x2', position: [19, 0],  footprintW: 1, footprintH: 1, blocking: true },
-              { regionName: 'rock_2x2', position: [5, 3],   footprintW: 1, footprintH: 1, blocking: true },
-              { regionName: 'rock_2x2', position: [22, 5],  footprintW: 1, footprintH: 1, blocking: true },
-              { regionName: 'rock_2x2', position: [16, 6],  footprintW: 1, footprintH: 1, blocking: true },
-              { regionName: 'rock_2x2', position: [8, 7],   footprintW: 1, footprintH: 1, blocking: true },
-              { regionName: 'rock_2x2', position: [10, 7],  footprintW: 1, footprintH: 1, blocking: true },
-              { regionName: 'rock_2x2', position: [12, 8],  footprintW: 1, footprintH: 1, blocking: true },
-              { regionName: 'rock_2x2', position: [13, 9],  footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [19, 0], footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [5, 3], footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [22, 5], footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [16, 6], footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [8, 7], footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [10, 7], footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [12, 8], footprintW: 1, footprintH: 1, blocking: true },
+              { regionName: 'rock_2x2', position: [13, 9], footprintW: 1, footprintH: 1, blocking: true },
               { regionName: 'rock_2x2', position: [10, 10], footprintW: 1, footprintH: 1, blocking: true },
               { regionName: 'rock_2x2', position: [12, 11], footprintW: 1, footprintH: 1, blocking: true },
               { regionName: 'rock_2x2', position: [20, 12], footprintW: 1, footprintH: 1, blocking: true },
@@ -487,7 +490,7 @@ export class BlinkingGroveZone {
               // collect-to-unlock mechanic is unchanged, only the artwork.
               // Each gem charges its matching energy-meter gate below.
               { type: 'collectible_key', keyId: 'golden_key', name: 'Orange Gem', color: '#FFD700', spriteRegion: 'gem_orange', position: [12, 9] }, // Next to 'm' in 'vim'
-              { type: 'collectible_key', keyId: 'silver_key', name: 'Green Gem',  color: '#C0C0C0', spriteRegion: 'gem_green',  position: [33, 9] }, // Next to 'l' in 'Total'
+              { type: 'collectible_key', keyId: 'silver_key', name: 'Green Gem', color: '#C0C0C0', spriteRegion: 'gem_green', position: [33, 9] }, // Next to 'l' in 'Total'
               { type: 'collectible_key', keyId: 'bronze_key', name: 'Bronze Gem', color: '#CD7F32', spriteRegion: 'gem_bronze', position: [26, 0] }, // Next to 'z' in 'Rulez'
               { type: 'vim_key', value: 'w', position: [6, 3], description: 'w - jump forward to next word' },
               { type: 'vim_key', value: 'e', position: [11, 8], description: 'e - jump to end of word' },
