@@ -117,16 +117,21 @@ export class CursorBeforeClickersGame {
         enableCutsceneSkipping: true,
         // The first scene sets the mood (corruption of Textland) before
         // the zone-entry cutscene re-introduces Cursor in the Blinking
-        // Grove. Lines that the zone narration restates ("Once, the
-        // world was clear" / "Then from the Blinking Grove…" / "Hello,
-        // Cursor") have been removed here so the player doesn't hear
-        // them twice.
+        // Grove. Only the lines that the zone narration literally
+        // restates ("Then from the Blinking Grove…" / "Hello, Cursor")
+        // have been removed here so the player doesn't hear them twice.
+        // The opening "Once, the world was clear / Text flowed like
+        // rivers / But the Bugs came." stays — it's the world setup
+        // and reads as separate from the zone-level recap.
         originStory: [
           '🎵 [Background: soft ambient melody, typewriter clacks echo gently]',
           '',
           '[BLACK SCREEN]',
           '',
           'NARRATOR (calm, magical voice):',
+          'Once, the world was clear.',
+          'Text flowed like rivers, perfectly aligned.',
+          'But the Bugs came.',
           'They chewed through the order,',
           'left commands scrambled,',
           'and the caret spirits lost their voice.',
