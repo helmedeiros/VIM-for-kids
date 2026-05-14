@@ -346,6 +346,54 @@ describe('Cutscene Type Detection', () => {
     await showCutscenePromise;
   });
 
+  it('serializes overlapping showCutscene calls so two overlays never coexist', async () => {
+    const first = {
+      gameId: 'test-game',
+      type: 'level',
+      levelId: 'lvl1',
+      script: ['First cutscene line'],
+    };
+    const second = {
+      gameId: 'test-game',
+      type: 'zone',
+      levelId: 'lvl1',
+      zoneId: 'zoneA',
+      script: ['Second cutscene line'],
+    };
+
+    // Kick off both back-to-back without waiting — this is exactly the
+    // race we hit during a level transition (level cutscene followed by
+    // the new zone's entry cutscene).
+    const firstDone = renderer.showCutscene(first);
+    const secondDone = renderer.showCutscene(second);
+
+    // After both calls resolve their start hop, only ONE overlay should
+    // be in the DOM at any moment.
+    await Promise.resolve();
+    expect(document.querySelectorAll('div[style*="z-index: 10000"]').length).toBe(1);
+    expect(document.body.innerHTML).toContain('First cutscene line');
+    expect(document.body.innerHTML).not.toContain('Second cutscene line');
+
+    // Click through the first; the second should now take over.
+    const firstOverlay = document.querySelector('div[style*="background: rgba(64, 64, 64, 0.95)"]');
+    expect(firstOverlay).toBeTruthy();
+    firstOverlay.click();
+    await firstDone;
+    // Let the chain hop to start the next overlay.
+    await Promise.resolve();
+    await Promise.resolve();
+
+    // Still exactly one overlay — the second cutscene, with its zone
+    // styling — and the first is gone from the DOM.
+    expect(document.querySelectorAll('div[style*="z-index: 10000"]').length).toBe(1);
+    const secondOverlay = document.querySelector('div[style*="background: rgba(0, 0, 0, 0.7)"]');
+    expect(secondOverlay).toBeTruthy();
+    expect(document.body.innerHTML).toContain('Second cutscene line');
+
+    secondOverlay.click();
+    await secondDone;
+  });
+
   it('should use zone background for zone cutscenes', async () => {
     const zoneStory = {
       gameId: 'test-game',
