@@ -867,20 +867,23 @@ describe('MovePlayerUseCase', () => {
         expect(result.success).toBe(true);
       });
 
-      it('should not call fadeOutExistingBalloons when not leaving NPC position', async () => {
-        // Mock game state with no NPCs
+      it('still calls fadeOutExistingBalloons on a plain move with no NPCs around', async () => {
+        // Any user-initiated move dismisses a lingering balloon — even when
+        // no NPC is involved — so the bubble disappears as soon as the
+        // player walks away.
         mockGameState.getCurrentState.mockReturnValue({
           npcs: [],
         });
 
         const result = await movePlayerUseCase.execute('right');
 
-        expect(mockGameRenderer.fadeOutExistingBalloons).not.toHaveBeenCalled();
+        expect(mockGameRenderer.fadeOutExistingBalloons).toHaveBeenCalled();
         expect(result.success).toBe(true);
       });
 
-      it('should not call fadeOutExistingBalloons when moving from NPC to NPC', async () => {
-        // Mock game state with NPCs at both positions
+      it('calls fadeOutExistingBalloons even when moving from one NPC cell to another', async () => {
+        // The old balloon fades; if stepping onto the new walkable NPC
+        // triggers fresh dialog, showNPCBalloon will replace it.
         const mockNPC1 = { position: new Position(5, 5) };
         const mockNPC2 = { position: new Position(6, 5) };
         mockGameState.getCurrentState.mockReturnValue({
@@ -889,8 +892,21 @@ describe('MovePlayerUseCase', () => {
 
         const result = await movePlayerUseCase.execute('right');
 
-        expect(mockGameRenderer.fadeOutExistingBalloons).not.toHaveBeenCalled();
+        expect(mockGameRenderer.fadeOutExistingBalloons).toHaveBeenCalled();
         expect(result.success).toBe(true);
+      });
+
+      it('dismisses lingering balloons even when the move is blocked (walking into water)', async () => {
+        // The player walked away from a non-walkable NPC they bumped into;
+        // the bubble must clear immediately even if the new direction is
+        // not walkable.
+        mockMap.isWalkable.mockReturnValue(false);
+        mockGameState.getCurrentState.mockReturnValue({ npcs: [] });
+
+        const result = await movePlayerUseCase.execute('right');
+
+        expect(mockGameRenderer.fadeOutExistingBalloons).toHaveBeenCalled();
+        expect(result.success).toBe(false);
       });
 
       it('should handle missing fadeOutExistingBalloons method gracefully', async () => {
@@ -920,11 +936,12 @@ describe('MovePlayerUseCase', () => {
           npcs: [mockNPC],
         });
 
-        expect(async () => {
-          await movePlayerUseCase.execute('right');
-        }).not.toThrow();
+        await expect(movePlayerUseCase.execute('right')).resolves.toBeDefined();
 
-        expect(mockGameRenderer.fadeOutExistingBalloons).not.toHaveBeenCalled();
+        // Lingering-balloon dismissal is independent of the NPC interaction
+        // use case — it runs on every move attempt to keep dialog bubbles
+        // from outliving the player's current intent.
+        expect(mockGameRenderer.fadeOutExistingBalloons).toHaveBeenCalled();
       });
     });
 
