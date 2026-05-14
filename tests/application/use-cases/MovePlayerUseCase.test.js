@@ -112,22 +112,30 @@ describe('MovePlayerUseCase', () => {
       it('does nothing when w key has not been collected', async () => {
         mockGameState.collectedKeys = new Set();
         mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+        mockGameRenderer.showCursorHintBalloon = jest.fn();
 
         const result = await movePlayerUseCase.execute('word_forward');
 
         expect(mockGameState.cursor.position.x).toBe(5);
         expect(result.success).toBe(false);
         expect(result.reason).toBe('word_motion_locked');
+        expect(mockGameRenderer.showCursorHintBalloon).toHaveBeenCalledWith(
+          "I don't have the 'w' button!"
+        );
       });
 
       it('does nothing when there are no text labels in the zone', async () => {
         mockGameState.collectedKeys = new Set(['w']);
         mockGameState.getTextLabels = jest.fn().mockReturnValue([]);
+        mockGameRenderer.showCursorHintBalloon = jest.fn();
 
         const result = await movePlayerUseCase.execute('word_forward');
 
         expect(result.success).toBe(false);
         expect(result.reason).toBe('no_text');
+        expect(mockGameRenderer.showCursorHintBalloon).toHaveBeenCalledWith(
+          "'w' can only be used on text."
+        );
       });
 
       it('does nothing when the cursor is not currently sitting on a text label', async () => {
@@ -136,12 +144,16 @@ describe('MovePlayerUseCase', () => {
         mockGameState.getTextLabels = jest.fn().mockReturnValue([
           labelAt(0, 5, 'x'), labelAt(7, 5, 'y'),
         ]);
+        mockGameRenderer.showCursorHintBalloon = jest.fn();
 
         const result = await movePlayerUseCase.execute('word_forward');
 
         expect(result.success).toBe(false);
         expect(result.reason).toBe('not_on_text');
         expect(mockGameState.cursor.position.x).toBe(5);
+        expect(mockGameRenderer.showCursorHintBalloon).toHaveBeenCalledWith(
+          "'w' can only be used on text."
+        );
       });
 
       it('jumps cursor to the start of the next word on the same row', async () => {

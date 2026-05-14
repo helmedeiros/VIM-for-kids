@@ -489,6 +489,48 @@ export class CanvasGameRenderer extends GameRenderer {
     return balloon;
   }
 
+  /**
+   * Show a short hint balloon anchored above the cursor — used for word-
+   * motion feedback like "'w' can only be used on text." Reuses the NPC
+   * balloon styling and the existing fade-out flow, so a subsequent NPC
+   * bump or another hint replaces it cleanly.
+   */
+  showCursorHintBalloon(message, options = {}) {
+    const duration = options.duration === undefined ? 2500 : options.duration;
+    this.fadeOutExistingBalloons();
+
+    const balloon = document.createElement('div');
+    balloon.className = 'npc-balloon';
+    balloon.textContent = message;
+
+    const container = this._container || document.body;
+    balloon.style.position = 'absolute';
+    container.appendChild(balloon);
+
+    const ts = this._camera ? this._camera.tileSize : 32;
+    const camOffsetX = (this._camera && this._camera.cursorOffsetX) || 0;
+    const camOffsetY = (this._camera && this._camera.cursorOffsetY) || 0;
+    const canvasRect = this.gameBoard ? this.gameBoard.getBoundingClientRect() : null;
+    const containerRect = container.getBoundingClientRect();
+
+    if (canvasRect) {
+      const cursorCenterX = canvasRect.left + camOffsetX + ts / 2;
+      const cursorTopY = canvasRect.top + camOffsetY;
+      const balloonLeft = cursorCenterX - containerRect.left;
+      const balloonTop = cursorTopY - containerRect.top - balloon.offsetHeight - 18;
+
+      balloon.style.left = `${balloonLeft}px`;
+      balloon.style.top = `${Math.max(balloonTop, 10)}px`;
+      balloon.style.transform = 'translateX(-50%)';
+    }
+
+    setTimeout(() => {
+      if (balloon.parentNode) balloon.remove();
+    }, duration);
+
+    return balloon;
+  }
+
   fadeOutExistingBalloons() {
     const container = this._container || document.body;
     const balloons = container.querySelectorAll('.npc-balloon');
