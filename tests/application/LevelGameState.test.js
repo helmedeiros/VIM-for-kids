@@ -111,6 +111,24 @@ describe('LevelGameState', () => {
       carry.add('w'); // mutate the caller's set
       expect(levelState.collectedKeys.has('w')).toBe(false);
     });
+
+    test('seeds collectedCollectibleKeys from options.initialCollectedCollectibleKeys', () => {
+      // A master key picked up on a previous level must survive into
+      // this one and be visible to the zone's unlock checks.
+      const levelState = new LevelGameState(
+        zoneProvider,
+        levelConfig,
+        null,
+        null,
+        null,
+        { initialCollectedCollectibleKeys: new Set(['master_key']) }
+      );
+
+      expect(levelState.collectedCollectibleKeys.has('master_key')).toBe(true);
+      // The carryover is also mirrored into the zone so unlock checks
+      // see the key the next time tryUnlockSecondaryGate runs.
+      expect(levelState.zone.getCollectedCollectibleKeys().has('master_key')).toBe(true);
+    });
   });
 
   describe('Zone Progression', () => {

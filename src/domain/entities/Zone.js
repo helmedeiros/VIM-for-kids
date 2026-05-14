@@ -588,6 +588,19 @@ export class Zone {
     return new Set(this._collectedCollectibleKeys);
   }
 
+  /**
+   * Pre-load collectible-key IDs the player is carrying in from a
+   * previous level (e.g. a master key picked up on level 1 and not
+   * yet spent). The set is merged into the zone's existing collected
+   * tally so gate-unlock checks recognise them.
+   */
+  seedCollectedCollectibleKeys(keyIds) {
+    if (!keyIds) return;
+    for (const id of keyIds) {
+      this._collectedCollectibleKeys.add(id);
+    }
+  }
+
   isComplete() {
     return this._gate && this._gate.isOpen;
   }

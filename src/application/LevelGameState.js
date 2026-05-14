@@ -34,6 +34,12 @@ export class LevelGameState {
     this._initialCollectedKeys = options.initialCollectedKeys
       ? new Set(options.initialCollectedKeys)
       : null;
+    // Carryable collectible keys — currently just `master_key`. Seeds the
+    // collectedCollectibleKeys set so the chest stays in the inventory
+    // across level boundaries until it actually unlocks a door.
+    this._initialCollectedCollectibleKeys = options.initialCollectedCollectibleKeys
+      ? new Set(options.initialCollectedCollectibleKeys)
+      : null;
 
     // Initialize first zone synchronously for backward compatibility
     this._loadZoneSync(this._getCurrentZoneId());
@@ -62,7 +68,18 @@ export class LevelGameState {
       this.collectedKeys = this._initialCollectedKeys
         ? new Set(this._initialCollectedKeys)
         : new Set();
-      this.collectedCollectibleKeys = new Set();
+      this.collectedCollectibleKeys = this._initialCollectedCollectibleKeys
+        ? new Set(this._initialCollectedCollectibleKeys)
+        : new Set();
+      // Mirror the carryover into the zone's own bookkeeping so unlock
+      // checks (e.g. Zone.tryUnlockSecondaryGate) see the master key.
+      if (
+        this.collectedCollectibleKeys.size > 0 &&
+        this.zone &&
+        typeof this.zone.seedCollectedCollectibleKeys === 'function'
+      ) {
+        this.zone.seedCollectedCollectibleKeys(this.collectedCollectibleKeys);
+      }
     } catch (error) {
       throw new Error(`Zone '${zoneId}' not found in registry`);
     }
