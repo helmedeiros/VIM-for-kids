@@ -147,6 +147,18 @@ describe('Gate', () => {
       expect(result).toBe(false);
     });
 
+    it('master_key wildcards canUnlock open even without normal requirements', () => {
+      const unlockConditions = { requiredCollectibleKeys: ['silver_key'] };
+      const gateWithConditions = new Gate(testPosition, unlockConditions);
+
+      // No silver_key — but the player has a master_key in their pocket.
+      const collected = new Set(['master_key']);
+      expect(gateWithConditions.canUnlock(new Set(), collected)).toBe(true);
+      // canUnlockWithoutMasterKey strips it back out for the consumption
+      // decision in Zone.tryUnlockSecondaryGate.
+      expect(gateWithConditions.canUnlockWithoutMasterKey(new Set(), collected)).toBe(false);
+    });
+
     it('should return true when all VIM key requirements are met', () => {
       const unlockConditions = { collectedVimKeys: ['h', 'j'] };
       const gateWithConditions = new Gate(testPosition, unlockConditions);

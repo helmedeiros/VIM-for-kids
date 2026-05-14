@@ -7,7 +7,7 @@
  * and clear silhouettes that create a 2D-that-looks-3D effect.
  */
 export class TilePainter {
-  constructor(tileSize = 32, columns = 28) {
+  constructor(tileSize = 32, columns = 29) {
     this._ts = tileSize;
     this._columns = columns;
   }
@@ -48,6 +48,7 @@ export class TilePainter {
       (c) => this._paintFlowerCluster(c),
       (c) => this._paintMushroom(c),
       (c) => this._paintTallGrass(c),
+      (c) => this._paintTreasureChest(c),
     ];
 
     painters.forEach((paint, i) => {
@@ -760,6 +761,62 @@ export class TilePainter {
       const tipOffset = Math.round((lean * (h - 1)) / 6);
       ctx.fillRect(x + tipOffset, baseY - (h - 1), 1, 1);
     });
+  }
+
+  _paintTreasureChest(ctx) {
+    const ts = this._ts;
+
+    // Drop shadow under the chest
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(ts / 2, ts - 4, 11, 2.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Chest body: warm brown wood with a slightly darker base
+    const bodyGrad = ctx.createLinearGradient(0, 14, 0, 26);
+    bodyGrad.addColorStop(0, '#a3702f');
+    bodyGrad.addColorStop(1, '#7a4f1f');
+    ctx.fillStyle = bodyGrad;
+    ctx.fillRect(7, 14, 18, 12);
+
+    // Domed lid
+    const lidGrad = ctx.createLinearGradient(0, 8, 0, 16);
+    lidGrad.addColorStop(0, '#b7853a');
+    lidGrad.addColorStop(1, '#8b5c25');
+    ctx.fillStyle = lidGrad;
+    ctx.fillRect(8, 9, 16, 6);
+    ctx.fillRect(7, 11, 18, 4);
+
+    // Plank dividers on body
+    ctx.fillStyle = 'rgba(46, 26, 8, 0.55)';
+    ctx.fillRect(13, 14, 1, 12);
+    ctx.fillRect(19, 14, 1, 12);
+
+    // Brass trim — top and bottom band
+    ctx.fillStyle = '#e0b04a';
+    ctx.fillRect(7, 14, 18, 2);
+    ctx.fillRect(7, 24, 18, 2);
+    ctx.fillStyle = 'rgba(255,236,170,0.55)';
+    ctx.fillRect(7, 14, 18, 1);
+
+    // Brass corner studs
+    ctx.fillStyle = '#d2a23a';
+    [[8, 9], [22, 9], [8, 24], [22, 24]].forEach(([sx, sy]) => {
+      ctx.fillRect(sx, sy, 2, 2);
+    });
+
+    // Keyhole plate
+    ctx.fillStyle = '#e0b04a';
+    ctx.fillRect(15, 18, 4, 5);
+    ctx.fillStyle = '#1c1108';
+    ctx.fillRect(16, 19, 2, 3);
+
+    // Outline so the chest reads cleanly on busy floors
+    ctx.fillStyle = '#1c1108';
+    ctx.fillRect(7, 9, 1, 17);
+    ctx.fillRect(24, 9, 1, 17);
+    ctx.fillRect(8, 9, 16, 1);
+    ctx.fillRect(7, 26, 18, 1);
   }
 
   _paintBridge(ctx) {

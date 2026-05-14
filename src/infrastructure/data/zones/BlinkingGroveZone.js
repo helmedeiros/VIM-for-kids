@@ -108,6 +108,10 @@ export class BlinkingGroveZone {
           { type: 'vim_key', value: 'k', position: [2, 9] }, // Up movement key - on grass
           { type: 'vim_key', value: 'l', position: [3, 10] }, // Right movement key - on grass
           { type: 'collectible_key', keyId: 'maze_key', name: 'Maze Key', color: '#FFD700', position: [37, 14] }, // Golden key in the maze
+          // Treasure chest tucked into the gap between "words" and "are"
+          // inside the labyrinth's "Remember:" room. Walking onto it
+          // grants a one-shot master key that opens any locked door.
+          { type: 'collectible_key', keyId: 'master_key', name: 'Master Key', color: '#e0b04a', spriteRegion: 'treasure_chest', position: [22, 3] },
         ],
         textLabels: [
           // "Remember words are not WORD" text at the top

@@ -529,11 +529,22 @@ export class Zone {
 
     // If gate can be unlocked, open it and consume the required keys
     if (gate.canUnlock(this._collectedKeys, this._collectedCollectibleKeys)) {
-      // Consume the required CollectibleKeys when unlocking
-      const requiredCollectibleKeys = gate.getRequiredCollectibleKeys();
-      requiredCollectibleKeys.forEach(keyId => {
-        this._collectedCollectibleKeys.delete(keyId);
-      });
+      // Did this unlock require the master key? It does when the gate's
+      // own requirements aren't met but master_key was held — Gate.canUnlock
+      // wildcards it in. In that case, burn the master key (one-shot) and
+      // leave the normal keys alone.
+      const usedMasterKey =
+        this._collectedCollectibleKeys.has('master_key') &&
+        !gate.canUnlockWithoutMasterKey(this._collectedKeys, this._collectedCollectibleKeys);
+      if (usedMasterKey) {
+        this._collectedCollectibleKeys.delete('master_key');
+      } else {
+        // Consume the required CollectibleKeys when unlocking normally
+        const requiredCollectibleKeys = gate.getRequiredCollectibleKeys();
+        requiredCollectibleKeys.forEach(keyId => {
+          this._collectedCollectibleKeys.delete(keyId);
+        });
+      }
 
       // Mark the gate as unlocked - when open, it becomes invisible and walkable
       gate.open();

@@ -80,13 +80,19 @@ describe('BlinkingGroveZone', () => {
 
       // Filter only CollectibleKeys from main area
       const collectibleKeys = config.tiles.specialTiles.filter(tile => tile.type === 'collectible_key');
-      expect(collectibleKeys).toHaveLength(1); // Only main area maze key
+      expect(collectibleKeys).toHaveLength(2); // maze_key + master_key (treasure chest)
 
       // Check main area maze key
-      const mazeKey = collectibleKeys[0];
-      expect(mazeKey.keyId).toBe('maze_key');
+      const mazeKey = collectibleKeys.find((k) => k.keyId === 'maze_key');
+      expect(mazeKey).toBeDefined();
       expect(mazeKey.name).toBe('Maze Key');
       expect(mazeKey.color).toBe('#FFD700');
+
+      // Check the treasure-chest master key sitting between "words" and "are".
+      const masterKey = collectibleKeys.find((k) => k.keyId === 'master_key');
+      expect(masterKey).toBeDefined();
+      expect(masterKey.spriteRegion).toBe('treasure_chest');
+      expect(masterKey.position).toEqual([22, 3]);
       expect(mazeKey.position).toEqual([37, 14]);
 
       // Check hidden area has the expected collectible keys
