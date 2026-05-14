@@ -378,6 +378,20 @@ describe('CanvasGameRenderer', () => {
       expect(visible).toHaveLength(1);
       expect(visible[0].textContent).toBe('second');
     });
+
+    it('anchors the balloon above the cursor via Camera.worldToScreen', () => {
+      // Pretend a game state with the cursor at (3, 4) so the renderer
+      // takes the cursor-aware positioning branch instead of skipping it.
+      renderer._currentGameState = { cursor: { position: { x: 3, y: 4 } } };
+      renderer._camera = {
+        tileSize: 32,
+        worldToScreen: jest.fn().mockReturnValue({ x: 96, y: 128 }),
+      };
+      renderer.showCursorHintBalloon('hi');
+      expect(renderer._camera.worldToScreen).toHaveBeenCalledWith(3, 4);
+      const balloon = document.querySelector('.npc-balloon');
+      expect(balloon.style.transform).toBe('translateX(-50%)');
+    });
   });
 
   describe('hideMessage', () => {

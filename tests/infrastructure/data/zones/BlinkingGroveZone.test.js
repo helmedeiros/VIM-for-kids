@@ -49,10 +49,13 @@ describe('BlinkingGroveZone', () => {
     test('should have correct narration structure', () => {
       const config = BlinkingGroveZone.getConfig();
 
+      // The "Once, the world was clear / Text flowed / But the Bugs
+      // came" world-setup beat lives in the origin story; the zone
+      // narration picks up from the Blinking Grove arrival.
       expect(config.narration).toBeInstanceOf(Array);
-      expect(config.narration).toHaveLength(4);
-      expect(config.narration[0]).toContain('Once, the world was clear');
-      expect(config.narration[2]).toContain('Hello, Cursor');
+      expect(config.narration).toHaveLength(3);
+      expect(config.narration[0]).toContain('Blinking Grove');
+      expect(config.narration[1]).toContain('Hello, Cursor');
     });
 
     test('should have correct VIM keys configuration', () => {

@@ -507,15 +507,18 @@ export class CanvasGameRenderer extends GameRenderer {
     balloon.style.position = 'absolute';
     container.appendChild(balloon);
 
-    const ts = this._camera ? this._camera.tileSize : 32;
-    const camOffsetX = (this._camera && this._camera.cursorOffsetX) || 0;
-    const camOffsetY = (this._camera && this._camera.cursorOffsetY) || 0;
-    const canvasRect = this.gameBoard ? this.gameBoard.getBoundingClientRect() : null;
-    const containerRect = container.getBoundingClientRect();
+    // Anchor above the cursor's current cell — mirrors how NPC balloons
+    // pick a position via Camera.worldToScreen so the hint sits on the
+    // tile the player is actually looking at, not the top-left corner.
+    const cursor = this._currentGameState && this._currentGameState.cursor;
+    if (cursor && this._camera && this.gameBoard) {
+      const ts = this._camera.tileSize;
+      const screen = this._camera.worldToScreen(cursor.position.x, cursor.position.y);
+      const canvasRect = this.gameBoard.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
 
-    if (canvasRect) {
-      const cursorCenterX = canvasRect.left + camOffsetX + ts / 2;
-      const cursorTopY = canvasRect.top + camOffsetY;
+      const cursorCenterX = canvasRect.left + screen.x + ts / 2;
+      const cursorTopY = canvasRect.top + screen.y;
       const balloonLeft = cursorCenterX - containerRect.left;
       const balloonTop = cursorTopY - containerRect.top - balloon.offsetHeight - 18;
 
