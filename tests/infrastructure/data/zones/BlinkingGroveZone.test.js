@@ -121,7 +121,7 @@ describe('BlinkingGroveZone', () => {
     test('should have correct text labels configuration', () => {
       const config = BlinkingGroveZone.getConfig();
 
-      expect(config.tiles.textLabels).toHaveLength(36); // Updated for new text layout with additional characters
+      expect(config.tiles.textLabels).toHaveLength(37); // Updated for new text layout with additional characters
 
       // Check that we have the expected text elements
       const textContent = config.tiles.textLabels.map(l => l.text).join('');
@@ -243,7 +243,7 @@ describe('BlinkingGroveZone', () => {
 
     test('should create functional zone with all components', () => {
       expect(zone.vimKeys).toHaveLength(4);
-      expect(zone.textLabels).toHaveLength(36); // Updated for new text layout with additional characters
+      expect(zone.textLabels).toHaveLength(37); // Updated for new text layout with additional characters
       expect(zone.gate).toBeDefined();
       expect(zone.npcs).toHaveLength(3);
       expect(zone.events).toHaveLength(3);
