@@ -8,6 +8,15 @@ export class DynamicZoneMap {
     this._zoneHeight = zoneHeight;
     this._decorations = [];
     this._calculateDynamicGridSize();
+    // Pin the zone's top-left anchor at construction. Everything that
+    // happens later — expandDimensions for hidden-area reveal, window
+    // resize handlers, browser zoom — keeps the anchor where it is.
+    // Otherwise the anchor recomputes from the current _width and
+    // tiles/NPCs end up at different absolute positions depending on
+    // whether the grid grew between two reads (the source of the
+    // hidden-area drift we hit on 4K vs MacBook screens).
+    this._zoneStartX = Math.max(0, Math.floor((this._width - this._zoneWidth) / 2));
+    this._zoneStartY = Math.max(0, Math.floor((this._height - this._zoneHeight) / 2));
     this._initializeMap();
 
     // Listen for window resize to recalculate grid if needed
@@ -51,6 +60,11 @@ export class DynamicZoneMap {
   // Method for testing - allows setting specific screen dimensions
   _setTestDimensions(width, height) {
     this._calculateDynamicGridSize({ width, height });
+    // Test helper: re-pin the anchor so positions match the new screen.
+    // Production code never calls this; the runtime keeps the frozen
+    // anchor from construction.
+    this._zoneStartX = Math.max(0, Math.floor((this._width - this._zoneWidth) / 2));
+    this._zoneStartY = Math.max(0, Math.floor((this._height - this._zoneHeight) / 2));
     this._initializeMap();
   }
 
@@ -92,11 +106,13 @@ export class DynamicZoneMap {
   }
 
   get zoneStartX() {
-    return Math.floor((this._width - this._zoneWidth) / 2);
+    // Returns the anchor frozen at construction so growing the grid
+    // (hidden-area reveal, resize) never relocates the playable zone.
+    return this._zoneStartX;
   }
 
   get zoneStartY() {
-    return Math.floor((this._height - this._zoneHeight) / 2);
+    return this._zoneStartY;
   }
 
   get zoneEndX() {

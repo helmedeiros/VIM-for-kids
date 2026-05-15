@@ -50,6 +50,19 @@ describe('DynamicZoneMap', () => {
       expect(dynamicMap.zoneEndX).toBe(expectedStartX + 12);
       expect(dynamicMap.zoneEndY).toBe(expectedStartY + 8);
     });
+
+    test('zoneStartX/Y do not shift when the grid is expanded', () => {
+      // expandDimensions used to re-center the zone (zoneStartX was a
+      // derived getter), which caused the hidden-area drift bug across
+      // different screen sizes. The anchor must stay pinned.
+      const startX = dynamicMap.zoneStartX;
+      const startY = dynamicMap.zoneStartY;
+
+      dynamicMap.expandDimensions(dynamicMap.width + 60, dynamicMap.height + 40);
+
+      expect(dynamicMap.zoneStartX).toBe(startX);
+      expect(dynamicMap.zoneStartY).toBe(startY);
+    });
   });
 
   describe('Test Dimensions', () => {
