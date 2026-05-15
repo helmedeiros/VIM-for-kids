@@ -394,6 +394,29 @@ describe('Cutscene Type Detection', () => {
     await secondDone;
   });
 
+  it('restores keyboard focus to the game canvas on close', async () => {
+    // Stand in for the focusable canvas the keyboard handler listens on.
+    const canvas = document.createElement('canvas');
+    canvas.id = 'gameBoardCanvas';
+    canvas.setAttribute('tabindex', '0');
+    document.body.appendChild(canvas);
+    const focusSpy = jest.spyOn(canvas, 'focus');
+
+    const story = {
+      gameId: 'test-game',
+      type: 'level',
+      levelId: 'l1',
+      script: ['One line'],
+    };
+    const done = renderer.showCutscene(story);
+    const overlay = document.querySelector('div[style*="z-index: 10000"]');
+    overlay.click();
+    await done;
+
+    expect(focusSpy).toHaveBeenCalled();
+    canvas.remove();
+  });
+
   it('should use zone background for zone cutscenes', async () => {
     const zoneStory = {
       gameId: 'test-game',
