@@ -37,7 +37,8 @@ describe('ZoneRegistry', () => {
       const zoneIds = ZoneRegistry.getAvailableZoneIds();
 
       expect(zoneIds).toContain('zone_1');
-      expect(zoneIds).toHaveLength(11); // All 10 main zones + textland exploration zone
+      expect(zoneIds).toContain('zone_practice');
+      expect(zoneIds).toHaveLength(12); // 10 main zones + zone_practice + textland exploration
     });
 
     test('should check if zone exists', () => {
@@ -48,7 +49,7 @@ describe('ZoneRegistry', () => {
     test('should get all zone information', () => {
       const zoneInfo = ZoneRegistry.getAllZoneInfo();
 
-      expect(zoneInfo).toHaveLength(11);
+      expect(zoneInfo).toHaveLength(12);
       expect(zoneInfo[0]).toEqual({
         zoneId: 'zone_1',
         name: '1. Blinking Grove',
@@ -56,7 +57,9 @@ describe('ZoneRegistry', () => {
         skillFocus: ['h', 'j', 'k', 'l'],
         puzzleTheme: 'Basic movement, bump-to-talk',
       });
-      expect(zoneInfo[9]).toEqual({
+      // zone_practice slots in between zone_1 and zone_2.
+      expect(zoneInfo[1].zoneId).toBe('zone_practice');
+      expect(zoneInfo[10]).toEqual({
         zoneId: 'zone_10',
         name: '10. The Syntax Temple',
         biome: 'Coastal ruins, golden gates',
@@ -118,8 +121,9 @@ describe('ZoneRegistry', () => {
       const zones = ZoneRegistry.getZones();
 
       expect(zones).toBeInstanceOf(Map);
-      expect(zones.size).toBe(11);
+      expect(zones.size).toBe(12);
       expect(zones.has('zone_1')).toBe(true);
+      expect(zones.has('zone_practice')).toBe(true);
       expect(zones.has('zone_10')).toBe(true);
     });
 

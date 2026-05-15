@@ -1,4 +1,5 @@
 import { BlinkingGroveZone } from './BlinkingGroveZone.js';
+import { WordPracticeZone } from './WordPracticeZone.js';
 import { MazeOfModesZone } from './MazeOfModesZone.js';
 import { SwampOfWordsZone } from './SwampOfWordsZone.js';
 import { DeleteCanyonZone } from './DeleteCanyonZone.js';
@@ -18,6 +19,7 @@ export class ZoneRegistry {
   static getZones() {
     return new Map([
       ['zone_1', BlinkingGroveZone],
+      ['zone_practice', WordPracticeZone],
       ['zone_2', MazeOfModesZone],
       ['zone_3', SwampOfWordsZone],
       ['zone_4', DeleteCanyonZone],

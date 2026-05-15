@@ -112,9 +112,11 @@ describe('Zone and Level Progression Integration', () => {
     });
 
     it('should start at first zone of level 2', () => {
-      expect(game.gameState.getCurrentZoneId()).toBe('zone_2');
+      // level_2 now warms up with the word-practice arena before the
+      // Maze of Modes (zone_2) and Swamp of Words (zone_3).
+      expect(game.gameState.getCurrentZoneId()).toBe('zone_practice');
       expect(game.gameState.getCurrentZoneIndex()).toBe(0);
-      expect(game.gameState.getTotalZones()).toBe(2);
+      expect(game.gameState.getTotalZones()).toBe(3);
     });
 
     it('should progress to next zone when passing through open gate in non-last zone', () => {
@@ -138,13 +140,16 @@ describe('Zone and Level Progression Integration', () => {
     });
 
     it('should progress to next level when passing through open gate in last zone', () => {
-      // Progress to last zone first
+      // level_2 now has three zones: zone_practice (auto-open gate),
+      // zone_2 (Maze of Modes), zone_3 (Swamp of Words). Walk through
+      // each to reach the last one.
+      game.gameState.progressToNextZone(); // zone_practice -> zone_2
       const keys1 = game.gameState.availableKeys;
       keys1.forEach((key) => game.gameState.collectKey(key));
-      game.gameState.progressToNextZone();
+      game.gameState.progressToNextZone(); // zone_2 -> zone_3
 
       // Now in last zone of level
-      expect(game.gameState.getCurrentZoneIndex()).toBe(1);
+      expect(game.gameState.getCurrentZoneIndex()).toBe(2);
       expect(game.gameState.hasNextZone()).toBe(false);
 
       const gate = game.gameState.getGate();
@@ -169,6 +174,10 @@ describe('Zone and Level Progression Integration', () => {
   describe('Movement Through Gates Integration', () => {
     beforeEach(() => {
       game = new VimForKidsGame({ level: 'level_2' });
+      // Step past the practice arena (auto-open gate) so the tests
+      // below land in zone_2 (Maze of Modes), which has a real locked
+      // gate that needs vim_keys to open.
+      game.gameState.progressToNextZone();
     });
 
     it('should trigger zone progression when moving through open gate with movement commands', () => {
@@ -229,7 +238,13 @@ describe('Zone and Level Progression Integration', () => {
       // Test progression API
       expect(typeof game.gameState.executeProgression).toBe('function');
 
-      // Complete zone_2 (first zone in level_2, collect all keys)
+      // Walk through the auto-open practice arena (level_2's first zone).
+      const practiceGate = game.gameState.getGate();
+      game.gameState.cursor = game.gameState.cursor.moveTo(practiceGate.position);
+      await game.gameState.executeProgression();
+      expect(game.gameState.getCurrentZoneId()).toBe('zone_2');
+
+      // Complete zone_2 (Maze of Modes) by collecting its keys.
       const zone2Keys = [...game.gameState.availableKeys];
       zone2Keys.forEach((key) => game.gameState.collectKey(key));
 
@@ -240,9 +255,9 @@ describe('Zone and Level Progression Integration', () => {
       // Execute progression
       await game.gameState.executeProgression();
 
-      // Should be at zone_3 now (second zone in level_2)
+      // Should be at zone_3 now (third zone in level_2)
       expect(game.gameState.getCurrentZoneId()).toBe('zone_3');
-      expect(game.gameState.getCurrentZoneIndex()).toBe(1);
+      expect(game.gameState.getCurrentZoneIndex()).toBe(2);
     });
 
     it('should handle progression when no progression is possible', async () => {

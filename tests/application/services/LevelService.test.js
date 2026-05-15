@@ -140,7 +140,7 @@ describe('LevelService', () => {
     it('should return zones for level', () => {
       const zones = levelService.getLevelZones('cursor-before-clickers', 'level_2');
 
-      expect(zones).toEqual(['zone_2', 'zone_3']);
+      expect(zones).toEqual(['zone_practice', 'zone_2', 'zone_3']);
     });
 
     it('should return single zone for level_1', () => {
