@@ -207,6 +207,12 @@ export class CutsceneRenderer {
     return new Promise((resolve) => {
       const cutsceneType = cutsceneStory.type || 'game';
 
+      // Remember which element had focus before the overlay stole it so
+      // we can hand focus back to the game board on close — keeps keyboard
+      // input flowing without the player having to click the canvas first.
+      this._focusBeforeCutscene =
+        typeof document !== 'undefined' ? document.activeElement : null;
+
       this._createCutsceneOverlay(cutsceneType);
       this._isVisible = true;
 
@@ -230,6 +236,24 @@ export class CutsceneRenderer {
     this._cutsceneOverlay = null;
     this._isVisible = false;
     this._clearTimeouts();
+    // Restore keyboard focus to the canvas (or whatever element held it
+    // before the cutscene) so the player can move immediately on close
+    // without having to click anything first.
+    this._restoreFocus();
+  }
+
+  _restoreFocus() {
+    if (typeof document === 'undefined') return;
+    const previous = this._focusBeforeCutscene;
+    this._focusBeforeCutscene = null;
+    // Prefer the focusable game canvas — that's where the keyboard
+    // handler is attached — but fall back to whoever held focus when
+    // the cutscene started.
+    const canvas = document.getElementById('gameBoardCanvas');
+    const target = canvas || (previous && typeof previous.focus === 'function' ? previous : null);
+    if (target && typeof target.focus === 'function') {
+      target.focus();
+    }
   }
 
   /**
