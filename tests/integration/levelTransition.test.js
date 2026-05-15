@@ -124,9 +124,10 @@ describe('Level Transition Integration', () => {
       // Test the transitionToLevel method directly
       await game.transitionToLevel('level_2');
 
-      // Verify level transition
+      // Verify level transition — level_2 now warms up with the
+      // word-practice arena before Maze of Modes.
       expect(game.currentLevel).toBe('level_2');
-      expect(game.gameState.getCurrentZoneId()).toBe('zone_2');
+      expect(game.gameState.getCurrentZoneId()).toBe('zone_practice');
       expect(game.gameState.getCurrentZoneIndex()).toBe(0);
     });
   });
@@ -140,10 +141,17 @@ describe('Level Transition Integration', () => {
 
     it('should transition through zones then to next level', async () => {
       expect(game.currentLevel).toBe('level_2');
-      expect(game.gameState.getCurrentZoneId()).toBe('zone_2');
-      expect(game.gameState.getTotalZones()).toBe(2);
+      expect(game.gameState.getCurrentZoneId()).toBe('zone_practice');
+      expect(game.gameState.getTotalZones()).toBe(3);
 
-      // Complete first zone
+      // Walk through the warm-up practice arena (auto-open gate, no keys).
+      const practiceGate = game.gameState.getGate();
+      game.gameState.cursor = game.gameState.cursor.moveTo(practiceGate.position);
+      const progressionResult0 = await game.gameState.executeProgression();
+      expect(progressionResult0.type).toBe('zone');
+      expect(game.gameState.getCurrentZoneId()).toBe('zone_2');
+
+      // Complete Maze of Modes (zone_2)
       const keys1 = game.gameState.availableKeys;
       keys1.forEach((key) => {
         game.gameState.collectKey(key);
@@ -159,10 +167,10 @@ describe('Level Transition Integration', () => {
       // Execute zone progression
       const progressionResult1 = await game.gameState.executeProgression();
       expect(progressionResult1.type).toBe('zone');
-      expect(game.gameState.getCurrentZoneIndex()).toBe(1);
+      expect(game.gameState.getCurrentZoneIndex()).toBe(2);
       expect(game.gameState.getCurrentZoneId()).toBe('zone_3');
 
-      // Complete zone_3 (second zone in level_2)
+      // Complete zone_3 (last zone in level_2)
       const zone3Keys = [...game.gameState.availableKeys];
       zone3Keys.forEach((key) => game.gameState.collectKey(key));
 

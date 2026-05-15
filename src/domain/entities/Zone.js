@@ -359,6 +359,13 @@ export class Zone {
 
       // Gate starts locked as per configuration
       this._gate.close();
+      // …unless the configured conditions are already met at construction
+      // (e.g. zone_practice declares `collectedVimKeys: []`, which is
+      // trivially satisfied). Re-evaluating here lets zones be born with
+      // an open exit gate without contorting the carryover flow.
+      if (this._gate.canUnlock(this._collectedKeys, this._collectedCollectibleKeys)) {
+        this._gate.open();
+      }
     } else if (gateConfig && gateConfig.position === null) {
       // Final zone with no exit gate - create a dummy gate for consistency
       const centerPosition = this._gameMap.zoneToAbsolute(6, 6);

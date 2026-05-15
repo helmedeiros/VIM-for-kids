@@ -47,7 +47,7 @@ describe('CursorBeforeClickersGame', () => {
       const level2 = game.levels.level_2;
       expect(level2.id).toBe('level_2');
       expect(level2.name).toBe('Text Manipulation');
-      expect(level2.zones).toEqual(['zone_2', 'zone_3']);
+      expect(level2.zones).toEqual(['zone_practice', 'zone_2', 'zone_3']);
       expect(level2.description).toContain('modes and word navigation');
     });
 

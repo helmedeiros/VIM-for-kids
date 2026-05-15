@@ -34,7 +34,11 @@ export class CursorBeforeClickersGame {
         level_2: {
           id: 'level_2',
           name: 'Text Manipulation',
-          zones: ['zone_2', 'zone_3'], // Maze of Modes, Swamp of Words
+          // zone_practice is a free-roam word-motion arena that warms
+          // the player up before the Maze of Modes / Swamp of Words.
+          // Adding it as the first zone keeps the existing level_2
+          // content (modes, words) where it was.
+          zones: ['zone_practice', 'zone_2', 'zone_3'],
           description: 'Master VIM modes and word navigation',
           cutscene: [
             'You have learned the basics of movement.',

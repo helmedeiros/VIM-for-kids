@@ -60,7 +60,8 @@ describe('ZoneRegistryAdapter', () => {
       const zoneIds = adapter.getAvailableZoneIds();
 
       expect(zoneIds).toContain('zone_1');
-      expect(zoneIds).toHaveLength(11);
+      expect(zoneIds).toContain('zone_practice');
+      expect(zoneIds).toHaveLength(12);
     });
 
     test('should check zone existence through adapter', () => {
@@ -71,7 +72,7 @@ describe('ZoneRegistryAdapter', () => {
     test('should get all zone information through adapter', () => {
       const zoneInfo = adapter.getAllZoneInfo();
 
-      expect(zoneInfo).toHaveLength(11);
+      expect(zoneInfo).toHaveLength(12);
       expect(zoneInfo[0]).toEqual({
         zoneId: 'zone_1',
         name: '1. Blinking Grove',
@@ -79,7 +80,8 @@ describe('ZoneRegistryAdapter', () => {
         skillFocus: ['h', 'j', 'k', 'l'],
         puzzleTheme: 'Basic movement, bump-to-talk',
       });
-      expect(zoneInfo[9]).toEqual({
+      expect(zoneInfo[1].zoneId).toBe('zone_practice');
+      expect(zoneInfo[10]).toEqual({
         zoneId: 'zone_10',
         name: '10. The Syntax Temple',
         biome: 'Coastal ruins, golden gates',
