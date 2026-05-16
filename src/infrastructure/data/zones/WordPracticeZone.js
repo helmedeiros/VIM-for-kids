@@ -86,37 +86,100 @@ export class WordPracticeZone {
           R: 'rock',
         },
         decorations: [
+          // ----- Desert (sand area, cols 1-79) ----------------------
+          // Palm clusters, lone cacti, and a few dried-out trees so
+          // the western leg of the zone reads as a desert oasis
+          // instead of an empty sand strip. Every plant uses
+          // collisionFootprintH:1 so the canopy is a "walk behind"
+          // tile (player slides under the leaves and stays visible
+          // through the trunk). All positions vetted against the
+          // organic sand mass — the coastline has irregular bays so
+          // pick only x,y pairs whose 2x2 footprint sits on sand.
+          // North-side palms and cacti above the gem row.
+          { regionName: 'palm_tree',     position: [ 1,  2], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'palm_tree_alt', position: [16,  1], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'cactus',        position: [ 6,  8], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'dead_tree',     position: [21,  3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'cactus',        position: [28,  1], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'palm_tree',     position: [34,  1], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'dead_pine',     position: [50,  2], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'palm_tree_alt', position: [56,  3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'cactus',        position: [60,  3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'dead_tree',     position: [74,  3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          // South-side palms and cacti below the gem row.
+          { regionName: 'palm_tree',     position: [ 4, 18], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'cactus',        position: [10, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'dead_pine',     position: [18, 11], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'palm_tree_alt', position: [30, 15], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'cactus',        position: [38,  9], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'palm_tree',     position: [46, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'dead_tree',     position: [56,  9], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'cactus',        position: [64, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'palm_tree_alt', position: [72, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+
           // ----- Tree labyrinth (middle band, cols 84-156) ----------
-          // Stagger 2x2 trees across the band so the player has to
-          // weave around them. Each tree blocks normal movement but
-          // word motion (w/e/b) still hops across them.
-          { regionName: 'tree_2x2', position: [88, 3],  footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [96, 6],  footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [104, 4], footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [112, 7], footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [120, 3], footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [128, 5], footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [136, 8], footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [144, 4], footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [152, 6], footprintW: 2, footprintH: 2, blocking: true },
-
-          { regionName: 'tree_2x2', position: [92, 12],  footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [100, 14], footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [108, 12], footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [116, 15], footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [124, 13], footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [132, 16], footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [140, 13], footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [148, 15], footprintW: 2, footprintH: 2, blocking: true },
-          { regionName: 'tree_2x2', position: [156, 12], footprintW: 2, footprintH: 2, blocking: true },
-
-          // ----- Sand-area boulders (chunky cluster look) -----------
-          // Decorative boulders scattered in the sand area so it
-          // doesn't read as one empty stretch. Word motion already
-          // treats blocking decorations as hoppable.
-          { regionName: 'rock_2x2', position: [22, 14], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1, renderScale: 0.7 },
-          { regionName: 'rock_2x2', position: [40, 16], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1, renderScale: 0.7 },
-          { regionName: 'rock_2x2', position: [62, 14], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1, renderScale: 0.7 },
+          // Five horizontal hedge rows at anchor rows 1, 5, 9, 13, 17.
+          // Variants cycle through the round-tree palette so the
+          // forest looks lived-in. Every tree uses collisionFootprintH:
+          // 1 — the trunk row blocks but the canopy row is walkable,
+          // so the cursor slips behind the leaves (rendered over it)
+          // before bumping the trunk. The maze comes from the offset
+          // gap pattern: each hedge stands at different cols, forcing
+          // the player to weave between trunks.
+          // Hedge 1 — anchor row 3 (top of sand mass in this band).
+          { regionName: 'tree_round_green',   position: [ 84,  3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dark',    position: [ 90,  3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_layered', position: [ 96,  3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dense',   position: [104,  3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_shadow',  position: [110,  3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_green',   position: [118,  3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dark',    position: [124,  3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dense',   position: [132,  3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_layered', position: [140,  3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_shadow',  position: [146,  3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dark',    position: [154,  3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          // Hedge 2 — anchor row 5 (offset cols), trunks block row 6.
+          { regionName: 'tree_round_dense',   position: [ 86,  5], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_shadow',  position: [ 94,  5], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_green',   position: [100,  5], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_layered', position: [108,  5], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dark',    position: [114,  5], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_green',   position: [122,  5], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dense',   position: [130,  5], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_shadow',  position: [136,  5], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dark',    position: [144,  5], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_layered', position: [152,  5], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          // Hedge 3 — anchor row 9, trunks block row 10.
+          { regionName: 'tree_round_shadow',  position: [ 84,  9], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_green',   position: [ 92,  9], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dense',   position: [100,  9], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dark',    position: [106,  9], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_layered', position: [116,  9], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_green',   position: [126,  9], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_shadow',  position: [134,  9], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dark',    position: [142,  9], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dense',   position: [150,  9], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          // Hedge 4 — anchor row 13 (offset cols), trunks block row 14.
+          { regionName: 'tree_round_layered', position: [ 88, 13], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dark',    position: [ 96, 13], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_shadow',  position: [104, 13], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_green',   position: [112, 13], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dense',   position: [120, 13], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_layered', position: [128, 13], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dark',    position: [138, 13], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_shadow',  position: [146, 13], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_green',   position: [154, 13], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          // Hedge 5 — anchor row 17, trunks block row 18.
+          { regionName: 'tree_round_dense',   position: [ 86, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_green',   position: [ 92, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dark',    position: [100, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_layered', position: [108, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_shadow',  position: [116, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dense',   position: [124, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_dark',    position: [132, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_green',   position: [140, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_layered', position: [148, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'tree_round_shadow',  position: [156, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
 
           // ----- Boss-arena rocks ringing the snake's pit -----------
           { regionName: 'rock_2x2', position: [170, 4],  footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1, renderScale: 0.7 },

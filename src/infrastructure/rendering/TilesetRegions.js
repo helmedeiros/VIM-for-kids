@@ -54,8 +54,30 @@ export const TILESET_REGIONS = {
   // reads natural and earthy. Swap by re-pointing these two entries.
   rock: { sx: 224, sy: 6208, sw: 32, sh: 32 },        // rock_brown_round
   rock_2x2: { sx: 128, sy: 6208, sw: 32, sh: 32 },    // rock_pile_sandy
-  // Multi-tile decorations (drawn via TileRenderer.drawDecoration, not drawTile).
-  // 2x2 footprint, 64x64 source = 1:1 with destination at renderSize 32 → crisp pixels.
+
+  // === Forest trees (64x64 each, 2x2 footprint) ============================
+  // Top 4x2 block of the tileset is a row of round leafy trees in five
+  // shades. Use these to mix variants inside a tree labyrinth so it
+  // doesn't read as a single repeated sprite.
+  tree_round_green:   { sx:   0, sy:   0, sw: 64, sh: 64 },
+  tree_round_dark:    { sx:  64, sy:   0, sw: 64, sh: 64 },
+  tree_round_dense:   { sx: 128, sy:   0, sw: 64, sh: 64 },
+  tree_round_shadow:  { sx: 192, sy:   0, sw: 64, sh: 64 },
+  tree_round_layered: { sx:   0, sy:  64, sw: 64, sh: 64 },
+
+  // === Desert flora (64x64, 2x2 footprint) =================================
+  // Palms and dried-out trees in the y=1280..1536 band of the tileset.
+  // Drop these onto sand tiles to read "desert oasis" instead of "blank
+  // beach" — palms cluster, cacti/succulents stand alone, dead trees
+  // litter the edges.
+  palm_tree:     { sx:   0, sy: 1344, sw: 64, sh: 64 },
+  palm_tree_alt: { sx: 128, sy: 1344, sw: 64, sh: 64 },
+  dead_tree:     { sx:  64, sy: 1472, sw: 64, sh: 64 },
+  dead_pine:     { sx: 128, sy: 1472, sw: 64, sh: 64 },
+  cactus:        { sx: 192, sy: 1280, sw: 64, sh: 64 },
+
+  // Legacy alias — kept so existing zones (BlinkingGrove, FieldOfInsertion)
+  // keep rendering until they migrate to the named variants above.
   tree_2x2: { sx: 0, sy: 0, sw: 64, sh: 64 },
 
   // === Gems (24x24) — collectible-key overrides for the hidden area ======
