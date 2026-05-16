@@ -1,5 +1,13 @@
 import { VimForKidsGame } from '../../src/VimForKidsGame.js';
 
+// Helper: collect every CollectibleKey currently in the zone so any
+// gate that requires them unlocks. Used by the level-2 tests now that
+// the practice zone's exit gate needs the three sand gems.
+function collectAllCollectibles(gameState) {
+  const collectibles = [...(gameState.availableCollectibleKeys || [])];
+  collectibles.forEach((key) => gameState.collectCollectibleKey(key));
+}
+
 // Mock DOM elements for testing
 const mockGameBoard = {
   setAttribute: jest.fn(),
@@ -123,10 +131,13 @@ describe('Zone and Level Progression Integration', () => {
       const gate = game.gameState.getGate();
       const keys = game.gameState.availableKeys;
 
-      // Collect all keys to open gate
+      // Collect all keys to open gate. zone_practice has no vim keys
+      // — its exit gate is unlocked by the three sand-gem collectible
+      // keys, so collect those too.
       keys.forEach((key) => {
         game.gameState.collectKey(key);
       });
+      collectAllCollectibles(game.gameState);
 
       expect(gate.isOpen).toBe(true);
       expect(game.gameState.isCurrentZoneComplete()).toBe(true);
@@ -140,9 +151,10 @@ describe('Zone and Level Progression Integration', () => {
     });
 
     it('should progress to next level when passing through open gate in last zone', () => {
-      // level_2 now has three zones: zone_practice (auto-open gate),
-      // zone_2 (Maze of Modes), zone_3 (Swamp of Words). Walk through
+      // level_2 has three zones: zone_practice (Trials of the Sand),
+      // zone_2 (Maze of Modes), zone_3 (Swamp of Words). Drive through
       // each to reach the last one.
+      collectAllCollectibles(game.gameState); // sand gems unlock the practice exit
       game.gameState.progressToNextZone(); // zone_practice -> zone_2
       const keys1 = game.gameState.availableKeys;
       keys1.forEach((key) => game.gameState.collectKey(key));
@@ -174,9 +186,9 @@ describe('Zone and Level Progression Integration', () => {
   describe('Movement Through Gates Integration', () => {
     beforeEach(() => {
       game = new VimForKidsGame({ level: 'level_2' });
-      // Step past the practice arena (auto-open gate) so the tests
-      // below land in zone_2 (Maze of Modes), which has a real locked
-      // gate that needs vim_keys to open.
+      // Step past the practice arena. Its exit gate now requires the
+      // three sand gems, so collect those first.
+      collectAllCollectibles(game.gameState);
       game.gameState.progressToNextZone();
     });
 
@@ -238,7 +250,9 @@ describe('Zone and Level Progression Integration', () => {
       // Test progression API
       expect(typeof game.gameState.executeProgression).toBe('function');
 
-      // Walk through the auto-open practice arena (level_2's first zone).
+      // Collect the practice arena's three sand gems so its exit gate
+      // unlocks, then step onto the gate to trigger progression.
+      collectAllCollectibles(game.gameState);
       const practiceGate = game.gameState.getGate();
       game.gameState.cursor = game.gameState.cursor.moveTo(practiceGate.position);
       await game.gameState.executeProgression();
@@ -272,9 +286,12 @@ describe('Zone and Level Progression Integration', () => {
     });
 
     it('should execute level progression correctly', () => {
-      // Complete all zones in level
+      // Walk through every zone in the level. zone_practice unlocks
+      // via collectible keys (sand gems), the rest via vim keys, so
+      // collect both kinds at each stop.
       const totalZones = game.gameState.getTotalZones();
       for (let i = 0; i < totalZones; i++) {
+        collectAllCollectibles(game.gameState);
         const keys = game.gameState.availableKeys;
         keys.forEach((key) => game.gameState.collectKey(key));
 

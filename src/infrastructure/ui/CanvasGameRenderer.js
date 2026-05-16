@@ -149,7 +149,7 @@ export class CanvasGameRenderer extends GameRenderer {
       }
 
       const charsCanvas = painter.createCharacterCanvas();
-      this._charSpriteSheet = new SpriteSheet(charsCanvas, ts, ts, 11);
+      this._charSpriteSheet = new SpriteSheet(charsCanvas, ts, ts, 12);
 
       this._gameLoop.requestRedraw();
     } catch (error) {

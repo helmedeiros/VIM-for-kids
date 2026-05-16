@@ -43,6 +43,7 @@ export class CharacterSprites {
       final_encourager: 19,
       syntax_spirit: 16,
       word_witch: 17,
+      pixel_snake: 21,
     };
 
     this._defaultNpcFrame = 19;
