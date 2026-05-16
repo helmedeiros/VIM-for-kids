@@ -144,7 +144,10 @@ describe('Level Transition Integration', () => {
       expect(game.gameState.getCurrentZoneId()).toBe('zone_practice');
       expect(game.gameState.getTotalZones()).toBe(3);
 
-      // Walk through the warm-up practice arena (auto-open gate, no keys).
+      // Walk through the warm-up practice arena. Its exit gate now
+      // requires the three sand gems, so collect those first.
+      const practiceGems = [...game.gameState.availableCollectibleKeys];
+      practiceGems.forEach((gem) => game.gameState.collectCollectibleKey(gem));
       const practiceGate = game.gameState.getGate();
       game.gameState.cursor = game.gameState.cursor.moveTo(practiceGate.position);
       const progressionResult0 = await game.gameState.executeProgression();

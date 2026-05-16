@@ -64,7 +64,7 @@ export class TilePainter {
 
   createCharacterCanvas() {
     const ts = this._ts;
-    const cols = 11;
+    const cols = 12;
     const rows = 2;
     const canvas = document.createElement('canvas');
     canvas.width = cols * ts;
@@ -75,7 +75,8 @@ export class TilePainter {
     //   0-7  : cursor (s/n/e/w × idle/step)
     //   8-10 : vim_key, collectible_key, gate_open
     //   11   : gate_closed
-    //   12-20: NPCs
+    //   12-20: NPCs (existing)
+    //   21   : pixel_snake (level-2 boss)
     const painters = [
       (c) => this._paintCursor(c, 's', 0),
       (c) => this._paintCursor(c, 's', 1),
@@ -98,6 +99,7 @@ export class TilePainter {
       (c) => this._paintInsertScribe(c),
       (c) => this._paintPracticeBuddy(c),
       (c) => this._paintMirrorSprite(c),
+      (c) => this._paintPixelSnake(c),
     ];
 
     painters.forEach((paint, i) => {
@@ -1657,5 +1659,67 @@ export class TilePainter {
         c.fillRect(15, 18, 1, 1);
       },
     });
+  }
+
+  _paintPixelSnake(ctx) {
+    // Small coiled garden snake — green body with diamond markings,
+    // a wedge-shaped head and a forked tongue. Used as the level-2
+    // boss; renders inside a single 32x32 NPC frame.
+    const ts = this._ts;
+
+    // Drop shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(ts / 2, ts - 3, 11, 2.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Outer coil (dark green)
+    ctx.fillStyle = '#3f6d29';
+    ctx.beginPath();
+    ctx.arc(ts / 2, ts / 2 + 2, 11, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Mid coil (mid green)
+    ctx.fillStyle = '#5a8d3a';
+    ctx.beginPath();
+    ctx.arc(ts / 2, ts / 2 + 2, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Inner coil (light green) — pale belly
+    ctx.fillStyle = '#8fc25a';
+    ctx.beginPath();
+    ctx.arc(ts / 2, ts / 2 + 2, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Diamond markings along the back
+    ctx.fillStyle = '#2a4a1b';
+    const diamonds = [
+      [ts / 2 - 8, ts / 2 + 1],
+      [ts / 2 - 5, ts / 2 - 4],
+      [ts / 2 - 3, ts / 2 + 6],
+      [ts / 2 + 4, ts / 2 + 6],
+    ];
+    diamonds.forEach(([dx, dy]) => {
+      ctx.fillRect(dx, dy, 2, 2);
+    });
+
+    // Head — wedge sticking out to the right
+    ctx.fillStyle = '#5a8d3a';
+    ctx.fillRect(ts / 2 + 6, ts / 2 - 5, 8, 7);
+    ctx.fillStyle = '#7eb84d';
+    ctx.fillRect(ts / 2 + 6, ts / 2 - 5, 8, 2);
+
+    // Eyes
+    ctx.fillStyle = '#fff7c0';
+    ctx.fillRect(ts / 2 + 8, ts / 2 - 3, 2, 2);
+    ctx.fillRect(ts / 2 + 12, ts / 2 - 3, 1, 2);
+    ctx.fillStyle = '#1c1108';
+    ctx.fillRect(ts / 2 + 9, ts / 2 - 2, 1, 1);
+
+    // Forked tongue
+    ctx.fillStyle = '#d54040';
+    ctx.fillRect(ts / 2 + 14, ts / 2, 2, 1);
+    ctx.fillRect(ts / 2 + 15, ts / 2 - 1, 1, 1);
+    ctx.fillRect(ts / 2 + 15, ts / 2 + 1, 1, 1);
   }
 }

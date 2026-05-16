@@ -88,14 +88,14 @@ describe('TilePainter', () => {
 
     it('creates canvas with correct dimensions', () => {
       const canvas = painter.createCharacterCanvas();
-      expect(canvas.width).toBe(11 * 32);
+      expect(canvas.width).toBe(12 * 32);
       expect(canvas.height).toBe(2 * 32);
     });
 
-    it('paints all 21 character sprites', () => {
+    it('paints all 22 character sprites', () => {
       painter.createCharacterCanvas();
-      // 8 cursor frames + vim_key + collectible_key + gate_open + gate_closed + 9 NPCs
-      expect(mockCtx.drawImage).toHaveBeenCalledTimes(21);
+      // 8 cursor + vim_key + collectible_key + gate_open + gate_closed + 9 NPCs + pixel_snake
+      expect(mockCtx.drawImage).toHaveBeenCalledTimes(22);
     });
   });
 
