@@ -80,6 +80,19 @@ export const TILESET_REGIONS = {
   // keep rendering until they migrate to the named variants above.
   tree_2x2: { sx: 0, sy: 0, sw: 64, sh: 64 },
 
+  // === Village buildings (96x96 = 3x3 footprint) ===========================
+  // Stone-walled houses with a chimney column. Drop these onto sand to
+  // build a small village at the start of the desert. Two variants for
+  // visual mix.
+  house_stone:     { sx:   0, sy: 7424, sw: 96, sh: 96 },
+  house_stone_alt: { sx: 128, sy: 7424, sw: 96, sh: 96 },
+
+  // === Village fences (16x16, 1x1 footprint, rendered 32x32) ==============
+  // Wooden picket-fence segment. Tile horizontally to fence off yards or
+  // line the road. Sprite source is 16x16 — the standard renderer scales
+  // it up to a full game tile.
+  fence_wood_h: { sx: 128, sy: 9408, sw: 16, sh: 16 },
+
   // === Gems (24x24) — collectible-key overrides for the hidden area ======
   // Each gem sits in a small metal dish with a base/stem. The art lives
   // in the items strip near sy=9152 with irregular 24x24-ish packing.
