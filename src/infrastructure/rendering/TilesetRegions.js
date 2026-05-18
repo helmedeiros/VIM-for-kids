@@ -94,6 +94,19 @@ export const TILESET_REGIONS = {
   // the cell, so the dome overflows up into the cell above.
   energy_meter_empty:    { sx: 208, sy: 9536, sw: 16, sh: 24 },
   energy_meter_charged:  { sx: 224, sy: 9536, sw: 16, sh: 24 },
+
+  // === Pier planks (16x16, used as the `bridge` tile override) ============
+  // Horizontal wooden planks. Registering under the name `bridge` makes
+  // any 'bridge' tile in a layout render as wooden planks — pier cells
+  // over water visibly read as a wooden dock.
+  bridge: { sx: 0, sy: 8800, sw: 16, sh: 16 },
+
+  // === Village houses (96x96, 3x3 footprint) ==============================
+  // Pokemon-style top-down houses with painted roofs and visible doors.
+  // Three roof colors for visual mix in the same village.
+  house_orange: { sx:   0, sy: 13568, sw: 96, sh: 96 },
+  house_blue:   { sx:   0, sy: 13760, sw: 96, sh: 96 },
+  house_green:  { sx: 128, sy: 13760, sw: 96, sh: 96 },
 };
 
 export function registerTilesetRegions(atlas, image, regions = TILESET_REGIONS) {
