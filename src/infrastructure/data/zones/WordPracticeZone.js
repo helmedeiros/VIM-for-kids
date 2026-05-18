@@ -45,7 +45,7 @@ export class WordPracticeZone {
     return {
       ...this._getSharedConfig(),
 
-      cursorStartPosition: new Position(2, 11),
+      cursorStartPosition: new Position(1, 11),
       tiles: {
         tileType: 'sand',
         // 240 cols x 22 rows. An island-shaped sand mass instead of a
@@ -65,9 +65,9 @@ export class WordPracticeZone {
           'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCCCCCCCCCS',
           'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCCGCCCCCCS',
           'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCCCCCCCCCS',
-          'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCCCCCCCCCS',
-          'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCCGCCCGCCS',
-          'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCCCCCCCCCS',
+          'WWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCCCCCCCCCS',
+          'WBBBBBPPPPPPPPPPPPPPPPSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCCGCCCGCCS',
+          'WWWWWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCCCCCCCCCS',
           'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCCCCCCCCCS',
           'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCCGCCCCCCS',
           'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSWWSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCCCCCCCCCS',
@@ -84,9 +84,27 @@ export class WordPracticeZone {
           C: 'cobblestone',
           G: 'gate',
           R: 'rock',
+          B: 'bridge', // pier plank — walkable wooden plank over water
+          P: 'path',   // village dirt road
         },
         decorations: [
           // ----- Desert (sand area, cols 1-79) ----------------------
+          // ----- Village (cols 6-21, road on row 11) ---------------
+          // 8 Pokemon-style houses lining the dirt-path road. 4 on the
+          // north side (rows 7-9) and 4 on the south side (rows 13-15),
+          // alternating roof colors for visual mix. Each house is 3x3,
+          // fully blocking; the road at row 11 stays the only east-west
+          // corridor through the village. The pier (game cols 1-5 row 11)
+          // feeds straight into this road; from the eastern edge of the
+          // village (col 22) the cursor enters the open desert with gems.
+          { regionName: 'house_orange', position: [ 6,  7], footprintW: 3, footprintH: 3, blocking: true },
+          { regionName: 'house_blue',   position: [10,  7], footprintW: 3, footprintH: 3, blocking: true },
+          { regionName: 'house_green',  position: [14,  7], footprintW: 3, footprintH: 3, blocking: true },
+          { regionName: 'house_orange', position: [18,  7], footprintW: 3, footprintH: 3, blocking: true },
+          { regionName: 'house_blue',   position: [ 6, 13], footprintW: 3, footprintH: 3, blocking: true },
+          { regionName: 'house_green',  position: [10, 13], footprintW: 3, footprintH: 3, blocking: true },
+          { regionName: 'house_orange', position: [14, 13], footprintW: 3, footprintH: 3, blocking: true },
+          { regionName: 'house_blue',   position: [18, 13], footprintW: 3, footprintH: 3, blocking: true },
           // Palm clusters, lone cacti, and a few dried-out trees so
           // the western leg of the zone reads as a desert oasis
           // instead of an empty sand strip. Every plant uses
@@ -108,9 +126,7 @@ export class WordPracticeZone {
           { regionName: 'dead_tree', position: [74, 5], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
           // South-side palms and cacti below the gem row.
           { regionName: 'palm_tree', position: [4, 16], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
-          { regionName: 'cactus', position: [10, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
-          { regionName: 'dead_pine', position: [18, 11], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
-          { regionName: 'palm_tree_alt', position: [30, 15], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'cactus', position: [10, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },          { regionName: 'palm_tree_alt', position: [30, 15], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
           { regionName: 'cactus', position: [38, 9], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
           { regionName: 'palm_tree', position: [46, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
           { regionName: 'dead_tree', position: [56, 9], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
