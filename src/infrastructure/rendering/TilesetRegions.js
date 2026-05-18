@@ -104,9 +104,12 @@ export const TILESET_REGIONS = {
   // === Village houses (96x96, 3x3 footprint) ==============================
   // Pokemon-style top-down houses with painted roofs and visible doors.
   // Three roof colors for visual mix in the same village.
-  house_orange: { sx:   0, sy: 13552, sw: 96, sh: 96 },
+  // Natural 96x96 sprite per house. The tileset packs the three colors
+  // at irregular y positions — orange at sy=13536, blue at sy=13664,
+  // green at sy=13696 (note green is offset 32px below blue).
+  house_orange: { sx:   0, sy: 13536, sw: 96, sh: 96 },
   house_blue:   { sx:   0, sy: 13664, sw: 96, sh: 96 },
-  house_green:  { sx: 128, sy: 13664, sw: 96, sh: 96 },
+  house_green:  { sx: 128, sy: 13696, sw: 96, sh: 96 },
 };
 
 export function registerTilesetRegions(atlas, image, regions = TILESET_REGIONS) {
