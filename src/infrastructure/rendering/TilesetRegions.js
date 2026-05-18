@@ -104,21 +104,24 @@ export const TILESET_REGIONS = {
   // === Village houses (96x96, 3x3 footprint) ==============================
   // Pokemon-style top-down houses with painted roofs and visible doors.
   // Three roof colors for visual mix in the same village.
-  // Full Pokemon-style 2-tier houses at 128x128 (4x4 footprint). Each
-  // sprite captures the entire L-shape design: taller back roof,
-  // smaller front roof, eave with upper window, brown body with door
-  // + window, foundation, and the diagonal shadow on the right.
+  // Full Pokemon-style houses at 96x128 (3x4 footprint, 1:1 mapping).
+  // Width narrowed from 128 to 96 because the 128-wide crop captured
+  // 16 px of the neighbor house's left edge (green's content starts at
+  // sx=112, so blue/orange crops at sw=128 picked up green's roof).
   //
-  // sy is shifted +16 below the grid-aligned house top so the previous
-  // row's bottom-shadow strip isn't captured (otherwise it renders as
-  // a stray dark band above each house in-game).
+  // Each color's full content fits in 96 wide:
+  //   - taller back roof + smaller front roof (L-shape blue/green)
+  //   - eave with upper window
+  //   - brown body with door + window
+  //   - foundation + own diagonal shadow
   //
-  // Green's anchor is at sx=112 (not 128) because its content actually
-  // starts 16 px left of the 128-aligned grid — using sx=128 would
-  // chop off the left side of the body where the door sits.
-  house_orange: { sx:   0, sy: 13792, sw: 128, sh: 128 },
-  house_blue:   { sx:   0, sy: 13664, sw: 128, sh: 128 },
-  house_green:  { sx: 112, sy: 13664, sw: 128, sh: 128 },
+  // sy shifted +16 below the grid-aligned house top to skip the
+  // previous row's bottom-shadow strip (would otherwise show as a
+  // stray dark band above each house). Green's sx stays at 112 to
+  // include its door which lives left of the 128-grid line.
+  house_orange: { sx:   0, sy: 13792, sw: 96, sh: 128 },
+  house_blue:   { sx:   0, sy: 13664, sw: 96, sh: 128 },
+  house_green:  { sx: 112, sy: 13664, sw: 96, sh: 128 },
 };
 
 export function registerTilesetRegions(atlas, image, regions = TILESET_REGIONS) {
