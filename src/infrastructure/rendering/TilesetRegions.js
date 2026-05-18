@@ -104,15 +104,17 @@ export const TILESET_REGIONS = {
   // === Village houses (96x96, 3x3 footprint) ==============================
   // Pokemon-style top-down houses with painted roofs and visible doors.
   // Three roof colors for visual mix in the same village.
-  // Full Pokemon-style houses at 96x112 (3x4 footprint). Each color's
-  // full design — 2-tier corrugated roof + eave with upper window +
-  // brown body with door/windows + foundation + shadow — fits cleanly
-  // at these sy values. Pair with footprintH:4 (96x128 dest) in the
-  // decoration; the 14% vertical stretch from 112→128 keeps detail
-  // crisp and pixel art still reads cleanly.
-  house_orange: { sx:   0, sy: 13808, sw: 96, sh: 112 },
-  house_blue:   { sx:   0, sy: 13664, sw: 96, sh: 112 },
-  house_green:  { sx: 128, sy: 13664, sw: 96, sh: 112 },
+  // Full Pokemon-style 2-tier houses at 128x128 (4x4 footprint). Each
+  // sprite captures the entire L-shape design: taller back roof,
+  // smaller front roof, eave with upper window, brown body with door
+  // + window, foundation, and the diagonal shadow on the right.
+  //
+  // Green's anchor is at sx=112 (not 128) because its content actually
+  // starts 16 px left of the 128-aligned grid — using sx=128 would
+  // chop off the left side of the body where the door sits.
+  house_orange: { sx:   0, sy: 13776, sw: 128, sh: 128 },
+  house_blue:   { sx:   0, sy: 13648, sw: 128, sh: 128 },
+  house_green:  { sx: 112, sy: 13648, sw: 128, sh: 128 },
 };
 
 export function registerTilesetRegions(atlas, image, regions = TILESET_REGIONS) {
