@@ -97,14 +97,14 @@ export class WordPracticeZone {
           // corridor through the village. The pier (game cols 1-9 row 11)
           // feeds straight into this road; east of col 25 the cursor
           // exits the village into the open desert with gems.
-          { regionName: 'house_orange', position: [10,  7], footprintW: 3, footprintH: 3, blocking: true, renderScale: 1.3 },
-          { regionName: 'house_blue',   position: [14,  7], footprintW: 3, footprintH: 3, blocking: true },
-          { regionName: 'house_green',  position: [18,  7], footprintW: 3, footprintH: 3, blocking: true },
-          { regionName: 'house_orange', position: [22,  7], footprintW: 3, footprintH: 3, blocking: true, renderScale: 1.3 },
-          { regionName: 'house_blue',   position: [10, 13], footprintW: 3, footprintH: 3, blocking: true },
-          { regionName: 'house_green',  position: [14, 13], footprintW: 3, footprintH: 3, blocking: true },
-          { regionName: 'house_orange', position: [18, 13], footprintW: 3, footprintH: 3, blocking: true, renderScale: 1.3 },
-          { regionName: 'house_blue',   position: [22, 13], footprintW: 3, footprintH: 3, blocking: true },
+          { regionName: 'house_orange', position: [10,  6], footprintW: 3, footprintH: 4, blocking: true },
+          { regionName: 'house_blue',   position: [14,  6], footprintW: 3, footprintH: 4, blocking: true },
+          { regionName: 'house_green',  position: [18,  6], footprintW: 3, footprintH: 4, blocking: true },
+          { regionName: 'house_orange', position: [22,  6], footprintW: 3, footprintH: 4, blocking: true },
+          { regionName: 'house_blue',   position: [10, 13], footprintW: 3, footprintH: 4, blocking: true },
+          { regionName: 'house_green',  position: [14, 13], footprintW: 3, footprintH: 4, blocking: true },
+          { regionName: 'house_orange', position: [18, 13], footprintW: 3, footprintH: 4, blocking: true },
+          { regionName: 'house_blue',   position: [22, 13], footprintW: 3, footprintH: 4, blocking: true },
           // Palm clusters, lone cacti, and a few dried-out trees so
           // the western leg of the zone reads as a desert oasis
           // instead of an empty sand strip. Every plant uses
