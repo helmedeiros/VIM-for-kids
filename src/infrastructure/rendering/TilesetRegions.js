@@ -109,12 +109,16 @@ export const TILESET_REGIONS = {
   // smaller front roof, eave with upper window, brown body with door
   // + window, foundation, and the diagonal shadow on the right.
   //
+  // sy is shifted +16 below the grid-aligned house top so the previous
+  // row's bottom-shadow strip isn't captured (otherwise it renders as
+  // a stray dark band above each house in-game).
+  //
   // Green's anchor is at sx=112 (not 128) because its content actually
   // starts 16 px left of the 128-aligned grid — using sx=128 would
   // chop off the left side of the body where the door sits.
-  house_orange: { sx:   0, sy: 13776, sw: 128, sh: 128 },
-  house_blue:   { sx:   0, sy: 13648, sw: 128, sh: 128 },
-  house_green:  { sx: 112, sy: 13648, sw: 128, sh: 128 },
+  house_orange: { sx:   0, sy: 13792, sw: 128, sh: 128 },
+  house_blue:   { sx:   0, sy: 13664, sw: 128, sh: 128 },
+  house_green:  { sx: 112, sy: 13664, sw: 128, sh: 128 },
 };
 
 export function registerTilesetRegions(atlas, image, regions = TILESET_REGIONS) {
