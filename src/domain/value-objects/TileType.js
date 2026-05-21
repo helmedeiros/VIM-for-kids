@@ -44,3 +44,8 @@ TileType.RAMP_LEFT = new TileType('ramp_left', true);
 
 TileType.ROCK = new TileType('rock', false);
 TileType.COBBLESTONE = new TileType('cobblestone', true);
+
+// Walkable stone-block tile used as floating letter platforms in water.
+// Renders with the same stone sprite as TileType.STONE but is passable
+// so the cursor can hop word-to-word vim-adventures-style.
+TileType.PLATFORM = new TileType('platform', true);

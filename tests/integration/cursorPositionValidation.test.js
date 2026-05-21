@@ -102,7 +102,18 @@ const parseZoneFile = (filePath) => {
 
 const getWalkableTileTypes = () => {
   // Known walkable tile types from TileType.js
-  return ['path', 'dirt', 'field', 'bridge', 'sand', 'test_ground', 'boss_area', 'grass'];
+  return [
+    'path',
+    'dirt',
+    'field',
+    'bridge',
+    'sand',
+    'test_ground',
+    'boss_area',
+    'grass',
+    'cobblestone',
+    'platform',
+  ];
 };
 
 const validateZonePosition = (zoneData, walkableTileTypes) => {
