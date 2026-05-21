@@ -205,6 +205,7 @@ export class Zone {
       ramp_left: TileType.RAMP_LEFT,
       rock: TileType.ROCK,
       cobblestone: TileType.COBBLESTONE,
+      platform: TileType.PLATFORM,
       // Special tiles that should be walkable paths
       vim_key_spot: TileType.PATH,
       gate: TileType.PATH,

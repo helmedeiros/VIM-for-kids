@@ -20,35 +20,35 @@ export const TILESET_REGIONS = {
   // defaults (small + 2x2 boulder); the rest are available for future use.
 
   // Small single rocks — row 1 of the rocks page (sy=6240).
-  rock_small_green:        { sx:   0, sy: 6240, sw: 32, sh: 32 },
-  rock_small_grey_light:   { sx:  32, sy: 6240, sw: 32, sh: 32 },
-  rock_small_grey:         { sx:  64, sy: 6240, sw: 32, sh: 32 },
-  rock_small_grey_pair:    { sx:  96, sy: 6240, sw: 32, sh: 32 },
-  rock_small_teal:         { sx: 128, sy: 6240, sw: 32, sh: 32 },
-  rock_small_teal_light:   { sx: 160, sy: 6240, sw: 32, sh: 32 },
-  rock_small_teal_pair:    { sx: 192, sy: 6240, sw: 32, sh: 32 },
-  rock_small_brown_pair:   { sx: 224, sy: 6240, sw: 32, sh: 32 },
+  rock_small_green: { sx: 0, sy: 6240, sw: 32, sh: 32 },
+  rock_small_grey_light: { sx: 32, sy: 6240, sw: 32, sh: 32 },
+  rock_small_grey: { sx: 64, sy: 6240, sw: 32, sh: 32 },
+  rock_small_grey_pair: { sx: 96, sy: 6240, sw: 32, sh: 32 },
+  rock_small_teal: { sx: 128, sy: 6240, sw: 32, sh: 32 },
+  rock_small_teal_light: { sx: 160, sy: 6240, sw: 32, sh: 32 },
+  rock_small_teal_pair: { sx: 192, sy: 6240, sw: 32, sh: 32 },
+  rock_small_brown_pair: { sx: 224, sy: 6240, sw: 32, sh: 32 },
 
   // Pile rocks without base (rounded clusters, sy=6208).
-  rock_pile_sandy:         { sx: 128, sy: 6208, sw: 32, sh: 32 },
-  rock_pile_grey:          { sx: 160, sy: 6208, sw: 32, sh: 32 },
-  rock_pile_green:         { sx: 192, sy: 6208, sw: 32, sh: 32 },
-  rock_brown_round:        { sx: 224, sy: 6208, sw: 32, sh: 32 },
+  rock_pile_sandy: { sx: 128, sy: 6208, sw: 32, sh: 32 },
+  rock_pile_grey: { sx: 160, sy: 6208, sw: 32, sh: 32 },
+  rock_pile_green: { sx: 192, sy: 6208, sw: 32, sh: 32 },
+  rock_brown_round: { sx: 224, sy: 6208, sw: 32, sh: 32 },
 
   // Pile rocks with water base (sy=6176) — for shorelines / ponds.
-  rock_pile_sandy_water:   { sx: 128, sy: 6176, sw: 32, sh: 32 },
-  rock_pile_grey_water:    { sx: 160, sy: 6176, sw: 32, sh: 32 },
-  rock_pile_green_water:   { sx: 192, sy: 6176, sw: 32, sh: 32 },
+  rock_pile_sandy_water: { sx: 128, sy: 6176, sw: 32, sh: 32 },
+  rock_pile_grey_water: { sx: 160, sy: 6176, sw: 32, sh: 32 },
+  rock_pile_green_water: { sx: 192, sy: 6176, sw: 32, sh: 32 },
 
   // Chunky / tall boulders — row 2 (sy=6272).
-  rock_chunky_green:       { sx:   0, sy: 6272, sw: 32, sh: 32 },
-  rock_chunky_green_alt:   { sx:  32, sy: 6272, sw: 32, sh: 32 },
-  rock_chunky_green_small: { sx:  64, sy: 6272, sw: 32, sh: 32 },
-  rock_tall_green:         { sx:  96, sy: 6272, sw: 32, sh: 32 },
-  rock_tall_green_alt:     { sx: 128, sy: 6272, sw: 32, sh: 32 },
-  rock_chunky_brown:       { sx: 160, sy: 6272, sw: 32, sh: 32 },
-  rock_chunky_blue:        { sx: 192, sy: 6272, sw: 32, sh: 32 },
-  rock_tall_blue:          { sx: 224, sy: 6272, sw: 32, sh: 32 },
+  rock_chunky_green: { sx: 0, sy: 6272, sw: 32, sh: 32 },
+  rock_chunky_green_alt: { sx: 32, sy: 6272, sw: 32, sh: 32 },
+  rock_chunky_green_small: { sx: 64, sy: 6272, sw: 32, sh: 32 },
+  rock_tall_green: { sx: 96, sy: 6272, sw: 32, sh: 32 },
+  rock_tall_green_alt: { sx: 128, sy: 6272, sw: 32, sh: 32 },
+  rock_chunky_brown: { sx: 160, sy: 6272, sw: 32, sh: 32 },
+  rock_chunky_blue: { sx: 192, sy: 6272, sw: 32, sh: 32 },
+  rock_tall_blue: { sx: 224, sy: 6272, sw: 32, sh: 32 },
 
   // In-use defaults — point at warm/brown variants so the hidden area
   // reads natural and earthy. Swap by re-pointing these two entries.
@@ -59,22 +59,22 @@ export const TILESET_REGIONS = {
   // Top 4x2 block of the tileset is a row of round leafy trees in five
   // shades. Use these to mix variants inside a tree labyrinth so it
   // doesn't read as a single repeated sprite.
-  tree_round_green:   { sx:   0, sy:   0, sw: 64, sh: 64 },
-  tree_round_dark:    { sx:  64, sy:   0, sw: 64, sh: 64 },
-  tree_round_dense:   { sx: 128, sy:   0, sw: 64, sh: 64 },
-  tree_round_shadow:  { sx: 192, sy:   0, sw: 64, sh: 64 },
-  tree_round_layered: { sx:   0, sy:  64, sw: 64, sh: 64 },
+  tree_round_green: { sx: 0, sy: 0, sw: 64, sh: 64 },
+  tree_round_dark: { sx: 64, sy: 0, sw: 64, sh: 64 },
+  tree_round_dense: { sx: 128, sy: 0, sw: 64, sh: 64 },
+  tree_round_shadow: { sx: 192, sy: 0, sw: 64, sh: 64 },
+  tree_round_layered: { sx: 0, sy: 64, sw: 64, sh: 64 },
 
   // === Desert flora (64x64, 2x2 footprint) =================================
   // Palms and dried-out trees in the y=1280..1536 band of the tileset.
   // Drop these onto sand tiles to read "desert oasis" instead of "blank
   // beach" — palms cluster, cacti/succulents stand alone, dead trees
   // litter the edges.
-  palm_tree:     { sx:   0, sy: 1344, sw: 64, sh: 64 },
+  palm_tree: { sx: 0, sy: 1344, sw: 64, sh: 64 },
   palm_tree_alt: { sx: 128, sy: 1344, sw: 64, sh: 64 },
-  dead_tree:     { sx:  64, sy: 1472, sw: 64, sh: 64 },
-  dead_pine:     { sx: 128, sy: 1472, sw: 64, sh: 64 },
-  cactus:        { sx: 192, sy: 1280, sw: 64, sh: 64 },
+  dead_tree: { sx: 64, sy: 1472, sw: 64, sh: 64 },
+  dead_pine: { sx: 128, sy: 1472, sw: 64, sh: 64 },
+  cactus: { sx: 192, sy: 1280, sw: 64, sh: 64 },
 
   // Legacy alias — kept so existing zones (BlinkingGrove, FieldOfInsertion)
   // keep rendering until they migrate to the named variants above.
@@ -84,7 +84,7 @@ export const TILESET_REGIONS = {
   // Each gem sits in a small metal dish with a base/stem. The art lives
   // in the items strip near sy=9152 with irregular 24x24-ish packing.
   gem_orange: { sx: 164, sy: 9152, sw: 24, sh: 24 },
-  gem_green:  { sx: 196, sy: 9152, sw: 24, sh: 24 },
+  gem_green: { sx: 196, sy: 9152, sw: 24, sh: 24 },
   gem_bronze: { sx: 228, sy: 9152, sw: 24, sh: 24 },
 
   // === Energy meters (16x24) — gate overrides for the hidden area =========
@@ -92,8 +92,14 @@ export const TILESET_REGIONS = {
   // blue = charged (unlocked once the matching gem is collected).
   // Drawn at 32x48 destination with the foot anchored at the bottom of
   // the cell, so the dome overflows up into the cell above.
-  energy_meter_empty:    { sx: 208, sy: 9536, sw: 16, sh: 24 },
-  energy_meter_charged:  { sx: 224, sy: 9536, sw: 16, sh: 24 },
+  energy_meter_empty: { sx: 208, sy: 9536, sw: 16, sh: 24 },
+  energy_meter_charged: { sx: 224, sy: 9536, sw: 16, sh: 24 },
+
+  // === Letter platforms (16x16, walkable stone block) =====================
+  // Light-gray stone tile rendered as the floating letter platforms in
+  // the water section between village and forest. Reuses the stone
+  // sprite but registers it under the walkable `platform` TileType.
+  platform: { sx: 130, sy: 3184, sw: 16, sh: 16 },
 
   // === Pier planks (16x16, used as the `bridge` tile override) ============
   // Horizontal wooden planks. Registering under the name `bridge` makes
@@ -119,9 +125,9 @@ export const TILESET_REGIONS = {
   // previous row's bottom-shadow strip (would otherwise show as a
   // stray dark band above each house). Green's sx stays at 112 to
   // include its door which lives left of the 128-grid line.
-  house_orange: { sx:   0, sy: 13792, sw: 96, sh: 128 },
-  house_blue:   { sx:   0, sy: 13664, sw: 96, sh: 128 },
-  house_green:  { sx: 112, sy: 13664, sw: 96, sh: 128 },
+  house_orange: { sx: 0, sy: 13792, sw: 96, sh: 128 },
+  house_blue: { sx: 0, sy: 13664, sw: 96, sh: 128 },
+  house_green: { sx: 100, sy: 13664, sw: 96, sh: 128 },
 };
 
 export function registerTilesetRegions(atlas, image, regions = TILESET_REGIONS) {
