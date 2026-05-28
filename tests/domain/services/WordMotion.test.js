@@ -128,6 +128,24 @@ describe('WordMotion.findNextWordStart', () => {
       const target = WordMotion.findNextWordStart(new Position(0, 3), labels);
       expect(target).toEqual(new Position(0, 5));
     });
+
+    it('ignores walkability when both labels share an explicit group (water-gap hop)', () => {
+      // Sing-song scenario: cursor on platform "a", a water tile, then platform
+      // "b" — same group. The flood-fill cannot cross the water, but because
+      // both labels are tagged together, word motion should still jump.
+      const labels = [label(0, 3, 'a', 'sing'), label(5, 3, 'b', 'sing')];
+      const isWalkable = (pos) => pos.x === 0 || pos.x === 5;
+      const target = WordMotion.findNextWordStart(new Position(0, 3), labels, isWalkable);
+      expect(target).toEqual(new Position(5, 3));
+    });
+
+    it('still respects walkability when labels share only the implicit null group', () => {
+      // Authored without a group → fall back to flood-fill safety.
+      const labels = [label(0, 3, 'a'), label(5, 3, 'b')];
+      const isWalkable = (pos) => pos.x !== 3;
+      const target = WordMotion.findNextWordStart(new Position(0, 3), labels, isWalkable);
+      expect(target).toBeNull();
+    });
   });
 
   describe('with text groups', () => {
