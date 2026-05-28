@@ -12,6 +12,7 @@ import { KeyboardInputHandler } from './infrastructure/input/KeyboardInputHandle
 import { ZoneRegistryAdapter } from './infrastructure/data/zones/ZoneRegistryAdapter.js';
 import { GameProviderAdapter } from './infrastructure/data/games/GameProviderAdapter.js';
 import { GameSelectorUI } from './infrastructure/ui/GameSelectorUI.js';
+import { featureFlags } from './infrastructure/FeatureFlags.js';
 
 export class VimForKidsGame {
   constructor(options = {}, dependencies = {}) {
@@ -104,6 +105,46 @@ export class VimForKidsGame {
   }
 
   /**
+   * Collect every vim key that's introduced in any zone of any level *before*
+   * the given level. Used by the GRANT_ALL_PREVIOUS_KEYS testing flag so the
+   * player can jump straight into a later level with all the prerequisite
+   * motions already in their inventory.
+   * @private
+   */
+  _collectKeysFromPriorLevels(currentLevelId) {
+    const keys = new Set();
+    let game;
+    try {
+      game = GameRegistry.getGame(this.currentGameId);
+    } catch {
+      return keys;
+    }
+    if (!game.supportsLevels || !game.supportsLevels()) return keys;
+    const supported = game.getSupportedLevels();
+    const stopIdx = supported.indexOf(currentLevelId);
+    if (stopIdx <= 0) return keys;
+    for (let i = 0; i < stopIdx; i++) {
+      let levelConfig;
+      try {
+        levelConfig = game.getLevelConfiguration(supported[i]);
+      } catch {
+        continue;
+      }
+      for (const zoneId of levelConfig.zones || []) {
+        try {
+          const zone = this.zoneProvider.createZone(zoneId);
+          for (const vimKey of zone.vimKeys || []) {
+            if (vimKey && vimKey.key) keys.add(vimKey.key);
+          }
+        } catch {
+          // skip zones that fail to materialise
+        }
+      }
+    }
+    return keys;
+  }
+
+  /**
    * Synchronous initialization for backward compatibility
    * @private
    */
@@ -115,6 +156,10 @@ export class VimForKidsGame {
       // For level-based games, try to create with level config
       try {
         const levelConfig = this._getLevelConfiguration(this.currentLevel);
+        let initialCollectedKeys = this._carriedCollectedKeys || null;
+        if (!initialCollectedKeys && featureFlags.isEnabled('GRANT_ALL_PREVIOUS_KEYS')) {
+          initialCollectedKeys = this._collectKeysFromPriorLevels(this.currentLevel);
+        }
         this.gameState = new LevelGameState(
           this.zoneProvider,
           levelConfig,
@@ -122,7 +167,7 @@ export class VimForKidsGame {
           this.cutsceneService,
           this.cutsceneRenderer,
           {
-            initialCollectedKeys: this._carriedCollectedKeys || null,
+            initialCollectedKeys,
             initialCollectedCollectibleKeys: this._carriedCollectibleKeys || null,
           }
         );

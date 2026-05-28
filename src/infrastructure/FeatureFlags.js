@@ -29,6 +29,7 @@ class FeatureFlags {
       ACHIEVEMENT_SYSTEM: false,
       ENHANCED_3D_EFFECTS: true, // Toggle for pseudo-3D tile enhancements
       REPEAT_CUTSCENES: true, // Show cutscenes every time (false = show only once)
+      GRANT_ALL_PREVIOUS_KEYS: false, // Testing aid: when jumping directly into a level, auto-collect every vim key from levels before it
 
       // Load flags from environment or remote config
       ...this.loadFromEnvironment(),
