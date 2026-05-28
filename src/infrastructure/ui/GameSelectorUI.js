@@ -117,6 +117,15 @@ export class GameSelectorUI {
               <p class="game-description">When off, cutscenes only play once per level.</p>
             </div>
           </div>
+          <div class="game-item" style="margin-top:12px">
+            <div class="game-info">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:800;font-size:0.9em">
+                <input type="checkbox" id="grantAllPreviousKeysToggle">
+                Grant all previous-level keys
+              </label>
+              <p class="game-description">Testing aid: when jumping into a level, auto-collect every vim key from levels before it.</p>
+            </div>
+          </div>
         </div>
       </div>
       <div class="modal-backdrop"></div>
@@ -170,6 +179,19 @@ export class GameSelectorUI {
           featureFlags.enable('REPEAT_CUTSCENES');
         } else {
           featureFlags.disable('REPEAT_CUTSCENES');
+        }
+      });
+    }
+
+    // Grant all previous-level keys (testing aid)
+    const grantKeysToggle = document.getElementById('grantAllPreviousKeysToggle');
+    if (grantKeysToggle) {
+      grantKeysToggle.checked = featureFlags.isEnabled('GRANT_ALL_PREVIOUS_KEYS');
+      grantKeysToggle.addEventListener('change', () => {
+        if (grantKeysToggle.checked) {
+          featureFlags.enable('GRANT_ALL_PREVIOUS_KEYS');
+        } else {
+          featureFlags.disable('GRANT_ALL_PREVIOUS_KEYS');
         }
       });
     }
