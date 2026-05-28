@@ -39,6 +39,13 @@ function findInDirection(cursor, textLabels, isWalkable, xExtractor, direction) 
 
   if (!isWalkable) return candidates[0];
 
+  // An explicit group is the author's promise that every label inside it
+  // belongs to one block the player should hop freely (e.g. sing-song
+  // platforms across water). Skip the flood-fill in that case and trust the
+  // group. The implicit null group still gets the walkability check so
+  // unrelated, ungrouped texts don't bleed into each other.
+  if (cursorGroup !== null) return candidates[0];
+
   const reachable = computeReachable(cursor, eligibleLabels, isWalkable);
   for (const target of candidates) {
     if (reachable.has(keyOf(target))) return target;
