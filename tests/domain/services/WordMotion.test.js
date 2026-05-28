@@ -139,6 +139,17 @@ describe('WordMotion.findNextWordStart', () => {
       expect(target).toEqual(new Position(5, 3));
     });
 
+    it('refuses to land on a blocked cell even in an explicit group (boulder dead-end)', () => {
+      // Rock decoration covers the next-word-start letter. The player must pick
+      // a different motion (`e` to land on the previous word's end, `b` to step
+      // back, etc.) — `w` should fail rather than warp onto the boulder.
+      const labels = [label(0, 3, 'a', 'sing'), label(5, 3, 'p', 'sing')];
+      // Everything's walkable except the boulder cell at (5, 3).
+      const isWalkable = (pos) => !(pos.x === 5 && pos.y === 3);
+      const target = WordMotion.findNextWordStart(new Position(0, 3), labels, isWalkable);
+      expect(target).toBeNull();
+    });
+
     it('still respects walkability when labels share only the implicit null group', () => {
       // Authored without a group → fall back to flood-fill safety.
       const labels = [label(0, 3, 'a'), label(5, 3, 'b')];

@@ -44,7 +44,15 @@ function findInDirection(cursor, textLabels, isWalkable, xExtractor, direction) 
   // platforms across water). Skip the flood-fill in that case and trust the
   // group. The implicit null group still gets the walkability check so
   // unrelated, ungrouped texts don't bleed into each other.
-  if (cursorGroup !== null) return candidates[0];
+  //
+  // The destination itself must still be walkable, though: a boulder
+  // covering the next-word letter is a dead end the player has to plan
+  // around with a different motion (`e`/`b`), so we return null rather
+  // than warp onto a blocked cell.
+  if (cursorGroup !== null) {
+    const target = candidates[0];
+    return isWalkable(target) ? target : null;
+  }
 
   const reachable = computeReachable(cursor, eligibleLabels, isWalkable);
   for (const target of candidates) {
