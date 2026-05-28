@@ -92,6 +92,29 @@ describe('GRANT_ALL_PREVIOUS_KEYS testing flag', () => {
       expect(game.gameState.collectedKeys.has('l')).toBe(true);
     });
 
+    it('renders through getCurrentState() so textLabels survive the re-render', () => {
+      featureFlags.disable('GRANT_ALL_PREVIOUS_KEYS');
+      game = new VimForKidsGame({ level: 'level_2' });
+      const renderCalls = [];
+      game.gameRenderer = {
+        render: (state) => renderCalls.push(state),
+      };
+
+      featureFlags.enable('GRANT_ALL_PREVIOUS_KEYS');
+      document.dispatchEvent(
+        new CustomEvent('vimForKids:grantAllPreviousKeysToggled', {
+          detail: { enabled: true },
+        })
+      );
+
+      // The snapshot passed to render must include the zone's textLabels so
+      // the canvas renderer's EntityIndex keeps drawing the sing-song letters.
+      expect(renderCalls.length).toBeGreaterThan(0);
+      const last = renderCalls[renderCalls.length - 1];
+      expect(Array.isArray(last.textLabels)).toBe(true);
+      expect(last.textLabels.length).toBeGreaterThan(0);
+    });
+
     it('ignores the event when detail.enabled is false', () => {
       featureFlags.disable('GRANT_ALL_PREVIOUS_KEYS');
       game = new VimForKidsGame({ level: 'level_2' });
