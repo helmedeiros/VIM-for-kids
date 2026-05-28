@@ -1422,7 +1422,7 @@ export class WordPracticeZone {
           {
             locked: true,
             unlocksWhen: { requiredCollectibleKeys: ['sand_gem_orange'] },
-            position: [90, 10],
+            position: [91, 10],
             leadsTo: 'boss_arena_orange',
             closedSpriteRegion: 'energy_meter_empty',
             openSpriteRegion: 'energy_meter_charged',
@@ -1430,7 +1430,7 @@ export class WordPracticeZone {
           {
             locked: true,
             unlocksWhen: { requiredCollectibleKeys: ['sand_gem_green'] },
-            position: [90, 11],
+            position: [91, 11],
             leadsTo: 'boss_arena_green',
             closedSpriteRegion: 'energy_meter_empty',
             openSpriteRegion: 'energy_meter_charged',
@@ -1438,7 +1438,7 @@ export class WordPracticeZone {
           {
             locked: true,
             unlocksWhen: { requiredCollectibleKeys: ['sand_gem_bronze'] },
-            position: [90, 12],
+            position: [91, 12],
             leadsTo: 'boss_arena_bronze',
             closedSpriteRegion: 'energy_meter_empty',
             openSpriteRegion: 'energy_meter_charged',
