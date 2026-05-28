@@ -61,6 +61,11 @@ export class VimForKidsGame {
    * Inject every vim key that levels before the current one would grant
    * into the running game state, then re-render so the collected-keys
    * panel updates immediately. Triggered by the gear-menu toggle.
+   *
+   * Always re-render through getCurrentState() — LevelGameState only
+   * exposes textLabels/gate/secondaryGates/npcs through that snapshot,
+   * so passing `this.gameState` directly drops the sing-song text
+   * labels (EntityIndex sees gameState.textLabels === undefined).
    * @private
    */
   _applyAllPreviousLevelKeysToCurrentState() {
@@ -70,7 +75,11 @@ export class VimForKidsGame {
       this.gameState.collectedKeys.add(k);
     }
     if (this.gameRenderer && typeof this.gameRenderer.render === 'function') {
-      this.gameRenderer.render(this.gameState);
+      const snapshot =
+        typeof this.gameState.getCurrentState === 'function'
+          ? this.gameState.getCurrentState()
+          : this.gameState;
+      this.gameRenderer.render(snapshot);
     }
   }
 
