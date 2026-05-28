@@ -1239,12 +1239,14 @@ export class WordPracticeZone {
           // Five maze keys spread along the row-11 walk-behind canopy
           // corridor. Each opens one of the five gates further east,
           // so the player has to keep moving through the labyrinth to
-          // collect them all before reaching the boss arena.
-          { type: 'collectible_key', keyId: 'maze_key_1', name: 'Maze Key I', color: '#e8c547', position: [100, 11] },
-          { type: 'collectible_key', keyId: 'maze_key_2', name: 'Maze Key II', color: '#a3d977', position: [125, 11] },
-          { type: 'collectible_key', keyId: 'maze_key_3', name: 'Maze Key III', color: '#7ed4e0', position: [140, 11] },
-          { type: 'collectible_key', keyId: 'maze_key_4', name: 'Maze Key IV', color: '#c79bf2', position: [162, 11] },
-          { type: 'collectible_key', keyId: 'maze_key_5', name: 'Maze Key V', color: '#f29d9d', position: [185, 11] },
+          // collect them all before reaching the boss arena. Drawn
+          // black so they pop against the sand floor — the pale
+          // pastels (gold/lime/cyan/lilac/coral) blended right in.
+          { type: 'collectible_key', keyId: 'maze_key_1', name: 'Maze Key I', color: '#111111', position: [100, 11] },
+          { type: 'collectible_key', keyId: 'maze_key_2', name: 'Maze Key II', color: '#111111', position: [125, 11] },
+          { type: 'collectible_key', keyId: 'maze_key_3', name: 'Maze Key III', color: '#111111', position: [140, 11] },
+          { type: 'collectible_key', keyId: 'maze_key_4', name: 'Maze Key IV', color: '#111111', position: [162, 11] },
+          { type: 'collectible_key', keyId: 'maze_key_5', name: 'Maze Key V', color: '#111111', position: [185, 11] },
         ],
         textLabels: [
           // Water-platform letter tiles — vim-adventures style. Seven
