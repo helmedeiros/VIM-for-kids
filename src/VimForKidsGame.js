@@ -41,6 +41,37 @@ export class VimForKidsGame {
 
     // Initialize game synchronously for backward compatibility
     this._initializeGameSync();
+
+    // React to the gear-menu toggle in real-time so the player doesn't have
+    // to restart the level to receive the prior-level keys.
+    this._grantKeysListener = (event) => {
+      if (event && event.detail && event.detail.enabled) {
+        this._applyAllPreviousLevelKeysToCurrentState();
+      }
+    };
+    if (typeof document !== 'undefined') {
+      document.addEventListener(
+        'vimForKids:grantAllPreviousKeysToggled',
+        this._grantKeysListener
+      );
+    }
+  }
+
+  /**
+   * Inject every vim key that levels before the current one would grant
+   * into the running game state, then re-render so the collected-keys
+   * panel updates immediately. Triggered by the gear-menu toggle.
+   * @private
+   */
+  _applyAllPreviousLevelKeysToCurrentState() {
+    if (!this.gameState || !this.gameState.collectedKeys) return;
+    const keys = this._collectKeysFromPriorLevels(this.currentLevel);
+    for (const k of keys) {
+      this.gameState.collectedKeys.add(k);
+    }
+    if (this.gameRenderer && typeof this.gameRenderer.render === 'function') {
+      this.gameRenderer.render(this.gameState);
+    }
   }
 
   /**
@@ -563,6 +594,15 @@ export class VimForKidsGame {
   cleanup() {
     if (this.inputHandler) {
       this.inputHandler.cleanup();
+    }
+
+    // Drop the gear-menu listener so it doesn't fire against a stale instance.
+    if (typeof document !== 'undefined' && this._grantKeysListener) {
+      document.removeEventListener(
+        'vimForKids:grantAllPreviousKeysToggled',
+        this._grantKeysListener
+      );
+      this._grantKeysListener = null;
     }
 
     // Clean up game selector UI

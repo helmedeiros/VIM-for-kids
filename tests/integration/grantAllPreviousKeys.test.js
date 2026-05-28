@@ -70,4 +70,35 @@ describe('GRANT_ALL_PREVIOUS_KEYS testing flag', () => {
       expect(game.gameState.collectedKeys.has('l')).toBe(false);
     });
   });
+
+  describe('runtime toggle event', () => {
+    it('injects prior-level keys into the live game state when the toggle event fires', () => {
+      featureFlags.disable('GRANT_ALL_PREVIOUS_KEYS');
+      game = new VimForKidsGame({ level: 'level_2' });
+      expect(game.gameState.collectedKeys.size).toBe(0);
+
+      featureFlags.enable('GRANT_ALL_PREVIOUS_KEYS');
+      document.dispatchEvent(
+        new CustomEvent('vimForKids:grantAllPreviousKeysToggled', {
+          detail: { enabled: true },
+        })
+      );
+
+      expect(game.gameState.collectedKeys.has('h')).toBe(true);
+      expect(game.gameState.collectedKeys.has('l')).toBe(true);
+    });
+
+    it('ignores the event when detail.enabled is false', () => {
+      featureFlags.disable('GRANT_ALL_PREVIOUS_KEYS');
+      game = new VimForKidsGame({ level: 'level_2' });
+
+      document.dispatchEvent(
+        new CustomEvent('vimForKids:grantAllPreviousKeysToggled', {
+          detail: { enabled: false },
+        })
+      );
+
+      expect(game.gameState.collectedKeys.size).toBe(0);
+    });
+  });
 });

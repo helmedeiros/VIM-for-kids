@@ -193,6 +193,13 @@ export class GameSelectorUI {
         } else {
           featureFlags.disable('GRANT_ALL_PREVIOUS_KEYS');
         }
+        // Let the running game inject the prior-level keys immediately so
+        // the player doesn't have to restart to feel the change.
+        document.dispatchEvent(
+          new CustomEvent('vimForKids:grantAllPreviousKeysToggled', {
+            detail: { enabled: grantKeysToggle.checked },
+          })
+        );
       });
     }
   }
