@@ -822,24 +822,34 @@ export class CanvasGameRenderer extends GameRenderer {
       if (ck.spriteRegion && this._tryDrawCellRegion(ctx, ck.spriteRegion, screenX, screenY, ts)) {
         // Drawn via PNG region override (e.g. gem sprite); skip default.
       } else if (ck.color && hasCharSprites) {
-        // Author supplied a custom color but no sprite \u2014 draw a small
+        // Author supplied a custom color but no sprite \u2014 draw a
         // monochrome key with that color so high-contrast keys (e.g.
         // the black maze keys laid across the sand floor) actually
         // show up. The emoji path renders with the OS's color font
         // which ignores fillStyle, so use canvas primitives instead.
+        // Sized to fill ~85% of the tile so it reads at the same
+        // weight as the default golden-key sprite.
         ctx.fillStyle = ck.color;
         const cx = screenX + half;
         const cy = screenY + half;
-        const r = Math.max(3, Math.floor(ts * 0.18));
-        // Bow (round head)
+        const r = Math.max(5, Math.floor(ts * 0.3));
+        const shaftH = Math.max(3, Math.floor(r * 0.55));
+        // Bow (round head) on the left
         ctx.beginPath();
-        ctx.arc(cx - r * 0.5, cy, r, 0, Math.PI * 2);
+        ctx.arc(cx - r * 0.5, cy, r * 0.95, 0, Math.PI * 2);
         ctx.fill();
-        // Shaft
-        ctx.fillRect(cx, cy - Math.max(1, r * 0.25), r * 1.5, Math.max(2, r * 0.5));
-        // Teeth
-        ctx.fillRect(cx + r * 0.8, cy + r * 0.25, Math.max(2, r * 0.3), r * 0.6);
-        ctx.fillRect(cx + r * 1.2, cy + r * 0.25, Math.max(2, r * 0.3), r * 0.6);
+        // Hollow the bow so it reads as a key, not a blob
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(cx - r * 0.5, cy, r * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        // Shaft extending right from the bow
+        ctx.fillRect(cx, cy - shaftH / 2, r * 1.5, shaftH);
+        // Two teeth on the underside of the tip
+        ctx.fillRect(cx + r * 0.7, cy + shaftH / 2, Math.max(2, Math.floor(r * 0.35)), Math.max(3, Math.floor(r * 0.7)));
+        ctx.fillRect(cx + r * 1.2, cy + shaftH / 2, Math.max(2, Math.floor(r * 0.35)), Math.max(3, Math.floor(r * 0.7)));
       } else if (hasCharSprites) {
         this._drawCharSprite(
           ctx,
