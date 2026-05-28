@@ -91,14 +91,14 @@ export class WordPracticeZone {
         decorations: [
           // ----- Desert (sand area, cols 1-79) ----------------------
           // ----- Village (cols 10-25, road on row 11) --------------
-          { regionName: 'house_orange', position: [30, 6], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
-          { regionName: 'house_blue', position: [34, 6], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
-          { regionName: 'house_green', position: [38, 6], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
-          { regionName: 'house_orange', position: [42, 6], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
-          { regionName: 'house_blue', position: [30, 12], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
-          { regionName: 'house_green', position: [34, 12], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
-          { regionName: 'house_orange', position: [38, 12], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
-          { regionName: 'house_blue', position: [42, 12], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
+          { regionName: 'house_orange', position: [30, 6], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'house_blue', position: [34, 6], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'house_green', position: [38, 6], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'house_orange', position: [42, 6], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'house_blue', position: [30, 12], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'house_green', position: [34, 12], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'house_orange', position: [38, 12], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 1 },
+          { regionName: 'house_blue', position: [42, 12], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 1 },
           // North-side palms and cacti above the gem row.
           { regionName: 'palm_tree_alt', position: [35, 1], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
           { regionName: 'dead_tree', position: [40, 3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
