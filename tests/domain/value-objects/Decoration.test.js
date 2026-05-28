@@ -133,6 +133,32 @@ describe('Decoration', () => {
       expect(d.blocks(new Position(11, 5))).toBe(true);
     });
 
+    it('with collisionFootprintYOffset shifts the collision band up so the front rows are walk-over', () => {
+      // 3x4 house: top row = roof (walk-behind), middle 2 rows = walls+door (block),
+      // bottom row = shadow on the sand (walk-over from in front).
+      const d = new Decoration({
+        regionName: 'house_orange',
+        anchor: new Position(30, 6),
+        footprintW: 3,
+        footprintH: 4,
+        blocking: true,
+        collisionFootprintH: 2,
+        collisionFootprintYOffset: 1,
+      });
+
+      // Top row (roof): walk-behind
+      expect(d.blocks(new Position(30, 6))).toBe(false);
+      expect(d.blocks(new Position(32, 6))).toBe(false);
+      // Walls + door (rows 7-8): block
+      expect(d.blocks(new Position(30, 7))).toBe(true);
+      expect(d.blocks(new Position(31, 7))).toBe(true);
+      expect(d.blocks(new Position(32, 8))).toBe(true);
+      // Bottom shadow row (row 9): walk-over — player can stand in front of the door
+      expect(d.blocks(new Position(30, 9))).toBe(false);
+      expect(d.blocks(new Position(31, 9))).toBe(false);
+      expect(d.blocks(new Position(32, 9))).toBe(false);
+    });
+
     it('exposes baseY = anchor.y + footprintH - 1 for render-order sorting', () => {
       const d = new Decoration({
         regionName: 'rock_2x2',
