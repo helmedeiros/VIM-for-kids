@@ -99,5 +99,8 @@ export default defineConfig({
     __DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
     __BUILD_DATE__: JSON.stringify(getBuildTimestamp()),
     __GIT_HASH__: JSON.stringify(getGitHash()),
+    __BASE_URL__: JSON.stringify(
+      process.env.NODE_ENV === 'production' ? '/VIM-for-kids/' : '/'
+    ),
   },
 });
