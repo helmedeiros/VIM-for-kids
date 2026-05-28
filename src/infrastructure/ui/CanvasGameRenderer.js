@@ -821,6 +821,25 @@ export class CanvasGameRenderer extends GameRenderer {
     if (ck) {
       if (ck.spriteRegion && this._tryDrawCellRegion(ctx, ck.spriteRegion, screenX, screenY, ts)) {
         // Drawn via PNG region override (e.g. gem sprite); skip default.
+      } else if (ck.color && hasCharSprites) {
+        // Author supplied a custom color but no sprite \u2014 draw a small
+        // monochrome key with that color so high-contrast keys (e.g.
+        // the black maze keys laid across the sand floor) actually
+        // show up. The emoji path renders with the OS's color font
+        // which ignores fillStyle, so use canvas primitives instead.
+        ctx.fillStyle = ck.color;
+        const cx = screenX + half;
+        const cy = screenY + half;
+        const r = Math.max(3, Math.floor(ts * 0.18));
+        // Bow (round head)
+        ctx.beginPath();
+        ctx.arc(cx - r * 0.5, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+        // Shaft
+        ctx.fillRect(cx, cy - Math.max(1, r * 0.25), r * 1.5, Math.max(2, r * 0.5));
+        // Teeth
+        ctx.fillRect(cx + r * 0.8, cy + r * 0.25, Math.max(2, r * 0.3), r * 0.6);
+        ctx.fillRect(cx + r * 1.2, cy + r * 0.25, Math.max(2, r * 0.3), r * 0.6);
       } else if (hasCharSprites) {
         this._drawCharSprite(
           ctx,
