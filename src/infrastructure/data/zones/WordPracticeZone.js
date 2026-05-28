@@ -130,6 +130,19 @@ export class WordPracticeZone {
           { regionName: 'rock_2x2', position: [61, 16], footprintW: 1, footprintH: 1, blocking: true }, // c in 'continue'
           { regionName: 'rock_2x2', position: [76, 16], footprintW: 1, footprintH: 1, blocking: true }, // g in 'singing'
           { regionName: 'rock_2x2', position: [57, 18], footprintW: 1, footprintH: 1, blocking: true }, // j in 'just'
+          // Funnel trees around the meter gate. The corridor at cols
+          // 89-91 is open sand on every row, so without these the
+          // player would walk around the meter line via row 10 or row
+          // 12. Standard 2x2 maze trees (anchor at the top-left) seal
+          // both the north detour (rows 9-10) and the south detour
+          // (rows 12-13) at cols 89-92. That leaves row 11 — the
+          // cursor's path — as the only east-bound route, so the
+          // player has to step east through orange, green, then bronze
+          // meters in series before reaching the canopy at (92, 11).
+          { regionName: 'tree_round_dense', position: [89, 9], footprintW: 2, footprintH: 2, blocking: true },
+          { regionName: 'tree_round_green', position: [91, 9], footprintW: 2, footprintH: 2, blocking: true },
+          { regionName: 'tree_round_dark', position: [89, 12], footprintW: 2, footprintH: 2, blocking: true },
+          { regionName: 'tree_round_layered', position: [91, 12], footprintW: 2, footprintH: 2, blocking: true },
           // ----- Tree labyrinth (cols 70-167) ----------------------
           { regionName: 'tree_round_green', position: [92, 0], footprintW: 2, footprintH: 2, blocking: true },
           { regionName: 'tree_round_shadow', position: [92, 1], footprintW: 2, footprintH: 2, blocking: true },
@@ -1413,16 +1426,17 @@ export class WordPracticeZone {
           leadsTo: 'zone_2',
         },
         secondaryGates: [
-          // Three meters guarding the labyrinth entrance, stacked
-          // vertically on cursor row 11 ± 1 the same way the Blinking
-          // Grove hidden area lines its meters up at col 34. Each
-          // consumes its matching sand gem and visually swaps from
-          // empty (red) to charged (blue). The maze stays sealed until
-          // all three are charged.
+          // Three meters lined up *in series* on cursor row 11 just
+          // west of the maze wall at col 92. The corridor is sealed to
+          // a single row by the tree decorations below — so the
+          // player can't bypass any meter and has to charge orange
+          // (col 89), green (col 90), bronze (col 91) in turn before
+          // stepping onto the walk-behind canopy at (92, 11) and
+          // entering the maze.
           {
             locked: true,
             unlocksWhen: { requiredCollectibleKeys: ['sand_gem_orange'] },
-            position: [91, 10],
+            position: [89, 11],
             leadsTo: 'boss_arena_orange',
             closedSpriteRegion: 'energy_meter_empty',
             openSpriteRegion: 'energy_meter_charged',
@@ -1430,7 +1444,7 @@ export class WordPracticeZone {
           {
             locked: true,
             unlocksWhen: { requiredCollectibleKeys: ['sand_gem_green'] },
-            position: [91, 11],
+            position: [90, 11],
             leadsTo: 'boss_arena_green',
             closedSpriteRegion: 'energy_meter_empty',
             openSpriteRegion: 'energy_meter_charged',
@@ -1438,7 +1452,7 @@ export class WordPracticeZone {
           {
             locked: true,
             unlocksWhen: { requiredCollectibleKeys: ['sand_gem_bronze'] },
-            position: [91, 12],
+            position: [91, 11],
             leadsTo: 'boss_arena_bronze',
             closedSpriteRegion: 'energy_meter_empty',
             openSpriteRegion: 'energy_meter_charged',
