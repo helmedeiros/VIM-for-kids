@@ -167,6 +167,17 @@ export class VimForKidsGame {
           for (const vimKey of zone.vimKeys || []) {
             if (vimKey && vimKey.key) keys.add(vimKey.key);
           }
+          // Hidden areas in a zone carry their own vim_key tiles (e.g. the
+          // w/e/b motions tucked away in Blinking Grove's secret area).
+          // They're stored as raw specialTiles config rather than VimKey
+          // entities, so read the value field directly.
+          const hiddenAreas =
+            typeof zone.getHiddenAreas === 'function' ? zone.getHiddenAreas() : [];
+          for (const area of hiddenAreas) {
+            for (const tile of area.specialTiles || []) {
+              if (tile && tile.type === 'vim_key' && tile.value) keys.add(tile.value);
+            }
+          }
         } catch {
           // skip zones that fail to materialise
         }
