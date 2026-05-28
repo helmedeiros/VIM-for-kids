@@ -242,6 +242,27 @@ describe('CanvasGameRenderer', () => {
       renderer._drawEntitiesAt(mockCtx, 5, 5, 0, 0, 32);
       expect(mockCtx.fillRect).toHaveBeenCalled();
     });
+
+    it('draws colored collectible keys as canvas primitives when sprites are loaded', () => {
+      // When ck.color is set, ck.spriteRegion is absent, and the char
+      // sprite sheet is available, the renderer must draw the key as a
+      // monochrome shape (arc + fillRect) tinted with the supplied
+      // color instead of falling back to the golden-key sprite. This is
+      // what makes the level-2 maze keys readable as black silhouettes
+      // on the sand floor.
+      renderer._charSpriteSheet = { image: {} }; // force hasCharSprites
+      const state = createMockGameState({
+        availableCollectibleKeys: [
+          { position: { x: 6, y: 6 }, keyId: 'maze_key_1', color: '#111111' },
+        ],
+      });
+      renderer.render(state);
+      renderer._drawEntitiesAt(mockCtx, 6, 6, 0, 0, 32);
+
+      expect(mockCtx.arc).toHaveBeenCalled();
+      expect(mockCtx.fillRect).toHaveBeenCalled();
+      expect(mockCtx.fillStyle).toBe('#111111');
+    });
   });
 
   describe('updateCollectedKeysDisplay', () => {
