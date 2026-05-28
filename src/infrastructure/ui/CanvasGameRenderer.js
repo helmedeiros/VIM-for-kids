@@ -22,7 +22,12 @@ import {
   pickGrassEdges,
 } from '../rendering/TileOverlayRules.js';
 
-const RPG_TILESET_URL = '/assets/sprites/tileset-rpg.png';
+// Resolve the tileset URL through Vite's __BASE_URL__ define so it works
+// both on the dev server (`/`) and under the GitHub Pages subpath
+// (`/VIM-for-kids/`). The typeof guard keeps Jest happy when the global
+// isn't injected.
+const _resolvedBase = typeof __BASE_URL__ !== 'undefined' ? __BASE_URL__ : '/';
+const RPG_TILESET_URL = `${_resolvedBase}assets/sprites/tileset-rpg.png`;
 
 /**
  * Canvas-based game renderer implementing the GameRenderer port.

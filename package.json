@@ -118,7 +118,8 @@
     "globals": {
       "__DEV__": "readonly",
       "__BUILD_DATE__": "readonly",
-      "__GIT_HASH__": "readonly"
+      "__GIT_HASH__": "readonly",
+      "__BASE_URL__": "readonly"
     },
     "rules": {
       "no-console": [
