@@ -91,29 +91,14 @@ export class WordPracticeZone {
         decorations: [
           // ----- Desert (sand area, cols 1-79) ----------------------
           // ----- Village (cols 10-25, road on row 11) --------------
-          // 8 Pokemon-style houses lining the dirt-path road. 4 on the
-          // north side (rows 7-9) and 4 on the south side (rows 13-15),
-          // alternating roof colors for visual mix. Each house is 3x3,
-          // fully blocking; the road at row 11 stays the only east-west
-          // corridor through the village. The pier (game cols 1-9 row 11)
-          // feeds straight into this road; east of col 25 the cursor
-          // exits the village into the open desert with gems.
-          { regionName: 'house_orange', position: [29, 6], footprintW: 3, footprintH: 4, blocking: true },
-          { regionName: 'house_blue', position: [33, 6], footprintW: 3, footprintH: 4, blocking: true },
-          { regionName: 'house_green', position: [37, 6], footprintW: 3, footprintH: 4, blocking: true },
-          { regionName: 'house_orange', position: [41, 6], footprintW: 3, footprintH: 4, blocking: true },
-          { regionName: 'house_blue', position: [29, 12], footprintW: 3, footprintH: 4, blocking: true },
-          { regionName: 'house_green', position: [33, 12], footprintW: 3, footprintH: 4, blocking: true },
-          { regionName: 'house_orange', position: [37, 12], footprintW: 3, footprintH: 4, blocking: true },
-          { regionName: 'house_blue', position: [41, 12], footprintW: 3, footprintH: 4, blocking: true },
-          // Palm clusters, lone cacti, and a few dried-out trees so
-          // the western leg of the zone reads as a desert oasis
-          // instead of an empty sand strip. Every plant uses
-          // collisionFootprintH:1 so the canopy is a "walk behind"
-          // tile (player slides under the leaves and stays visible
-          // through the trunk). All positions vetted against the
-          // organic sand mass — the coastline has irregular bays so
-          // pick only x,y pairs whose 2x2 footprint sits on sand.
+          { regionName: 'house_orange', position: [30, 6], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
+          { regionName: 'house_blue', position: [34, 6], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
+          { regionName: 'house_green', position: [38, 6], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
+          { regionName: 'house_orange', position: [42, 6], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
+          { regionName: 'house_blue', position: [30, 12], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
+          { regionName: 'house_green', position: [34, 12], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
+          { regionName: 'house_orange', position: [38, 12], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
+          { regionName: 'house_blue', position: [42, 12], footprintW: 3, footprintH: 4, blocking: true, collisionFootprintH: 2 },
           // North-side palms and cacti above the gem row.
           { regionName: 'palm_tree_alt', position: [35, 1], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
           { regionName: 'dead_tree', position: [40, 3], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
@@ -131,15 +116,6 @@ export class WordPracticeZone {
           { regionName: 'cactus', position: [83, 17], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
           { regionName: 'palm_tree_alt', position: [91, 15], footprintW: 2, footprintH: 2, blocking: true, collisionFootprintH: 1 },
           // ----- Tree labyrinth (cols 70-167) ----------------------
-          // Forest band that wraps the maze: west and east buffers
-          // (the sand pockets just outside the maze proper, filled
-          // with overlapping 2x2 trees) plus the maze body itself.
-          // All entries sorted by y (row) ascending, then x (col)
-          // ascending — walking the section top-to-bottom matches
-          // walking the labyrinth north-to-south, west-to-east. A
-          // single-tile passage at game row 11 stays open as the
-          // only corridor from desert into maze and from maze into
-          // the boss arena.
           { regionName: 'tree_round_green', position: [89, 0], footprintW: 2, footprintH: 2, blocking: true },
           { regionName: 'tree_round_shadow', position: [89, 1], footprintW: 2, footprintH: 2, blocking: true },
           { regionName: 'tree_round_layered', position: [90, 1], footprintW: 2, footprintH: 2, blocking: true },
