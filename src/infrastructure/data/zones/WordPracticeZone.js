@@ -1236,6 +1236,15 @@ export class WordPracticeZone {
           // the long-form word motion: a WORD is any run of non-blank
           // chars, so B hops past punctuation as a single token.
           { type: 'vim_key', value: 'B', position: [62, 18], description: 'B - jump backward to start of WORD (whitespace-separated)' },
+          // Five maze keys spread along the row-11 walk-behind canopy
+          // corridor. Each opens one of the five gates further east,
+          // so the player has to keep moving through the labyrinth to
+          // collect them all before reaching the boss arena.
+          { type: 'collectible_key', keyId: 'maze_key_1', name: 'Maze Key I', color: '#e8c547', position: [100, 11] },
+          { type: 'collectible_key', keyId: 'maze_key_2', name: 'Maze Key II', color: '#a3d977', position: [125, 11] },
+          { type: 'collectible_key', keyId: 'maze_key_3', name: 'Maze Key III', color: '#7ed4e0', position: [140, 11] },
+          { type: 'collectible_key', keyId: 'maze_key_4', name: 'Maze Key IV', color: '#c79bf2', position: [162, 11] },
+          { type: 'collectible_key', keyId: 'maze_key_5', name: 'Maze Key V', color: '#f29d9d', position: [185, 11] },
         ],
         textLabels: [
           // Water-platform letter tiles — vim-adventures style. Seven
@@ -1450,6 +1459,41 @@ export class WordPracticeZone {
             leadsTo: 'boss_arena_bronze',
             closedSpriteRegion: 'energy_meter_empty',
             openSpriteRegion: 'energy_meter_charged',
+          },
+          // Five labyrinth doors gating the long maze corridor between
+          // the meter trio and the boss arena. Each opens only with
+          // its matching maze key (collected further west on row 11),
+          // so reaching the east end requires sweeping the whole maze
+          // first.
+          {
+            locked: true,
+            unlocksWhen: { requiredCollectibleKeys: ['maze_key_1'] },
+            position: [110, 11],
+            leadsTo: 'maze_door_1',
+          },
+          {
+            locked: true,
+            unlocksWhen: { requiredCollectibleKeys: ['maze_key_2'] },
+            position: [131, 11],
+            leadsTo: 'maze_door_2',
+          },
+          {
+            locked: true,
+            unlocksWhen: { requiredCollectibleKeys: ['maze_key_3'] },
+            position: [152, 11],
+            leadsTo: 'maze_door_3',
+          },
+          {
+            locked: true,
+            unlocksWhen: { requiredCollectibleKeys: ['maze_key_4'] },
+            position: [173, 11],
+            leadsTo: 'maze_door_4',
+          },
+          {
+            locked: true,
+            unlocksWhen: { requiredCollectibleKeys: ['maze_key_5'] },
+            position: [200, 11],
+            leadsTo: 'maze_door_5',
           },
         ],
       },
