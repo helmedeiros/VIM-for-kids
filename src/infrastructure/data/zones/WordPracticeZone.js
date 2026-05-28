@@ -1231,6 +1231,11 @@ export class WordPracticeZone {
           { type: 'collectible_key', keyId: 'sand_gem_orange', name: 'Orange Gem', color: '#FFD700', spriteRegion: 'gem_orange', position: [35, 5] },
           { type: 'collectible_key', keyId: 'sand_gem_green', name: 'Green Gem', color: '#C0C0C0', spriteRegion: 'gem_green', position: [35, 20] },
           { type: 'collectible_key', keyId: 'sand_gem_bronze', name: 'Bronze Gem', color: '#CD7F32', spriteRegion: 'gem_bronze', position: [90, 5] },
+          // Capital B (WORDS backward) sits on the 'b' platform of
+          // 'because' in the last sing-song line. Collecting it teaches
+          // the long-form word motion: a WORD is any run of non-blank
+          // chars, so B hops past punctuation as a single token.
+          { type: 'vim_key', value: 'B', position: [62, 18], description: 'B - jump backward to start of WORD (whitespace-separated)' },
         ],
         textLabels: [
           // Water-platform letter tiles — vim-adventures style. Seven
@@ -1390,7 +1395,9 @@ export class WordPracticeZone {
           { text: 'u', position: [58, 18], color: '#1c1108', fontSize: '14px', group: 'sing_song_loop' },
           { text: 's', position: [59, 18], color: '#1c1108', fontSize: '14px', group: 'sing_song_loop' },
           { text: 't', position: [60, 18], color: '#1c1108', fontSize: '14px', group: 'sing_song_loop' },
-          { text: 'b', position: [62, 18], color: '#1c1108', fontSize: '14px', group: 'sing_song_loop' },
+          // The 'b' of 'because' is replaced by the collectable B (WORDS
+          // backward) vim key in specialTiles above — let the keycap
+          // sprite render on top of the platform instead of the letter.
           { text: 'e', position: [63, 18], color: '#1c1108', fontSize: '14px', group: 'sing_song_loop' },
           { text: 'c', position: [64, 18], color: '#1c1108', fontSize: '14px', group: 'sing_song_loop' },
           { text: 'a', position: [65, 18], color: '#1c1108', fontSize: '14px', group: 'sing_song_loop' },
