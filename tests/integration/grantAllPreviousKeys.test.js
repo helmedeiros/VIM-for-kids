@@ -30,11 +30,15 @@ describe('GRANT_ALL_PREVIOUS_KEYS testing flag', () => {
     it('gathers every vim key from zones in levels before the requested level', () => {
       game = new VimForKidsGame();
       const keys = game._collectKeysFromPriorLevels('level_2');
-      // Level 1 (Blinking Grove) introduces h, j, k, l
+      // Level 1 (Blinking Grove) introduces h, j, k, l in the main area
       expect(keys.has('h')).toBe(true);
       expect(keys.has('j')).toBe(true);
       expect(keys.has('k')).toBe(true);
       expect(keys.has('l')).toBe(true);
+      // ...and w, b, e inside the hidden area off the main map.
+      expect(keys.has('w')).toBe(true);
+      expect(keys.has('b')).toBe(true);
+      expect(keys.has('e')).toBe(true);
     });
 
     it('returns an empty set when the level id is not part of the game', () => {
