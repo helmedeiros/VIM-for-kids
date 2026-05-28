@@ -425,6 +425,7 @@ export class Zone {
           footprintH: entry.footprintH,
           blocking: entry.blocking,
           collisionFootprintH: entry.collisionFootprintH,
+          collisionFootprintYOffset: entry.collisionFootprintYOffset,
           renderScale: entry.renderScale,
         })
       );

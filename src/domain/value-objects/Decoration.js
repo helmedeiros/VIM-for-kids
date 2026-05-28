@@ -15,6 +15,7 @@ export class Decoration {
     footprintH,
     blocking = false,
     collisionFootprintH,
+    collisionFootprintYOffset = 0,
     renderScale = 1.0,
   }) {
     if (typeof regionName !== 'string' || regionName.length === 0) {
@@ -43,6 +44,11 @@ export class Decoration {
     // (trees, etc.) keep blocking every occupied cell.
     this._collisionFootprintH =
       collisionFootprintH === undefined ? footprintH : collisionFootprintH;
+    // Optional: number of bottom rows to EXCLUDE from the collision band.
+    // Lets a sprite have a front "walk-over" strip (e.g. the shadow under
+    // a house) that the player can step onto. Defaults to 0 so existing
+    // decorations keep blocking all the way to the bottom row.
+    this._collisionFootprintYOffset = collisionFootprintYOffset;
     this._renderScale = renderScale;
   }
 
@@ -75,12 +81,13 @@ export class Decoration {
     if (!this._blocking) return false;
     const dx = position.x - this._anchor.x;
     const dy = position.y - this._anchor.y;
-    const collisionStartY = this._footprintH - this._collisionFootprintH;
+    const collisionEndY = this._footprintH - this._collisionFootprintYOffset;
+    const collisionStartY = collisionEndY - this._collisionFootprintH;
     return (
       dx >= 0 &&
       dx < this._footprintW &&
       dy >= collisionStartY &&
-      dy < this._footprintH
+      dy < collisionEndY
     );
   }
 
