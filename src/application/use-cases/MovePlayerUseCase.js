@@ -110,6 +110,16 @@ export class MovePlayerUseCase {
       return { success: false, reason: 'no_next_word' };
     }
 
+    // Rocks-as-flood-passable doesn't mean rocks-as-landable: the
+    // word-motion predicate above lets the flood-fill route through
+    // blocking decorations, but the cursor itself must still end on a
+    // walkable tile. A boulder hiding the next-word letter is a dead end
+    // the player has to plan around — fail so they switch to e/b.
+    if (!this._isPositionWalkable(target)) {
+      this._showHint(`'${requiredKey}' would land on a boulder. Try a different motion.`);
+      return { success: false, reason: 'destination_blocked' };
+    }
+
     this._checkNPCExit(cursorPos, target);
     this._gameState.cursor = this._gameState.cursor.moveTo(target);
 

@@ -178,6 +178,32 @@ describe('MovePlayerUseCase', () => {
         expect(mockGameState.cursor.position.x).toBe(5);
       });
 
+      it('refuses to land on a boulder even if the target letter sits under it', async () => {
+        // Live game: _isWalkableForWordMotion deliberately treats blocking
+        // decorations as flood-passable so word motion can route across rocks.
+        // But the cursor must not END on a rock tile — a boulder hiding the
+        // next-word letter should be a dead end forcing e/b instead of w.
+        mockGameState.collectedKeys = new Set(['w']);
+        mockGameState.getTextLabels = jest.fn().mockReturnValue(sameRowLabels);
+        // A rock_2x2 boulder sits at (7, 5): strict walkability says no, but
+        // the word-motion helper still treats blocking decorations as
+        // passable so the BFS can route across them.
+        mockMap.isWalkable.mockImplementation((pos) => !(pos.x === 7 && pos.y === 5));
+        mockMap.getDecorations = jest.fn().mockReturnValue([
+          { blocks: (pos) => pos.x === 7 && pos.y === 5 },
+        ]);
+        mockGameRenderer.showCursorHintBalloon = jest.fn();
+
+        const result = await movePlayerUseCase.execute('word_forward');
+
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('destination_blocked');
+        expect(mockGameState.cursor.position.x).toBe(5);
+        expect(mockGameRenderer.showCursorHintBalloon).toHaveBeenCalledWith(
+          expect.stringContaining('boulder')
+        );
+      });
+
       it('does not unlock secondary gates as a side effect of the flood-fill', async () => {
         // Regression: w-motion uses a pure walkability predicate; touching a closed
         // gate during BFS must NOT call tryUnlockSecondaryGate (which would consume
