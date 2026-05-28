@@ -1243,10 +1243,10 @@ export class WordPracticeZone {
           // black so they pop against the sand floor — the pale
           // pastels (gold/lime/cyan/lilac/coral) blended right in.
           { type: 'collectible_key', keyId: 'maze_key_1', name: 'Maze Key I', color: '#111111', position: [100, 11] },
-          { type: 'collectible_key', keyId: 'maze_key_2', name: 'Maze Key II', color: '#111111', position: [125, 11] },
-          { type: 'collectible_key', keyId: 'maze_key_3', name: 'Maze Key III', color: '#111111', position: [140, 11] },
+          { type: 'collectible_key', keyId: 'maze_key_2', name: 'Maze Key II', color: '#111111', position: [125, 9] },
+          { type: 'collectible_key', keyId: 'maze_key_3', name: 'Maze Key III', color: '#111111', position: [140, 8] },
           { type: 'collectible_key', keyId: 'maze_key_4', name: 'Maze Key IV', color: '#111111', position: [162, 11] },
-          { type: 'collectible_key', keyId: 'maze_key_5', name: 'Maze Key V', color: '#111111', position: [185, 11] },
+          { type: 'collectible_key', keyId: 'maze_key_5', name: 'Maze Key V', color: '#111111', position: [178, 11] },
         ],
         textLabels: [
           // Water-platform letter tiles — vim-adventures style. Seven
@@ -1470,31 +1470,31 @@ export class WordPracticeZone {
           {
             locked: true,
             unlocksWhen: { requiredCollectibleKeys: ['maze_key_1'] },
-            position: [110, 11],
+            position: [184, 11],
             leadsTo: 'maze_door_1',
           },
           {
             locked: true,
             unlocksWhen: { requiredCollectibleKeys: ['maze_key_2'] },
-            position: [131, 11],
+            position: [185, 11],
             leadsTo: 'maze_door_2',
           },
           {
             locked: true,
             unlocksWhen: { requiredCollectibleKeys: ['maze_key_3'] },
-            position: [152, 11],
+            position: [186, 11],
             leadsTo: 'maze_door_3',
           },
           {
             locked: true,
             unlocksWhen: { requiredCollectibleKeys: ['maze_key_4'] },
-            position: [173, 11],
+            position: [187, 11],
             leadsTo: 'maze_door_4',
           },
           {
             locked: true,
             unlocksWhen: { requiredCollectibleKeys: ['maze_key_5'] },
-            position: [200, 11],
+            position: [188, 11],
             leadsTo: 'maze_door_5',
           },
         ],
