@@ -243,25 +243,31 @@ describe('CanvasGameRenderer', () => {
       expect(mockCtx.fillRect).toHaveBeenCalled();
     });
 
-    it('draws colored collectible keys as canvas primitives when sprites are loaded', () => {
-      // When ck.color is set, ck.spriteRegion is absent, and the char
-      // sprite sheet is available, the renderer must draw the key as a
-      // monochrome shape (arc + fillRect) tinted with the supplied
-      // color instead of falling back to the golden-key sprite. This is
-      // what makes the level-2 maze keys readable as black silhouettes
-      // on the sand floor.
-      renderer._charSpriteSheet = { image: {} }; // force hasCharSprites
+    it('defers colored collectible keys to the on-top pass so decorations cannot occlude them', () => {
+      // ck.color + no spriteRegion + char sprites present → the entity
+      // loop pushes the key onto _pendingColoredKeys and the actual
+      // arc/fillRect calls happen later in _drawColoredKeysOnTop.
+      // That pass runs after every decoration, including walk-behind
+      // canopies, so the maze keys stay visible.
+      renderer._charSpriteSheet = { image: {} };
       const state = createMockGameState({
         availableCollectibleKeys: [
-          { position: { x: 6, y: 6 }, keyId: 'maze_key_1', color: '#111111' },
+          { position: { x: 6, y: 6 }, keyId: 'maze_key_1', color: '#d97f1e' },
         ],
       });
       renderer.render(state);
       renderer._drawEntitiesAt(mockCtx, 6, 6, 0, 0, 32);
 
+      // Deferred — no canvas draw calls yet for this key.
+      expect(renderer._pendingColoredKeys).toHaveLength(1);
+
+      // Triggering the on-top pass commits the silhouette.
+      renderer._drawColoredKeysOnTop(mockCtx);
       expect(mockCtx.arc).toHaveBeenCalled();
       expect(mockCtx.fillRect).toHaveBeenCalled();
-      expect(mockCtx.fillStyle).toBe('#111111');
+      expect(mockCtx.fillStyle).toBe('#d97f1e');
+      // Queue cleared after the pass.
+      expect(renderer._pendingColoredKeys).toHaveLength(0);
     });
   });
 
