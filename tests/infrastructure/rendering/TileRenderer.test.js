@@ -26,6 +26,16 @@ describe('TileRenderer', () => {
 
     mockCtx = {
       drawImage: jest.fn(),
+      fillRect: jest.fn(),
+      beginPath: jest.fn(),
+      ellipse: jest.fn(),
+      fill: jest.fn(),
+      save: jest.fn(),
+      restore: jest.fn(),
+      translate: jest.fn(),
+      rotate: jest.fn(),
+      // fillStyle is a settable property, not a function
+      fillStyle: '',
     };
 
     renderer = new TileRenderer(mockSpriteSheet, mockTileAtlas, 32);
@@ -134,6 +144,24 @@ describe('TileRenderer', () => {
       mockTileAtlas.getRegion.mockReturnValue(null);
       renderer.drawDecoration(mockCtx, { regionName: 'missing', footprintW: 1, footprintH: 1 }, 0, 0);
       expect(mockCtx.drawImage).not.toHaveBeenCalled();
+    });
+
+    it('draws a procedural lever when regionName is lever_stone and no sprite is registered', () => {
+      // The lever's tileset cell hasn't been pinpointed, so the
+      // renderer falls back to canvas primitives (stone pedestal +
+      // wooden handle) when regionName is 'lever_stone'.
+      mockTileAtlas.getRegion.mockReturnValue(null);
+      renderer.drawDecoration(
+        mockCtx,
+        { regionName: 'lever_stone', footprintW: 1, footprintH: 1 },
+        50,
+        80
+      );
+      expect(mockCtx.drawImage).not.toHaveBeenCalled();
+      // Multiple fillRect calls (base, highlight, shadow strip, slot,
+      // lever shaft, knob) plus an ellipse drop shadow.
+      expect(mockCtx.fillRect).toHaveBeenCalled();
+      expect(mockCtx.ellipse).toHaveBeenCalled();
     });
 
     it('scales destination using the renderer renderSize', () => {
