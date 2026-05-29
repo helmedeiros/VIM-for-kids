@@ -51,7 +51,7 @@ describe('VIM for Kids Game Integration', () => {
       const game = new VimForKidsGame();
       expect(game.currentLevel).toBe('level_1');
       expect(game.gameState.cursor).toBeDefined();
-      expect(game.gameState.availableKeys).toHaveLength(4);
+      expect(game.gameState.availableKeys).toHaveLength(7);
     });
 
     it('should render initial game state', () => {
@@ -71,7 +71,7 @@ describe('VIM for Kids Game Integration', () => {
     it('should have all VIM keys available initially', () => {
       game = new VimForKidsGame();
 
-      expect(game.gameState.availableKeys).toHaveLength(4);
+      expect(game.gameState.availableKeys).toHaveLength(7);
 
       const keyLetters = game.gameState.availableKeys.map((key) => key.key);
       expect(keyLetters).toContain('h');
@@ -194,7 +194,7 @@ describe('VIM for Kids Game Integration', () => {
       game.gameState.collectKey(targetKey);
 
       expect(game.gameState.collectedKeys.has('h')).toBe(true);
-      expect(game.gameState.availableKeys.length).toBe(3);
+      expect(game.gameState.availableKeys.length).toBe(6);
     });
 
     it('should collect key without popup when key is collected', () => {
@@ -205,7 +205,7 @@ describe('VIM for Kids Game Integration', () => {
 
       // Verify key was collected
       expect(game.gameState.collectedKeys.has('h')).toBe(true);
-      expect(game.gameState.availableKeys.length).toBe(3);
+      expect(game.gameState.availableKeys.length).toBe(6);
     });
 
             it('should update UI when key is collected', () => {
@@ -216,7 +216,7 @@ describe('VIM for Kids Game Integration', () => {
 
       // Verify key was collected in game state
       expect(game.gameState.collectedKeys.has('h')).toBe(true);
-      expect(game.gameState.availableKeys.length).toBe(3);
+      expect(game.gameState.availableKeys.length).toBe(6);
     });
 
     it('should collect keys placed in grass area', () => {

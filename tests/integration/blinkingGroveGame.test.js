@@ -71,7 +71,7 @@ describe('Blinking Grove Game Integration', () => {
     });
 
     it('should have 4 movement keys available', () => {
-      expect(game.gameState.availableKeys).toHaveLength(4);
+      expect(game.gameState.availableKeys).toHaveLength(7);
 
       const keyLetters = game.gameState.availableKeys.map((key) => key.key);
       expect(keyLetters).toContain('h');
@@ -82,7 +82,10 @@ describe('Blinking Grove Game Integration', () => {
 
     it('should display text labels on the ground', () => {
       const textLabels = game.gameState.getTextLabels();
-      expect(textLabels).toHaveLength(37); // "Remember: words are not WORDS" + entry punctuation + "Hello world!"
+      // Main-area labels (37) + the secret grove's poem (now pre-revealed)
+      // bring the total to 242. The grove is visible from the start so the
+      // map dimensions don't change when the player crosses the gate.
+      expect(textLabels).toHaveLength(242);
 
       // Check that the individual characters for "Hello world!" are present
       const textContents = textLabels.map((label) => label.text);
@@ -167,33 +170,35 @@ describe('Blinking Grove Game Integration', () => {
       game.gameState.collectKey(game.gameState.availableKeys.find(k => k.key === 'h'));
 
       expect(game.gameState.collectedKeys.has('h')).toBe(true);
-      expect(game.gameState.availableKeys).toHaveLength(3);
+      expect(game.gameState.availableKeys).toHaveLength(6);
     });
 
     it('should track progress of key collection', () => {
       const keys = [...game.gameState.availableKeys];
 
-      // Collect keys one by one
+      // Collect keys one by one — there are now 7 (4 main + 3 secret).
       keys.forEach((key, index) => {
         game.gameState.collectKey(key);
         expect(game.gameState.collectedKeys.size).toBe(index + 1);
       });
 
-      expect(game.gameState.collectedKeys.size).toBe(4);
+      expect(game.gameState.collectedKeys.size).toBe(7);
       expect(game.gameState.isCurrentZoneComplete()).toBe(true);
     });
   });
 
   describe('Gate Mechanics', () => {
-    it('should keep gate closed until all keys are collected', () => {
+    it('should keep gate closed until the h/j/k/l movement set is collected', () => {
       const gate = game.gameState.getGate();
-      const keys = [...game.gameState.availableKeys];
-
-      // Collect partial keys
-      for (let i = 0; i < keys.length - 1; i++) {
-        game.gameState.collectKey(keys[i]);
-        expect(gate.isOpen).toBe(false);
-      }
+      // The gate unlocks specifically on h/j/k/l (skillFocus), so
+      // collect everything *except* the main-area movement keys and
+      // the gate must stay shut.
+      const movementSet = new Set(['h', 'j', 'k', 'l']);
+      const nonMovement = game.gameState.availableKeys.filter(
+        (k) => !movementSet.has(k.key)
+      );
+      nonMovement.forEach((k) => game.gameState.collectKey(k));
+      expect(gate.isOpen).toBe(false);
     });
 
     it('should open gate after collecting all 4 movement keys', () => {
@@ -610,18 +615,13 @@ describe('Blinking Grove Game Integration', () => {
           }
         }
 
-                // Interact with gate to reveal hidden area (simulate ESC key press exactly like real game)
+        // The secret grove is now pre-revealed at zone construction
+        // (`revealWhen: 'always'`) so the camera doesn't rescale when
+        // the player walks in. Calling reveal again is a no-op — the
+        // contents are already on the map. Just teleport to the
+        // documented hidden-area start so the rest of this test keeps
+        // exercising the collectible flow.
         if (mainGate.leadsTo === 'vim_secret_area') {
-          // Step 1: Reveal the hidden area (exactly like real game)
-          const revealed = game.gameState.zone.revealHiddenArea('escProgression');
-          expect(revealed).toBe(true);
-
-          // Step 2: Enter the hidden area (exactly like real game)
-          const hiddenArea = game.gameState.zone.enterHiddenArea('vim_secret_area');
-          expect(hiddenArea).toBeTruthy();
-          expect(hiddenArea.id).toBe('vim_secret_area');
-
-          // Step 3: Move player to hidden area start position (exactly like real game)
           const startPos = game.gameState.zone.getHiddenAreaStartPosition('vim_secret_area');
           expect(startPos).toBeTruthy();
           game.gameState.cursor = game.gameState.cursor.moveTo(startPos);

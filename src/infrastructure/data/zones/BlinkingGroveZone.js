@@ -170,7 +170,13 @@ export class BlinkingGroveZone {
         hiddenAreas: [
           {
             id: 'vim_secret_area',
-            revealWhen: 'escProgression',
+            // Always pre-revealed at zone construction. Keeps the
+            // structural separation between "main map" and "secret
+            // grove" but renders the entire layout from the start so
+            // the camera doesn't have to rescale when the player
+            // walks through the gate (used to cause a noticeable
+            // resolution jump mid-game).
+            revealWhen: 'always',
             layout: [
               'CWWWWWWWWWWWWWWWPPPPPPPPRPPRPPPPPPPPWWWWWWWWWWWWWWWW',
               'PWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWCWWWWWWWWWWWWWWWW',

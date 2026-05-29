@@ -148,6 +148,18 @@ export class Zone {
     this._hiddenAreas = config.tiles.hiddenAreas || [];
     this._revealedHiddenAreas = new Set();
     this._currentHiddenArea = null; // Track which hidden area player is currently in
+
+    // Pre-reveal any hidden area authored with `revealWhen: 'always'`.
+    // Lets a zone keep the structural separation between "main map" and
+    // "secret area" data while rendering both from the start — the map
+    // expands at construction time, before any camera math runs, so
+    // there's no jarring resolution change when the player walks in.
+    this._hiddenAreas
+      .filter((area) => area.revealWhen === 'always')
+      .forEach((area) => {
+        this._revealHiddenArea(area);
+        this._revealedHiddenAreas.add(area.id);
+      });
   }
 
   _buildTiles(tilesConfig) {

@@ -248,8 +248,10 @@ describe('BlinkingGroveZone', () => {
     });
 
     test('should create functional zone with all components', () => {
-      expect(zone.vimKeys).toHaveLength(4);
-      expect(zone.textLabels).toHaveLength(37); // Updated for new text layout with additional characters
+      // 4 main-area movement keys (h/j/k/l) + 3 word-motion keys
+      // (w/e/b) inside the secret grove, which is pre-revealed at
+      // construction so the camera doesn't rescale when entered.
+      expect(zone.vimKeys).toHaveLength(7);
       expect(zone.gate).toBeDefined();
       expect(zone.npcs).toHaveLength(3);
       expect(zone.events).toHaveLength(3);
@@ -279,7 +281,9 @@ describe('BlinkingGroveZone', () => {
         zone.collectKey(key);
       });
 
-      expect(zone.getCollectedKeysCount()).toBe(4);
+      // Zone now exposes 7 keys (h/j/k/l + w/e/b from the pre-revealed
+      // secret grove). The gate still unlocks on the h/j/k/l set.
+      expect(zone.getCollectedKeysCount()).toBe(7);
       expect(zone.gate.isOpen).toBe(true);
       expect(zone.isComplete()).toBe(true);
 
@@ -310,9 +314,14 @@ describe('BlinkingGroveZone', () => {
       const zone = BlinkingGroveZone.create();
 
       const configKeys = config.skillFocus.sort();
-      const zoneKeys = zone.vimKeys.map((k) => k.key).sort();
-
-      expect(configKeys).toEqual(zoneKeys);
+      // skillFocus tracks the *main-area* introductory keys; the
+      // pre-revealed secret grove adds bonus word-motion keys
+      // (w/e/b) on top, so we check skillFocus is a subset of the
+      // zone's full key set rather than an exact match.
+      const zoneKeys = zone.vimKeys.map((k) => k.key);
+      for (const key of configKeys) {
+        expect(zoneKeys).toContain(key);
+      }
     });
 
     test('should have consistent gate unlock conditions', () => {
