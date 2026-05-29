@@ -261,9 +261,9 @@ describe('CanvasGameRenderer', () => {
       // Deferred — no canvas draw calls yet for this key.
       expect(renderer._pendingColoredKeys).toHaveLength(1);
 
-      // Triggering the on-top pass commits the silhouette.
+      // Triggering the on-top pass commits the silhouette — pixel-art
+      // rendering uses solid fillRect blocks (no arcs).
       renderer._drawColoredKeysOnTop(mockCtx);
-      expect(mockCtx.arc).toHaveBeenCalled();
       expect(mockCtx.fillRect).toHaveBeenCalled();
       expect(mockCtx.fillStyle).toBe('#d97f1e');
       // Queue cleared after the pass.
