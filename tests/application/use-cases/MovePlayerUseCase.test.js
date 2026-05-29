@@ -2109,4 +2109,82 @@ describe('MovePlayerUseCase', () => {
       expect(mockGameState.cursor.rememberedColumn).toBe(4); // Should remember original column
     });
   });
+
+  describe('sing-song lever pull', () => {
+    function makeLever(x, y) {
+      let blocking = true;
+      return {
+        regionName: 'lever_stone',
+        footprintW: 1,
+        footprintH: 1,
+        occupies: (pos) => pos.x === x && pos.y === y,
+        get _blocking() { return blocking; },
+        set _blocking(v) { blocking = v; },
+      };
+    }
+    function makeRock(x, y) {
+      return {
+        regionName: 'rock_2x2',
+        footprintW: 1,
+        footprintH: 1,
+        anchor: new Position(x, y),
+      };
+    }
+
+    it('removes the sing-song rocks the first time the cursor bumps the lever', () => {
+      const lever = makeLever(3, 5);
+      const rocks = [makeRock(10, 6), makeRock(15, 6), makeRock(20, 6)];
+      const labyrinthBoulder = {
+        regionName: 'rock_2x2',
+        footprintW: 2,
+        footprintH: 2,
+        anchor: new Position(50, 4),
+      };
+      const decorations = [lever, ...rocks, labyrinthBoulder];
+
+      // Map is walkable everywhere except the lever cell (decoration blocks).
+      mockMap.isWalkable.mockImplementation((p) => !(p.x === 3 && p.y === 5));
+      mockMap.getDecorations = jest.fn(() => decorations);
+      mockMap.removeDecorations = jest.fn((predicate) => {
+        for (let i = decorations.length - 1; i >= 0; i--) {
+          if (predicate(decorations[i])) decorations.splice(i, 1);
+        }
+      });
+      mockGameRenderer.showCursorHintBalloon = jest.fn();
+      // Cursor sits one tile west of the lever and walks east into it.
+      mockGameState.cursor = new Cursor(new Position(2, 5));
+
+      const result = movePlayerUseCase.executeSync('right');
+
+      // Cursor stepped onto the lever cell — motion succeeded.
+      expect(mockGameState.cursor.position.x).toBe(3);
+      expect(mockGameState.cursor.position.y).toBe(5);
+      expect(result.success).toBe(true);
+
+      // Side effects fired: rocks removed, labyrinth boulder kept,
+      // hint surfaced, and the flag latched so a second bump is a
+      // no-op.
+      expect(mockGameState.singSongLeverPulled).toBe(true);
+      expect(mockMap.removeDecorations).toHaveBeenCalledTimes(1);
+      expect(decorations).toContain(lever);
+      expect(decorations).toContain(labyrinthBoulder);
+      expect(decorations).not.toContain(rocks[0]);
+      expect(mockGameRenderer.showCursorHintBalloon).toHaveBeenCalledWith(
+        expect.stringContaining('rocks crumble')
+      );
+    });
+
+    it('does not re-pull the lever after the flag is set', () => {
+      const lever = makeLever(3, 5);
+      mockMap.isWalkable.mockImplementation((p) => !(p.x === 3 && p.y === 5));
+      mockMap.getDecorations = jest.fn(() => [lever]);
+      mockMap.removeDecorations = jest.fn();
+      mockGameState.singSongLeverPulled = true;
+      mockGameState.cursor = new Cursor(new Position(2, 5));
+
+      movePlayerUseCase.executeSync('right');
+
+      expect(mockMap.removeDecorations).not.toHaveBeenCalled();
+    });
+  });
 });
