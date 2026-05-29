@@ -797,7 +797,9 @@ export class CanvasGameRenderer extends GameRenderer {
       // Float UP from the cell floor — bob value stays in [-amp, 0]
       // so the silhouette never dips below its resting position. Use
       // `(1 - cos)/2` for a smooth hover that pauses at the top.
-      const bobAmp = Math.max(4, Math.floor(ts * 0.3));
+      // Amplitude pushes the bow about three-quarters of a tile up so
+      // the key clearly rises above the canopy at peak.
+      const bobAmp = Math.max(8, Math.floor(ts * 0.75));
       const bob = -Math.round(((1 - Math.cos(time * 3 + phase)) / 2) * bobAmp);
 
       // Pixel unit sized so the whole key fits inside ~80% of the tile
