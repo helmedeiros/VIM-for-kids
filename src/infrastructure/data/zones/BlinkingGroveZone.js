@@ -200,7 +200,7 @@ export class BlinkingGroveZone {
               G: 'gate',
               R: 'rock',
             },
-            offsetX: 56, // Positioned to connect directly to the main area
+            offsetX: 75, // Right after the main area's 75-col layout (no overlap)
             offsetY: 1, // Same vertical level as the main area
             // ~30% of the hidden-area rocks use the chunky rock_2x2 sprite
             // (the sandy pile boulder) instead of the small brown round
