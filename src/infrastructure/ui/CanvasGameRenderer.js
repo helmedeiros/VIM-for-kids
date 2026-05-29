@@ -742,6 +742,36 @@ export class CanvasGameRenderer extends GameRenderer {
       return;
     }
     const time = this._animationTime || 0;
+    // Pixel-art template of a tiny RPG key, matching the reference
+    // sprite the user shared. Each truthy cell is one "art pixel"
+    // drawn at scale u. Read top-down: bow ring, shaft, left bit.
+    //   01111110     ← bow top
+    //   1     1
+    //   1  X  1      ← bow centre (highlight masked with destination-out)
+    //   1     1
+    //   01111110     ← bow bottom
+    //      11        ← shaft begins
+    //      11
+    //      11
+    //      11
+    //     111        ← bit (the "tooth")
+    //      1
+    //      1
+    const KEY_BLOCKS = [
+      // [col, row, w, h] in art-pixel units, drawn in order
+      // Bow ring (drawn as outline so the hole shows through)
+      [1, 0, 3, 1],
+      [0, 1, 1, 3],
+      [4, 1, 1, 3],
+      [1, 4, 3, 1],
+      // Shaft
+      [2, 5, 1, 5],
+      // Bit (left-pointing tooth at the lower part of the shaft)
+      [1, 8, 1, 1],
+      [1, 9, 1, 1],
+    ];
+    const ART_WIDTH = 5; // bow span in art-pixels
+
     for (const job of this._pendingColoredKeys) {
       const { ck, screenX, screenY, ts } = job;
       // Per-key phase so adjacent keys don't bob in lockstep.
@@ -752,39 +782,16 @@ export class CanvasGameRenderer extends GameRenderer {
       const bobAmp = Math.max(4, Math.floor(ts * 0.35));
       const bob = Math.round(Math.sin(time * 4 + phase) * bobAmp);
 
-      const cx = screenX + ts / 2;
-      // Anchor the key near the top of the cell and let it bob from
-      // there — pushes the silhouette clear of the canopy on the up
-      // swing and keeps it readable on the down swing.
-      const cy = screenY + ts * 0.35 + bob;
-      const u = Math.max(2, Math.floor(ts * 0.12));
-      const bowR = u * 2;
-      const bowCx = Math.round(cx);
-      const bowCy = Math.round(cy - u * 4);
+      const u = Math.max(2, Math.floor(ts * 0.16));
+      // Centre the art horizontally, anchor the key high in the cell
+      // so the up-swing of the bob clears the canopy.
+      const originX = Math.round(screenX + ts / 2 - (ART_WIDTH * u) / 2);
+      const originY = Math.round(screenY + ts * 0.2) + bob;
 
       ctx.fillStyle = ck.color;
-      // Bow (round head)
-      ctx.beginPath();
-      ctx.arc(bowCx, bowCy, bowR + u, 0, Math.PI * 2);
-      ctx.fill();
-      // Hollow centre of the bow
-      ctx.save();
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.beginPath();
-      ctx.arc(bowCx, bowCy, u, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      // Vertical shaft
-      const shaftW = u;
-      const shaftTop = bowCy + bowR;
-      const shaftH = u * 5;
-      ctx.fillRect(bowCx - Math.floor(shaftW / 2), shaftTop, shaftW, shaftH);
-
-      // Bit on the lower-left of the tip
-      const bitW = u * 2;
-      const bitH = u;
-      ctx.fillRect(bowCx - Math.floor(shaftW / 2) - bitW, shaftTop + shaftH - u, bitW, bitH);
+      for (const [cx, cy, w, h] of KEY_BLOCKS) {
+        ctx.fillRect(originX + cx * u, originY + cy * u, w * u, h * u);
+      }
     }
     this._pendingColoredKeys = [];
   }
