@@ -226,6 +226,19 @@ export class DynamicZoneMap {
     this._decorations.push(decoration);
   }
 
+  /**
+   * Remove every decoration matching the predicate. Used by interactive
+   * mechanics (e.g. the lever that pulverises the sing-song rocks) to
+   * mutate the map in response to player action.
+   * @param {(deco: Decoration) => boolean} predicate
+   * @returns {number} count of decorations removed
+   */
+  removeDecorations(predicate) {
+    const before = this._decorations.length;
+    this._decorations = this._decorations.filter((d) => !predicate(d));
+    return before - this._decorations.length;
+  }
+
   getDecorations() {
     return [...this._decorations];
   }

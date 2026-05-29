@@ -238,6 +238,13 @@ export class MovePlayerUseCase {
     }
 
     if (!this._gameState.map.isWalkable(position)) {
+      // The sing-song lever sits on a blocking decoration. The first
+      // time the player steps onto it we pull the lever: every
+      // rock_2x2 boulder hiding a sing-song letter shatters and the
+      // lever cell becomes walkable so the player can stride past.
+      if (this._tryPullSingSongLever(position)) {
+        return { walkable: true };
+      }
       return { walkable: false };
     }
 
@@ -246,6 +253,40 @@ export class MovePlayerUseCase {
     }
 
     return { walkable: true };
+  }
+
+  /**
+   * Detect "player bumps the wooden lever for the first time" and run
+   * the side-effect: remove every 1x1 rock_2x2 boulder (the ones
+   * sitting on the sing-song platforms — labyrinth 2x2 boulders are
+   * left alone), unblock the lever cell, and surface a one-shot hint.
+   * Returns true when the lever fires so the caller can treat the
+   * target as walkable on this step.
+   * @private
+   */
+  _tryPullSingSongLever(position) {
+    if (this._gameState.singSongLeverPulled) return false;
+    const map = this._gameState.map;
+    if (typeof map.getDecorations !== 'function') return false;
+    const lever = map
+      .getDecorations()
+      .find((d) => d.regionName === 'lever_stone' && d.occupies && d.occupies(position));
+    if (!lever) return false;
+
+    this._gameState.singSongLeverPulled = true;
+    if (typeof map.removeDecorations === 'function') {
+      map.removeDecorations(
+        (d) => d.regionName === 'rock_2x2' && d.footprintW === 1 && d.footprintH === 1
+      );
+    }
+    // The lever decoration itself stays for the visual; relax its
+    // blocking flag so the player can step onto / past it after the
+    // pull. Mutating in place is fine because the Map keeps the same
+    // Decoration instances across renders.
+    if (lever._blocking !== undefined) lever._blocking = false;
+
+    this._showHint('You pulled the lever! The sing-song rocks crumble away.');
+    return true;
   }
 
   _hasWordKey() {
