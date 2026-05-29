@@ -1517,7 +1517,7 @@ export class WordPracticeZone {
             'The song rocks will break.',
             'Then press b to go back!',
           ],
-          position: [95, 11],
+          position: [90, 11],
           walkable: false,
         },
         {
