@@ -1494,6 +1494,24 @@ export class WordPracticeZone {
       },
       npcs: [
         {
+          // Posted next to the gem meters at the labyrinth entrance.
+          // Hints that the player can come back through the sing-song
+          // platforms by pulling the wood lever — the rocks blocking
+          // the lowercase 'b' landings will break and `b` becomes
+          // usable to step backward through the song.
+          id: 'lever_guide',
+          type: 'maze_scribe',
+          appearsWhen: { zoneEntered: true },
+          dialogue: [
+            'Oops, missed something?',
+            'Pull the lever.',
+            'The song rocks will break.',
+            'Then press b to go back!',
+          ],
+          position: [95, 12],
+          walkable: false,
+        },
+        {
           id: 'pixel_snake',
           type: 'pixel_snake',
           appearsWhen: { zoneEntered: true },
