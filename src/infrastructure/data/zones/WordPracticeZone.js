@@ -130,12 +130,15 @@ export class WordPracticeZone {
           { regionName: 'rock_2x2', position: [61, 16], footprintW: 1, footprintH: 1, blocking: true }, // c in 'continue'
           { regionName: 'rock_2x2', position: [76, 16], footprintW: 1, footprintH: 1, blocking: true }, // g in 'singing'
           { regionName: 'rock_2x2', position: [57, 18], footprintW: 1, footprintH: 1, blocking: true }, // j in 'just'
-          // Stone-block lever at the south pier-to-labyrinth seam.
-          // Visual only for now — the mechanic that breaks the
-          // sing-song rocks when the player pulls it lands in a
-          // follow-up PR. Blocks so the lever feels solid; the kid
-          // bumps into it to read the lever_guide NPC's hint nearby.
-          { regionName: 'lever_stone', position: [90, 19], footprintW: 1, footprintH: 1, blocking: true },
+          // Stone-block lever on the east edge of the south sand
+          // strip, three tiles east of where the pier meets sand.
+          // Visible from the pier without occupying (90, 19), which
+          // is the ONLY sand cell the kid can step onto when crossing
+          // from the pier to the labyrinth (placing it there sealed
+          // the player in). Visual only for now; the mechanic that
+          // breaks the sing-song rocks when pulled lands in a
+          // follow-up PR.
+          { regionName: 'lever_stone', position: [93, 19], footprintW: 1, footprintH: 1, blocking: true },
           // ----- Tree labyrinth (cols 70-167) ----------------------
           { regionName: 'tree_round_green', position: [92, 0], footprintW: 2, footprintH: 2, blocking: true },
           { regionName: 'tree_round_shadow', position: [92, 1], footprintW: 2, footprintH: 2, blocking: true },
