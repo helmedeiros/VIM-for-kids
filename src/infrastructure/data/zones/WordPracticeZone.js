@@ -1239,7 +1239,7 @@ export class WordPracticeZone {
           // land on the gem letter.
           { type: 'collectible_key', keyId: 'sand_gem_orange', name: 'Orange Gem', color: '#FFD700', spriteRegion: 'gem_orange', position: [35, 5] },
           { type: 'collectible_key', keyId: 'sand_gem_green', name: 'Green Gem', color: '#C0C0C0', spriteRegion: 'gem_green', position: [35, 20] },
-          { type: 'collectible_key', keyId: 'sand_gem_bronze', name: 'Bronze Gem', color: '#CD7F32', spriteRegion: 'gem_bronze', position: [90, 5] },
+          { type: 'collectible_key', keyId: 'sand_gem_bronze', name: 'Bronze Gem', color: '#CD7F32', spriteRegion: 'gem_bronze', position: [90, 13] },
           // Five maze keys spread along the row-11 walk-behind canopy
           // corridor. Each opens one of the five gates further east,
           // so the player has to keep moving through the labyrinth to
@@ -1520,7 +1520,7 @@ export class WordPracticeZone {
             'The song rocks will break.',
             'Then press b to go back!',
           ],
-          position: [90, 11],
+          position: [91, 9],
           walkable: false,
         },
         {

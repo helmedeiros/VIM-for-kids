@@ -95,12 +95,10 @@ export const TILESET_REGIONS = {
   energy_meter_empty: { sx: 208, sy: 9536, sw: 16, sh: 24 },
   energy_meter_charged: { sx: 224, sy: 9536, sw: 16, sh: 24 },
 
-  // === Stone-block lever (16x24) — interactable mechanism ================
-  // Pale stone base with a small wooden lever sticking up. Used at the
-  // south pier near the labyrinth to gate the "break the sing-song
-  // rocks" mechanic. sx/sy point at the items strip near the energy
-  // meters; adjust if your tileset puts the lever at a different cell.
-  lever_stone: { sx: 240, sy: 9536, sw: 16, sh: 24 },
+  // (No tileset region for the lever — drawn procedurally by
+  // TileRenderer.drawDecoration when regionName === 'lever_stone'.
+  // Locating the exact tile in tileset-rpg.png is fiddly, so the
+  // renderer paints a 16x24 stone block + wooden handle directly.)
 
   // === Letter platforms (16x16, walkable stone block) =====================
   // Light-gray stone tile rendered as the floating letter platforms in
