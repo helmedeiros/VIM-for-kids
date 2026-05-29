@@ -713,6 +713,11 @@ export class CanvasGameRenderer extends GameRenderer {
     // upper half occludes the cursor when it stands behind a 2x2 rock.
     this._drawDecorations(ctx, map, bounds, ts, (deco) => deco.baseY >= cursorY);
 
+    // Colored procedural keys (the maze keys laid through the row-11
+    // canopy corridor) draw last so the walk-behind tree decorations
+    // don't hide them. Adds an idle bob so they're easy to spot.
+    this._drawColoredKeysOnTop(ctx);
+
     // Wall overhang pass — drawn AFTER the cursor so the cobblestone cap of
     // bottom-of-run walls visually extends up into the cell to the north and
     // occludes part of the cursor when the cursor stands directly above a wall.
@@ -720,6 +725,68 @@ export class CanvasGameRenderer extends GameRenderer {
 
     // Draw particles on top of everything
     this._particleSystem.draw(ctx);
+  }
+
+  /**
+   * Final on-top pass for colored procedural keys (e.g. the maze keys
+   * with `color: '#d97f1e'`). Each cell drawn in the entity loop
+   * deferred its actual draw to this method by pushing into
+   * `_pendingColoredKeys`; we render the key silhouette here so the
+   * canopy decorations above never occlude it. Adds a small vertical
+   * idle bob keyed to `_animationTime` so the key animates in place.
+   * @private
+   */
+  _drawColoredKeysOnTop(ctx) {
+    if (!this._pendingColoredKeys || this._pendingColoredKeys.length === 0) {
+      this._pendingColoredKeys = [];
+      return;
+    }
+    const time = this._animationTime || 0;
+    for (const job of this._pendingColoredKeys) {
+      const { ck, screenX, screenY, ts } = job;
+      // Per-key phase so adjacent keys don't bob in lockstep.
+      const phase = (screenX * 0.13 + screenY * 0.17) % (Math.PI * 2);
+      // Bob over roughly two-thirds of a tile so the key rises clearly
+      // above the canopy at its highest point and looks like it's
+      // floating, not just twitching.
+      const bobAmp = Math.max(4, Math.floor(ts * 0.35));
+      const bob = Math.round(Math.sin(time * 4 + phase) * bobAmp);
+
+      const cx = screenX + ts / 2;
+      // Anchor the key near the top of the cell and let it bob from
+      // there — pushes the silhouette clear of the canopy on the up
+      // swing and keeps it readable on the down swing.
+      const cy = screenY + ts * 0.35 + bob;
+      const u = Math.max(2, Math.floor(ts * 0.12));
+      const bowR = u * 2;
+      const bowCx = Math.round(cx);
+      const bowCy = Math.round(cy - u * 4);
+
+      ctx.fillStyle = ck.color;
+      // Bow (round head)
+      ctx.beginPath();
+      ctx.arc(bowCx, bowCy, bowR + u, 0, Math.PI * 2);
+      ctx.fill();
+      // Hollow centre of the bow
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(bowCx, bowCy, u, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Vertical shaft
+      const shaftW = u;
+      const shaftTop = bowCy + bowR;
+      const shaftH = u * 5;
+      ctx.fillRect(bowCx - Math.floor(shaftW / 2), shaftTop, shaftW, shaftH);
+
+      // Bit on the lower-left of the tip
+      const bitW = u * 2;
+      const bitH = u;
+      ctx.fillRect(bowCx - Math.floor(shaftW / 2) - bitW, shaftTop + shaftH - u, bitW, bitH);
+    }
+    this._pendingColoredKeys = [];
   }
 
   _drawWallOverhang(ctx, map, bounds, ts, gameState) {
@@ -822,40 +889,11 @@ export class CanvasGameRenderer extends GameRenderer {
       if (ck.spriteRegion && this._tryDrawCellRegion(ctx, ck.spriteRegion, screenX, screenY, ts)) {
         // Drawn via PNG region override (e.g. gem sprite); skip default.
       } else if (ck.color && hasCharSprites) {
-        // Procedural pixel-art key \u2014 bow on top, vertical shaft, small
-        // bit at the bottom \u2014 drawn with the supplied color. Matches
-        // the orange key reference (RPG-Maker style) the user shared.
-        // Whole-pixel coordinates so it stays crisp at any tile size.
-        const cx = screenX + half;
-        const cy = screenY + half;
-        const u = Math.max(1, Math.floor(ts * 0.09)); // pixel unit
-        const bowR = u * 2;
-        const bowCx = Math.round(cx);
-        const bowCy = Math.round(cy - u * 4);
-
-        ctx.fillStyle = ck.color;
-        // Bow (round head) \u2014 drawn as a chunky circle
-        ctx.beginPath();
-        ctx.arc(bowCx, bowCy, bowR + u, 0, Math.PI * 2);
-        ctx.fill();
-        // Hollow the bow to make it read as a key, not a dot
-        ctx.save();
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.beginPath();
-        ctx.arc(bowCx, bowCy, u, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-
-        // Shaft going down from the bow
-        const shaftW = u;
-        const shaftTop = bowCy + bowR;
-        const shaftH = u * 5;
-        ctx.fillRect(bowCx - Math.floor(shaftW / 2), shaftTop, shaftW, shaftH);
-
-        // Small bit (tooth) sticking out at the bottom
-        const bitW = u * 2;
-        const bitH = u;
-        ctx.fillRect(bowCx - Math.floor(shaftW / 2) - bitW, shaftTop + shaftH - u, bitW, bitH);
+        // Deferred \u2014 colored procedural keys draw in a final pass after
+        // the canopy decorations so they stay visible on the maze
+        // walk-behind tiles. See _drawColoredKeysOnTop below.
+        if (!this._pendingColoredKeys) this._pendingColoredKeys = [];
+        this._pendingColoredKeys.push({ ck, screenX, screenY, ts });
       } else if (hasCharSprites) {
         this._drawCharSprite(
           ctx,
