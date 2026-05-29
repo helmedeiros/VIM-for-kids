@@ -130,6 +130,12 @@ export class WordPracticeZone {
           { regionName: 'rock_2x2', position: [61, 16], footprintW: 1, footprintH: 1, blocking: true }, // c in 'continue'
           { regionName: 'rock_2x2', position: [76, 16], footprintW: 1, footprintH: 1, blocking: true }, // g in 'singing'
           { regionName: 'rock_2x2', position: [57, 18], footprintW: 1, footprintH: 1, blocking: true }, // j in 'just'
+          // Stone-block lever at the south pier-to-labyrinth seam.
+          // Visual only for now — the mechanic that breaks the
+          // sing-song rocks when the player pulls it lands in a
+          // follow-up PR. Blocks so the lever feels solid; the kid
+          // bumps into it to read the lever_guide NPC's hint nearby.
+          { regionName: 'lever_stone', position: [90, 19], footprintW: 1, footprintH: 1, blocking: true },
           // ----- Tree labyrinth (cols 70-167) ----------------------
           { regionName: 'tree_round_green', position: [92, 0], footprintW: 2, footprintH: 2, blocking: true },
           { regionName: 'tree_round_shadow', position: [92, 1], footprintW: 2, footprintH: 2, blocking: true },
@@ -1494,11 +1500,14 @@ export class WordPracticeZone {
       },
       npcs: [
         {
-          // Posted next to the gem meters at the labyrinth entrance.
-          // Hints that the player can come back through the sing-song
-          // platforms by pulling the wood lever — the rocks blocking
-          // the lowercase 'b' landings will break and `b` becomes
-          // usable to step backward through the song.
+          // Posted right next to the gem meters at the labyrinth
+          // entrance (one tile east of the green meter on the cursor
+          // row), so the kid bumps into them as soon as they finish
+          // charging. Hints that the player can come back through
+          // the sing-song platforms by pulling the wood lever at the
+          // south pier — the rocks blocking the lowercase 'b'
+          // landings will break and `b` becomes usable to step
+          // backward through the song.
           id: 'lever_guide',
           type: 'maze_scribe',
           appearsWhen: { zoneEntered: true },
@@ -1508,7 +1517,7 @@ export class WordPracticeZone {
             'The song rocks will break.',
             'Then press b to go back!',
           ],
-          position: [95, 12],
+          position: [95, 11],
           walkable: false,
         },
         {
