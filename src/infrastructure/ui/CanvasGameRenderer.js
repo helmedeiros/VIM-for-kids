@@ -742,54 +742,79 @@ export class CanvasGameRenderer extends GameRenderer {
       return;
     }
     const time = this._animationTime || 0;
-    // Pixel-art template of a tiny RPG key, matching the reference
-    // sprite the user shared. Each truthy cell is one "art pixel"
-    // drawn at scale u. Read top-down: bow ring, shaft, left bit.
-    //   01111110     ← bow top
-    //   1     1
-    //   1  X  1      ← bow centre (highlight masked with destination-out)
-    //   1     1
-    //   01111110     ← bow bottom
-    //      11        ← shaft begins
-    //      11
-    //      11
-    //      11
-    //     111        ← bit (the "tooth")
-    //      1
-    //      1
-    const KEY_BLOCKS = [
-      // [col, row, w, h] in art-pixel units, drawn in order
-      // Bow ring (drawn as outline so the hole shows through)
-      [1, 0, 3, 1],
-      [0, 1, 1, 3],
-      [4, 1, 1, 3],
-      [1, 4, 3, 1],
-      // Shaft
-      [2, 5, 1, 5],
-      // Bit (left-pointing tooth at the lower part of the shaft)
-      [1, 8, 1, 1],
+    // Tiny RPG key, pixel-art template. Two layers — a darker shadow
+    // colour and the main fill — give the bow an inner ring and the
+    // shaft a vertical highlight, so the silhouette reads as a proper
+    // key instead of a flat blob.
+    //
+    // Main fill (1)             Shadow / inner ring (2)
+    //   01110                     00000
+    //   1   1                     02220
+    //   1 1 1                     02 20
+    //   1   1                     02220
+    //   01110                     00000
+    //    1                         0
+    //    1                         0
+    //    1                         0
+    //   11                        20
+    //    1                         2
+    const KEY_FILL_BLOCKS = [
+      [1, 0, 3, 1],         // bow top
+      [0, 1, 1, 3],         // bow left side
+      [4, 1, 1, 3],         // bow right side
+      [1, 4, 3, 1],         // bow bottom
+      [2, 5, 1, 4],         // shaft
+      [1, 8, 1, 1],         // bit (tooth)
+      [2, 9, 1, 1],         // shaft tip
+    ];
+    const KEY_SHADOW_BLOCKS = [
+      // Inner ring of the bow (one pixel inside the outline)
+      [1, 1, 3, 1],
+      [1, 3, 3, 1],
+      [1, 2, 1, 1],
+      [3, 2, 1, 1],
+      // Shadow streak down the right side of the shaft
+      [3, 6, 1, 2],
+      // Notch under the bit
       [1, 9, 1, 1],
     ];
-    const ART_WIDTH = 5; // bow span in art-pixels
+    const ART_WIDTH = 5;
+
+    const shade = (hex, factor) => {
+      const n = parseInt(hex.replace('#', ''), 16);
+      const r = Math.max(0, Math.min(255, Math.round(((n >> 16) & 0xff) * factor)));
+      const g = Math.max(0, Math.min(255, Math.round(((n >> 8) & 0xff) * factor)));
+      const b = Math.max(0, Math.min(255, Math.round((n & 0xff) * factor)));
+      return `rgb(${r}, ${g}, ${b})`;
+    };
 
     for (const job of this._pendingColoredKeys) {
       const { ck, screenX, screenY, ts } = job;
       // Per-key phase so adjacent keys don't bob in lockstep.
       const phase = (screenX * 0.13 + screenY * 0.17) % (Math.PI * 2);
-      // Bob over roughly two-thirds of a tile so the key rises clearly
-      // above the canopy at its highest point and looks like it's
-      // floating, not just twitching.
-      const bobAmp = Math.max(4, Math.floor(ts * 0.35));
-      const bob = Math.round(Math.sin(time * 4 + phase) * bobAmp);
+      // Float UP from a low resting position — never dip below the
+      // baseline so the key can't slide behind the canopy on the down
+      // swing. `(1 - cos)/2` keeps the value in [0, 1] for a smooth
+      // hover, then scaled by amplitude.
+      const bobAmp = Math.max(6, Math.floor(ts * 0.4));
+      const bob = -Math.round(((1 - Math.cos(time * 3 + phase)) / 2) * bobAmp);
 
-      const u = Math.max(2, Math.floor(ts * 0.16));
-      // Centre the art horizontally, anchor the key high in the cell
-      // so the up-swing of the bob clears the canopy.
+      // Smaller unit than before so the key occupies ~half a tile in
+      // each direction — matches the reference proportions.
+      const u = Math.max(2, Math.floor(ts * 0.1));
       const originX = Math.round(screenX + ts / 2 - (ART_WIDTH * u) / 2);
-      const originY = Math.round(screenY + ts * 0.2) + bob;
+      // Resting position low in the cell so the up-swing brings the
+      // bow to roughly the middle of the cell.
+      const originY = Math.round(screenY + ts * 0.45) + bob;
 
+      // Shadow layer first (so the main fill paints on top of the
+      // inner ring strokes).
+      ctx.fillStyle = shade(ck.color, 0.6);
+      for (const [cx, cy, w, h] of KEY_SHADOW_BLOCKS) {
+        ctx.fillRect(originX + cx * u, originY + cy * u, w * u, h * u);
+      }
       ctx.fillStyle = ck.color;
-      for (const [cx, cy, w, h] of KEY_BLOCKS) {
+      for (const [cx, cy, w, h] of KEY_FILL_BLOCKS) {
         ctx.fillRect(originX + cx * u, originY + cy * u, w * u, h * u);
       }
     }
