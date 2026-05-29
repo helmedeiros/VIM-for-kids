@@ -788,24 +788,27 @@ export class CanvasGameRenderer extends GameRenderer {
       return `rgb(${r}, ${g}, ${b})`;
     };
 
+    const ART_HEIGHT = 10; // bow + shaft + tip in art-pixel rows
+
     for (const job of this._pendingColoredKeys) {
       const { ck, screenX, screenY, ts } = job;
       // Per-key phase so adjacent keys don't bob in lockstep.
       const phase = (screenX * 0.13 + screenY * 0.17) % (Math.PI * 2);
-      // Float UP from a low resting position — never dip below the
-      // baseline so the key can't slide behind the canopy on the down
-      // swing. `(1 - cos)/2` keeps the value in [0, 1] for a smooth
-      // hover, then scaled by amplitude.
-      const bobAmp = Math.max(6, Math.floor(ts * 0.4));
+      // Float UP from the cell floor — bob value stays in [-amp, 0]
+      // so the silhouette never dips below its resting position. Use
+      // `(1 - cos)/2` for a smooth hover that pauses at the top.
+      const bobAmp = Math.max(4, Math.floor(ts * 0.3));
       const bob = -Math.round(((1 - Math.cos(time * 3 + phase)) / 2) * bobAmp);
 
-      // Smaller unit than before so the key occupies ~half a tile in
-      // each direction — matches the reference proportions.
-      const u = Math.max(2, Math.floor(ts * 0.1));
+      // Pixel unit sized so the whole key fits inside ~80% of the tile
+      // height, leaving headroom for the bob without crossing into the
+      // canopy below.
+      const u = Math.max(2, Math.floor(ts * 0.08));
       const originX = Math.round(screenX + ts / 2 - (ART_WIDTH * u) / 2);
-      // Resting position low in the cell so the up-swing brings the
-      // bow to roughly the middle of the cell.
-      const originY = Math.round(screenY + ts * 0.45) + bob;
+      // Anchor the bottom of the key at the cell's floor so the key
+      // sits squarely inside its own tile at rest. The bob then lifts
+      // it upward into the cell above.
+      const originY = Math.round(screenY + ts - ART_HEIGHT * u) + bob;
 
       // Shadow layer first (so the main fill paints on top of the
       // inner ring strokes).
