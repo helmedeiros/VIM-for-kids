@@ -1246,11 +1246,11 @@ export class WordPracticeZone {
           // collect them all before reaching the boss arena. Drawn
           // black so they pop against the sand floor — the pale
           // pastels (gold/lime/cyan/lilac/coral) blended right in.
-          { type: 'collectible_key', keyId: 'maze_key_1', name: 'Maze Key I', color: '#111111', position: [100, 11] },
-          { type: 'collectible_key', keyId: 'maze_key_2', name: 'Maze Key II', color: '#111111', position: [125, 9] },
-          { type: 'collectible_key', keyId: 'maze_key_3', name: 'Maze Key III', color: '#111111', position: [140, 8] },
-          { type: 'collectible_key', keyId: 'maze_key_4', name: 'Maze Key IV', color: '#111111', position: [162, 11] },
-          { type: 'collectible_key', keyId: 'maze_key_5', name: 'Maze Key V', color: '#111111', position: [178, 11] },
+          { type: 'collectible_key', keyId: 'maze_key_1', name: 'Maze Key I', color: '#d97f1e', position: [100, 11] },
+          { type: 'collectible_key', keyId: 'maze_key_2', name: 'Maze Key II', color: '#d97f1e', position: [125, 9] },
+          { type: 'collectible_key', keyId: 'maze_key_3', name: 'Maze Key III', color: '#d97f1e', position: [140, 8] },
+          { type: 'collectible_key', keyId: 'maze_key_4', name: 'Maze Key IV', color: '#d97f1e', position: [162, 11] },
+          { type: 'collectible_key', keyId: 'maze_key_5', name: 'Maze Key V', color: '#d97f1e', position: [178, 11] },
         ],
         textLabels: [
           // Water-platform letter tiles — vim-adventures style. Seven
