@@ -2112,14 +2112,11 @@ describe('MovePlayerUseCase', () => {
 
   describe('sing-song lever pull', () => {
     function makeLever(x, y) {
-      let blocking = true;
       return {
         regionName: 'lever_stone',
         footprintW: 1,
         footprintH: 1,
         occupies: (pos) => pos.x === x && pos.y === y,
-        get _blocking() { return blocking; },
-        set _blocking(v) { blocking = v; },
       };
     }
     function makeRock(x, y) {
@@ -2131,7 +2128,7 @@ describe('MovePlayerUseCase', () => {
       };
     }
 
-    it('removes the sing-song rocks the first time the cursor bumps the lever', () => {
+    it('removes the sing-song rocks the first time the cursor bumps the lever, without moving', () => {
       const lever = makeLever(3, 5);
       const rocks = [makeRock(10, 6), makeRock(15, 6), makeRock(20, 6)];
       const labyrinthBoulder = {
@@ -2154,16 +2151,12 @@ describe('MovePlayerUseCase', () => {
       // Cursor sits one tile west of the lever and walks east into it.
       mockGameState.cursor = new Cursor(new Position(2, 5));
 
-      const result = movePlayerUseCase.executeSync('right');
+      movePlayerUseCase.executeSync('right');
 
-      // Cursor stepped onto the lever cell — motion succeeded.
-      expect(mockGameState.cursor.position.x).toBe(3);
+      // Bump-to-pull: the cursor stays at (2, 5) — the lever blocks
+      // the move just like an NPC does. Side effects still fire.
+      expect(mockGameState.cursor.position.x).toBe(2);
       expect(mockGameState.cursor.position.y).toBe(5);
-      expect(result.success).toBe(true);
-
-      // Side effects fired: rocks removed, labyrinth boulder kept,
-      // hint surfaced, and the flag latched so a second bump is a
-      // no-op.
       expect(mockGameState.singSongLeverPulled).toBe(true);
       expect(mockMap.removeDecorations).toHaveBeenCalledTimes(1);
       expect(decorations).toContain(lever);
