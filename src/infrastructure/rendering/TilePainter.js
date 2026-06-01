@@ -935,80 +935,98 @@ export class TilePainter {
   _paintRampDiagonal(ctx, direction) {
     const ts = this._ts;
 
-    // Cobblestone fills the whole cell — the upper landing and the
-    // lower floor are both this colour, so neighbouring floor tiles
-    // flow into the ramp without a seam.
+    // Cobblestone base — the floor on both ends of the ramp flows
+    // into the cell without a visible seam.
     const floorGrad = ctx.createLinearGradient(0, 0, ts, ts);
     floorGrad.addColorStop(0, '#dccdb2');
     floorGrad.addColorStop(1, '#c2b497');
     ctx.fillStyle = floorGrad;
     ctx.fillRect(0, 0, ts, ts);
 
-    // Front face of the inclined plane — the wall-stone wedge sits
-    // BELOW the slope line, because that's the solid bulk supporting
-    // the staircase. ramp_right: low-left → high-right, so the wedge
-    // is the bottom-right triangle. ramp_left mirrors it.
+    // Trapezoidal ramp surface. The low end (closest to the viewer)
+    // is wider; the high end is narrower so the surface recedes "up
+    // and away". direction +1 = ramp_right (low-left → high-right);
+    // direction -1 = ramp_left  (low-right → high-left).
+    const lowInset = Math.max(2, Math.round(ts * 0.1));
+    const highInset = Math.max(4, Math.round(ts * 0.28));
+
+    let A, B, C, D, gradStart, gradEnd;
+    if (direction > 0) {
+      A = [0, lowInset];
+      B = [ts, highInset];
+      C = [ts, ts - highInset];
+      D = [0, ts - lowInset];
+      gradStart = [0, 0];
+      gradEnd = [ts, 0];
+    } else {
+      A = [0, highInset];
+      B = [ts, lowInset];
+      C = [ts, ts - lowInset];
+      D = [0, ts - highInset];
+      gradStart = [ts, 0];
+      gradEnd = [0, 0];
+    }
+
     ctx.save();
     ctx.beginPath();
-    if (direction > 0) {
-      ctx.moveTo(0, ts);
-      ctx.lineTo(ts, ts);
-      ctx.lineTo(ts, 0);
-    } else {
-      ctx.moveTo(0, 0);
-      ctx.lineTo(0, ts);
-      ctx.lineTo(ts, ts);
-    }
+    ctx.moveTo(A[0], A[1]);
+    ctx.lineTo(B[0], B[1]);
+    ctx.lineTo(C[0], C[1]);
+    ctx.lineTo(D[0], D[1]);
     ctx.closePath();
     ctx.clip();
 
-    const wallGrad = ctx.createLinearGradient(0, 0, 0, ts);
-    wallGrad.addColorStop(0, '#9c8e76');
-    wallGrad.addColorStop(0.55, '#7e7159');
-    wallGrad.addColorStop(1, '#5e5340');
-    ctx.fillStyle = wallGrad;
+    // Pale cream at the low (front) end, deep stone at the high end —
+    // the directional gradient is the main "rolling up" cue.
+    const surfaceGrad = ctx.createLinearGradient(
+      gradStart[0],
+      gradStart[1],
+      gradEnd[0],
+      gradEnd[1]
+    );
+    surfaceGrad.addColorStop(0, '#e6d7be');
+    surfaceGrad.addColorStop(0.5, '#b4a484');
+    surfaceGrad.addColorStop(1, '#5e5340');
+    ctx.fillStyle = surfaceGrad;
     ctx.fillRect(0, 0, ts, ts);
 
-    // Horizontal brick courses across the wedge so the front reads as
-    // stacked stone rather than a flat triangle. The clip mask trims
-    // each line to the slope outline automatically.
-    ctx.strokeStyle = 'rgba(74, 62, 42, 0.55)';
+    // Vertical risers across the surface so it reads as treads, not a
+    // flat shaded slab. Clip trims each line to the trapezoid edges.
+    ctx.strokeStyle = 'rgba(48, 38, 22, 0.5)';
     ctx.lineWidth = 1;
-    const courses = 4;
-    for (let i = 1; i <= courses; i++) {
-      const y = (ts * i) / (courses + 1);
+    const steps = 5;
+    for (let i = 1; i <= steps; i++) {
+      const x = (ts * i) / (steps + 1);
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(ts, y);
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, ts);
       ctx.stroke();
     }
 
     ctx.restore();
 
-    // The slope itself — dark line for the edge against the wall, plus
-    // a one-pixel warm highlight just above so the lip catches light
-    // like the top of a step.
+    // Dark outline — the visible edge of the raised ramp structure
+    // against the floor.
     ctx.strokeStyle = '#3a2f1e';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    if (direction > 0) {
-      ctx.moveTo(0, ts);
-      ctx.lineTo(ts, 0);
-    } else {
-      ctx.moveTo(0, 0);
-      ctx.lineTo(ts, ts);
-    }
+    ctx.moveTo(A[0], A[1]);
+    ctx.lineTo(B[0], B[1]);
+    ctx.lineTo(C[0], C[1]);
+    ctx.lineTo(D[0], D[1]);
+    ctx.closePath();
     ctx.stroke();
 
-    ctx.strokeStyle = 'rgba(255, 245, 220, 0.6)';
+    // Warm highlight on the low-end lip — the front catches light.
+    ctx.strokeStyle = 'rgba(255, 245, 220, 0.7)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     if (direction > 0) {
-      ctx.moveTo(0, ts - 1);
-      ctx.lineTo(ts - 1, 0);
+      ctx.moveTo(A[0] + 1, A[1] + 1);
+      ctx.lineTo(D[0] + 1, D[1] - 1);
     } else {
-      ctx.moveTo(1, 0);
-      ctx.lineTo(ts, ts - 1);
+      ctx.moveTo(B[0] - 1, B[1] + 1);
+      ctx.lineTo(C[0] - 1, C[1] - 1);
     }
     ctx.stroke();
   }
