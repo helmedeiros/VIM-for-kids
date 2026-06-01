@@ -22,6 +22,7 @@ describe('TilePainter', () => {
       drawImage: jest.fn(),
       save: jest.fn(),
       restore: jest.fn(),
+      clip: jest.fn(),
       translate: jest.fn(),
       scale: jest.fn(),
       rotate: jest.fn(),
