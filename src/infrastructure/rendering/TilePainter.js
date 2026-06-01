@@ -935,33 +935,33 @@ export class TilePainter {
   _paintRampDiagonal(ctx, direction) {
     const ts = this._ts;
 
-    // --- Floor base (warm cream cobblestone, matches _paintCobblestone)
+    // Cobblestone fills the whole cell — the upper landing and the
+    // lower floor are both this colour, so neighbouring floor tiles
+    // flow into the ramp without a seam.
     const floorGrad = ctx.createLinearGradient(0, 0, ts, ts);
     floorGrad.addColorStop(0, '#dccdb2');
     floorGrad.addColorStop(1, '#c2b497');
     ctx.fillStyle = floorGrad;
     ctx.fillRect(0, 0, ts, ts);
 
-    // The diagonal that separates floor from wall. For ramp_right the
-    // wedge is the upper-right triangle (0,0) → (ts,0) → (ts,ts); for
-    // ramp_left the wedge is the upper-left triangle (0,0) → (ts,0) →
-    // (0,ts). Both diagonals go corner-to-corner so the slope visually
-    // bridges the full height of the cell.
+    // Front face of the inclined plane — the wall-stone wedge sits
+    // BELOW the slope line, because that's the solid bulk supporting
+    // the staircase. ramp_right: low-left → high-right, so the wedge
+    // is the bottom-right triangle. ramp_left mirrors it.
     ctx.save();
     ctx.beginPath();
     if (direction > 0) {
-      ctx.moveTo(0, 0);
-      ctx.lineTo(ts, 0);
+      ctx.moveTo(0, ts);
       ctx.lineTo(ts, ts);
+      ctx.lineTo(ts, 0);
     } else {
       ctx.moveTo(0, 0);
-      ctx.lineTo(ts, 0);
       ctx.lineTo(0, ts);
+      ctx.lineTo(ts, ts);
     }
     ctx.closePath();
     ctx.clip();
 
-    // --- Wall wedge (front-face stone palette from _paintWall)
     const wallGrad = ctx.createLinearGradient(0, 0, 0, ts);
     wallGrad.addColorStop(0, '#9c8e76');
     wallGrad.addColorStop(0.55, '#7e7159');
@@ -969,54 +969,46 @@ export class TilePainter {
     ctx.fillStyle = wallGrad;
     ctx.fillRect(0, 0, ts, ts);
 
-    // Brick tread lines running parallel to the ramp's diagonal so the
-    // wedge reads as climbing up the slope rather than a flat triangle.
+    // Horizontal brick courses across the wedge so the front reads as
+    // stacked stone rather than a flat triangle. The clip mask trims
+    // each line to the slope outline automatically.
     ctx.strokeStyle = 'rgba(74, 62, 42, 0.55)';
     ctx.lineWidth = 1;
-    const stepCount = 4;
-    for (let i = 1; i <= stepCount; i++) {
-      const t = i / (stepCount + 1);
+    const courses = 4;
+    for (let i = 1; i <= courses; i++) {
+      const y = (ts * i) / (courses + 1);
       ctx.beginPath();
-      if (direction > 0) {
-        // From left edge of the wedge (along the hypotenuse) to the
-        // right edge of the cell.
-        ctx.moveTo(ts * t, ts * t);
-        ctx.lineTo(ts, ts * t);
-      } else {
-        ctx.moveTo(0, ts * t);
-        ctx.lineTo(ts * (1 - t), ts * t);
-      }
+      ctx.moveTo(0, y);
+      ctx.lineTo(ts, y);
       ctx.stroke();
     }
-    // Highlight along the top edge of the wedge — makes the climb read
-    // as catching the light at the top.
-    ctx.fillStyle = 'rgba(255, 250, 230, 0.35)';
-    ctx.fillRect(0, 0, ts, 1);
 
     ctx.restore();
 
-    // --- Diagonal edge: the visible "lip" between floor and wall.
-    // Dark stroke + thin highlight above gives it a hairline 3D feel.
+    // The slope itself — dark line for the edge against the wall, plus
+    // a one-pixel warm highlight just above so the lip catches light
+    // like the top of a step.
     ctx.strokeStyle = '#3a2f1e';
     ctx.lineWidth = 2;
     ctx.beginPath();
     if (direction > 0) {
+      ctx.moveTo(0, ts);
+      ctx.lineTo(ts, 0);
+    } else {
       ctx.moveTo(0, 0);
       ctx.lineTo(ts, ts);
-    } else {
-      ctx.moveTo(ts, 0);
-      ctx.lineTo(0, ts);
     }
     ctx.stroke();
-    ctx.strokeStyle = 'rgba(255, 250, 230, 0.4)';
+
+    ctx.strokeStyle = 'rgba(255, 245, 220, 0.6)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     if (direction > 0) {
-      ctx.moveTo(0, 0);
-      ctx.lineTo(ts, ts);
+      ctx.moveTo(0, ts - 1);
+      ctx.lineTo(ts - 1, 0);
     } else {
-      ctx.moveTo(ts, 0);
-      ctx.lineTo(0, ts);
+      ctx.moveTo(1, 0);
+      ctx.lineTo(ts, ts - 1);
     }
     ctx.stroke();
   }
