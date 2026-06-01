@@ -922,73 +922,111 @@ export class TilePainter {
     ctx.fillRect(4, 4, ts - 8, ts - 8);
   }
 
-  _paintRampRight(ctx) {
+  /**
+   * Shared inclined-plane painter. `direction` is +1 for a slope rising
+   * to the right (ramp_right) or -1 for a slope rising to the left
+   * (ramp_left). The cell is split along a diagonal: the *low* half is
+   * painted with the warm cobblestone floor (matching the surrounding
+   * pavement) and the *high* half is painted with the wall's brown
+   * stone palette, so the tile reads as a wedge of wall fading down
+   * into the floor — an inclined plane joining two elevations.
+   * @private
+   */
+  _paintRampDiagonal(ctx, direction) {
     const ts = this._ts;
-    // Left half is ground
-    ctx.fillStyle = '#90a0b8';
+
+    // --- Floor base (warm cream cobblestone, matches _paintCobblestone)
+    const floorGrad = ctx.createLinearGradient(0, 0, ts, ts);
+    floorGrad.addColorStop(0, '#dccdb2');
+    floorGrad.addColorStop(1, '#c2b497');
+    ctx.fillStyle = floorGrad;
     ctx.fillRect(0, 0, ts, ts);
 
-    // Right half is wall with brick pattern
-    ctx.fillStyle = '#5a6878';
-    ctx.fillRect(ts / 2, 0, ts / 2, ts);
-    const bh = 6, bw = 8;
-    for (let row = 0; row < ts / bh; row++) {
-      const offset = (row % 2) * (bw / 2);
-      for (let col = 0; col < ts / 2 / bw + 1; col++) {
-        const bx = ts / 2 + col * bw + offset;
-        const by = row * bh;
-        ctx.fillStyle = `rgb(${90 + (row + col) % 3 * 2}, ${105 + (row + col) % 3 * 2}, ${118 + (row + col) % 3 * 2})`;
-        ctx.fillRect(bx + 1, by + 1, bw - 2, bh - 2);
-        ctx.fillStyle = 'rgba(255,255,255,0.1)';
-        ctx.fillRect(bx + 1, by + 1, bw - 2, 1);
-        ctx.fillStyle = 'rgba(0,0,0,0.1)';
-        ctx.fillRect(bx + 1, by + bh - 2, bw - 2, 1);
-      }
-      ctx.fillStyle = '#3a4858';
-      ctx.fillRect(ts / 2, row * bh, ts / 2, 1);
+    // The diagonal that separates floor from wall. For ramp_right the
+    // wedge is the upper-right triangle (0,0) → (ts,0) → (ts,ts); for
+    // ramp_left the wedge is the upper-left triangle (0,0) → (ts,0) →
+    // (0,ts). Both diagonals go corner-to-corner so the slope visually
+    // bridges the full height of the cell.
+    ctx.save();
+    ctx.beginPath();
+    if (direction > 0) {
+      ctx.moveTo(0, 0);
+      ctx.lineTo(ts, 0);
+      ctx.lineTo(ts, ts);
+    } else {
+      ctx.moveTo(0, 0);
+      ctx.lineTo(ts, 0);
+      ctx.lineTo(0, ts);
     }
+    ctx.closePath();
+    ctx.clip();
 
-    // Slope gradient transition
-    const slope = ctx.createLinearGradient(ts / 2 - 4, 0, ts / 2 + 4, 0);
-    slope.addColorStop(0, '#90a0b8');
-    slope.addColorStop(1, '#4a5868');
-    ctx.fillStyle = slope;
-    ctx.fillRect(ts / 2 - 4, 0, 8, ts);
+    // --- Wall wedge (front-face stone palette from _paintWall)
+    const wallGrad = ctx.createLinearGradient(0, 0, 0, ts);
+    wallGrad.addColorStop(0, '#9c8e76');
+    wallGrad.addColorStop(0.55, '#7e7159');
+    wallGrad.addColorStop(1, '#5e5340');
+    ctx.fillStyle = wallGrad;
+    ctx.fillRect(0, 0, ts, ts);
+
+    // Brick tread lines running parallel to the ramp's diagonal so the
+    // wedge reads as climbing up the slope rather than a flat triangle.
+    ctx.strokeStyle = 'rgba(74, 62, 42, 0.55)';
+    ctx.lineWidth = 1;
+    const stepCount = 4;
+    for (let i = 1; i <= stepCount; i++) {
+      const t = i / (stepCount + 1);
+      ctx.beginPath();
+      if (direction > 0) {
+        // From left edge of the wedge (along the hypotenuse) to the
+        // right edge of the cell.
+        ctx.moveTo(ts * t, ts * t);
+        ctx.lineTo(ts, ts * t);
+      } else {
+        ctx.moveTo(0, ts * t);
+        ctx.lineTo(ts * (1 - t), ts * t);
+      }
+      ctx.stroke();
+    }
+    // Highlight along the top edge of the wedge — makes the climb read
+    // as catching the light at the top.
+    ctx.fillStyle = 'rgba(255, 250, 230, 0.35)';
+    ctx.fillRect(0, 0, ts, 1);
+
+    ctx.restore();
+
+    // --- Diagonal edge: the visible "lip" between floor and wall.
+    // Dark stroke + thin highlight above gives it a hairline 3D feel.
+    ctx.strokeStyle = '#3a2f1e';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    if (direction > 0) {
+      ctx.moveTo(0, 0);
+      ctx.lineTo(ts, ts);
+    } else {
+      ctx.moveTo(ts, 0);
+      ctx.lineTo(0, ts);
+    }
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255, 250, 230, 0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if (direction > 0) {
+      ctx.moveTo(0, 0);
+      ctx.lineTo(ts, ts);
+    } else {
+      ctx.moveTo(ts, 0);
+      ctx.lineTo(0, ts);
+    }
+    ctx.stroke();
+  }
+
+  _paintRampRight(ctx) {
+    this._paintRampDiagonal(ctx, 1);
   }
 
   _paintRampLeft(ctx) {
-    const ts = this._ts;
-    // Right half is ground
-    ctx.fillStyle = '#90a0b8';
-    ctx.fillRect(0, 0, ts, ts);
-
-    // Left half is wall with brick pattern
-    ctx.fillStyle = '#5a6878';
-    ctx.fillRect(0, 0, ts / 2, ts);
-    const bh = 6, bw = 8;
-    for (let row = 0; row < ts / bh; row++) {
-      const offset = (row % 2) * (bw / 2);
-      for (let col = -1; col < ts / 2 / bw + 1; col++) {
-        const bx = col * bw + offset;
-        const by = row * bh;
-        if (bx + bw <= 0 || bx >= ts / 2) continue;
-        ctx.fillStyle = `rgb(${90 + (row + col) % 3 * 2}, ${105 + (row + col) % 3 * 2}, ${118 + (row + col) % 3 * 2})`;
-        ctx.fillRect(Math.max(0, bx + 1), by + 1, Math.min(bw - 2, ts / 2 - bx - 1), bh - 2);
-        ctx.fillStyle = 'rgba(255,255,255,0.1)';
-        ctx.fillRect(Math.max(0, bx + 1), by + 1, Math.min(bw - 2, ts / 2 - bx - 1), 1);
-        ctx.fillStyle = 'rgba(0,0,0,0.1)';
-        ctx.fillRect(Math.max(0, bx + 1), by + bh - 2, Math.min(bw - 2, ts / 2 - bx - 1), 1);
-      }
-      ctx.fillStyle = '#3a4858';
-      ctx.fillRect(0, row * bh, ts / 2, 1);
-    }
-
-    // Slope gradient transition
-    const slope = ctx.createLinearGradient(ts / 2 - 4, 0, ts / 2 + 4, 0);
-    slope.addColorStop(0, '#4a5868');
-    slope.addColorStop(1, '#90a0b8');
-    ctx.fillStyle = slope;
-    ctx.fillRect(ts / 2 - 4, 0, 8, ts);
+    this._paintRampDiagonal(ctx, -1);
   }
 
   _paintVoid(ctx) {

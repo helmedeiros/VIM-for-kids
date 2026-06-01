@@ -118,8 +118,8 @@ export class CanvasGameRenderer extends GameRenderer {
       test_ground: '#9b6ab6',
       void: '#1a1a1a',
       boss_area: '#c83030',
-      ramp_right: '#8b9dc3',
-      ramp_left: '#8b9dc3',
+      ramp_right: '#c2b497',
+      ramp_left: '#c2b497',
       rock: '#7a7a7a',
     };
   }
