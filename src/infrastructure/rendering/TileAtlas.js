@@ -34,8 +34,6 @@ export class TileAtlas {
       grass_edge_s: 22,
       grass_edge_w: 23,
       cobblestone: 24,
-      ramp_right_top: 29,
-      ramp_left_top: 30,
     };
     this._regions = new Map();
   }
