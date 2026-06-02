@@ -7,7 +7,7 @@
  * and clear silhouettes that create a 2D-that-looks-3D effect.
  */
 export class TilePainter {
-  constructor(tileSize = 32, columns = 31) {
+  constructor(tileSize = 32, columns = 29) {
     this._ts = tileSize;
     this._columns = columns;
   }
@@ -49,8 +49,6 @@ export class TilePainter {
       (c) => this._paintMushroom(c),
       (c) => this._paintTallGrass(c),
       (c) => this._paintTreasureChest(c),
-      (c) => this._paintRampRightTop(c),
-      (c) => this._paintRampLeftTop(c),
     ];
 
     painters.forEach((paint, i) => {
@@ -1006,28 +1004,26 @@ export class TilePainter {
     ctx.stroke();
   }
 
-  // The ramp is a 2-tile-tall structure: the lower cell carries the
-  // bottom of the slope (most of the cell is wall), the cell directly
-  // above carries the top of the slope (a smaller wedge bleeding into
-  // the wall above). The full slope runs corner-to-corner across both
-  // cells — bottom-left of the lower cell to top-right of the upper
-  // cell for ramp_right; mirrored for ramp_left.
+  // Single-cell wedge — the wall above the ramp keeps its normal
+  // rendering, so the 2-tile staircase silhouette is the wedge (this
+  // cell) stacked under that wall. Slope runs corner-to-corner so the
+  // wedge fills the whole tile and reads clearly from any distance.
 
   _paintRampRight(ctx) {
     const ts = this._ts;
-    // Bottom cell: slope enters from top edge at x=ts/2 and exits at
-    // the bottom-left corner. Wall fills the lower-right quadrilateral.
+    // ramp_right: low on the left, high on the right. Slope from
+    // bottom-left to top-right; wall wedge fills the lower-right
+    // triangle (the bulk supporting the staircase).
     this._paintRampWedge(
       ctx,
       [
-        [ts / 2, 0],
-        [ts, 0],
-        [ts, ts],
         [0, ts],
+        [ts, ts],
+        [ts, 0],
       ],
       [
-        [ts / 2, 0],
         [0, ts],
+        [ts, 0],
       ]
     );
   }
@@ -1038,48 +1034,12 @@ export class TilePainter {
       ctx,
       [
         [0, 0],
-        [ts / 2, 0],
         [ts, ts],
         [0, ts],
       ],
       [
-        [ts / 2, 0],
-        [ts, ts],
-      ]
-    );
-  }
-
-  _paintRampRightTop(ctx) {
-    const ts = this._ts;
-    // Top cell: slope enters from top-right corner and exits at
-    // x=ts/2 on the bottom edge. Wall fills a small triangle in the
-    // bottom-right; the rest of the cell is the upper-floor landing.
-    this._paintRampWedge(
-      ctx,
-      [
-        [ts, 0],
-        [ts, ts],
-        [ts / 2, ts],
-      ],
-      [
-        [ts, 0],
-        [ts / 2, ts],
-      ]
-    );
-  }
-
-  _paintRampLeftTop(ctx) {
-    const ts = this._ts;
-    this._paintRampWedge(
-      ctx,
-      [
         [0, 0],
-        [ts / 2, ts],
-        [0, ts],
-      ],
-      [
-        [0, 0],
-        [ts / 2, ts],
+        [ts, ts],
       ]
     );
   }
