@@ -7,7 +7,7 @@
  * and clear silhouettes that create a 2D-that-looks-3D effect.
  */
 export class TilePainter {
-  constructor(tileSize = 32, columns = 29) {
+  constructor(tileSize = 32, columns = 31) {
     this._ts = tileSize;
     this._columns = columns;
   }
@@ -49,6 +49,8 @@ export class TilePainter {
       (c) => this._paintMushroom(c),
       (c) => this._paintTallGrass(c),
       (c) => this._paintTreasureChest(c),
+      (c) => this._paintRampRightTop(c),
+      (c) => this._paintRampLeftTop(c),
     ];
 
     painters.forEach((paint, i) => {
@@ -923,120 +925,163 @@ export class TilePainter {
   }
 
   /**
-   * Shared inclined-plane painter. `direction` is +1 for a slope rising
-   * to the right (ramp_right) or -1 for a slope rising to the left
-   * (ramp_left). The cell is split along a diagonal: the *low* half is
-   * painted with the warm cobblestone floor (matching the surrounding
-   * pavement) and the *high* half is painted with the wall's brown
-   * stone palette, so the tile reads as a wedge of wall fading down
-   * into the floor — an inclined plane joining two elevations.
+   * Paint the cobblestone floor + horizontal-courses wall material
+   * inside an arbitrary polygon (the wall wedge of a ramp cell).
+   *
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {Array<[number, number]>} wallPoly  polygon corners of the
+   *   wall wedge in local cell coords (0..ts).
+   * @param {Array<[number, number]>} slopeEdge two points marking the
+   *   inclined edge of the wedge (the visible slope), in local coords.
    * @private
    */
-  _paintRampDiagonal(ctx, direction) {
+  _paintRampWedge(ctx, wallPoly, slopeEdge) {
     const ts = this._ts;
 
-    // Cobblestone base — the floor on both ends of the ramp flows
-    // into the cell without a visible seam.
+    // Cobblestone floor base flows behind the wedge so any non-wall
+    // areas (the upper landing or the lower floor) blend seamlessly
+    // with adjacent floor cells.
     const floorGrad = ctx.createLinearGradient(0, 0, ts, ts);
     floorGrad.addColorStop(0, '#dccdb2');
     floorGrad.addColorStop(1, '#c2b497');
     ctx.fillStyle = floorGrad;
     ctx.fillRect(0, 0, ts, ts);
 
-    // Trapezoidal ramp surface. The low end (closest to the viewer)
-    // is wider; the high end is narrower so the surface recedes "up
-    // and away". direction +1 = ramp_right (low-left → high-right);
-    // direction -1 = ramp_left  (low-right → high-left).
-    const lowInset = Math.max(2, Math.round(ts * 0.1));
-    const highInset = Math.max(4, Math.round(ts * 0.28));
-
-    let A, B, C, D, gradStart, gradEnd;
-    if (direction > 0) {
-      A = [0, lowInset];
-      B = [ts, highInset];
-      C = [ts, ts - highInset];
-      D = [0, ts - lowInset];
-      gradStart = [0, 0];
-      gradEnd = [ts, 0];
-    } else {
-      A = [0, highInset];
-      B = [ts, lowInset];
-      C = [ts, ts - lowInset];
-      D = [0, ts - highInset];
-      gradStart = [ts, 0];
-      gradEnd = [0, 0];
-    }
-
+    // Wall material, clipped to the wedge polygon.
     ctx.save();
     ctx.beginPath();
-    ctx.moveTo(A[0], A[1]);
-    ctx.lineTo(B[0], B[1]);
-    ctx.lineTo(C[0], C[1]);
-    ctx.lineTo(D[0], D[1]);
+    ctx.moveTo(wallPoly[0][0], wallPoly[0][1]);
+    for (let i = 1; i < wallPoly.length; i++) {
+      ctx.lineTo(wallPoly[i][0], wallPoly[i][1]);
+    }
     ctx.closePath();
     ctx.clip();
 
-    // Pale cream at the low (front) end, deep stone at the high end —
-    // the directional gradient is the main "rolling up" cue.
-    const surfaceGrad = ctx.createLinearGradient(
-      gradStart[0],
-      gradStart[1],
-      gradEnd[0],
-      gradEnd[1]
-    );
-    surfaceGrad.addColorStop(0, '#e6d7be');
-    surfaceGrad.addColorStop(0.5, '#b4a484');
-    surfaceGrad.addColorStop(1, '#5e5340');
-    ctx.fillStyle = surfaceGrad;
+    const wallGrad = ctx.createLinearGradient(0, 0, 0, ts);
+    wallGrad.addColorStop(0, '#9c8e76');
+    wallGrad.addColorStop(0.55, '#7e7159');
+    wallGrad.addColorStop(1, '#5e5340');
+    ctx.fillStyle = wallGrad;
     ctx.fillRect(0, 0, ts, ts);
 
-    // Vertical risers across the surface so it reads as treads, not a
-    // flat shaded slab. Clip trims each line to the trapezoid edges.
-    ctx.strokeStyle = 'rgba(48, 38, 22, 0.5)';
+    // Horizontal brick courses — match the wall front face palette and
+    // visually merge with adjacent wall cells stacked above or beside.
+    ctx.strokeStyle = 'rgba(48, 38, 22, 0.55)';
     ctx.lineWidth = 1;
-    const steps = 5;
-    for (let i = 1; i <= steps; i++) {
-      const x = (ts * i) / (steps + 1);
+    const courses = 4;
+    for (let i = 1; i <= courses; i++) {
+      const y = (ts * i) / (courses + 1);
       ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, ts);
+      ctx.moveTo(0, y);
+      ctx.lineTo(ts, y);
       ctx.stroke();
     }
 
     ctx.restore();
 
-    // Dark outline — the visible edge of the raised ramp structure
-    // against the floor.
+    // Slope edge — dark stroke against the cobble + a one-pixel warm
+    // highlight just inside the wedge, so the lip catches light.
+    const [sx0, sy0] = slopeEdge[0];
+    const [sx1, sy1] = slopeEdge[1];
     ctx.strokeStyle = '#3a2f1e';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(A[0], A[1]);
-    ctx.lineTo(B[0], B[1]);
-    ctx.lineTo(C[0], C[1]);
-    ctx.lineTo(D[0], D[1]);
-    ctx.closePath();
+    ctx.moveTo(sx0, sy0);
+    ctx.lineTo(sx1, sy1);
     ctx.stroke();
 
-    // Warm highlight on the low-end lip — the front catches light.
-    ctx.strokeStyle = 'rgba(255, 245, 220, 0.7)';
+    // Direction of the inward normal (rough — push the highlight one
+    // pixel toward the wedge interior, computed via the polygon centroid).
+    const cx = wallPoly.reduce((s, p) => s + p[0], 0) / wallPoly.length;
+    const cy = wallPoly.reduce((s, p) => s + p[1], 0) / wallPoly.length;
+    const midX = (sx0 + sx1) / 2;
+    const midY = (sy0 + sy1) / 2;
+    const dx = Math.sign(cx - midX);
+    const dy = Math.sign(cy - midY);
+    ctx.strokeStyle = 'rgba(255, 245, 220, 0.6)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    if (direction > 0) {
-      ctx.moveTo(A[0] + 1, A[1] + 1);
-      ctx.lineTo(D[0] + 1, D[1] - 1);
-    } else {
-      ctx.moveTo(B[0] - 1, B[1] + 1);
-      ctx.lineTo(C[0] - 1, C[1] - 1);
-    }
+    ctx.moveTo(sx0 + dx, sy0 + dy);
+    ctx.lineTo(sx1 + dx, sy1 + dy);
     ctx.stroke();
   }
 
+  // The ramp is a 2-tile-tall structure: the lower cell carries the
+  // bottom of the slope (most of the cell is wall), the cell directly
+  // above carries the top of the slope (a smaller wedge bleeding into
+  // the wall above). The full slope runs corner-to-corner across both
+  // cells — bottom-left of the lower cell to top-right of the upper
+  // cell for ramp_right; mirrored for ramp_left.
+
   _paintRampRight(ctx) {
-    this._paintRampDiagonal(ctx, 1);
+    const ts = this._ts;
+    // Bottom cell: slope enters from top edge at x=ts/2 and exits at
+    // the bottom-left corner. Wall fills the lower-right quadrilateral.
+    this._paintRampWedge(
+      ctx,
+      [
+        [ts / 2, 0],
+        [ts, 0],
+        [ts, ts],
+        [0, ts],
+      ],
+      [
+        [ts / 2, 0],
+        [0, ts],
+      ]
+    );
   }
 
   _paintRampLeft(ctx) {
-    this._paintRampDiagonal(ctx, -1);
+    const ts = this._ts;
+    this._paintRampWedge(
+      ctx,
+      [
+        [0, 0],
+        [ts / 2, 0],
+        [ts, ts],
+        [0, ts],
+      ],
+      [
+        [ts / 2, 0],
+        [ts, ts],
+      ]
+    );
+  }
+
+  _paintRampRightTop(ctx) {
+    const ts = this._ts;
+    // Top cell: slope enters from top-right corner and exits at
+    // x=ts/2 on the bottom edge. Wall fills a small triangle in the
+    // bottom-right; the rest of the cell is the upper-floor landing.
+    this._paintRampWedge(
+      ctx,
+      [
+        [ts, 0],
+        [ts, ts],
+        [ts / 2, ts],
+      ],
+      [
+        [ts, 0],
+        [ts / 2, ts],
+      ]
+    );
+  }
+
+  _paintRampLeftTop(ctx) {
+    const ts = this._ts;
+    this._paintRampWedge(
+      ctx,
+      [
+        [0, 0],
+        [ts / 2, ts],
+        [0, ts],
+      ],
+      [
+        [0, 0],
+        [ts / 2, ts],
+      ]
+    );
   }
 
   _paintVoid(ctx) {
