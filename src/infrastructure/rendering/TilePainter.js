@@ -936,16 +936,20 @@ export class TilePainter {
   _paintRampWedge(ctx, wallPoly, slopeEdge) {
     const ts = this._ts;
 
-    // Cobblestone floor base flows behind the wedge so any non-wall
-    // areas (the upper landing or the lower floor) blend seamlessly
-    // with adjacent floor cells.
+    // Cobblestone floor base — fills the area "cut" out of the wall by
+    // the wedge, so the slope reveals the floor or upper-landing
+    // underneath. Matches _paintCobblestone's palette so adjacent
+    // floor cells flow into the cut without a seam.
     const floorGrad = ctx.createLinearGradient(0, 0, ts, ts);
     floorGrad.addColorStop(0, '#dccdb2');
     floorGrad.addColorStop(1, '#c2b497');
     ctx.fillStyle = floorGrad;
     ctx.fillRect(0, 0, ts, ts);
 
-    // Wall material, clipped to the wedge polygon.
+    // Inside the wedge polygon, paint the EXACT wall sprite (cobble
+    // cap + brick front face + staggered stones). Clipping makes the
+    // wall pixels visible only in the wedge area, so the ramp reads as
+    // a wall sliced diagonally — perfectly matching adjacent walls.
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(wallPoly[0][0], wallPoly[0][1]);
@@ -954,27 +958,7 @@ export class TilePainter {
     }
     ctx.closePath();
     ctx.clip();
-
-    const wallGrad = ctx.createLinearGradient(0, 0, 0, ts);
-    wallGrad.addColorStop(0, '#9c8e76');
-    wallGrad.addColorStop(0.55, '#7e7159');
-    wallGrad.addColorStop(1, '#5e5340');
-    ctx.fillStyle = wallGrad;
-    ctx.fillRect(0, 0, ts, ts);
-
-    // Horizontal brick courses — match the wall front face palette and
-    // visually merge with adjacent wall cells stacked above or beside.
-    ctx.strokeStyle = 'rgba(48, 38, 22, 0.55)';
-    ctx.lineWidth = 1;
-    const courses = 4;
-    for (let i = 1; i <= courses; i++) {
-      const y = (ts * i) / (courses + 1);
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(ts, y);
-      ctx.stroke();
-    }
-
+    this._paintWall(ctx);
     ctx.restore();
 
     // Slope edge — dark stroke against the cobble + a one-pixel warm
