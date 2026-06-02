@@ -995,35 +995,39 @@ export class TilePainter {
 
   _paintRampRight(ctx) {
     const ts = this._ts;
-    // ramp_right: low on the left, high on the right. Slope from
-    // bottom-left to top-right; wall wedge fills the lower-right
-    // triangle (the bulk supporting the staircase).
+    // ramp_right: high on the right, low on the left. Wall sprite is
+    // kept INTACT in the upper-right triangle; the lower-left corner
+    // is sliced off, exposing the cobble floor of the lower elevation.
+    // Slope edge runs from top-left to bottom-right.
     this._paintRampWedge(
       ctx,
       [
-        [0, ts],
-        [ts, ts],
+        [0, 0],
         [ts, 0],
+        [ts, ts],
       ],
       [
-        [0, ts],
-        [ts, 0],
+        [0, 0],
+        [ts, ts],
       ]
     );
   }
 
   _paintRampLeft(ctx) {
     const ts = this._ts;
+    // ramp_left: high on the left. Wall kept INTACT in the upper-left
+    // triangle; lower-right corner sliced off. Slope edge runs from
+    // top-right to bottom-left.
     this._paintRampWedge(
       ctx,
       [
         [0, 0],
-        [ts, ts],
+        [ts, 0],
         [0, ts],
       ],
       [
-        [0, 0],
-        [ts, ts],
+        [ts, 0],
+        [0, ts],
       ]
     );
   }
