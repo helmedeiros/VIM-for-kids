@@ -28,6 +28,14 @@ import {
 // isn't injected.
 const _resolvedBase = typeof __BASE_URL__ !== 'undefined' ? __BASE_URL__ : '/';
 const RPG_TILESET_URL = `${_resolvedBase}assets/sprites/tileset-rpg.png`;
+const RAMPS_URL = `${_resolvedBase}assets/sprites/ramps.png`;
+
+// Pixel-accurate alpha bounding boxes inside ramps.png (912x1184 source).
+// The two ramps are mirrored triangles; we anchor each at its LOW corner
+// when rendering so the slope rises into the cell(s) above and to the
+// high-side neighbour.
+const RAMP_LEFT_REGION = { sx: 91, sy: 430, sw: 309, sh: 394 };
+const RAMP_RIGHT_REGION = { sx: 512, sy: 431, sw: 309, sh: 394 };
 
 /**
  * Canvas-based game renderer implementing the GameRenderer port.
@@ -162,6 +170,7 @@ export class CanvasGameRenderer extends GameRenderer {
     }
 
     this._loadRpgTileset();
+    this._loadRampsImage();
   }
 
   _loadRpgTileset() {
@@ -174,6 +183,19 @@ export class CanvasGameRenderer extends GameRenderer {
       })
       .catch((error) => {
         console.warn('RPG tileset unavailable, using procedural tiles:', error.message);
+      });
+  }
+
+  _loadRampsImage() {
+    const loader = new AssetLoader();
+    loader
+      .loadImage(RAMPS_URL)
+      .then((image) => {
+        this._rampsImage = image;
+        this._gameLoop.requestRedraw();
+      })
+      .catch((error) => {
+        console.warn('Ramps sprite unavailable, using procedural ramps:', error.message);
       });
   }
 
@@ -706,6 +728,11 @@ export class CanvasGameRenderer extends GameRenderer {
     // the cursor pass so the cursor can walk in front of it.
     this._drawRampWallAbove(ctx, map, bounds, ts, gameState);
 
+    // Painterly ramp sprite overlay (ramps.png) — drawn after the wall
+    // stamp so it overlays the rough wedge with a clean triangular
+    // sprite. 2x2 cell footprint anchored at the LOW corner.
+    this._drawRampSprites(ctx, map, bounds, ts, gameState);
+
     // Decorations split by Y relative to the cursor so the cursor walks
     // BEHIND tall sprites (boulders, trees) at or south of its row, and
     // IN FRONT OF decorations that are strictly north of it.
@@ -830,6 +857,44 @@ export class CanvasGameRenderer extends GameRenderer {
       }
     }
     this._pendingColoredKeys = [];
+  }
+
+  _drawRampSprites(ctx, map, bounds, ts, gameState) {
+    if (!this._rampsImage) return;
+    const mapWidth = map.width || map.size;
+    const mapHeight = map.height || map.size;
+    const destSize = ts * 2;
+    for (let row = bounds.startY; row < bounds.endY; row++) {
+      for (let col = bounds.startX; col < bounds.endX; col++) {
+        const getNeighborName = this._neighborGetter(map, mapWidth, mapHeight, col, row, gameState);
+        const cellName = getNeighborName(0, 0);
+        if (cellName !== 'ramp_right' && cellName !== 'ramp_left') continue;
+
+        const region = cellName === 'ramp_right' ? RAMP_RIGHT_REGION : RAMP_LEFT_REGION;
+        const screenX = (col - bounds.startX) * ts;
+        const screenY = (row - bounds.startY) * ts;
+
+        // Anchor at the LOW corner of the slope. The sprite covers a
+        // 2x2 area, with the ramp cell occupying one quadrant of it.
+        // ramp_right (low-left, high-right): low corner is bottom-LEFT
+        //   of the 2x2, so draw at (screenX, screenY - ts).
+        // ramp_left  (low-right, high-left): low corner is bottom-RIGHT,
+        //   so draw at (screenX - ts, screenY - ts).
+        const dx = cellName === 'ramp_right' ? screenX : screenX - ts;
+        const dy = screenY - ts;
+        ctx.drawImage(
+          this._rampsImage,
+          region.sx,
+          region.sy,
+          region.sw,
+          region.sh,
+          dx,
+          dy,
+          destSize,
+          destSize
+        );
+      }
+    }
   }
 
   _drawRampWallAbove(ctx, map, bounds, ts, gameState) {
