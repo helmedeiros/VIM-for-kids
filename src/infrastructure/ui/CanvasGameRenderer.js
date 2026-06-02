@@ -723,6 +723,12 @@ export class CanvasGameRenderer extends GameRenderer {
     // occludes part of the cursor when the cursor stands directly above a wall.
     this._drawWallOverhang(ctx, map, bounds, ts, gameState);
 
+    // Ramp overhang pass — for every ramp cell, paint its upper-slope
+    // continuation in the cell directly north so the inclined plane
+    // visibly bleeds up into the wall above and reads as a 2-tile-tall
+    // staircase rather than a flat single-cell wedge.
+    this._drawRampOverhang(ctx, map, bounds, ts, gameState);
+
     // Draw particles on top of everything
     this._particleSystem.draw(ctx);
   }
@@ -839,6 +845,29 @@ export class CanvasGameRenderer extends GameRenderer {
         const screenX = (col - bounds.startX) * ts;
         const screenY = (row - bounds.startY) * ts;
         this._tileRenderer.drawTile(ctx, 'wall_cap', screenX, screenY);
+      }
+    }
+  }
+
+  _drawRampOverhang(ctx, map, bounds, ts, gameState) {
+    if (!this._tileRenderer) return;
+    const mapWidth = map.width || map.size;
+    const mapHeight = map.height || map.size;
+    for (let row = bounds.startY; row < bounds.endY; row++) {
+      for (let col = bounds.startX; col < bounds.endX; col++) {
+        const getNeighborName = this._neighborGetter(map, mapWidth, mapHeight, col, row, gameState);
+        const southName = getNeighborName(0, 1);
+        const topSprite =
+          southName === 'ramp_right'
+            ? 'ramp_right_top'
+            : southName === 'ramp_left'
+              ? 'ramp_left_top'
+              : null;
+        if (!topSprite) continue;
+
+        const screenX = (col - bounds.startX) * ts;
+        const screenY = (row - bounds.startY) * ts;
+        this._tileRenderer.drawTile(ctx, topSprite, screenX, screenY);
       }
     }
   }
