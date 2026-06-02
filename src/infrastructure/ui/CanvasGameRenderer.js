@@ -700,6 +700,12 @@ export class CanvasGameRenderer extends GameRenderer {
       }
     }
 
+    // Ramp wall continuation — for every ramp cell, stamp a wall sprite
+    // into the cell directly north so the inclined plane reads as a
+    // 2-tile-tall structure (wall on top, wedge below). Runs before
+    // the cursor pass so the cursor can walk in front of it.
+    this._drawRampWallAbove(ctx, map, bounds, ts, gameState);
+
     // Decorations split by Y relative to the cursor so the cursor walks
     // BEHIND tall sprites (boulders, trees) at or south of its row, and
     // IN FRONT OF decorations that are strictly north of it.
@@ -824,6 +830,23 @@ export class CanvasGameRenderer extends GameRenderer {
       }
     }
     this._pendingColoredKeys = [];
+  }
+
+  _drawRampWallAbove(ctx, map, bounds, ts, gameState) {
+    if (!this._tileRenderer) return;
+    const mapWidth = map.width || map.size;
+    const mapHeight = map.height || map.size;
+    for (let row = bounds.startY; row < bounds.endY; row++) {
+      for (let col = bounds.startX; col < bounds.endX; col++) {
+        const getNeighborName = this._neighborGetter(map, mapWidth, mapHeight, col, row, gameState);
+        const southName = getNeighborName(0, 1);
+        if (southName !== 'ramp_right' && southName !== 'ramp_left') continue;
+
+        const screenX = (col - bounds.startX) * ts;
+        const screenY = (row - bounds.startY) * ts;
+        this._tileRenderer.drawTile(ctx, 'wall', screenX, screenY);
+      }
+    }
   }
 
   _drawWallOverhang(ctx, map, bounds, ts, gameState) {
