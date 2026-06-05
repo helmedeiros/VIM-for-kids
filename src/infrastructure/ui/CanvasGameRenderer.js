@@ -776,7 +776,7 @@ export class CanvasGameRenderer extends GameRenderer {
     this._drawDecorations(ctx, map, bounds, ts, (deco) => deco.baseY < cursorY);
 
     // Draw cursor on top of the north-pass decorations.
-    this._drawCursor(ctx, gameState.cursor, bounds, ts);
+    this._drawCursor(ctx, gameState.cursor, bounds, ts, map);
 
     // South-pass decorations now draw OVER the cursor — the boulder's
     // upper half occludes the cursor when it stands behind a 2x2 rock.
@@ -1178,7 +1178,7 @@ export class CanvasGameRenderer extends GameRenderer {
     }
   }
 
-  _drawCursor(ctx, cursor, bounds, ts) {
+  _drawCursor(ctx, cursor, bounds, ts, map) {
     // Use animated position if movement animation is active
     let cx, cy;
     if (this._movementAnimator.isAnimating) {
@@ -1192,7 +1192,7 @@ export class CanvasGameRenderer extends GameRenderer {
 
     if (cx >= bounds.startX - 1 && cx < bounds.endX + 1 && cy >= bounds.startY - 1 && cy < bounds.endY + 1) {
       const screenX = (cx - bounds.startX) * ts;
-      const screenY = (cy - bounds.startY) * ts;
+      const screenY = (cy - bounds.startY) * ts - this._rampLift(cursor, cx, cy, ts, map);
 
       if (this._charSpriteSheet) {
         const cursorFrame = this._characterSprites.getCursorFrame(
@@ -1229,6 +1229,40 @@ export class CanvasGameRenderer extends GameRenderer {
         ctx.fillText('\u25CF', screenX + ts / 2, screenY + ts / 2);
       }
     }
+  }
+
+  /**
+   * Vertical pixel offset to lift the cursor sprite while it crosses a
+   * ramp tile, so the character visibly "climbs" the slope rather than
+   * sliding across flat ground.
+   *
+   * Returns 0 for non-ramp tiles. For ramps, lift scales linearly with
+   * the cursor's fractional X within the tile (0 at the low side, ~ts/2
+   * at the high side) so the rise is continuous through movement
+   * animation and matches the slope direction of the underlying tile.
+   * @private
+   */
+  _rampLift(cursor, cx, cy, ts, map) {
+    if (!map) return 0;
+    const tileX = Math.round(cx);
+    const tileY = Math.round(cy);
+    let tile;
+    try {
+      const PositionClass = Object.getPrototypeOf(cursor.position).constructor;
+      tile = map.getTileAt(new PositionClass(tileX, tileY));
+    } catch {
+      return 0;
+    }
+    const name = tile?.name;
+    if (name !== 'ramp_right' && name !== 'ramp_left') return 0;
+
+    // Fractional X within the tile, 0 at left edge → 1 at right edge.
+    const fx = Math.max(0, Math.min(1, cx - tileX + 0.5));
+    const maxLift = ts * 0.5;
+    // ramp_right: low-left, high-right → lift grows with fx.
+    // ramp_left:  high-left, low-right → lift grows as fx shrinks.
+    const t = name === 'ramp_right' ? fx : 1 - fx;
+    return t * maxLift;
   }
 
   _drawCharSprite(ctx, frameIndex, screenX, screenY, ts) {
