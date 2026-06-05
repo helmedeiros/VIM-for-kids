@@ -899,7 +899,6 @@ export class CanvasGameRenderer extends GameRenderer {
     if (!this._rampsImage) return;
     const mapWidth = map.width || map.size;
     const mapHeight = map.height || map.size;
-    const destSize = ts * 2;
     for (let row = bounds.startY; row < bounds.endY; row++) {
       for (let col = bounds.startX; col < bounds.endX; col++) {
         const getNeighborName = this._neighborGetter(map, mapWidth, mapHeight, col, row, gameState);
@@ -910,24 +909,19 @@ export class CanvasGameRenderer extends GameRenderer {
         const screenX = (col - bounds.startX) * ts;
         const screenY = (row - bounds.startY) * ts;
 
-        // Anchor at the LOW corner of the slope. The sprite covers a
-        // 2x2 area, with the ramp cell occupying one quadrant of it.
-        // ramp_right (low-left, high-right): low corner is bottom-LEFT
-        //   of the 2x2, so draw at (screenX, screenY - ts).
-        // ramp_left  (low-right, high-left): low corner is bottom-RIGHT,
-        //   so draw at (screenX - ts, screenY - ts).
-        const dx = cellName === 'ramp_right' ? screenX : screenX - ts;
-        const dy = screenY - ts;
+        // Single-cell ramp — the sprite is downscaled to fit the ramp
+        // tile exactly, so adjacent walls render normally without
+        // overlap from the ramp art.
         ctx.drawImage(
           this._rampsImage,
           region.sx,
           region.sy,
           region.sw,
           region.sh,
-          dx,
-          dy,
-          destSize,
-          destSize
+          screenX,
+          screenY,
+          ts,
+          ts
         );
       }
     }
