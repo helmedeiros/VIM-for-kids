@@ -765,15 +765,11 @@ export class CanvasGameRenderer extends GameRenderer {
       }
     }
 
-    // Ramp wall continuation — for every ramp cell, stamp a wall sprite
-    // into the cell directly north so the inclined plane reads as a
-    // 2-tile-tall structure (wall on top, wedge below). Runs before
-    // the cursor pass so the cursor can walk in front of it.
-    this._drawRampWallAbove(ctx, map, bounds, ts, gameState);
-
-    // Painterly ramp sprite overlay (ramps.png) — drawn after the wall
-    // stamp so it overlays the rough wedge with a clean triangular
-    // sprite. 2x2 cell footprint anchored at the LOW corner.
+    // Painterly ramp sprite overlay (ramps.png). The maze ramps
+    // already have actual wall tiles directly above them in the level
+    // data, so the PNG slope rises into a real wall naturally; ramps
+    // in open areas (grass/water) just rise into open space without
+    // a synthesised wall stamped behind them.
     this._drawRampSprites(ctx, map, bounds, ts, gameState);
 
     // Decorations split by Y relative to the cursor so the cursor walks
@@ -960,23 +956,6 @@ export class CanvasGameRenderer extends GameRenderer {
           destW,
           destH
         );
-      }
-    }
-  }
-
-  _drawRampWallAbove(ctx, map, bounds, ts, gameState) {
-    if (!this._tileRenderer) return;
-    const mapWidth = map.width || map.size;
-    const mapHeight = map.height || map.size;
-    for (let row = bounds.startY; row < bounds.endY; row++) {
-      for (let col = bounds.startX; col < bounds.endX; col++) {
-        const getNeighborName = this._neighborGetter(map, mapWidth, mapHeight, col, row, gameState);
-        const southName = getNeighborName(0, 1);
-        if (southName !== 'ramp_right' && southName !== 'ramp_left') continue;
-
-        const screenX = (col - bounds.startX) * ts;
-        const screenY = (row - bounds.startY) * ts;
-        this._tileRenderer.drawTile(ctx, 'wall', screenX, screenY);
       }
     }
   }
