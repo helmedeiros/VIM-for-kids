@@ -905,7 +905,11 @@ export class CanvasGameRenderer extends GameRenderer {
         const cellName = getNeighborName(0, 0);
         if (cellName !== 'ramp_right' && cellName !== 'ramp_left') continue;
 
-        const region = cellName === 'ramp_right' ? RAMP_RIGHT_REGION : RAMP_LEFT_REGION;
+        // The two source sprites in ramps.png are visually mirrored:
+        // the LEFT sprite shows a slope rising to the right (low-left,
+        // high-right) and vice versa. So we feed the right-rising
+        // sprite to ramp_right and the left-rising sprite to ramp_left.
+        const region = cellName === 'ramp_right' ? RAMP_LEFT_REGION : RAMP_RIGHT_REGION;
         const screenX = (col - bounds.startX) * ts;
         const screenY = (row - bounds.startY) * ts;
 
