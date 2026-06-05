@@ -720,11 +720,18 @@ export class CanvasGameRenderer extends GameRenderer {
         // Draw tile (sprite or colored rectangle fallback). Rock sprites
         // have a transparent background, so paint a path tile beneath them
         // first — the rock then reads as a boulder placed on the floor.
+        // Ramps render the neighbouring floor type underneath so the PNG
+        // ramp triangle (overlaid later) sits over grass when the area
+        // around it is grass, dirt when it's the maze, etc.
         if (this._tileRenderer) {
           if (renderName === 'rock') {
             this._tileRenderer.drawTile(ctx, 'path', screenX, screenY);
           }
-          this._tileRenderer.drawTile(ctx, renderName, screenX, screenY);
+          const floorName =
+            renderName === 'ramp_right' || renderName === 'ramp_left'
+              ? this._pickRampFloor(getNeighborName)
+              : renderName;
+          this._tileRenderer.drawTile(ctx, floorName, screenX, screenY);
         } else {
           ctx.fillStyle = this._tileColors[renderName] || this._tileColors[tileName] || '#1a8fc4';
           ctx.fillRect(screenX, screenY, ts, ts);
@@ -893,6 +900,26 @@ export class CanvasGameRenderer extends GameRenderer {
       }
     }
     this._pendingColoredKeys = [];
+  }
+
+  /**
+   * Pick the floor tile name to render under a ramp cell based on its
+   * four orthogonal neighbours. Prefers a natural floor (grass, sand)
+   * over masonry so the ramp's transparent corners blend with the
+   * area around it. Falls back to dirt for the maze interior.
+   * @private
+   */
+  _pickRampFloor(getNeighborName) {
+    const neighbours = [
+      getNeighborName(0, -1),
+      getNeighborName(0, 1),
+      getNeighborName(-1, 0),
+      getNeighborName(1, 0),
+    ];
+    if (neighbours.includes('grass')) return 'grass';
+    if (neighbours.includes('sand')) return 'sand';
+    if (neighbours.includes('path')) return 'path';
+    return 'dirt';
   }
 
   _drawRampSprites(ctx, map, bounds, ts, gameState) {
