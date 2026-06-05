@@ -909,19 +909,25 @@ export class CanvasGameRenderer extends GameRenderer {
         const screenX = (col - bounds.startX) * ts;
         const screenY = (row - bounds.startY) * ts;
 
-        // Single-cell ramp — the sprite is downscaled to fit the ramp
-        // tile exactly, so adjacent walls render normally without
-        // overlap from the ramp art.
+        // Ramp width stays at one cell so neighbouring walls render
+        // untouched, but height extends ~50% above the cell so the
+        // slope visibly rises into the wall above — the silhouette
+        // the user liked from the previous 2x2 size, minus the
+        // sideways overflow.
+        const destW = ts;
+        const destH = Math.round(ts * 1.5);
+        const dx = screenX;
+        const dy = screenY + ts - destH;
         ctx.drawImage(
           this._rampsImage,
           region.sx,
           region.sy,
           region.sw,
           region.sh,
-          screenX,
-          screenY,
-          ts,
-          ts
+          dx,
+          dy,
+          destW,
+          destH
         );
       }
     }

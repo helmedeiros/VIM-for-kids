@@ -12,6 +12,11 @@ export const TILESET_REGIONS = {
   // Path now reads as warm pale sand to lighten up the hidden-area floor.
   path: { sx: 40, sy: 2208, sw: 16, sh: 16 },
   dirt: { sx: 32, sy: 2576, sw: 16, sh: 16 },
+  // Ramp cells render the maze's dirt floor underneath, so the PNG
+  // ramp triangle (rendered later by CanvasGameRenderer._drawRampSprites)
+  // sits over a floor that matches the surrounding maze pavement.
+  ramp_right: { sx: 32, sy: 2576, sw: 16, sh: 16 },
+  ramp_left: { sx: 32, sy: 2576, sw: 16, sh: 16 },
   sand: { sx: 40, sy: 2208, sw: 16, sh: 16 },
   stone: { sx: 130, sy: 3184, sw: 16, sh: 16 },
   // === Rocks page catalog =================================================
