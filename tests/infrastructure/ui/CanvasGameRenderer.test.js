@@ -188,6 +188,150 @@ describe('CanvasGameRenderer', () => {
     });
   });
 
+  describe('_pickRampFloor', () => {
+    it('returns grass when any orthogonal neighbour is grass', () => {
+      const getN = (dx, dy) => (dx === 0 && dy === -1 ? 'grass' : 'water');
+      expect(renderer._pickRampFloor(getN)).toBe('grass');
+    });
+
+    it('returns sand when no grass but a neighbour is sand', () => {
+      const getN = (dx, dy) => (dx === 0 && dy === 1 ? 'sand' : 'wall');
+      expect(renderer._pickRampFloor(getN)).toBe('sand');
+    });
+
+    it('returns path when no grass / sand but a neighbour is path', () => {
+      const getN = (dx, dy) => (dx === 1 && dy === 0 ? 'path' : 'wall');
+      expect(renderer._pickRampFloor(getN)).toBe('path');
+    });
+
+    it('falls back to dirt when no preferred neighbour is present', () => {
+      const getN = () => 'wall';
+      expect(renderer._pickRampFloor(getN)).toBe('dirt');
+    });
+  });
+
+  describe('_rampLift', () => {
+    const Position = class {
+      constructor(x, y) {
+        this._x = x;
+        this._y = y;
+      }
+      get x() {
+        return this._x;
+      }
+      get y() {
+        return this._y;
+      }
+    };
+    const cursor = { position: new Position(0, 0) };
+
+    it('returns 0 when no map is provided', () => {
+      expect(renderer._rampLift(cursor, 5, 5, 32, null)).toBe(0);
+    });
+
+    it('returns 0 when the tile under the cursor is not a ramp', () => {
+      const map = { getTileAt: () => ({ name: 'grass' }) };
+      expect(renderer._rampLift(cursor, 5, 5, 32, map)).toBe(0);
+    });
+
+    it('returns 0 when getTileAt throws', () => {
+      const map = {
+        getTileAt: () => {
+          throw new Error('boom');
+        },
+      };
+      expect(renderer._rampLift(cursor, 5, 5, 32, map)).toBe(0);
+    });
+
+    it('lifts proportional to fx on ramp_right (mid-tile = ts/4)', () => {
+      const map = { getTileAt: () => ({ name: 'ramp_right' }) };
+      // cx === tileX so fx = 0.5 → lift = 0.5 * (ts*0.5) = ts/4 = 8
+      expect(renderer._rampLift(cursor, 5, 5, 32, map)).toBeCloseTo(8);
+    });
+
+    it('lifts proportional to (1 - fx) on ramp_left (mid-tile = ts/4)', () => {
+      const map = { getTileAt: () => ({ name: 'ramp_left' }) };
+      expect(renderer._rampLift(cursor, 5, 5, 32, map)).toBeCloseTo(8);
+    });
+
+    it('approaches max lift near the high edge of ramp_right', () => {
+      const map = { getTileAt: () => ({ name: 'ramp_right' }) };
+      // cx = 5.4 → tileX = 5, fx = 0.9 → lift = 0.9 * 16 = 14.4
+      expect(renderer._rampLift(cursor, 5.4, 5, 32, map)).toBeCloseTo(14.4);
+    });
+
+    it('returns 0 lift at the low edge of ramp_right', () => {
+      const map = { getTileAt: () => ({ name: 'ramp_right' }) };
+      // cx = tileX - 0.5 → fx = 0 → lift = 0
+      expect(renderer._rampLift(cursor, 4.5, 5, 32, map)).toBe(0);
+    });
+
+    it('returns 0 lift when getTileAt returns null', () => {
+      const map = { getTileAt: () => null };
+      expect(renderer._rampLift(cursor, 5, 5, 32, map)).toBe(0);
+    });
+  });
+
+  describe('_drawRampSprites', () => {
+    it('does nothing when the ramps image has not loaded', () => {
+      renderer._rampsImage = null;
+      const map = {
+        width: 3,
+        height: 3,
+        getTileAt: () => ({ name: 'grass' }),
+      };
+      mockCtx.drawImage.mockClear();
+      renderer._drawRampSprites(
+        mockCtx,
+        map,
+        { startX: 0, startY: 0, endX: 3, endY: 3 },
+        32,
+        createMockGameState()
+      );
+      expect(mockCtx.drawImage).not.toHaveBeenCalled();
+    });
+
+    it('stamps the sprite once per ramp_right cell in bounds', () => {
+      renderer._rampsImage = { width: 100, height: 100 };
+      const state = createMockGameState();
+      const map = {
+        width: 3,
+        height: 3,
+        getTileAt: (pos) =>
+          pos.x === 1 && pos.y === 1 ? { name: 'ramp_right' } : { name: 'grass' },
+      };
+      mockCtx.drawImage.mockClear();
+      renderer._drawRampSprites(
+        mockCtx,
+        map,
+        { startX: 0, startY: 0, endX: 3, endY: 3 },
+        32,
+        state
+      );
+      expect(mockCtx.drawImage).toHaveBeenCalledTimes(1);
+    });
+
+    it('stamps the sprite for ramp_left cells using the mirrored region', () => {
+      renderer._rampsImage = { width: 100, height: 100 };
+      const state = createMockGameState();
+      const map = {
+        width: 3,
+        height: 3,
+        getTileAt: (pos) =>
+          pos.x === 1 && pos.y === 1 ? { name: 'ramp_left' } : { name: 'grass' },
+      };
+      mockCtx.drawImage.mockClear();
+      renderer._drawRampSprites(
+        mockCtx,
+        map,
+        { startX: 0, startY: 0, endX: 3, endY: 3 },
+        32,
+        state
+      );
+      expect(mockCtx.drawImage).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('_drawEntitiesAt', () => {
     it('draws VIM keys', () => {
       const state = createMockGameState({
