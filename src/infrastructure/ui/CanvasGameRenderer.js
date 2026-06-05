@@ -191,12 +191,48 @@ export class CanvasGameRenderer extends GameRenderer {
     loader
       .loadImage(RAMPS_URL)
       .then((image) => {
-        this._rampsImage = image;
+        this._rampsImage = this._stripCheckerAlpha(image);
         this._gameLoop.requestRedraw();
       })
       .catch((error) => {
         console.warn('Ramps sprite unavailable, using procedural ramps:', error.message);
       });
+  }
+
+  /**
+   * The source ramps.png has a grey-checker "transparency" backdrop
+   * baked in as opaque pixels. Repaint it through an offscreen canvas
+   * and zero the alpha of any low-chroma (i.e. grey) pixel, leaving
+   * just the ramps' coloured pixels visible. Returns a canvas the
+   * renderer can drawImage from in place of the original.
+   * @private
+   */
+  _stripCheckerAlpha(image) {
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(image, 0, 0);
+    try {
+      const data = ctx.getImageData(0, 0, image.width, image.height);
+      const px = data.data;
+      for (let i = 0; i < px.length; i += 4) {
+        const r = px[i];
+        const g = px[i + 1];
+        const b = px[i + 2];
+        const chroma = Math.max(r, g, b) - Math.min(r, g, b);
+        if (chroma < 25) {
+          px[i + 3] = 0;
+        }
+      }
+      ctx.putImageData(data, 0, 0);
+    } catch (err) {
+      // getImageData can throw under cross-origin sandboxing — fall
+      // back to the raw image so we still get a render.
+      console.warn('Ramp alpha cleanup failed:', err);
+      return image;
+    }
+    return canvas;
   }
 
   get spritesLoaded() {
