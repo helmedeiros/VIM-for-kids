@@ -988,48 +988,19 @@ export class TilePainter {
     ctx.stroke();
   }
 
-  // Single-cell wedge — the wall above the ramp keeps its normal
-  // rendering, so the 2-tile staircase silhouette is the wedge (this
-  // cell) stacked under that wall. Slope runs corner-to-corner so the
-  // wedge fills the whole tile and reads clearly from any distance.
+  // Procedural ramp fallback — paints just the cobblestone floor.
+  // The painterly PNG sprite (rendered by CanvasGameRenderer's
+  // _drawRampSprites pass) draws on top of this cobble base; its
+  // transparent corners reveal the cobble underneath without exposing
+  // any wall texture. When the PNG fails to load the cell still
+  // renders as walkable floor.
 
   _paintRampRight(ctx) {
-    const ts = this._ts;
-    // ramp_right: high on the right, low on the left. Wall sprite is
-    // kept INTACT in the upper-right triangle; the lower-left corner
-    // is sliced off, exposing the cobble floor of the lower elevation.
-    // Slope edge runs from top-left to bottom-right.
-    this._paintRampWedge(
-      ctx,
-      [
-        [0, 0],
-        [ts, 0],
-        [ts, ts],
-      ],
-      [
-        [0, 0],
-        [ts, ts],
-      ]
-    );
+    this._paintCobblestone(ctx);
   }
 
   _paintRampLeft(ctx) {
-    const ts = this._ts;
-    // ramp_left: high on the left. Wall kept INTACT in the upper-left
-    // triangle; lower-right corner sliced off. Slope edge runs from
-    // top-right to bottom-left.
-    this._paintRampWedge(
-      ctx,
-      [
-        [0, 0],
-        [ts, 0],
-        [0, ts],
-      ],
-      [
-        [ts, 0],
-        [0, ts],
-      ]
-    );
+    this._paintCobblestone(ctx);
   }
 
   _paintVoid(ctx) {
