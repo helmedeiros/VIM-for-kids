@@ -1,154 +1,71 @@
-# VIM for Kids 🎮
+# VIM for Kids
 
-An interactive educational game that teaches children VIM editor movement commands (h, j, k, l) through engaging gameplay.
+A browser game that teaches children VIM's movement commands — `h`, `j`, `k`,
+`l` — through play.
 
-![VIM for Kids Game](https://img.shields.io/badge/Game-Educational-brightgreen) ![Build Status](https://img.shields.io/badge/Build-Passing-success) ![Coverage](https://img.shields.io/badge/Coverage-92%25-brightgreen) ![License](https://img.shields.io/badge/License-MIT-blue)
+Players guide a cursor around a colorful grid world, collecting the four movement
+keys while picking up the navigation habits that underpin VIM proficiency. Both
+the VIM keys and the arrow keys work, so beginners can start with whichever feels
+natural.
 
-## 🎯 What is VIM for Kids?
+## Play
 
-VIM for Kids is a browser-based educational game designed to make learning VIM editor navigation fun and intuitive for children. Players navigate through a colorful grid world, collecting VIM movement keys while learning the fundamental h, j, k, l navigation commands that are essential for VIM proficiency.
+Open `index.html` in any modern browser to play immediately, or run it locally:
 
-### 🌟 Key Features
-
-- **🎮 Interactive Gameplay**: Navigate a character through various terrains
-- **📚 Educational Focus**: Learn VIM movement commands naturally through play
-- **🎨 Visual Learning**: Colorful tiles and animated feedback
-- **⌨️ Dual Input**: Support for both VIM keys (hjkl) and arrow keys
-- **🏆 Progress Tracking**: Collect all VIM keys to complete the game
-- **📱 Responsive Design**: Works on desktop and mobile devices
-
-## 🚀 Try It Out
-
-### Play Online
-
-Open `index.html` in your web browser to start playing immediately.
-
-### Quick Start for Development
-
-```bash
-# Clone the repository
-git clone <repository-url>
-cd vim-for-kids
-
-# Install dependencies
+```sh
+git clone https://github.com/helmedeiros/VIM-for-kids.git
+cd VIM-for-kids
 npm install
-
-# Start development server
-npm run dev
-
-# Open http://localhost:3000 in your browser
+npm run dev        # http://localhost:3000
 ```
 
-## 🎮 How to Play
+## How to play
 
-1. **Objective**: Collect all four VIM movement keys (h, j, k, l) scattered across the map
-2. **Movement**: Use VIM keys or arrow keys to navigate:
-   - `h` or `←` - Move left
-   - `j` or `↓` - Move down
-   - `k` or `↑` - Move up
-   - `l` or `→` - Move right
-3. **Rules**: Avoid water tiles (blue), stick to walkable paths (grass/dirt)
-4. **Learning**: Each key collected shows its VIM command and description
+Collect all four movement keys scattered across the map, staying on walkable
+paths and avoiding water tiles.
 
-## 🎭 Key Characters
+| Key       | Move  |
+| --------- | ----- |
+| `h` / `←` | Left  |
+| `j` / `↓` | Down  |
+| `k` / `↑` | Up    |
+| `l` / `→` | Right |
 
-Meet the inhabitants of this digital realm:
+Each key collected shows its VIM command and a short description.
 
-- **🖱️ Cursor** – The blinking protagonist, genderless and full of curiosity. This is your character, constantly eager to explore and learn new VIM commands.
+## Characters
 
-- **👻 Caret Spirits** – Guardians of VIM knowledge scattered across the land. These wise entities hold the secrets of text editing mastery and will share their wisdom when discovered.
+- **Cursor** — the blinking protagonist you control, curious and eager to explore.
+- **Caret Spirits** — guardians scattered across the land who share VIM knowledge
+  when discovered.
+- **The Bug King** — the final enemy who corrupts logic and overwrites order.
+- **Syntax Wisps** — optional lore spirits that explain more advanced concepts.
 
-- **👑 The Bug King** – The final enemy who corrupts logic and overwrites order. This malevolent force spreads chaos through the digital realm, turning clean code into tangled messes.
+## Technology
 
-- **✨ Syntax Wisps** – Optional lore spirits that explain advanced concepts. These ethereal beings offer deeper VIM knowledge for those ready to venture beyond the basics.
+- Pure JavaScript (ES6+), HTML5 and CSS3.
+- Hexagonal (ports and adapters) architecture.
+- Vite for development and builds; Jest for tests (92%+ coverage); ESLint and
+  Prettier for code quality.
 
-## 🏗️ Architecture & Technology
+## Documentation
 
-VIM for Kids is built with modern web technologies and clean architecture:
+Deeper guides live under `doc/`:
 
-- **Frontend**: Pure JavaScript (ES6+), HTML5, CSS3
-- **Architecture**: Hexagonal (Ports & Adapters) pattern
-- **Build System**: Vite with Hot Module Replacement
-- **Testing**: Jest with 92%+ code coverage
-- **Code Quality**: ESLint, Prettier, comprehensive test suite
+| Document                                   | Purpose                              |
+| ------------------------------------------ | ------------------------------------ |
+| `doc/README.md`                            | Documentation index.                 |
+| `doc/DEVELOPMENT.md`                       | Setup, workflow and best practices.  |
+| `doc/ARCHITECTURE.md`                      | The hexagonal architecture.          |
+| `doc/TRUNK_BASED_DEVELOPMENT.md`           | Branching and release workflow.      |
+| `doc/CONVENTIONAL_COMMITS.md`              | Commit message standards.            |
 
-## 📚 Documentation
+## Contributing
 
-Detailed documentation is available for developers and contributors:
+Start from `doc/DEVELOPMENT.md`, review `doc/ARCHITECTURE.md` to understand the
+structure, add tests for your change, and make sure `npm test` and `npm run lint`
+pass before opening a pull request.
 
-| Document                                                         | Purpose                             | Audience    |
-| ---------------------------------------------------------------- | ----------------------------------- | ----------- |
-| **[📖 Documentation Index](doc/README.md)**                      | Complete navigation guide           | All         |
-| **[🚀 Development Guide](doc/DEVELOPMENT.md)**                   | Setup, workflow, and best practices | Developers  |
-| **[🏗️ Architecture Guide](doc/ARCHITECTURE.md)**                 | Hexagonal architecture explanation  | Developers  |
-| **[🌳 Trunk-Based Development](doc/TRUNK_BASED_DEVELOPMENT.md)** | Modern development workflow guide   | Developers  |
-| **[📝 Conventional Commits](doc/CONVENTIONAL_COMMITS.md)**       | Commit message standards and tools  | All         |
-| **[🔧 Build System](doc/BUILD_SYSTEM_SUMMARY.md)**               | Technical implementation details    | Developers  |
-| **[📈 Refactoring History](doc/REFACTORING_SUMMARY.md)**         | Project evolution story             | Maintainers |
+## License
 
-## 🤝 Contributing
-
-We welcome contributions! Here's how to get started:
-
-1. **For New Contributors**: Start with the [Development Guide](doc/DEVELOPMENT.md)
-2. **Understanding the Code**: Review the [Architecture Guide](doc/ARCHITECTURE.md)
-3. **Making Changes**: Follow the development workflow in our docs
-4. **Testing**: Ensure all tests pass with `npm test`
-5. **Code Quality**: Run `npm run lint` before submitting
-
-### Development Workflow
-
-```bash
-# Fork and clone the repository
-git clone <your-fork-url>
-cd vim-for-kids
-
-# Install dependencies and start development
-npm install
-npm run dev
-
-# Make your changes, add tests
-npm test
-npm run lint
-
-# Submit a pull request
-```
-
-## 📊 Project Status
-
-- ✅ **Stable**: Core gameplay and educational features complete
-- ✅ **Well-Tested**: 92%+ code coverage with comprehensive test suite
-- ✅ **Modern Tooling**: Professional development environment
-- ✅ **Documented**: Comprehensive documentation for all aspects
-- 🔄 **Active**: Accepting contributions and enhancements
-
-## 🎓 Educational Impact
-
-VIM for Kids bridges the gap between gaming and learning by:
-
-- **Making VIM Accessible**: Introduces VIM navigation in a stress-free environment
-- **Building Muscle Memory**: Repeated gameplay reinforces key mappings
-- **Visual Association**: Links movement commands with directional actions
-- **Progressive Learning**: Learn at your own pace through gameplay
-
-Perfect for:
-
-- Children beginning their coding journey
-- Educators teaching text editor fundamentals
-- Anyone wanting to learn VIM navigation in a fun way
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Built with modern web development best practices
-- Inspired by the need to make VIM more accessible to young learners
-- Thanks to the open-source community for excellent tooling and resources
-
----
-
-**Ready to start your VIM journey?** Open `index.html` and begin playing! 🎮
-
-For detailed technical information, visit our [📖 Documentation](doc/README.md).
+This project is licensed under the [MIT](LICENSE) License.
