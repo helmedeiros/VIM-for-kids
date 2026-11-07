@@ -8,6 +8,18 @@ keys while picking up the navigation habits that underpin VIM proficiency. Both
 the VIM keys and the arrow keys work, so beginners can start with whichever feels
 natural.
 
+![Collecting the h, j, k and l keys](docs/demo/learn-hjkl.gif)
+
+Walk onto each letter to unlock it and see what it does.
+
+![Bumping into the Caret Stone to hear it speak](docs/demo/bump-to-talk.gif)
+
+Bump into a character to hear what it has to say.
+
+![Trying w on sand, then hopping across words with w, e and b](docs/demo/word-jumps.gif)
+
+`w` only works on text — on the word bridges it hops from word to word.
+
 ## Play
 
 Open `index.html` in any modern browser to play immediately, or run it locally:
